@@ -4,7 +4,9 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Text;
+using EasyHook;
 
 namespace Nucleus.Gaming.Tools.GameStarter
 {
@@ -21,7 +23,7 @@ namespace Nucleus.Gaming.Tools.GameStarter
             return Path.Combine(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location), "StartGame.exe");
         }
 
-        public static string GetArguments(string pathToGame, string args, int waitTime, params string[] mutex)
+        public static string GetArguments(string pathToGame, string args, int waitTime, string mutexType, params string[] mutex)
         {
             string mu = "";
             for (int i = 0; i < mutex.Length; i++)
@@ -34,10 +36,10 @@ namespace Nucleus.Gaming.Tools.GameStarter
                 }
             }
 
-            return "\"" + pathToGame + "\" \"" + args + "\" \"" + waitTime + "\" \"" + mu + "\"";
+            return "\"" + pathToGame + "\" \"" + args + "\" \"" + waitTime + "\" \"" + mutexType + "\" \"" + mu + "\"";
         }
 
-        public static void KillMutex(Process p, params string[] mutex)
+        public static void KillMutex(Process p, string mutexType, params string[] mutex)
         {
             lock (locker)
             {
@@ -56,7 +58,7 @@ namespace Nucleus.Gaming.Tools.GameStarter
                     }
                 }
 
-                startInfo.Arguments = "\"proc:" + p.Id.ToString() + "\" \"mutex:" + mu + "\"";
+                startInfo.Arguments = "\"proc:" + p.Id.ToString() + "\" \"mutextype:" + mutexType + "\" \"mutex:" + mu + "\"";
                 startInfo.RedirectStandardOutput = true;
                 startInfo.UseShellExecute = false;
 
@@ -68,7 +70,7 @@ namespace Nucleus.Gaming.Tools.GameStarter
             }
         }
 
-        public static bool MutexExists(Process p, params string[] mutex)
+        public static bool MutexExists(Process p, string mutexType, params string[] mutex)
         {
             lock (locker)
             {
@@ -87,7 +89,7 @@ namespace Nucleus.Gaming.Tools.GameStarter
                     }
                 }
 
-                startInfo.Arguments = $"\"proc:{p.Id}\" \"output:{mu}\"";
+                startInfo.Arguments = $"\"proc:{p.Id}\" \"mutextype:{mutexType}\" \"output:{mu}\"";
                 startInfo.RedirectStandardOutput = true;
                 startInfo.UseShellExecute = false;
                 startInfo.CreateNoWindow = true;
@@ -113,7 +115,7 @@ namespace Nucleus.Gaming.Tools.GameStarter
         /// <param name="waitTime"></param>
         /// <param name="mutex"></param>
         /// <returns></returns>
-        public static int StartGame(string pathToGame, string args, string workingDir = null)
+        public static int StartGame(string pathToGame, string args, bool hook, bool delay, bool renameMutex, string mutexNames, bool setWindow, string workingDir = null)
         {
             lock (locker)
             {
@@ -125,7 +127,9 @@ namespace Nucleus.Gaming.Tools.GameStarter
                 {
                     workingDir = "|" + workingDir;
                 }
-                startInfo.Arguments = "\"game:" + pathToGame + workingDir + ";" + args + "\"";
+
+                startInfo.Arguments = "\"" + "hook:" + hook + "\" \"delay:" + delay + "\" \"renamemutex:" + renameMutex + "\" \"mutextorename:" + mutexNames + "\" \"setwindow:" + setWindow + "\" \"game:" + pathToGame + workingDir + ";" + args + "\"";
+
                 startInfo.RedirectStandardOutput = true;
                 startInfo.UseShellExecute = false;
 
@@ -135,7 +139,7 @@ namespace Nucleus.Gaming.Tools.GameStarter
 
                 proc.WaitForExit();
 
-                // parse the last line for the process ID
+                //parse the last line for the process ID
                 return int.Parse(lastLine.Split(':')[1]);
             }
         }

@@ -12,6 +12,8 @@ namespace Nucleus.Gaming.Coop
         DualHorizontal = 1,
         DualVertical = 2,
         FourPlayers = 3,
-        SixteenPlayers = 4
+        SixPlayers = 4,
+        EightPlayers = 5,
+        SixteenPlayers = 6
     }
 }

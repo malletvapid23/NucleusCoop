@@ -24,6 +24,7 @@ namespace Nucleus.Gaming
         public string[] DirSymlinkExclusions;
         public string[] FileSymlinkExclusions;
         public string[] FileSymlinkCopyInstead;
+        public bool KeepSymLinkOnExit;
 
         public double HandlerInterval;
         public bool Debug;
@@ -33,6 +34,8 @@ namespace Nucleus.Gaming
         public bool HardcopyGame;
 
         public bool SupportsKeyboard;
+        public bool KeyboardPlayerFirst;
+
         public string[] ExecutableContext;
         public string ExecutableName;
         public string SteamID;
@@ -45,6 +48,8 @@ namespace Nucleus.Gaming
 
         public string StartArguments;
         public string BinariesFolder;
+
+        public bool FakeFocus;
 
         public void AddOption(string name, string desc, string key, object value, object defaultValue)
         {
@@ -62,6 +67,8 @@ namespace Nucleus.Gaming
         public string WorkingFolder;
         public bool NeedsSteamEmulation;
         public string[] KillMutex;
+        public string KillMutexType;
+        public int KillMutexDelay;
         public string LauncherExe;
         public string LauncherTitle;
         public Action Play;
@@ -70,6 +77,33 @@ namespace Nucleus.Gaming
         public string JsFileName;
         public bool LockMouse;
         public string Folder;
+        public bool HookFocus;
+        public bool ForceWindowTitle;
+        public int IdealProcessor;
+        public string UseProcessor;
+        public string ProcessorPriorityClass;
+        public bool CMDLaunch;
+        public string[] CMDOptions;
+        public bool HasDynamicWindowTitle;
+        public string[] SymlinkFiles;
+        public bool HookInitDelay;
+        public bool HookInit;
+        public string[] CopyFiles;
+        public bool SetWindowHook;
+        public bool HideTaskbar;
+        public bool PromptBetweenInstances;
+        public bool HideCursor;
+        public bool RenameNotKillMutex;
+        public bool IdInWindowTitle;
+        public bool ChangeExe;
+        public string GamepadGuid;
+        public bool UseX360ce;
+        public string HookFocusInstances;
+        public bool KeepAspectRatio;
+        public bool HideDesktop;
+        //public bool UseAlpha8CustomDll;
+        //public int FakeFocusInterval;
+        public bool ResetWindows;
 
         public Type HandlerType
         {
@@ -123,9 +157,9 @@ namespace Nucleus.Gaming
         /// Clones this Game Info into a new Generic Context
         /// </summary>
         /// <returns></returns>
-        public GenericContext CreateContext(GameProfile profile, PlayerInfo info, GenericGameHandler handler)
+        public GenericContext CreateContext(GameProfile profile, PlayerInfo info, GenericGameHandler handler, bool hasKeyboardPlayer)
         {
-            GenericContext context = new GenericContext(profile, info, handler);
+            GenericContext context = new GenericContext(profile, info, handler, hasKeyboardPlayer);
 
             Type t = GetType();
             PropertyInfo[] props = t.GetProperties();

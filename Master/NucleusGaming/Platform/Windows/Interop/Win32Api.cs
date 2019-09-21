@@ -367,6 +367,83 @@ namespace Nucleus.Gaming.Interop
             return lstHandles;
         }
 
+        public static List<Win32API.SYSTEM_HANDLE_INFORMATION> GetHandles(Process process = null, string IN_strObjectTypeName = null, string IN_strObjectName = null)
+        {
+            uint nStatus;
+            int nHandleInfoSize = 0x10000;
+            IntPtr ipHandlePointer = Marshal.AllocHGlobal(nHandleInfoSize);
+            int nLength = 0;
+            IntPtr ipHandle = IntPtr.Zero;
+
+            while ((nStatus = Win32API.NtQuerySystemInformation(CNST_SYSTEM_HANDLE_INFORMATION, ipHandlePointer,
+                                                                nHandleInfoSize, ref nLength)) ==
+                    STATUS_INFO_LENGTH_MISMATCH)
+            {
+                nHandleInfoSize = nLength;
+                Marshal.FreeHGlobal(ipHandlePointer);
+                ipHandlePointer = Marshal.AllocHGlobal(nLength);
+            }
+
+            byte[] baTemp = new byte[nLength];
+            Marshal.Copy(ipHandlePointer, baTemp, 0, nLength);
+
+            long lHandleCount = 0;
+            if (Is64Bits())
+            {
+                lHandleCount = Marshal.ReadInt64(ipHandlePointer);
+                ipHandle = new IntPtr(ipHandlePointer.ToInt64() + 8);
+            }
+            else
+            {
+                lHandleCount = Marshal.ReadInt32(ipHandlePointer);
+                ipHandle = new IntPtr(ipHandlePointer.ToInt32() + 4);
+            }
+
+            Win32API.SYSTEM_HANDLE_INFORMATION shHandle;
+            List<Win32API.SYSTEM_HANDLE_INFORMATION> lstHandles = new List<Win32API.SYSTEM_HANDLE_INFORMATION>();
+
+            for (long lIndex = 0; lIndex < lHandleCount; lIndex++)
+            {
+                shHandle = new Win32API.SYSTEM_HANDLE_INFORMATION();
+                if (Is64Bits())
+                {
+                    shHandle = (Win32API.SYSTEM_HANDLE_INFORMATION)Marshal.PtrToStructure(ipHandle, shHandle.GetType());
+                    ipHandle = new IntPtr(ipHandle.ToInt64() + Marshal.SizeOf(shHandle) + 8);
+                }
+                else
+                {
+                    ipHandle = new IntPtr(ipHandle.ToInt64() + Marshal.SizeOf(shHandle));
+                    shHandle = (Win32API.SYSTEM_HANDLE_INFORMATION)Marshal.PtrToStructure(ipHandle, shHandle.GetType());
+                }
+
+                if (process != null)
+                {
+                    if (shHandle.ProcessID != process.Id) continue;
+                }
+
+                string strObjectTypeName = "";
+                if (IN_strObjectTypeName != null)
+                {
+                    strObjectTypeName = getObjectTypeName(shHandle, Process.GetProcessById(shHandle.ProcessID));
+                    if (strObjectTypeName != IN_strObjectTypeName) continue;
+                }
+
+                string strObjectName = "";
+                if (IN_strObjectName != null)
+                {
+                    strObjectName = getObjectName(shHandle, Process.GetProcessById(shHandle.ProcessID));
+                    if (strObjectName != IN_strObjectName) continue;
+                }
+
+                string strObjectTypeName2 = getObjectTypeName(shHandle, Process.GetProcessById(shHandle.ProcessID));
+                string strObjectName2 = getObjectName(shHandle, Process.GetProcessById(shHandle.ProcessID));
+                Console.WriteLine("{0}   {1}   {2}", shHandle.ProcessID, strObjectTypeName2, strObjectName2);
+
+                lstHandles.Add(shHandle);
+            }
+            return lstHandles;
+        }
+
         public static bool Is64Bits()
         {
             return Environment.Is64BitProcess;

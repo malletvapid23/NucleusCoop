@@ -61,6 +61,8 @@ namespace Nucleus.Gaming.Coop
         /// </summary>
         bool SupportsKeyboard { get; }
 
+        
+
         /// <summary>
         /// Custom options that the user can modify
         /// </summary>

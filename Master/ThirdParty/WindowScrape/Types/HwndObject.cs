@@ -78,7 +78,7 @@ namespace WindowScrape.Types
                 }
                 else
                 {
-                    throw new NotImplementedException();
+                    HwndInterface.MakeNoTopMost(NativePtr);
                 }
             }
         }

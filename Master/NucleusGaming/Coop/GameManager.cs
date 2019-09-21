@@ -1,15 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.IO;
 using System.Reflection;
-using Nucleus.Gaming.Interop;
 using Newtonsoft.Json;
 using System.Threading;
 using Ionic.Zip;
 using Nucleus.Gaming.Properties;
-using System.Windows.Forms;
 using Nucleus.Gaming.Coop;
 
 namespace Nucleus.Gaming
@@ -303,7 +300,7 @@ namespace Nucleus.Gaming
 
         #region Initialize
 
-        private string GetAppDataPath()
+        public string GetAppDataPath()
         {
 #if ALPHA
             string local = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
@@ -320,7 +317,7 @@ namespace Nucleus.Gaming
             return Path.Combine(local, "games");
         }
 
-        protected string GetUserProfilePath()
+        public string GetUserProfilePath()
         {
             return Path.Combine(GetAppDataPath(), "userprofile.json");
         }
@@ -541,7 +538,8 @@ namespace Nucleus.Gaming
                     LogManager.Log("Found game info: " + info.GameName);
 
                     games.Add(info.GUID, info);
-                    gameInfos.Add(info.ExecutableName, info);
+                    //breaks anything? idk
+                    //gameInfos.Add(info.ExecutableName, info);
                 }
             }
         }

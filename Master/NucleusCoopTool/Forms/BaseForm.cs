@@ -9,7 +9,7 @@ namespace Nucleus.Coop
     /// Form that all other forms inherit from. Has all
     /// the default design parameters to have the Nucleus Coop look and feel
     /// </summary>
-    public class BaseForm : Form, IDynamicSized
+    public class BaseForm : System.Windows.Forms.Form, IDynamicSized
     {
         public BaseForm()
         {
@@ -72,7 +72,7 @@ namespace Nucleus.Coop
         /// This is a small quality of life fix)
         /// </summary>
         /// <param name="f">The form to move</param>
-        public void SetUpForm(Form f)
+        public void SetUpForm(System.Windows.Forms.Form f)
         {
             Point desktop = this.DesktopLocation;
             f.SetDesktopLocation(desktop.X + 100, desktop.Y + 100);

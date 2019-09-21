@@ -55,6 +55,10 @@ namespace Nucleus.Gaming.Coop
                     return 2;
                 case UserScreenType.FourPlayers:
                     return 4;
+                case UserScreenType.SixPlayers:
+                    return 6;
+                case UserScreenType.EightPlayers:
+                    return 8;
                 case UserScreenType.SixteenPlayers:
                     return 16;
                 default:

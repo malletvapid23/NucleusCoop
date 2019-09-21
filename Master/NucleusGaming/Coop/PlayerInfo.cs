@@ -39,6 +39,10 @@ namespace Nucleus.Gaming.Coop
         public int GamepadMask;
         public Joystick DInputJoystick;
 
+        public string HIDDeviceID;
+        public string Nickname;
+        public string InstanceId;
+
         // Serialized
 
         /// <summary>

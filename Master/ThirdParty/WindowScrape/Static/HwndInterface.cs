@@ -106,6 +106,11 @@ namespace WindowScrape.Static
             return SetWindowPos(hWnd, HWND_TOPMOST, 0, 0, 0, 0, (uint)(PositioningFlags.SWP_NOSIZE | PositioningFlags.SWP_NOMOVE));
         }
 
+        public static bool MakeNoTopMost(IntPtr hWnd)
+        {
+            return SetWindowPos(hWnd, HWND_NOTOPMOST, 0, 0, 0, 0, (uint)(PositioningFlags.SWP_NOSIZE | PositioningFlags.SWP_NOMOVE));
+        }
+
         public static Size GetHwndSize(IntPtr hwnd)
         {
             var rect = new RECT();

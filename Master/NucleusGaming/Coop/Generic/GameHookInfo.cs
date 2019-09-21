@@ -73,5 +73,15 @@ namespace Nucleus.Gaming
         public bool BlockMouseEvents = true;
         public bool BlockKeyboardEvents = true;
         public bool BlockInputEvents = true;
+
+        public bool FixResolution = false;
+        public bool FixPosition = false;
+
+        public bool UseAlpha8CustomDll = false;
+
+        public int WindowX = 0;
+        public int WindowY = 0;
+        public int ResWidth = 0;
+        public int ResHeight = 0;
     }
 }

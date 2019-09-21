@@ -75,6 +75,9 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Newtonsoft.Json, Version=10.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.10.0.3\lib\net40\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="SlimDX, Version=4.0.13.43, Culture=neutral, PublicKeyToken=b1b0c32fd1ffe4f9, processorArchitecture=x86">
       <HintPath>..\packages\SlimDX.4.0.13.44\lib\NET40\SlimDX.dll</HintPath>
       <Private>True</Private>
@@ -115,6 +118,12 @@
     <Compile Include="Forms\SearchDisksForm.Designer.cs">
       <DependentUpon>SearchDisksForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="Forms\Settings.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\Settings.Designer.cs">
+      <DependentUpon>Settings.cs</DependentUpon>
+    </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="Forms\BaseForm.resx">
@@ -129,6 +138,9 @@
     <EmbeddedResource Include="Forms\SearchDisksForm.resx">
       <DependentUpon>SearchDisksForm.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="Forms\Settings.resx">
+      <DependentUpon>Settings.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
@@ -141,34 +153,6 @@
     </Compile>
     <None Include="app.manifest">
       <SubType>Designer</SubType>
-    </None>
-    <None Include="games\DontStarveTogether\steam_api.ini" />
-    <None Include="games\Left4Dead2\bloodharvest.jpg">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="games\Left4Dead2\crashcourse.jpg">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="games\Left4Dead2\deadair.jpg">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="games\Left4Dead2\deadcenter.jpg">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="games\Left4Dead2\deathtoll.jpg">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="games\Left4Dead2\hardrain.jpg">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="games\Left4Dead2\nomercy.jpg">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="games\Left4Dead2\swampfever.JPG">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="games\Left4Dead2\theparish.jpg">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
@@ -189,6 +173,10 @@
     <ProjectReference Include="..\NucleusGaming\Nucleus.Gaming.csproj">
       <Project>{223dbdae-e362-452c-9455-f518d002b154}</Project>
       <Name>Nucleus.Gaming</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\StartGame\Nucleus.Coop.StartGame.csproj">
+      <Project>{91298ada-5999-41d4-8a7b-51f28094ab5b}</Project>
+      <Name>Nucleus.Coop.StartGame</Name>
     </ProjectReference>
     <ProjectReference Include="..\ThirdParty\WindowScrape\WindowScrape.csproj">
       <Project>{d9716550-921d-44e8-a289-c297950db1f7}</Project>
@@ -272,268 +260,11 @@
     <None Include="Resources\not_found_white.png" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="games\DebugBattlefront2.js" />
-    <None Include="games\Borderlands.js">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="games\Borderlands2.js">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="games\BorderlandsPreSequel.js">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="games\DebugCallOfDutyBlackOpsZombiesRocketV2.js" />
-    <None Include="games\DebugCallOfDutyBlackOps2Zombies.js" />
-    <None Include="games\DebugHaloWars.js" />
-    <None Include="games\DebugLeft4Dead.js" />
-    <None Include="games\SaintsRow3DX11.js">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="games\DebugHalo.js" />
-    <None Include="games\Left4Dead2.js">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="games\Left4Dead2\bkp\bloodharvest.jpg" />
-    <None Include="games\Left4Dead2\bkp\crashcourse.jpg" />
-    <None Include="games\Left4Dead2\bkp\darkcarnival.jpg" />
-    <None Include="games\Left4Dead2\bkp\deadair.jpg" />
-    <None Include="games\Left4Dead2\bkp\deadcenter.jpg" />
-    <None Include="games\Left4Dead2\bkp\deathaboard.jpg" />
-    <None Include="games\Left4Dead2\bkp\deathtoll.jpg" />
-    <None Include="games\Left4Dead2\bkp\hardrain.jpg" />
-    <None Include="games\Left4Dead2\bkp\nomercy.jpg" />
-    <None Include="games\Left4Dead2\bkp\swampfever.JPG" />
-    <None Include="games\Left4Dead2\bkp\theparish.jpg" />
-    <None Include="games\Left4Dead2\coldstream.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="games\Left4Dead2\darkcarnival.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="games\Left4Dead2\deathabroad.jpg">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="games\Left4Dead2\thepassing.jpg">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="games\Left4Dead2\thesacrifice.jpg">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="games\Left4Dead\nomercy.jpg">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="games\Left4Dead\crashcourse.jpg">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="games\Left4Dead\deathtoll.jpg">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="games\Left4Dead\deadair.jpg">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="games\Left4Dead\bloodharvest.jpg">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="games\Left4Dead\coldstream.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="games\AliensColonialMarines.js">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="games\AlienSwarmReactiveDrop.js">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="games\AlienSwarmReactiveDrop\ad4_obj_escape_image.jpg">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="games\AlienSwarmReactiveDrop\adanaxis1_access_obj_image.jpg">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="games\AlienSwarmReactiveDrop\breakinganentry_missionpic.jpg">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="games\AlienSwarmReactiveDrop\dm_desert_icon.jpg">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="games\AlienSwarmReactiveDrop\dm_testlab_icon.jpg">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="games\AlienSwarmReactiveDrop\obc17center_goo.jpg">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="games\AlienSwarmReactiveDrop\obc17citadel_escape.jpg">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="games\AlienSwarmReactiveDrop\obc17f_core.jpg">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="games\AlienSwarmReactiveDrop\obc17ts_button2.jpg">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="games\AlienSwarmReactiveDrop\obc17tunnel_eggs.jpg">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="games\AlienSwarmReactiveDrop\obdeimaesc.jpg">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="games\AlienSwarmReactiveDrop\oblandingelev.jpg">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="games\AlienSwarmReactiveDrop\oblandinghack.jpg">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="games\AlienSwarmReactiveDrop\obresidentialbio.jpg">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="games\AlienSwarmReactiveDrop\obrydbergreactor.jpg">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="games\AlienSwarmReactiveDrop\obsewertunnel.jpg">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="games\AlienSwarmReactiveDrop\obtimorstationnuke.jpg">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="games\AlienSwarmReactiveDrop\omegacity_missionpic.jpg">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="games\AlienSwarmReactiveDrop\rd-area9800lzpic.jpg">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="games\AlienSwarmReactiveDrop\rd-area9800pp1pic.jpg">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="games\AlienSwarmReactiveDrop\rd-area9800pp2pic.jpg">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="games\AlienSwarmReactiveDrop\rd-area9800wlpic.jpg">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="games\AlienSwarmReactiveDrop\rd-lan1_bridgempic.jpg">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="games\AlienSwarmReactiveDrop\rd-lan2_sewermpic.jpg">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="games\AlienSwarmReactiveDrop\rd-lan3_maintenance_obj_3.jpg">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="games\AlienSwarmReactiveDrop\rd-lan4_ventmpic.jpg">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="games\AlienSwarmReactiveDrop\rd-lan5_complexmpic.jpg">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="games\AlienSwarmReactiveDrop\rd-obbriefing_map3.jpg">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="games\AlienSwarmReactiveDrop\rd-obdesertexit.jpg">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="games\AlienSwarmReactiveDrop\rd-tarnormission2.jpg">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="games\AlienSwarmReactiveDrop\rd_bon2_survivors.jpg">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="games\AlienSwarmReactiveDrop\rd_bon3_blueprint.jpg">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="games\AlienSwarmReactiveDrop\rd_ocs1mapicon.jpg">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="games\AlienSwarmReactiveDrop\rd_ocs2mapicon.jpg">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="games\AlienSwarmReactiveDrop\rd_ocs3mapicon.jpg">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="games\AlienSwarmReactiveDrop\rd_ori2.jpg">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="games\AlienSwarmReactiveDrop\rd_par_mission2.jpg">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="games\AlienSwarmReactiveDrop\rd_par_objectif1.jpg">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="games\AlienSwarmReactiveDrop\rd_par_objectif23.jpg">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="games\AlienSwarmReactiveDrop\rd_par_objectif32.jpg">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="games\AlienSwarmReactiveDrop\rd_par_objectif33.jpg">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="games\AlienSwarmReactiveDrop\rd_res_m1missionpic.jpg">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="games\AlienSwarmReactiveDrop\rd_res_m2missionpic.jpg">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="games\AlienSwarmReactiveDrop\rd_res_m3missionpic.jpg">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="games\AlienSwarmReactiveDrop\rd_res_m4missionpic.jpg">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="games\AlienSwarmReactiveDrop\rd_til3arcticinfiltration_pic.jpg">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="games\AlienSwarmReactiveDrop\searchandrescue_missionpic.jpg">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="games\AlienSwarmReactiveDrop\tilarus01obj1.jpg">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="games\AlienSwarmReactiveDrop\tilarus02obj1.jpg">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="games\AlienSwarmReactiveDrop\tilarus04obj1.jpg">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="games\AlienSwarmReactiveDrop\tilarus05obj1.jpg">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="games\AlienSwarmReactiveDrop\tilarus06obj1access.jpg">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="games\AlienSwarmReactiveDrop\tilarus07objeggs.jpg">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="games\AlienSwarmReactiveDrop\tilarus08obj2.jpg">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="games\AlienSwarmReactiveDrop\tilarus09obpowerroom.jpg">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="games\Synergy.js">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="..\StartGame\bin\Release\StartGame.exe">
-      <Link>StartGame.exe</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="games\SaintsRow3.js">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="games\DebugSaintsRowIV.js" />
-    <None Include="games\DebugCallOfDutyBlackOpsMultiplayerRocketV2.js" />
-    <None Include="games\DebugDolphin.js" />
-    <None Include="games\GasGuzzlersExtreme.js">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="games\DontStarveTogether.js">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="games\DontStarveTogether\steam_api.dll" />
+    <None Include="Resources\setting.png" />
     <Content Include="icon.ico" />
     <Content Include="Resources\icon.ico" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="games\Left4Dead2\og\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
