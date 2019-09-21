@@ -74,7 +74,6 @@ namespace Nucleus.Inject64
                 //IntPtr InPassThruBuffer = Marshal.StringToHGlobalUni(args[i++]);
                 int.TryParse(args[i++], out int hWnd);
                 bool.TryParse(args[i++], out bool hookFocus);
-                bool.TryParse(args[i++], out bool setWindow);
                 bool.TryParse(args[i++], out bool hideCursor);
 
                 //int.TryParse(args[i++], out int InPassThruSize);
