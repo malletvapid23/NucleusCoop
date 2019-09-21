@@ -1,16 +1,30 @@
-# Nucleus Co-Op
-Nucles Co-Op is a tool for Windows that allows split-screen play on many games that do not initially support it.
-Its purspose is to make it as easy as possible for the average user to play games locally.
+# Nucleus Co-Op & Unofficial Mod
+Nucles Co-Op is a tool for Windows that allows split-screen play on many games that do not initially support it. Its purpose is to make it as easy as possible for the average user to play games locally.
 
-Support its development by helping on my Patreon! https://www.patreon.com/distro
+This repo is an unofficial mod of the Nucleus Co-Op application. The mod is based off of the official Nucleus Co-Op Alpha 8 build and features enhancements and quality of life changes including:
+- HUGE increase to the amount of compabitle games
+- Much more customization (via game scripts)
+- 6 and 8 player support
+- Quality of life improvements
+- Bug fixes
+- And more!
 
-Subscribe to our subreddit: https://www.reddit.com/r/nucleuscoop/
+View the full list of features/changes and changelog in Mod-Readme.txt in releases.
 
-Join our Discord: https://discord.gg/jrbPvKW
+# Disclaimer
+I am NOT associated with the original project or its authors. Nucleus Co-Op was originally created by Lucas Assis. I am merely a fan of split screen gaming and the original project! I wanted to continue this work to continue building upon the already faboulous tool that is NucleusCo-Op.
 
 
-# How does it work?
-Starting from Alpha 4, all games use a generic handler that can handle pretty much all situations.
+Github link to the original project: https://github.com/lucasassislar/nucleuscoop
+
+Subscribe the official Nucleus Co-Op subreddit: https://www.reddit.com/r/nucleuscoop/
+
+Join the official Nucleus Co-Op Discord: https://discord.gg/jrbPvKW
+
+^ You can certainly find me in those places as well
+
+# How does Nucleus Co-Op work?
+For Alpha 8, all games use a generic handler that can handle pretty much all situations.
 To add a new game, you can just create a new *.js file on the games folder, and describe what your game needs to run.
 Now, what the GenericHandler actually does?
 
@@ -22,14 +36,31 @@ When the user hits play:
 - If needed, we extract SmartSteamEmu and start the game using it.
 - Now we keep track of the processes, looking for the launcher and the actual game window, so we can position it correctly on the screen.
 
+# How can you contribute?
+Please report any bugs you may find and provide any feedback you have regarding the mod. I am always open to suggestions and I want to make split-screen available for every game, for everyone! Don't forget to create game scripts and share!
 
-# How to help on the development?
-If you want to truly code, here follows a somewhat summup of what you need to begin developing:
-TODO: finish up this section :/
+You can find me on the Nucleus subreddit/discord as well as the Splitscreen Dreams discord, a special community created specifically for making games non-split-screen games split-screen. Message me on discord, ZeroFox#5866, or Talos91#8419 if you're interested in contributing.
 
-For the application:
-	- Visual Studio 2015 or 2017 (Community works fine)
+In addition, I accept donations should you wish to support my endevor. It is greatly appreciated but completely voluntary, I will continue my best to help the community and enhance this project.
 
-For the games's Javascript files
-	- Visual Studio Code
-	- ProcessExplorer
+You can donate via PayPal through this link:
+
+[![paypal](https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=WUXKHLAD3A3LE&source=url)
+
+
+Thank you ^_^
+
+# Credits
+The original NucleusCo-Op Project: Lucas Assis
+
+NucleusCo-Op Mod: ZeroFox
+
+Ilyaki for his hook source code
+
+R-Mach for his help and contributions
+
+
+Special shout-out to: Talos91, the Splitscreen Dreams discord.
+
+
+All this wouldn't have been possible without Lucas. Thank you Lucas <3. Make split-screen great again!
