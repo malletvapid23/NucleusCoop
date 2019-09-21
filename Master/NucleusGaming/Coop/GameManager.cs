@@ -56,6 +56,9 @@ namespace Nucleus.Gaming
             string appData = GetAppDataPath();
             Directory.CreateDirectory(appData);
 
+            string gameJs = GetJsGamesPath();
+            Directory.CreateDirectory(gameJs);
+
             Initialize();
             LoadUser();
         }
