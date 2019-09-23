@@ -104,6 +104,7 @@ namespace Nucleus.Gaming
         //public bool UseAlpha8CustomDll;
         //public int FakeFocusInterval;
         public bool ResetWindows;
+        public bool PartialMutexSearch;
 
         public Type HandlerType
         {

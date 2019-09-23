@@ -32,7 +32,7 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
             this.settingsBtn = new System.Windows.Forms.Button();
-            this.label1 = new System.Windows.Forms.Label();
+            this.sideInfoLbl = new System.Windows.Forms.Label();
             this.lblVersion = new System.Windows.Forms.Label();
             this.btn_Next = new System.Windows.Forms.Button();
             this.btnAutoSearch = new System.Windows.Forms.Button();
@@ -42,9 +42,13 @@
             this.label_StepTitle = new System.Windows.Forms.Label();
             this.StepPanel = new System.Windows.Forms.Panel();
             this.list_Games = new Nucleus.Gaming.ControlListBox();
+            this.gameContextMenuStrip = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.detailsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.deleteToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.gameNameControl = new Nucleus.Coop.Controls.GameNameControl();
             this.btn_delete = new System.Windows.Forms.Button();
             this.btn_details = new System.Windows.Forms.Button();
+            this.gameContextMenuStrip.SuspendLayout();
             this.SuspendLayout();
             // 
             // settingsBtn
@@ -62,16 +66,15 @@
             this.settingsBtn.UseVisualStyleBackColor = false;
             this.settingsBtn.Click += new System.EventHandler(this.SettingsBtn_Click);
             // 
-            // label1
+            // sideInfoLbl
             // 
-            this.label1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(844, 12);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(149, 42);
-            this.label1.TabIndex = 14;
-            this.label1.Text = "Modded by ZeroFox\r\nv0.9.6.0 ALPHA";
-            this.label1.TextAlign = System.Drawing.ContentAlignment.TopRight;
+            this.sideInfoLbl.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.sideInfoLbl.AutoSize = true;
+            this.sideInfoLbl.Location = new System.Drawing.Point(844, 12);
+            this.sideInfoLbl.Name = "sideInfoLbl";
+            this.sideInfoLbl.Size = new System.Drawing.Size(0, 21);
+            this.sideInfoLbl.TabIndex = 14;
+            this.sideInfoLbl.TextAlign = System.Drawing.ContentAlignment.TopRight;
             // 
             // lblVersion
             // 
@@ -188,6 +191,28 @@
             this.list_Games.TabIndex = 2;
             this.list_Games.SelectedChanged += new System.Action<object, System.Windows.Forms.Control>(this.list_Games_SelectedChanged);
             // 
+            // gameContextMenuStrip
+            // 
+            this.gameContextMenuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.detailsToolStripMenuItem,
+            this.deleteToolStripMenuItem});
+            this.gameContextMenuStrip.Name = "gameContextMenuStrip";
+            this.gameContextMenuStrip.Size = new System.Drawing.Size(110, 48);
+            // 
+            // detailsToolStripMenuItem
+            // 
+            this.detailsToolStripMenuItem.Name = "detailsToolStripMenuItem";
+            this.detailsToolStripMenuItem.Size = new System.Drawing.Size(109, 22);
+            this.detailsToolStripMenuItem.Text = "Details";
+            this.detailsToolStripMenuItem.Click += new System.EventHandler(this.DetailsToolStripMenuItem_Click);
+            // 
+            // deleteToolStripMenuItem
+            // 
+            this.deleteToolStripMenuItem.Name = "deleteToolStripMenuItem";
+            this.deleteToolStripMenuItem.Size = new System.Drawing.Size(109, 22);
+            this.deleteToolStripMenuItem.Text = "Delete";
+            this.deleteToolStripMenuItem.Click += new System.EventHandler(this.DeleteToolStripMenuItem_Click);
+            // 
             // gameNameControl
             // 
             this.gameNameControl.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
@@ -230,7 +255,7 @@
             this.Controls.Add(this.btn_details);
             this.Controls.Add(this.btn_delete);
             this.Controls.Add(this.settingsBtn);
-            this.Controls.Add(this.label1);
+            this.Controls.Add(this.sideInfoLbl);
             this.Controls.Add(this.lblVersion);
             this.Controls.Add(this.gameNameControl);
             this.Controls.Add(this.btn_Next);
@@ -245,6 +270,7 @@
             this.MinimumSize = new System.Drawing.Size(640, 360);
             this.Name = "MainForm";
             this.Text = "Nucleus Coop (Alpha 8 Mod)";
+            this.gameContextMenuStrip.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -262,10 +288,13 @@
         private System.Windows.Forms.Button btn_Next;
         private System.Windows.Forms.Label lblVersion;
         private Controls.GameNameControl gameNameControl;
-        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.Label sideInfoLbl;
         private System.Windows.Forms.Button settingsBtn;
         private System.Windows.Forms.ToolTip toolTip1;
         private System.Windows.Forms.Button btn_delete;
         private System.Windows.Forms.Button btn_details;
+        private System.Windows.Forms.ContextMenuStrip gameContextMenuStrip;
+        private System.Windows.Forms.ToolStripMenuItem detailsToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem deleteToolStripMenuItem;
     }
 }

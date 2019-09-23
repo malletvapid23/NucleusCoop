@@ -785,7 +785,7 @@ namespace Nucleus.Coop
                         int halfw = (int)(bounds.Width / 3.0f);
                         int halfh = (int)(bounds.Height / 2.0f);
 
-                        for (int x = 0; x < 2; x++)
+                        for (int x = 0; x < 3; x++)
                         {
                             for (int y = 0; y < 2; y++)
                             {
@@ -833,7 +833,7 @@ namespace Nucleus.Coop
                             }
                         }
 
-                        if (playersUsing == 6)
+                        if (playersUsing == 8)
                         {
                             return false;
                         }
@@ -841,7 +841,7 @@ namespace Nucleus.Coop
                         int halfw = (int)(bounds.Width / 4.0f);
                         int halfh = (int)(bounds.Height / 2.0f);
 
-                        for (int x = 0; x < 2; x++)
+                        for (int x = 0; x < 4; x++)
                         {
                             for (int y = 0; y < 2; y++)
                             {

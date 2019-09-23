@@ -95,5 +95,7 @@ namespace Nucleus.Gaming
 
         bool ResetWindows { get; }
 
+        bool PartialMutexSearch { get; }
+
     }
 }

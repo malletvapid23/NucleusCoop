@@ -23,6 +23,7 @@ namespace StartGame
         private static int tries = 5;
         private static Process proc;
         private static string mt;
+        private static bool partialMutex;
 
         private static bool isHook;
         private static bool isDelay;
@@ -441,6 +442,7 @@ namespace StartGame
                         string skey = args[j];
                         if (!skey.Contains("monitors")
                              && !skey.Contains("game")
+                             && !skey.Contains("partialmutex")
                              && !skey.Contains("mutextype")
                              && !skey.Contains("mutex")
                              && !skey.Contains("proc")
@@ -487,9 +489,9 @@ namespace StartGame
                     {
                         mutexToRename = splited[1];
                     }
-                    else if (key.Contains("setwindow"))
+                    else if (key.Contains("partialmutex"))
                     {
-                        setWindow = Boolean.Parse(splited[1]);
+                        partialMutex = Boolean.Parse(splited[1]);
                     }
                     else if (key.Contains("game"))
                     {
@@ -525,7 +527,7 @@ namespace StartGame
                         {
                             string m = mutex[j];
                             ConsoleU.WriteLine("Trying to kill mutex: " + m, Palette.Feedback);
-                            if (!ProcessUtil.KillMutex(proc, mt, m))
+                            if (!ProcessUtil.KillMutex(proc, mt, m, partialMutex))
                             {
                                 ConsoleU.WriteLine("Mutex " + m + " could not be killed", Palette.Error);
                             }
@@ -559,7 +561,7 @@ namespace StartGame
                         {
                             string m = mutex[j];
                             ConsoleU.WriteLine("Requested mutex: " + m, Palette.Error);
-                            bool exists = ProcessUtil.MutexExists(proc, mt, m);
+                            bool exists = ProcessUtil.MutexExists(proc, mt, m, partialMutex);
                             if (!exists)
                             {
                                 all = false;

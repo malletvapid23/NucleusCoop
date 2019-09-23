@@ -490,10 +490,10 @@ namespace Nucleus.Gaming
                                     Thread.Sleep((gen.KillMutexDelay * 1000));
                                 }
 
-                                if (StartGameUtil.MutexExists(pdata.Process, gen.KillMutexType, gen.KillMutex))
+                                if (StartGameUtil.MutexExists(pdata.Process, gen.KillMutexType, gen.PartialMutexSearch, gen.KillMutex))
                                 {
                                     // mutexes still exist, must kill
-                                    StartGameUtil.KillMutex(pdata.Process, gen.KillMutexType, gen.KillMutex);
+                                    StartGameUtil.KillMutex(pdata.Process, gen.KillMutexType, gen.PartialMutexSearch, gen.KillMutex);
                                     pdata.KilledMutexes = true;
                                     break;
                                 }

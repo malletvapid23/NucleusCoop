@@ -5,12 +5,12 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("Nucleus Coop Tool")]
-[assembly: AssemblyDescription("Nucleus Coop for SplitScreen gaming on PC")]
+[assembly: AssemblyTitle("Nucleus Coop Tool (Mod)")]
+[assembly: AssemblyDescription("Split-screen gaming on PC")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Lucas Assis")]
+[assembly: AssemblyCompany("Lucas Assis & ZeroFox")]
 [assembly: AssemblyProduct("NucleusCoop")]
-[assembly: AssemblyCopyright("Copyright ©  2017")]
+[assembly: AssemblyCopyright("Copyright ©  2019")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

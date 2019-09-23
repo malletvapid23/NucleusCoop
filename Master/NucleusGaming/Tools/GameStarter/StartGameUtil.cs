@@ -39,7 +39,7 @@ namespace Nucleus.Gaming.Tools.GameStarter
             return "\"" + pathToGame + "\" \"" + args + "\" \"" + waitTime + "\" \"" + mutexType + "\" \"" + mu + "\"";
         }
 
-        public static void KillMutex(Process p, string mutexType, params string[] mutex)
+        public static void KillMutex(Process p, string mutexType, bool partial, params string[] mutex)
         {
             lock (locker)
             {
@@ -58,7 +58,7 @@ namespace Nucleus.Gaming.Tools.GameStarter
                     }
                 }
 
-                startInfo.Arguments = "\"proc:" + p.Id.ToString() + "\" \"mutextype:" + mutexType + "\" \"mutex:" + mu + "\"";
+                startInfo.Arguments = "\"proc:" + p.Id.ToString() + "\" \"partialmutex:" + partial + "\" \"mutextype:" + mutexType + "\" \"mutex:" + mu + "\"";
                 startInfo.RedirectStandardOutput = true;
                 startInfo.UseShellExecute = false;
 
@@ -70,7 +70,7 @@ namespace Nucleus.Gaming.Tools.GameStarter
             }
         }
 
-        public static bool MutexExists(Process p, string mutexType, params string[] mutex)
+        public static bool MutexExists(Process p, string mutexType, bool partial, params string[] mutex)
         {
             lock (locker)
             {
@@ -89,7 +89,7 @@ namespace Nucleus.Gaming.Tools.GameStarter
                     }
                 }
 
-                startInfo.Arguments = $"\"proc:{p.Id}\" \"mutextype:{mutexType}\" \"output:{mu}\"";
+                startInfo.Arguments = $"\"proc:{p.Id}\" \"partialmutex:{partial}\" \"mutextype:{mutexType}\" \"output:{mu}\"";
                 startInfo.RedirectStandardOutput = true;
                 startInfo.UseShellExecute = false;
                 startInfo.CreateNoWindow = true;

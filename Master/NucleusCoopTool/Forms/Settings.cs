@@ -239,7 +239,7 @@ namespace Nucleus.Coop
 
         private void Btn_credits_Click(object sender, EventArgs e)
         {
-            MessageBox.Show("Credits -\nNucleusCoop: Lucas Assis (lucasassislar)\nMod: ZeroFox\n\nThis mod brings further enhancements to NucleusCoop, such as:\n- HUGE increase to the amount of compabitle games\n- Much more customization (via game scripts)\n- 6 and 8 player support\n- Quality of life improvements\n- Bug fixes\n- And more!\n\nFull mod changelog in Mod-Readme.txt\nAll this wouldn't have been possible without Lucas. Thank you Lucas <3. Make split-screen great again!\n\nSpecial shout-out to: Talos91, Ilyaki and the Splitscreen Dreams discord.", "Credits",MessageBoxButtons.OK,MessageBoxIcon.Information);
+            MessageBox.Show("NucleusCoop Mod - " + mainForm.version + "\n\nCredits\n---------------------------------------------------------------------\nOriginal NucleusCoop Project: Lucas Assis (lucasassislar)\nMod: ZeroFox\n\nThis mod brings further enhancements to NucleusCoop, such as:\n- HUGE increase to the amount of compabitle games\n- Much more customization (via game scripts)\n- 6 and 8 player support\n- Quality of life improvements\n- Bug fixes\n- And more!\n\nFull mod changelog in Mod-Readme.txt\n\nAll this wouldn't have been possible without Lucas. Thank you Lucas <3. Make split-screen great again!\n\nSpecial thanks to: Talos91, Ilyaki and the Splitscreen Dreams discord.", "Credits",MessageBoxButtons.OK,MessageBoxIcon.Information);
         }
     }
 }

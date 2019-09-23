@@ -50,6 +50,10 @@ namespace Nucleus.Coop
         private int TopMost_HotkeyID = 2;
         private int StopSession_HotkeyID = 3;
 
+        public string version = "v0.9.6.1 ALPHA";
+        public Control SelectedControl { get; protected set; }
+        //public event Action<object, Control> SelectedChanged;
+
         private Thread handlerThread;
 
         private bool TopMostToggle = true;
@@ -71,6 +75,8 @@ namespace Nucleus.Coop
         {
             InitializeComponent();
 
+            sideInfoLbl.Text = "Modded by ZeroFox" + "\n" + version;
+
             positionsControl = new PositionsControl();
             Form settingsForm = new Form(this, positionsControl);
 
@@ -90,6 +96,7 @@ namespace Nucleus.Coop
 
             // selects the list of games, so the buttons look equal
             list_Games.Select();
+            SelectedControl = null;
 
             //list_Games.AutoScroll = false;
             //int vertScrollWidth = SystemInformation.VerticalScrollBarWidth;
@@ -676,39 +683,25 @@ namespace Nucleus.Coop
 
         private void Btn_delete_Click(object sender, EventArgs e)
         {
-            string userProfile = gameManager.GetUserProfilePath();
-
-            if (File.Exists(userProfile))
-            {
-                string jsonString = File.ReadAllText(userProfile);
-                JObject jObject = Newtonsoft.Json.JsonConvert.DeserializeObject(jsonString) as JObject;
-
-                JArray games = jObject["Games"] as JArray;
-                for(int i =0;i<games.Count;i++)
-                {
-                    string gameGuid = jObject["Games"][i]["GameGuid"].ToString();
-                    string profiles = jObject["Games"][i]["Profiles"].ToString();
-                    string exePath = jObject["Games"][i]["ExePath"].ToString();
-
-                    if (gameGuid == currentGameInfo.GameGuid && exePath == currentGameInfo.ExePath)
-                    {
-                        DialogResult dialogResult = MessageBox.Show("Are you sure you want to delete " + currentGameInfo.Game.GameName + "?", "Confirm deletion", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
-                        if (dialogResult == DialogResult.Yes)
-                        {
-                            gameManager.User.Games.RemoveAt(i);
-                            jObject["Games"][i].Remove();
-                            string output = JsonConvert.SerializeObject(jObject, Formatting.Indented);
-                            File.WriteAllText(userProfile, output);
-                            this.Controls.Clear();
-                            this.InitializeComponent();
-                            RefreshGames();
-                        }
-                    }
-                }
-            }
+            DeleteGame();
         }
 
         private void Btn_details_Click(object sender, EventArgs e)
+        {
+            GetDetails();
+        }
+
+        private void DetailsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            GetDetails();
+        }
+
+        private void DeleteToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            DeleteGame();
+        }
+
+        private void GetDetails()
         {
             string userProfile = gameManager.GetUserProfilePath();
 
@@ -727,6 +720,40 @@ namespace Nucleus.Coop
                     if (gameGuid == currentGameInfo.GameGuid && exePath == currentGameInfo.ExePath)
                     {
                         MessageBox.Show(string.Format("Game Name: {0}\nGame Guid: {1}\nProfiles: {2}\nExe Path: {3}\nScript Filename: {4}", currentGameInfo.Game.GameName, gameGuid, profiles, exePath, currentGameInfo.Game.JsFileName), "Game Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    }
+                }
+            }
+        }
+
+        private void DeleteGame()
+        {
+            string userProfile = gameManager.GetUserProfilePath();
+
+            if (File.Exists(userProfile))
+            {
+                string jsonString = File.ReadAllText(userProfile);
+                JObject jObject = Newtonsoft.Json.JsonConvert.DeserializeObject(jsonString) as JObject;
+
+                JArray games = jObject["Games"] as JArray;
+                for (int i = 0; i < games.Count; i++)
+                {
+                    string gameGuid = jObject["Games"][i]["GameGuid"].ToString();
+                    string profiles = jObject["Games"][i]["Profiles"].ToString();
+                    string exePath = jObject["Games"][i]["ExePath"].ToString();
+
+                    if (gameGuid == currentGameInfo.GameGuid && exePath == currentGameInfo.ExePath)
+                    {
+                        DialogResult dialogResult = MessageBox.Show("Are you sure you want to delete " + currentGameInfo.Game.GameName + "?", "Confirm deletion", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+                        if (dialogResult == DialogResult.Yes)
+                        {
+                            gameManager.User.Games.RemoveAt(i);
+                            jObject["Games"][i].Remove();
+                            string output = JsonConvert.SerializeObject(jObject, Formatting.Indented);
+                            File.WriteAllText(userProfile, output);
+                            this.Controls.Clear();
+                            this.InitializeComponent();
+                            RefreshGames();
+                        }
                     }
                 }
             }
