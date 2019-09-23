@@ -51,8 +51,6 @@ namespace Nucleus.Coop
         private int StopSession_HotkeyID = 3;
 
         public string version = "v0.9.6.1 ALPHA";
-        public Control SelectedControl { get; protected set; }
-        //public event Action<object, Control> SelectedChanged;
 
         private Thread handlerThread;
 
@@ -96,7 +94,6 @@ namespace Nucleus.Coop
 
             // selects the list of games, so the buttons look equal
             list_Games.Select();
-            SelectedControl = null;
 
             //list_Games.AutoScroll = false;
             //int vertScrollWidth = SystemInformation.VerticalScrollBarWidth;
@@ -757,6 +754,86 @@ namespace Nucleus.Coop
                     }
                 }
             }
+        }
+
+        private void GameContextMenuStrip_Opening(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            Control selectedControl = FindControlAtCursor(this);
+
+            if (selectedControl.GetType() == typeof(Label) || selectedControl.GetType() == typeof(PictureBox))
+            {
+                selectedControl = selectedControl.Parent;
+            }
+
+            foreach (Control c in selectedControl.Controls)
+            {
+                if (c is Label)
+                {
+                    if (c.Text == "No games")
+                    {
+                        gameContextMenuStrip.Items[0].Text = "No game selected...";
+                        for (int i = 1; i < gameContextMenuStrip.Items.Count; i++)
+                        {
+                            gameContextMenuStrip.Items[i].Visible = false;
+                        }
+                        return;
+                    }
+                }
+            }
+
+            if (selectedControl.GetType() == typeof(GameControl))
+            {
+                currentControl = (GameControl)selectedControl;
+                currentGameInfo = currentControl.UserGameInfo;
+
+                if (string.IsNullOrEmpty(currentGameInfo.GameGuid) || currentGameInfo == null)
+                {
+                    gameContextMenuStrip.Items[0].Text = "No game selected...";
+                    for (int i=1; i<gameContextMenuStrip.Items.Count; i++)
+                    {
+                        gameContextMenuStrip.Items[i].Visible = false;
+                    }
+                }
+                else
+                {
+                    gameContextMenuStrip.Items[0].Text = currentGameInfo.Game.GameName;
+                    for (int i = 1; i < gameContextMenuStrip.Items.Count; i++)
+                    {
+                        gameContextMenuStrip.Items[i].Visible = true;
+                    }
+                }
+            }
+            else
+            {
+                gameContextMenuStrip.Items[0].Text = "No game selected...";
+                for (int i = 1; i < gameContextMenuStrip.Items.Count; i++)
+                {
+                    gameContextMenuStrip.Items[i].Visible = false;
+                }
+            }
+        }
+
+        public static Control FindControlAtPoint(Control container, Point pos)
+        {
+            Control child;
+            foreach (Control c in container.Controls)
+            {
+                if (c.Visible && c.Bounds.Contains(pos))
+                {
+                    child = FindControlAtPoint(c, new Point(pos.X - c.Left, pos.Y - c.Top));
+                    if (child == null) return c;
+                    else return child;
+                }
+            }
+            return null;
+        }
+
+        public static Control FindControlAtCursor(MainForm form)
+        {
+            Point pos = Cursor.Position;
+            if (form.Bounds.Contains(pos))
+                return FindControlAtPoint(form, form.PointToClient(pos));
+            return null;
         }
     }
 }
