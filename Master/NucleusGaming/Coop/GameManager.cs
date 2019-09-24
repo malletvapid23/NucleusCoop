@@ -273,16 +273,18 @@ namespace Nucleus.Gaming
                     LogManager.Log("Extracting SmartSteamEmu");
 
                     Directory.CreateDirectory(steamEmu);
-                    using (MemoryStream stream = new MemoryStream(Resources.SmartSteamEmu))
+                    string local = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
+                    
+                    //using (MemoryStream stream = new MemoryStream(Resources.SmartSteamEmu))
+                    //{
+                    using (ZipFile zip1 = ZipFile.Read(Path.Combine(local, "utils\\SmartSteamEmu\\SmartSteamEmu.zip")))
                     {
-                        using (ZipFile zip1 = ZipFile.Read(stream))
+                        foreach (ZipEntry e in zip1)
                         {
-                            foreach (ZipEntry e in zip1)
-                            {
-                                e.Extract(steamEmu, ExtractExistingFileAction.OverwriteSilently);
-                            }
+                            e.Extract(steamEmu, ExtractExistingFileAction.OverwriteSilently);
                         }
                     }
+                    //}
                 }
             }
             catch

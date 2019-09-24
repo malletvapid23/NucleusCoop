@@ -278,7 +278,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\ncoop.ini" />
-    <None Include="Resources\SmartSteamEmu.zip" />
     <None Include="Resources\vertical.png" />
   </ItemGroup>
   <ItemGroup>

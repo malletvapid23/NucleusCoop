@@ -673,16 +673,19 @@ namespace Nucleus.Gaming
                 if (gen.UseX360ce)
                 {
                     string x360exe = "";
-                    string utilFolder = Path.Combine(Directory.GetCurrentDirectory(), "utils");
+                    string x360dll = "";
+                    string utilFolder = Path.Combine(Directory.GetCurrentDirectory(), "utils\\x360ce");
                     if (i == 0)
                     {
                         if (Is64Bit(exePath) == true)
                         {
                             x360exe = "x360ce_x64.exe";
+                            x360dll = "xinput1_3_x64.dll";
                         }
                         else if (Is64Bit(exePath) == false)
                         {
                             x360exe = "x360ce.exe";
+                            x360dll = "xinput1_3.dll";
                         }
                         else
                         {
@@ -699,6 +702,12 @@ namespace Nucleus.Gaming
                             File.Copy(Path.Combine(utilFolder, x360exe), Path.Combine(linkBinFolder, x360exe));
                         }
 
+                        if (!File.Exists(Path.Combine(linkBinFolder, "xinput1_3.dll")))
+                        {
+                            //File.Delete(Path.Combine(linkBinFolder, "x360ce.exe"));
+                            File.Copy(Path.Combine(utilFolder, x360dll), Path.Combine(linkBinFolder, "xinput1_3.dll"));
+                        }
+
                         ProcessStartInfo startInfo = new ProcessStartInfo();
                         startInfo.UseShellExecute = true;
                         startInfo.WorkingDirectory = Path.GetDirectoryName(exePath);
@@ -706,8 +715,7 @@ namespace Nucleus.Gaming
                         Process util = Process.Start(startInfo);
                         util.WaitForExit();
                     }
-
-                    if(i>0)
+                    else
                     {
                         if (File.Exists(Path.Combine(linkBinFolder, "x360ce.ini")))
                         {
