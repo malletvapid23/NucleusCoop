@@ -211,7 +211,6 @@ namespace StartGame
 
                 if (isHook || renameMutex || setWindow)
                 {
-
                     var targetsBytes = Encoding.Unicode.GetBytes(mutexToRename);
                     int targetsBytesLength = targetsBytes.Length;
                     int size = 7 + targetsBytesLength;
@@ -466,7 +465,7 @@ namespace StartGame
                     }
                     ConsoleU.WriteLine("Extra arguments:" + argument, Palette.Feedback);
 
-                    string[] splited = (arg + argument).Split(':');
+                    string[] splited = (arg + argument).Split(new string[] { "|::|" }, StringSplitOptions.None);
                     string key = splited[0].ToLower();
 
                     if (key.Contains("monitors"))
@@ -521,7 +520,7 @@ namespace StartGame
                     }
                     else if (key.Contains("mutex"))
                     {
-                        string[] mutex = splited[1].Split(';');
+                        string[] mutex = splited[1].Split(new string[] { "|==|"}, StringSplitOptions.None );
                         ConsoleU.WriteLine("Trying to kill mutexes", Palette.Wait);
                         for (int j = 0; j < mutex.Length; j++)
                         {

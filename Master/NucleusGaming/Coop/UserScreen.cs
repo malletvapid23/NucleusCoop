@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -15,6 +16,8 @@ namespace Nucleus.Gaming.Coop
 
         public Rectangle display;
         public bool vertical;
+
+        private readonly IniFile ini = new Gaming.IniFile(Path.Combine(Directory.GetCurrentDirectory(), "Settings.ini"));
 
         public Rectangle SwapTypeBounds
         {
@@ -61,6 +64,8 @@ namespace Nucleus.Gaming.Coop
                     return 8;
                 case UserScreenType.SixteenPlayers:
                     return 16;
+                case UserScreenType.Custom:
+                    return int.Parse(ini.IniReadValue("CustomLayout", "MaxPlayers"));
                 default:
                     return -1;
             }

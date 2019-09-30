@@ -105,6 +105,12 @@ namespace Nucleus.Gaming
         //public int FakeFocusInterval;
         public bool ResetWindows;
         public bool PartialMutexSearch;
+        public bool UseGoldberg;
+        public string OrigSteamDllPath;
+        public bool GoldbergNeedSteamInterface;
+        public bool XboxOneControllerFix;
+        public bool UseForceBindIP;
+        public string XInputPlusDll;
 
         public Type HandlerType
         {
@@ -214,9 +220,9 @@ namespace Nucleus.Gaming
         {
             string result;
             if (Environment.Is64BitOperatingSystem)
-                result = (string)Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432Node\Valve\Steam", "Language", null);
+                result = (string)Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432Node\Valve\Steam", "Language", "english");
             else
-                result = (string)Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\Valve\Steam", "Language", null);
+                result = (string)Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\Valve\Steam", "Language", "english");
 
             return result;
         }

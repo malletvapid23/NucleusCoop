@@ -192,7 +192,7 @@ NTSTATUS HookInstall(LPCSTR moduleHandle, LPCSTR proc, void* callBack)
 	LPCWSTR moduleHandlew = A2W(moduleHandle);
 
 	std::ofstream outfile;
-	outfile.open("error-log.txt", std::ios_base::app);
+
 
 	// Perform hooking
 	HOOK_TRACE_INFO hHook = { NULL }; // keep track of our hook
@@ -205,6 +205,7 @@ NTSTATUS HookInstall(LPCSTR moduleHandle, LPCSTR proc, void* callBack)
 		&hHook);
 	if (FAILED(result))
 	{
+		outfile.open("error-log.txt", std::ios_base::app);
 		outfile << "error installing hook: " << proc << ", error msg: " << (LPCWSTR)RtlGetLastErrorString() << "\n";
 	}
 	else
@@ -216,6 +217,7 @@ NTSTATUS HookInstall(LPCSTR moduleHandle, LPCSTR proc, void* callBack)
 		// Disable the hook for the provided threadIds, enable for all others
 		LhSetExclusiveACL(ACLEntries, 1, &hHook);
 
+		//outfile.open("error-log.txt", std::ios_base::app);
 		//outfile << "hWnd: " << (INT)hWnd << ", hook: " << proc << ", in module: " << moduleHandle << ", result: " << result << "\n";
 	}
 
@@ -235,7 +237,7 @@ void installFindMutexHooks(LPCWSTR targets)
 
 	{
 		std::wstring target_s(targets);
-		std::wstring splitter = L";";
+		std::wstring splitter = L"|==|";
 		unsigned int startIndex = 0;
 		unsigned int endIndex = 0;
 

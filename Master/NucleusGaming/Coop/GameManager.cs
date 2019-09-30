@@ -70,7 +70,7 @@ namespace Nucleus.Gaming
         /// <returns></returns>
         public bool AnyGame(string gameExe)
         {
-            return Games.Values.Any(c => c.ExecutableName == gameExe);
+            return Games.Values.Any(c => c.ExecutableName.ToLower() == gameExe);
         }
 
         /// <summary>
@@ -84,7 +84,7 @@ namespace Nucleus.Gaming
             string fileName = Path.GetFileName(exePath).ToLower();
             string dir = Path.GetDirectoryName(exePath);
 
-            var possibilities = Games.Values.Where(c => string.Equals(c.ExecutableName, fileName, StringComparison.OrdinalIgnoreCase));
+            var possibilities = Games.Values.Where(c => string.Equals(c.ExecutableName.ToLower(), fileName, StringComparison.OrdinalIgnoreCase));
 
             foreach (GenericGameInfo game in possibilities)
             {
@@ -128,7 +128,7 @@ namespace Nucleus.Gaming
             string fileName = Path.GetFileName(exePath).ToLower();
             string dir = Path.GetDirectoryName(exePath);
 
-            var possibilities = Games.Values.Where(c => c.ExecutableName == fileName);
+            var possibilities = Games.Values.Where(c => c.ExecutableName.ToLower() == fileName);
             List<GenericGameInfo> games = new List<GenericGameInfo>();
 
             foreach (GenericGameInfo game in possibilities)
@@ -197,7 +197,7 @@ namespace Nucleus.Gaming
             string fileName = Path.GetFileName(exePath).ToLower();
             string dir = Path.GetDirectoryName(exePath);
 
-            var possibilities = Games.Values.Where(c => c.ExecutableName == fileName);
+            var possibilities = Games.Values.Where(c => c.ExecutableName.ToLower() == fileName);
 
             foreach (GenericGameInfo game in possibilities)
             {
@@ -273,17 +273,15 @@ namespace Nucleus.Gaming
                     LogManager.Log("Extracting SmartSteamEmu");
 
                     Directory.CreateDirectory(steamEmu);
-                    string local = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
-                    
                     //using (MemoryStream stream = new MemoryStream(Resources.SmartSteamEmu))
                     //{
-                    using (ZipFile zip1 = ZipFile.Read(Path.Combine(local, "utils\\SmartSteamEmu\\SmartSteamEmu.zip")))
-                    {
-                        foreach (ZipEntry e in zip1)
+                        using (ZipFile zip1 = ZipFile.Read(Path.Combine(GetUtilsPath(), "SmartSteamEmu\\SmartSteamEmu.zip")))
                         {
-                            e.Extract(steamEmu, ExtractExistingFileAction.OverwriteSilently);
+                            foreach (ZipEntry e in zip1)
+                            {
+                                e.Extract(steamEmu, ExtractExistingFileAction.OverwriteSilently);
+                            }
                         }
-                    }
                     //}
                 }
             }
@@ -320,6 +318,12 @@ namespace Nucleus.Gaming
         {
             string local = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
             return Path.Combine(local, "games");
+        }
+
+        public string GetUtilsPath()
+        {
+            string local = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
+            return Path.Combine(local, "utils");
         }
 
         public string GetUserProfilePath()

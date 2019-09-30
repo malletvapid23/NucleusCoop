@@ -47,9 +47,15 @@
             this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripSeparator();
             this.detailsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.deleteToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.openScriptToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.openDataFolderToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.gameNameControl = new Nucleus.Coop.Controls.GameNameControl();
             this.btn_delete = new System.Windows.Forms.Button();
             this.btn_details = new System.Windows.Forms.Button();
+            this.btn_openScript = new System.Windows.Forms.Button();
+            this.btn_open_data = new System.Windows.Forms.Button();
+            this.toolStripMenuItem2 = new System.Windows.Forms.ToolStripSeparator();
+            this.changeIconToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.gameContextMenuStrip.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -200,9 +206,13 @@
             this.nullToolStripMenuItem,
             this.toolStripMenuItem1,
             this.detailsToolStripMenuItem,
-            this.deleteToolStripMenuItem});
+            this.deleteToolStripMenuItem,
+            this.openScriptToolStripMenuItem,
+            this.openDataFolderToolStripMenuItem,
+            this.toolStripMenuItem2,
+            this.changeIconToolStripMenuItem});
             this.gameContextMenuStrip.Name = "gameContextMenuStrip";
-            this.gameContextMenuStrip.Size = new System.Drawing.Size(181, 98);
+            this.gameContextMenuStrip.Size = new System.Drawing.Size(181, 170);
             this.gameContextMenuStrip.Opening += new System.ComponentModel.CancelEventHandler(this.GameContextMenuStrip_Opening);
             // 
             // nullToolStripMenuItem
@@ -221,12 +231,28 @@
             this.detailsToolStripMenuItem.Name = "detailsToolStripMenuItem";
             this.detailsToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.detailsToolStripMenuItem.Text = "Details";
+            this.detailsToolStripMenuItem.Click += new System.EventHandler(this.Btn_details_Click);
             // 
             // deleteToolStripMenuItem
             // 
             this.deleteToolStripMenuItem.Name = "deleteToolStripMenuItem";
             this.deleteToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.deleteToolStripMenuItem.Text = "Delete";
+            this.deleteToolStripMenuItem.Click += new System.EventHandler(this.Btn_delete_Click);
+            // 
+            // openScriptToolStripMenuItem
+            // 
+            this.openScriptToolStripMenuItem.Name = "openScriptToolStripMenuItem";
+            this.openScriptToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.openScriptToolStripMenuItem.Text = "Open Script";
+            this.openScriptToolStripMenuItem.Click += new System.EventHandler(this.OpenScriptToolStripMenuItem_Click);
+            // 
+            // openDataFolderToolStripMenuItem
+            // 
+            this.openDataFolderToolStripMenuItem.Name = "openDataFolderToolStripMenuItem";
+            this.openDataFolderToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.openDataFolderToolStripMenuItem.Text = "Open Data Folder";
+            this.openDataFolderToolStripMenuItem.Click += new System.EventHandler(this.OpenDataFolderToolStripMenuItem_Click);
             // 
             // gameNameControl
             // 
@@ -263,10 +289,50 @@
             this.btn_details.Visible = false;
             this.btn_details.Click += new System.EventHandler(this.Btn_details_Click);
             // 
+            // btn_openScript
+            // 
+            this.btn_openScript.Font = new System.Drawing.Font("Segoe UI", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btn_openScript.ForeColor = System.Drawing.Color.Black;
+            this.btn_openScript.Location = new System.Drawing.Point(450, 8);
+            this.btn_openScript.Name = "btn_openScript";
+            this.btn_openScript.Size = new System.Drawing.Size(86, 25);
+            this.btn_openScript.TabIndex = 19;
+            this.btn_openScript.Text = "Open Script";
+            this.btn_openScript.UseVisualStyleBackColor = true;
+            this.btn_openScript.Visible = false;
+            this.btn_openScript.Click += new System.EventHandler(this.Btn_openScript_Click);
+            // 
+            // btn_open_data
+            // 
+            this.btn_open_data.Font = new System.Drawing.Font("Segoe UI", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btn_open_data.ForeColor = System.Drawing.Color.Black;
+            this.btn_open_data.Location = new System.Drawing.Point(450, 39);
+            this.btn_open_data.Name = "btn_open_data";
+            this.btn_open_data.Size = new System.Drawing.Size(86, 25);
+            this.btn_open_data.TabIndex = 20;
+            this.btn_open_data.Text = "Open Data";
+            this.btn_open_data.UseVisualStyleBackColor = true;
+            this.btn_open_data.Visible = false;
+            this.btn_open_data.Click += new System.EventHandler(this.Btn_open_data_Click);
+            // 
+            // toolStripMenuItem2
+            // 
+            this.toolStripMenuItem2.Name = "toolStripMenuItem2";
+            this.toolStripMenuItem2.Size = new System.Drawing.Size(177, 6);
+            // 
+            // changeIconToolStripMenuItem
+            // 
+            this.changeIconToolStripMenuItem.Name = "changeIconToolStripMenuItem";
+            this.changeIconToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.changeIconToolStripMenuItem.Text = "Change Icon";
+            this.changeIconToolStripMenuItem.Click += new System.EventHandler(this.ChangeIconToolStripMenuItem_Click);
+            // 
             // MainForm
             // 
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
             this.ClientSize = new System.Drawing.Size(1054, 701);
+            this.Controls.Add(this.btn_open_data);
+            this.Controls.Add(this.btn_openScript);
             this.Controls.Add(this.btn_details);
             this.Controls.Add(this.btn_delete);
             this.Controls.Add(this.settingsBtn);
@@ -313,5 +379,11 @@
         private System.Windows.Forms.ToolStripSeparator toolStripMenuItem1;
         private System.Windows.Forms.ToolStripMenuItem detailsToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem deleteToolStripMenuItem;
+        private System.Windows.Forms.Button btn_openScript;
+        private System.Windows.Forms.ToolStripMenuItem openScriptToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem openDataFolderToolStripMenuItem;
+        private System.Windows.Forms.Button btn_open_data;
+        private System.Windows.Forms.ToolStripSeparator toolStripMenuItem2;
+        private System.Windows.Forms.ToolStripMenuItem changeIconToolStripMenuItem;
     }
 }

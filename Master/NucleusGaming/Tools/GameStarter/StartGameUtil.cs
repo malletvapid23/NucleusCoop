@@ -32,7 +32,7 @@ namespace Nucleus.Gaming.Tools.GameStarter
 
                 if (i != mutex.Length - 1)
                 {
-                    mu += ";";
+                    mu += "|";
                 }
             }
 
@@ -51,14 +51,13 @@ namespace Nucleus.Gaming.Tools.GameStarter
                 for (int i = 0; i < mutex.Length; i++)
                 {
                     mu += mutex[i];
-
                     if (i != mutex.Length - 1)
                     {
-                        mu += ";";
+                        mu += "|==|";
                     }
                 }
 
-                startInfo.Arguments = "\"proc:" + p.Id.ToString() + "\" \"partialmutex:" + partial + "\" \"mutextype:" + mutexType + "\" \"mutex:" + mu + "\"";
+                startInfo.Arguments = "\"proc|::|" + p.Id.ToString() + "\" \"partialmutex|::|" + partial + "\" \"mutextype|::|" + mutexType + "\" \"mutex|::|" + mu + "\"";
                 startInfo.RedirectStandardOutput = true;
                 startInfo.UseShellExecute = false;
 
@@ -85,11 +84,11 @@ namespace Nucleus.Gaming.Tools.GameStarter
 
                     if (i != mutex.Length - 1)
                     {
-                        mu += ";";
+                        mu += "|==|";
                     }
                 }
 
-                startInfo.Arguments = $"\"proc:{p.Id}\" \"partialmutex:{partial}\" \"mutextype:{mutexType}\" \"output:{mu}\"";
+                startInfo.Arguments = $"\"proc|::|{p.Id}\" \"partialmutex|::|{partial}\" \"mutextype|::|{mutexType}\" \"output|::|{mu}\"";
                 startInfo.RedirectStandardOutput = true;
                 startInfo.UseShellExecute = false;
                 startInfo.CreateNoWindow = true;
@@ -128,7 +127,7 @@ namespace Nucleus.Gaming.Tools.GameStarter
                     workingDir = "|" + workingDir;
                 }
 
-                startInfo.Arguments = "\"" + "hook:" + hook + "\" \"delay:" + delay + "\" \"renamemutex:" + renameMutex + "\" \"mutextorename:" + mutexNames + "\" \"setwindow:" + setWindow + "\" \"game:" + pathToGame + workingDir + ";" + args + "\"";
+                startInfo.Arguments = "\"" + "hook|::|" + hook + "\" \"delay|::|" + delay + "\" \"renamemutex|::|" + renameMutex + "\" \"mutextorename|::|" + mutexNames + "\" \"setwindow|::|" + setWindow + "\" \"game|::|" + pathToGame + workingDir + ";" + args + "\"";
 
                 startInfo.RedirectStandardOutput = true;
                 startInfo.UseShellExecute = false;

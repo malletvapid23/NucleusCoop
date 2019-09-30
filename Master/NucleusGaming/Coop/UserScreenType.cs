@@ -14,6 +14,7 @@ namespace Nucleus.Gaming.Coop
         FourPlayers = 3,
         SixPlayers = 4,
         EightPlayers = 5,
-        SixteenPlayers = 6
+        SixteenPlayers = 6,
+        Custom = 7
     }
 }

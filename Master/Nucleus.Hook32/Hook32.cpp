@@ -106,7 +106,6 @@ NTSTATUS HookInstall(LPCSTR moduleHandle, LPCSTR proc, void* callBack)
 	HOOK_TRACE_INFO hHook = { NULL }; // keep track of our hook
 
 	std::ofstream outfile;
-	outfile.open("error-log.txt", std::ios_base::app);
 
 	// Install the hook
 	NTSTATUS result = LhInstallHook(
@@ -116,6 +115,7 @@ NTSTATUS HookInstall(LPCSTR moduleHandle, LPCSTR proc, void* callBack)
 		&hHook);
 	if (FAILED(result))
 	{
+		outfile.open("error-log.txt", std::ios_base::app);
 		outfile << "error installing hook: " << proc << ", error msg: " << (LPCWSTR)RtlGetLastErrorString() << "\n";
 	}
 	else
@@ -127,6 +127,7 @@ NTSTATUS HookInstall(LPCSTR moduleHandle, LPCSTR proc, void* callBack)
 		// Disable the hook for the provided threadIds, enable for all others
 		LhSetExclusiveACL(ACLEntries, 1, &hHook);
 
+		//outfile.open("error-log.txt", std::ios_base::app);
 		//outfile << "hWnd: " << (INT)hWnd << ", hook: " << proc << ", in module: " << moduleHandle << ", result: " << result << "\n";
 	}
 	outfile.close();

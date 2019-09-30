@@ -931,6 +931,74 @@ namespace Nucleus.Coop
                         }
                     }
                     break;
+                case UserScreenType.Custom:
+                    {
+                        int horLines = int.Parse(ini.IniReadValue("CustomLayout", "HorizontalLines"));
+                        int verLines = int.Parse(ini.IniReadValue("CustomLayout", "VerticalLines"));
+                        int maxPlayers = int.Parse(ini.IniReadValue("CustomLayout", "MaxPlayers"));
+
+                        //if(horLines==0)
+                        //{
+                            horLines++;
+                        //}
+                        //if(verLines==0)
+                        //{
+                            verLines++;
+                        //}
+
+                        int playersUsing = 0;
+                        for (int i = 0; i < players.Count; i++)
+                        {
+                            PlayerInfo p = players[i];
+                            if (p.ScreenIndex == screenIndex)
+                            {
+                                playersUsing++;
+                            }
+                        }
+
+                        if (playersUsing == maxPlayers)
+                        {
+                            return false;
+                        }
+
+                        int halfw = (int)(bounds.Width / (float)verLines);
+                        int halfh = (int)(bounds.Height / (float)horLines);
+
+
+                        for (int x = 0; x < verLines; x++)
+                        {
+                            for (int y = 0; y < horLines; y++)
+                            {
+                                Rectangle area = new Rectangle(bounds.X + (halfw * x), bounds.Y + (halfh * y), halfw, halfh);
+
+                                bool goNext = false;
+                                // check if there's any player with the area's x,y coord
+                                for (int i = 0; i < players.Count; i++)
+                                {
+                                    PlayerInfo p = players[i];
+                                    if (p.ScreenIndex == screenIndex)
+                                    {
+                                        if (p.MonitorBounds.IntersectsWith(area))
+                                        {
+                                            goNext = true;
+                                            break;
+                                        }
+                                    }
+                                }
+
+                                if (goNext)
+                                {
+                                    continue;
+                                }
+                                monitorBounds = area;
+                                int halfwe = (int)(ebounds.Width / (float)verLines);
+                                int halfhe = (int)(ebounds.Height / (float)horLines);
+                                editorBounds = new Rectangle(ebounds.X + (halfwe * x), ebounds.Y + (halfhe * y), halfwe, halfhe);
+                                return true;
+                            }
+                        }
+                    }
+                    break;
             }
             return false;
         }
@@ -1008,7 +1076,7 @@ namespace Nucleus.Coop
                     UserScreen screen = screens[i];
                     if (screen.SwapTypeBounds.Contains(e.Location))
                     {
-                        if (screen.Type == UserScreenType.SixteenPlayers)
+                        if (screen.Type == UserScreenType.Custom)
                         {
                             screen.Type = 0;
                         }
@@ -1317,6 +1385,9 @@ namespace Nucleus.Coop
                         break;
                     case UserScreenType.SixteenPlayers:
                         g.DrawImage(Resources._16players, s.SwapTypeBounds);
+                        break;
+                    case UserScreenType.Custom:
+                        g.DrawImage(Resources.customLayout, s.SwapTypeBounds);
                         break;
                 }
             }

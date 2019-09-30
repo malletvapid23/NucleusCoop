@@ -97,5 +97,17 @@ namespace Nucleus.Gaming
 
         bool PartialMutexSearch { get; }
 
+        bool UseGoldberg { get; }
+
+        string OrigSteamDllPath { get; }
+
+        bool GoldbergNeedSteamInterface { get; }
+
+        bool XboxOneControllerFix { get; }
+
+        bool UseForceBindIP { get; }
+
+        string XInputPlusDll { get; }
+
     }
 }

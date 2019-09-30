@@ -320,6 +320,7 @@
     <None Include="Resources\_6players.bmp" />
     <None Include="Resources\6players.png" />
     <None Include="Resources\8players.png" />
+    <None Include="Resources\customLayout.png" />
     <Content Include="Resources\xinput1_3.dll" />
     <None Include="Resources\xinput1_3_a10_log.dll" />
     <None Include="Resources\xinput1_3_a10_x64.dll" />

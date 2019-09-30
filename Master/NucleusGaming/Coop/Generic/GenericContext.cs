@@ -74,6 +74,13 @@ namespace Nucleus.Gaming
         public bool HideDesktop;
         //public int FakeFocusInterval;
         public bool ResetWindows;
+        public bool UseGoldberg;
+        public string OrigSteamDllPath;
+        public bool GoldbergNeedSteamInterface;
+        public bool XboxOneControllerFix;
+        public bool UseForceBindIP;
+        public string XInputPlusDll;
+
 
         public Type HandlerType
         {
@@ -147,11 +154,43 @@ namespace Nucleus.Gaming
             return parent.GetFolder(folder);
         }
 
-        public string GamepadGuid
+        public string x360ceGamepadGuid
         {
             get
             {
                 return "IG_" + pInfo.GamepadGuid.ToString().Replace("-", string.Empty);
+            }
+        }
+
+        public string GamepadGuid
+        {
+            get
+            {
+                return pInfo.GamepadGuid.ToString();
+            }
+        }
+
+        public int OrigAspectRatio
+        {
+            get
+            {
+                return profile.Screens[pInfo.PlayerID].display.Width / profile.Screens[pInfo.PlayerID].display.Height;
+            }
+        }
+
+        public int OrigWidth
+        {
+            get
+            {
+                return pInfo.ProcessData.HWnd.Size.Width;
+            }
+        }
+
+        public int OrigHeight
+        {
+            get
+            {
+                return profile.Screens[pInfo.PlayerID].display.Height;
             }
         }
 

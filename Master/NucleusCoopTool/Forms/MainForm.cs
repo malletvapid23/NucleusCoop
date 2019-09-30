@@ -14,6 +14,8 @@ using WindowScrape.Constants;
 using System.Runtime.InteropServices;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Microsoft.Win32;
+using System.Text;
 
 namespace Nucleus.Coop
 {
@@ -22,6 +24,8 @@ namespace Nucleus.Coop
     /// </summary>
     public partial class MainForm : BaseForm
     {
+        public string version = "v0.9.7.0 ALPHA";
+
         private Form settingsForm = null;
 
         private int currentStepIndex;
@@ -50,7 +54,7 @@ namespace Nucleus.Coop
         private int TopMost_HotkeyID = 2;
         private int StopSession_HotkeyID = 3;
 
-        public string version = "v0.9.6.1 ALPHA";
+        private readonly IniFile ini = new Gaming.IniFile(Path.Combine(Directory.GetCurrentDirectory(), "Settings.ini"));
 
         private Thread handlerThread;
 
@@ -308,10 +312,28 @@ namespace Nucleus.Coop
         private void GetIcon(object state)
         {
             UserGameInfo game = (UserGameInfo)state;
-            Icon icon = Shell32.GetIcon(game.ExePath, false);
+            Bitmap bmp;
+            string iconPath = ini.IniReadValue("GameIcons", game.Game.GameName);
+            if (!string.IsNullOrEmpty(iconPath))
+            {
+                if(iconPath.EndsWith(".exe"))
+                {
+                    Icon icon = Shell32.GetIcon(iconPath, false);
+                    bmp = icon.ToBitmap();
+                    icon.Dispose();
+                }
+                else
+                {
+                    bmp = new Bitmap(iconPath);
+                }
+            }
+            else
+            {
+                Icon icon = Shell32.GetIcon(game.ExePath, false);
+                bmp = icon.ToBitmap();
+                icon.Dispose();
+            }
 
-            Bitmap bmp = icon.ToBitmap();
-            icon.Dispose();
             game.Icon = bmp;
 
             lock (controls)
@@ -335,6 +357,8 @@ namespace Nucleus.Coop
             {
                 btn_delete.Visible = false;
                 btn_details.Visible = false;
+                btn_openScript.Visible = false;
+                btn_open_data.Visible = false;
                 return;
             }
 
@@ -361,6 +385,10 @@ namespace Nucleus.Coop
             btn_delete.Visible = true;
             btn_details.Location = new Point(384 + (gameNameControl.Width - 100), 8);
             btn_details.Visible = true;
+            btn_openScript.Location = new Point(450 + (gameNameControl.Width - 100), 8);
+            btn_openScript.Visible = true;
+            btn_open_data.Location = new Point(450 + (gameNameControl.Width - 100), 39);
+            btn_open_data.Visible = true;
 
             if (content != null)
             {
@@ -716,7 +744,7 @@ namespace Nucleus.Coop
 
                     if (gameGuid == currentGameInfo.GameGuid && exePath == currentGameInfo.ExePath)
                     {
-                        MessageBox.Show(string.Format("Game Name: {0}\nGame Guid: {1}\nProfiles: {2}\nExe Path: {3}\nScript Filename: {4}", currentGameInfo.Game.GameName, gameGuid, profiles, exePath, currentGameInfo.Game.JsFileName), "Game Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        MessageBox.Show(string.Format("Game Name: {0}\nSteam ID: {1}\nProfiles: {2}\nExe Path: {3}\nScript Filename: {4}\nNucleus Game Data Path: {5}", currentGameInfo.Game.GameName, currentGameInfo.Game.SteamID, profiles, exePath, currentGameInfo.Game.JsFileName, Path.Combine(gameManager.GetAppDataPath(),gameGuid)), "Game Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     }
                 }
             }
@@ -834,6 +862,99 @@ namespace Nucleus.Coop
             if (form.Bounds.Contains(pos))
                 return FindControlAtPoint(form, form.PointToClient(pos));
             return null;
+        }
+
+        private void Btn_openScript_Click(object sender, EventArgs e)
+        {
+            OpenRawGameScript();
+        }
+
+        private void OpenRawGameScript()
+        {
+            var nppDir = (string)Registry.GetValue("HKEY_LOCAL_MACHINE\\SOFTWARE\\Notepad++", null, null);
+            if(nppDir != null)
+            {
+                var nppExePath = Path.Combine(nppDir, "Notepad++.exe");
+                var nppReadmePath = Path.Combine(nppDir, "readme.txt");
+                var sb = new StringBuilder();
+                sb.AppendFormat("\"{0}\" -n{1}", nppReadmePath);
+                Process.Start(nppExePath, sb.ToString());
+            }
+            else
+            {
+                Process.Start("notepad.exe", Path.Combine(gameManager.GetJsGamesPath(), currentGameInfo.Game.JsFileName));
+            }
+        }
+
+        private void OpenScriptToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            OpenRawGameScript();
+        }
+
+        private void Btn_open_data_Click(object sender, EventArgs e)
+        {
+            OpenDataFolder();
+        }
+
+        private void OpenDataFolder()
+        {
+            string path = Path.Combine(gameManager.GetAppDataPath(), currentGameInfo.Game.GUID);
+            if (Directory.Exists(path))
+            {
+                Process.Start(path);
+            }
+            else
+            {
+                MessageBox.Show("No data present for this game.", "No data found", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void OpenDataFolderToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            OpenDataFolder();
+        }
+
+        private void ChangeIconToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            using (OpenFileDialog dlg = new OpenFileDialog())
+            {
+                dlg.Title = "Open Image";
+                dlg.Filter = "All Images Files (*.png;*.jpg;*.jpeg;*.gif;*.bmp;*.tiff;*.tif;*.ico;*.exe)|*.png;*.jpg;*.jpeg;*.gif;*.bmp;*.tiff;*.tif;*.ico;*.exe" +
+                            "|PNG Portable Network Graphics (*.png)|*.png" +
+                            "|JPEG File Interchange Format (*.jpg *.jpeg *jfif)|*.jpg;*.jpeg;*.jfif" +
+                            "|BMP Windows Bitmap (*.bmp)|*.bmp" +
+                            "|TIF Tagged Imaged File Format (*.tif *.tiff)|*.tif;*.tiff" +
+                            "|Icon (*.ico)|*.ico" +
+                            "|Executable (*.exe)|*.exe";
+
+                if (dlg.ShowDialog() == DialogResult.OK)
+                {
+                    //PictureBox PictureBox1 = new PictureBox();
+
+                    // Create a new Bitmap object from the picture file on disk,
+                    // and assign that to the PictureBox.Image property
+                    //PictureBox1.Image = new Bitmap(dlg.FileName);
+
+                    if(dlg.FileName.EndsWith(".exe"))
+                    {
+                        Icon icon = Shell32.GetIcon(dlg.FileName, false);
+
+                        Bitmap bmp = icon.ToBitmap();
+                        icon.Dispose();
+                        currentGameInfo.Icon = bmp;
+                    }
+                    else
+                    {
+                        currentGameInfo.Icon = new Bitmap(dlg.FileName);
+                    }
+                    ini.IniWriteValue("GameIcons", currentGameInfo.Game.GameName, dlg.FileName);
+
+                    GetIcon(currentGameInfo);
+                    //this.Controls.Clear();
+                    //this.InitializeComponent();
+                    RefreshGames();
+                }
+            }
         }
     }
 }

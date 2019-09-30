@@ -8,11 +8,14 @@ using Nucleus.Gaming.Interop;
 using System.Threading;
 using System.Management;
 using System.IO;
+using Nucleus.Gaming;
 
 namespace Nucleus
 {
     public static class ProcessUtil
     {
+        private static readonly IniFile ini = new Gaming.IniFile(Path.Combine(Directory.GetCurrentDirectory(), "Settings.ini"));
+
         public static Process RunOrphanProcess(string path, string arguments = "")
         {
             ProcessStartInfo psi = new System.Diagnostics.ProcessStartInfo();
@@ -28,17 +31,20 @@ namespace Nucleus
         }
         private static void Log(string logMessage)
         {
-            StreamWriter w = new StreamWriter("mutex-debug.txt", true);
-            w.WriteLine($"[{DateTime.Now.ToLongTimeString()} {DateTime.Now.ToLongDateString()}] {logMessage}");
-            w.Dispose();
+            if(ini.IniReadValue("Misc", "MutexLog") == "True")
+            {
+                StreamWriter w = new StreamWriter("mutex-debug.txt", true);
+                w.WriteLine($"[{DateTime.Now.ToLongTimeString()} {DateTime.Now.ToLongDateString()}] {logMessage}");
+                w.Dispose();
+            }
         }
         public static bool KillMutex(Process process, string mutexType, string mutexName, bool partial)
         {
-            //Log(string.Format("Attempting to kill mutex"));
+            Log(string.Format("Attempting to kill mutex"));
             // 4 tries
             for (int i = 1; i < 4; i++)
             {
-                //Log("Attempt #" + i);
+                Log("Attempt #" + i);
                 Console.WriteLine("Loop " + i);
 
                 if(partial)
@@ -50,20 +56,20 @@ namespace Nucleus
 
                         if (!string.IsNullOrWhiteSpace(strObjectName) && strObjectName.Contains(mutexName))
                         {
-                            //Log(string.Format("Killing mutex located at '{0}'", strObjectName));
+                            Log(string.Format("Killing mutex located at '{0}'", strObjectName));
                             IntPtr ipHandle = IntPtr.Zero;
                             if (!Win32API.DuplicateHandle(Process.GetProcessById(handle.ProcessID).Handle, handle.Handle, Win32API.GetCurrentProcess(), out ipHandle, 0, false, Win32API.DUPLICATE_CLOSE_SOURCE))
                             {
-                                //Log(string.Format("DuplicateHandle() failed, error = {0}", Marshal.GetLastWin32Error()));
+                                Log(string.Format("DuplicateHandle() failed, error = {0}", Marshal.GetLastWin32Error()));
                                 Console.WriteLine("DuplicateHandle() failed, error = {0}", Marshal.GetLastWin32Error());
                             }
                             else
                             {
-                                //Log("Mutex was killed successfully");
+                                Log("Mutex was killed successfully");
                                 return true;
                             }
                         }
-                        //Log("----------------END-----------------");
+                        Log("----------------END-----------------");
                     }
                     return true;
                 }
@@ -73,15 +79,14 @@ namespace Nucleus
 
                     if (handles.Count == 0)
                     {
-                        //Log(string.Format("{0} not found in process handles", mutexName));
+                        Log(string.Format("{0} not found in process handles", mutexName));
                         continue;
                     }
 
                     foreach (var handle in handles)
                     {
-                        
                         string strObjectName = Win32Processes.getObjectName(handle, Process.GetProcessById(handle.ProcessID));
-
+                        Log(string.Format("Killing mutex {0}", strObjectName));
                         if (!string.IsNullOrWhiteSpace(strObjectName) && strObjectName.EndsWith(mutexName))
                         {
                             IntPtr ipHandle = IntPtr.Zero;
@@ -91,7 +96,7 @@ namespace Nucleus
                             }
                             else
                             {
-                                //Log("Mutex was killed successfully");
+                                Log("Mutex was killed successfully");
                                 return true;
                             }
                         }
@@ -99,14 +104,14 @@ namespace Nucleus
                     }
                 }
             }
-            //Log("Mutex was not killed");
-            //Log("----------------END-----------------");
+            Log("Mutex was not killed");
+            Log("----------------END-----------------");
             return false;
         }
 
         public static bool MutexExists(Process process, string mutexType, string mutexName, bool partial)
         {
-            //Log(string.Format("Checking if mutex '{0}' of type '{1}' exists in process '{2} (pid {3})'", mutexName,mutexType,process.MainWindowTitle,process.Id));
+            Log(string.Format("Checking if mutex '{0}' of type '{1}' exists in process '{2} (pid {3})'", mutexName,mutexType,process.MainWindowTitle,process.Id));
             // 4 tries
             for (int i = 0; i < 4; i++)
             {
@@ -123,7 +128,7 @@ namespace Nucleus
                             string strObjectName = Win32Processes.getObjectName(handle, Process.GetProcessById(handle.ProcessID));
                             if (!string.IsNullOrWhiteSpace(strObjectName) && strObjectName.Contains(mutexName))
                             {
-                                //Log(string.Format("Found mutex that contains search criteria. Located at {0}", strObjectName));
+                                Log(string.Format("Found mutex that contains search criteria. Located at {0}", strObjectName));
                                 if(!foundHandle)
                                 {
                                     foundHandle = true;
@@ -137,7 +142,13 @@ namespace Nucleus
                     {
                         if (handles.Count > 0)
                         {
-                            //Log("Found at least one mutex that matches");
+                            Log("Found the following mutexes:");
+                            foreach (var handle in handles)
+                            {
+                                string strObjectName = Win32Processes.getObjectName(handle, Process.GetProcessById(handle.ProcessID));
+                                Log(strObjectName);
+                            }
+                            
                             return true;
                         }
                     }

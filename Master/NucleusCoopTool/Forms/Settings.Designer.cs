@@ -29,6 +29,19 @@
         private void InitializeComponent()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form));
+            this.groupBox4 = new System.Windows.Forms.GroupBox();
+            this.mutexLogCheck = new System.Windows.Forms.CheckBox();
+            this.useNicksCheck = new System.Windows.Forms.CheckBox();
+            this.groupBox3 = new System.Windows.Forms.GroupBox();
+            this.label30 = new System.Windows.Forms.Label();
+            this.numMaxPlyrs = new System.Windows.Forms.NumericUpDown();
+            this.numVerDiv = new System.Windows.Forms.NumericUpDown();
+            this.numHorDiv = new System.Windows.Forms.NumericUpDown();
+            this.label29 = new System.Windows.Forms.Label();
+            this.label28 = new System.Windows.Forms.Label();
+            this.label27 = new System.Windows.Forms.Label();
+            this.enableCustomCheckbox = new System.Windows.Forms.CheckBox();
+            this.btn_credits = new System.Windows.Forms.Button();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
@@ -85,7 +98,6 @@
             this.controllerNineNick = new System.Windows.Forms.TextBox();
             this.controllerNineGuid = new System.Windows.Forms.TextBox();
             this.label26 = new System.Windows.Forms.Label();
-            this.useNicksCheck = new System.Windows.Forms.CheckBox();
             this.btn_Refresh = new System.Windows.Forms.Button();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.settingsTopCmb = new System.Windows.Forms.ComboBox();
@@ -102,7 +114,11 @@
             this.settingsCloseHKTxt = new System.Windows.Forms.TextBox();
             this.settingsCloseBtn = new System.Windows.Forms.Button();
             this.settingsSaveBtn = new System.Windows.Forms.Button();
-            this.btn_credits = new System.Windows.Forms.Button();
+            this.groupBox4.SuspendLayout();
+            this.groupBox3.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.numMaxPlyrs)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numVerDiv)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numHorDiv)).BeginInit();
             this.groupBox2.SuspendLayout();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
@@ -110,10 +126,188 @@
             this.groupBox1.SuspendLayout();
             this.SuspendLayout();
             // 
+            // groupBox4
+            // 
+            this.groupBox4.Controls.Add(this.mutexLogCheck);
+            this.groupBox4.Controls.Add(this.useNicksCheck);
+            this.groupBox4.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.groupBox4.ForeColor = System.Drawing.Color.White;
+            this.groupBox4.Location = new System.Drawing.Point(422, 490);
+            this.groupBox4.Name = "groupBox4";
+            this.groupBox4.Size = new System.Drawing.Size(403, 165);
+            this.groupBox4.TabIndex = 23;
+            this.groupBox4.TabStop = false;
+            this.groupBox4.Text = "Miscellaneous";
+            // 
+            // mutexLogCheck
+            // 
+            this.mutexLogCheck.AutoSize = true;
+            this.mutexLogCheck.Location = new System.Drawing.Point(19, 63);
+            this.mutexLogCheck.Name = "mutexLogCheck";
+            this.mutexLogCheck.Size = new System.Drawing.Size(196, 25);
+            this.mutexLogCheck.TabIndex = 0;
+            this.mutexLogCheck.Text = "Enable Mutex debug log";
+            this.mutexLogCheck.UseVisualStyleBackColor = true;
+            // 
+            // useNicksCheck
+            // 
+            this.useNicksCheck.AutoSize = true;
+            this.useNicksCheck.Location = new System.Drawing.Point(19, 32);
+            this.useNicksCheck.Name = "useNicksCheck";
+            this.useNicksCheck.Size = new System.Drawing.Size(340, 25);
+            this.useNicksCheck.TabIndex = 20;
+            this.useNicksCheck.Text = "Use Nicknames In-Game (requires Goldberg)";
+            this.useNicksCheck.UseVisualStyleBackColor = true;
+            // 
+            // groupBox3
+            // 
+            this.groupBox3.Controls.Add(this.label30);
+            this.groupBox3.Controls.Add(this.numMaxPlyrs);
+            this.groupBox3.Controls.Add(this.numVerDiv);
+            this.groupBox3.Controls.Add(this.numHorDiv);
+            this.groupBox3.Controls.Add(this.label29);
+            this.groupBox3.Controls.Add(this.label28);
+            this.groupBox3.Controls.Add(this.label27);
+            this.groupBox3.Controls.Add(this.enableCustomCheckbox);
+            this.groupBox3.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.groupBox3.ForeColor = System.Drawing.Color.White;
+            this.groupBox3.Location = new System.Drawing.Point(421, 12);
+            this.groupBox3.Name = "groupBox3";
+            this.groupBox3.Size = new System.Drawing.Size(403, 472);
+            this.groupBox3.TabIndex = 22;
+            this.groupBox3.TabStop = false;
+            this.groupBox3.Text = "Custom Position Layout";
+            this.groupBox3.Paint += new System.Windows.Forms.PaintEventHandler(this.GroupBox3_Paint);
+            // 
+            // label30
+            // 
+            this.label30.AutoSize = true;
+            this.label30.Font = new System.Drawing.Font("Segoe UI", 12F);
+            this.label30.ForeColor = System.Drawing.Color.White;
+            this.label30.Location = new System.Drawing.Point(16, 195);
+            this.label30.Name = "label30";
+            this.label30.Size = new System.Drawing.Size(68, 21);
+            this.label30.TabIndex = 35;
+            this.label30.Text = "Preview:";
+            this.label30.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            // 
+            // numMaxPlyrs
+            // 
+            this.numMaxPlyrs.BackColor = System.Drawing.SystemColors.ControlDark;
+            this.numMaxPlyrs.Enabled = false;
+            this.numMaxPlyrs.Location = new System.Drawing.Point(254, 144);
+            this.numMaxPlyrs.Maximum = new decimal(new int[] {
+            999,
+            0,
+            0,
+            0});
+            this.numMaxPlyrs.Name = "numMaxPlyrs";
+            this.numMaxPlyrs.ReadOnly = true;
+            this.numMaxPlyrs.Size = new System.Drawing.Size(60, 29);
+            this.numMaxPlyrs.TabIndex = 33;
+            this.numMaxPlyrs.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.numMaxPlyrs.Value = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
+            // 
+            // numVerDiv
+            // 
+            this.numVerDiv.Location = new System.Drawing.Point(254, 109);
+            this.numVerDiv.Maximum = new decimal(new int[] {
+            5,
+            0,
+            0,
+            0});
+            this.numVerDiv.Name = "numVerDiv";
+            this.numVerDiv.ReadOnly = true;
+            this.numVerDiv.Size = new System.Drawing.Size(60, 29);
+            this.numVerDiv.TabIndex = 32;
+            this.numVerDiv.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.numVerDiv.ValueChanged += new System.EventHandler(this.NumVerDiv_ValueChanged);
+            // 
+            // numHorDiv
+            // 
+            this.numHorDiv.Location = new System.Drawing.Point(254, 74);
+            this.numHorDiv.Maximum = new decimal(new int[] {
+            5,
+            0,
+            0,
+            0});
+            this.numHorDiv.Name = "numHorDiv";
+            this.numHorDiv.ReadOnly = true;
+            this.numHorDiv.Size = new System.Drawing.Size(60, 29);
+            this.numHorDiv.TabIndex = 31;
+            this.numHorDiv.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.numHorDiv.ValueChanged += new System.EventHandler(this.NumHorDiv_ValueChanged);
+            // 
+            // label29
+            // 
+            this.label29.AutoSize = true;
+            this.label29.Font = new System.Drawing.Font("Segoe UI", 12F);
+            this.label29.ForeColor = System.Drawing.Color.White;
+            this.label29.Location = new System.Drawing.Point(152, 146);
+            this.label29.Name = "label29";
+            this.label29.Size = new System.Drawing.Size(96, 21);
+            this.label29.TabIndex = 30;
+            this.label29.Text = "Max Players:";
+            this.label29.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            // 
+            // label28
+            // 
+            this.label28.AutoSize = true;
+            this.label28.Font = new System.Drawing.Font("Segoe UI", 12F);
+            this.label28.ForeColor = System.Drawing.Color.White;
+            this.label28.Location = new System.Drawing.Point(86, 111);
+            this.label28.Name = "label28";
+            this.label28.Size = new System.Drawing.Size(162, 21);
+            this.label28.TabIndex = 29;
+            this.label28.Text = "# of Vertical Divisions:";
+            this.label28.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            // 
+            // label27
+            // 
+            this.label27.AutoSize = true;
+            this.label27.Font = new System.Drawing.Font("Segoe UI", 12F);
+            this.label27.ForeColor = System.Drawing.Color.White;
+            this.label27.Location = new System.Drawing.Point(65, 76);
+            this.label27.Name = "label27";
+            this.label27.Size = new System.Drawing.Size(183, 21);
+            this.label27.TabIndex = 28;
+            this.label27.Text = "# of Horizontal Divisions:";
+            this.label27.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            // 
+            // enableCustomCheckbox
+            // 
+            this.enableCustomCheckbox.AutoSize = true;
+            this.enableCustomCheckbox.Checked = true;
+            this.enableCustomCheckbox.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.enableCustomCheckbox.Enabled = false;
+            this.enableCustomCheckbox.Location = new System.Drawing.Point(16, 35);
+            this.enableCustomCheckbox.Name = "enableCustomCheckbox";
+            this.enableCustomCheckbox.Size = new System.Drawing.Size(184, 25);
+            this.enableCustomCheckbox.TabIndex = 0;
+            this.enableCustomCheckbox.Text = "Enable Custom Layout";
+            this.enableCustomCheckbox.UseVisualStyleBackColor = true;
+            // 
+            // btn_credits
+            // 
+            this.btn_credits.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.btn_credits.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btn_credits.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btn_credits.ForeColor = System.Drawing.Color.White;
+            this.btn_credits.Location = new System.Drawing.Point(358, 675);
+            this.btn_credits.Name = "btn_credits";
+            this.btn_credits.Size = new System.Drawing.Size(120, 35);
+            this.btn_credits.TabIndex = 21;
+            this.btn_credits.Text = "Credits";
+            this.btn_credits.UseVisualStyleBackColor = true;
+            this.btn_credits.Click += new System.EventHandler(this.Btn_credits_Click);
+            // 
             // groupBox2
             // 
             this.groupBox2.Controls.Add(this.tabControl1);
-            this.groupBox2.Controls.Add(this.useNicksCheck);
             this.groupBox2.Controls.Add(this.btn_Refresh);
             this.groupBox2.ForeColor = System.Drawing.Color.White;
             this.groupBox2.Location = new System.Drawing.Point(12, 182);
@@ -130,7 +324,7 @@
             this.tabControl1.Location = new System.Drawing.Point(10, 28);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
-            this.tabControl1.Size = new System.Drawing.Size(387, 337);
+            this.tabControl1.Size = new System.Drawing.Size(387, 368);
             this.tabControl1.TabIndex = 30;
             // 
             // tabPage1
@@ -166,7 +360,7 @@
             this.tabPage1.Location = new System.Drawing.Point(4, 30);
             this.tabPage1.Name = "tabPage1";
             this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage1.Size = new System.Drawing.Size(379, 303);
+            this.tabPage1.Size = new System.Drawing.Size(379, 334);
             this.tabPage1.TabIndex = 0;
             this.tabPage1.Text = "Page 1";
             // 
@@ -461,7 +655,7 @@
             this.tabPage2.Location = new System.Drawing.Point(4, 30);
             this.tabPage2.Name = "tabPage2";
             this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage2.Size = new System.Drawing.Size(379, 303);
+            this.tabPage2.Size = new System.Drawing.Size(379, 334);
             this.tabPage2.TabIndex = 1;
             this.tabPage2.Text = "Page 2";
             // 
@@ -723,23 +917,13 @@
             this.label26.Text = "[Slot 9]:";
             this.label26.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             // 
-            // useNicksCheck
-            // 
-            this.useNicksCheck.AutoSize = true;
-            this.useNicksCheck.Location = new System.Drawing.Point(27, 432);
-            this.useNicksCheck.Name = "useNicksCheck";
-            this.useNicksCheck.Size = new System.Drawing.Size(340, 25);
-            this.useNicksCheck.TabIndex = 20;
-            this.useNicksCheck.Text = "Use Nicknames In-Game (requires Goldberg)";
-            this.useNicksCheck.UseVisualStyleBackColor = true;
-            // 
             // btn_Refresh
             // 
             this.btn_Refresh.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.btn_Refresh.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btn_Refresh.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btn_Refresh.ForeColor = System.Drawing.Color.White;
-            this.btn_Refresh.Location = new System.Drawing.Point(142, 383);
+            this.btn_Refresh.Location = new System.Drawing.Point(139, 419);
             this.btn_Refresh.Name = "btn_Refresh";
             this.btn_Refresh.Size = new System.Drawing.Size(120, 37);
             this.btn_Refresh.TabIndex = 16;
@@ -927,7 +1111,7 @@
             this.settingsCloseBtn.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.settingsCloseBtn.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.settingsCloseBtn.ForeColor = System.Drawing.Color.White;
-            this.settingsCloseBtn.Location = new System.Drawing.Point(295, 661);
+            this.settingsCloseBtn.Location = new System.Drawing.Point(499, 675);
             this.settingsCloseBtn.Name = "settingsCloseBtn";
             this.settingsCloseBtn.Size = new System.Drawing.Size(120, 35);
             this.settingsCloseBtn.TabIndex = 9;
@@ -941,7 +1125,7 @@
             this.settingsSaveBtn.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.settingsSaveBtn.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.settingsSaveBtn.ForeColor = System.Drawing.Color.White;
-            this.settingsSaveBtn.Location = new System.Drawing.Point(12, 661);
+            this.settingsSaveBtn.Location = new System.Drawing.Point(217, 675);
             this.settingsSaveBtn.Name = "settingsSaveBtn";
             this.settingsSaveBtn.Size = new System.Drawing.Size(120, 35);
             this.settingsSaveBtn.TabIndex = 8;
@@ -949,26 +1133,14 @@
             this.settingsSaveBtn.UseVisualStyleBackColor = true;
             this.settingsSaveBtn.Click += new System.EventHandler(this.SettingsSaveBtn_Click);
             // 
-            // btn_credits
-            // 
-            this.btn_credits.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.btn_credits.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btn_credits.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btn_credits.ForeColor = System.Drawing.Color.White;
-            this.btn_credits.Location = new System.Drawing.Point(154, 661);
-            this.btn_credits.Name = "btn_credits";
-            this.btn_credits.Size = new System.Drawing.Size(120, 35);
-            this.btn_credits.TabIndex = 21;
-            this.btn_credits.Text = "Credits";
-            this.btn_credits.UseVisualStyleBackColor = true;
-            this.btn_credits.Click += new System.EventHandler(this.Btn_credits_Click);
-            // 
             // Form
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 21F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(50)))), ((int)(((byte)(50)))), ((int)(((byte)(50)))));
-            this.ClientSize = new System.Drawing.Size(432, 708);
+            this.ClientSize = new System.Drawing.Size(837, 722);
+            this.Controls.Add(this.groupBox4);
+            this.Controls.Add(this.groupBox3);
             this.Controls.Add(this.btn_credits);
             this.Controls.Add(this.groupBox2);
             this.Controls.Add(this.groupBox1);
@@ -979,8 +1151,14 @@
             this.MaximizeBox = false;
             this.Name = "Form";
             this.Text = "Settings";
+            this.groupBox4.ResumeLayout(false);
+            this.groupBox4.PerformLayout();
+            this.groupBox3.ResumeLayout(false);
+            this.groupBox3.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.numMaxPlyrs)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numVerDiv)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numHorDiv)).EndInit();
             this.groupBox2.ResumeLayout(false);
-            this.groupBox2.PerformLayout();
             this.tabControl1.ResumeLayout(false);
             this.tabPage1.ResumeLayout(false);
             this.tabPage1.PerformLayout();
@@ -1068,5 +1246,16 @@
         private System.Windows.Forms.TextBox controllerNineGuid;
         private System.Windows.Forms.Label label26;
         private System.Windows.Forms.Button btn_credits;
+        private System.Windows.Forms.GroupBox groupBox3;
+        private System.Windows.Forms.NumericUpDown numMaxPlyrs;
+        private System.Windows.Forms.NumericUpDown numVerDiv;
+        private System.Windows.Forms.NumericUpDown numHorDiv;
+        private System.Windows.Forms.Label label29;
+        private System.Windows.Forms.Label label28;
+        private System.Windows.Forms.Label label27;
+        private System.Windows.Forms.CheckBox enableCustomCheckbox;
+        private System.Windows.Forms.GroupBox groupBox4;
+        private System.Windows.Forms.Label label30;
+        private System.Windows.Forms.CheckBox mutexLogCheck;
     }
 }
