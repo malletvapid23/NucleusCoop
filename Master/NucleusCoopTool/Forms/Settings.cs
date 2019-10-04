@@ -109,9 +109,9 @@ namespace Nucleus.Coop
                 useNicksCheck.Checked = Boolean.Parse(ini.IniReadValue("Misc", "UseNicksInGame"));
             }
 
-            if (ini.IniReadValue("Misc", "MutexLog") != "")
+            if (ini.IniReadValue("Misc", "DebugLog") != "")
             {
-                mutexLogCheck.Checked = Boolean.Parse(ini.IniReadValue("Misc", "MutexLog"));
+                debugLogCheck.Checked = Boolean.Parse(ini.IniReadValue("Misc", "DebugLog"));
             }
 
         }
@@ -181,7 +181,7 @@ namespace Nucleus.Coop
                 }
 
                 ini.IniWriteValue("Misc", "UseNicksInGame", useNicksCheck.Checked.ToString());
-                ini.IniWriteValue("Misc", "MutexLog", mutexLogCheck.Checked.ToString());
+                ini.IniWriteValue("Misc", "DebugLog", debugLogCheck.Checked.ToString());
 
                 //ini.IniWriteValue("CustomLayout", "Enabled", enableCustomCheckbox.Checked.ToString());
                 ini.IniWriteValue("CustomLayout", "HorizontalLines", numHorDiv.Value.ToString());

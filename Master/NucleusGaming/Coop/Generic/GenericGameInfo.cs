@@ -67,7 +67,7 @@ namespace Nucleus.Gaming
         public string WorkingFolder;
         public bool NeedsSteamEmulation;
         public string[] KillMutex;
-        public string KillMutexType;
+        public string KillMutexType = "Mutant";
         public int KillMutexDelay;
         public string LauncherExe;
         public string LauncherTitle;
@@ -103,14 +103,19 @@ namespace Nucleus.Gaming
         public bool HideDesktop;
         //public bool UseAlpha8CustomDll;
         //public int FakeFocusInterval;
-        public bool ResetWindows;
+        //public bool ResetWindows;
         public bool PartialMutexSearch;
         public bool UseGoldberg;
         public string OrigSteamDllPath;
         public bool GoldbergNeedSteamInterface;
         public bool XboxOneControllerFix;
         public bool UseForceBindIP;
-        public string XInputPlusDll;
+        public string[] XInputPlusDll;
+        public string[] CopyCustomUtils;
+        public int PlayersPerInstance;
+        public bool UseDevReorder;
+        public string[] HexEditAllExes;
+        public string[] HexEditExe;
 
         public Type HandlerType
         {

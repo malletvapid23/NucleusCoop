@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Runtime.InteropServices;
+using System.Text;
 using System.Threading;
 using EasyHook;
 
@@ -75,10 +76,14 @@ namespace Nucleus.Inject64
                 int.TryParse(args[i++], out int hWnd);
                 bool.TryParse(args[i++], out bool hookFocus);
                 bool.TryParse(args[i++], out bool hideCursor);
+                bool.TryParse(args[i++], out bool isDebug);
+                string nucleusFolderPath = args[i++];
 
+                var logPath = Encoding.Unicode.GetBytes(nucleusFolderPath);
+                int logPathLength = logPath.Length;
                 //int.TryParse(args[i++], out int InPassThruSize);
 
-                int size = 9;
+                int size = 1024;
                 IntPtr intPtr = Marshal.AllocHGlobal(size);
                 byte[] dataToSend = new byte[size];
 
@@ -87,11 +92,18 @@ namespace Nucleus.Inject64
                 dataToSend[2] = (byte)(hWnd >> 8);
                 dataToSend[3] = (byte)(hWnd);
 
+                dataToSend[6] = isDebug == true ? (byte)1 : (byte)0;
                 dataToSend[7] = hideCursor == true ? (byte)1 : (byte)0;
                 dataToSend[8] = hookFocus == true ? (byte)1 : (byte)0;
 
-                Marshal.Copy(dataToSend, 0, intPtr, size);
-                
+                dataToSend[9] = (byte)(logPathLength >> 24);
+                dataToSend[10] = (byte)(logPathLength >> 16);
+                dataToSend[11] = (byte)(logPathLength >> 8);
+                dataToSend[12] = (byte)logPathLength;
+
+                Array.Copy(logPath, 0, dataToSend, 13, logPathLength);
+
+                Marshal.Copy(dataToSend, 0, intPtr, size);                
 
                 //using (StreamWriter writer = new StreamWriter("error-log.txt", true))
                 //{

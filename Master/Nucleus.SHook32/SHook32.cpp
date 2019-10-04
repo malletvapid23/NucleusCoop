@@ -13,9 +13,19 @@
 #include <map>
 #include <iostream>
 //#include <vector>
+#include <locale>
+#include <codecvt>
+#include <time.h>
+#include <stdio.h>
 using namespace std;
 
 HWND hWnd = 0;
+
+bool IsDebug = false;
+
+std::ofstream outfile;
+std::wstring nucleusFolder;
+std::wstring logFile = L"\\debug-log.txt";
 
 std::mt19937 randomGenerator;
 
@@ -45,6 +55,24 @@ static t_NtOpenEvent NtOpenEvent;
 static t_NtCreateSemaphore NtCreateSemaphore;
 static t_NtOpenSemaphore NtOpenSemaphore;
 
+std::string ws2s(const std::wstring& wstr)
+{
+	using convert_typeX = std::codecvt_utf8<wchar_t>;
+	std::wstring_convert<convert_typeX, wchar_t> converterX;
+
+	return converterX.to_bytes(wstr);
+}
+
+inline std::string date_string()
+{
+	time_t rawtime;
+	std::time(&rawtime);
+	struct tm* tinfo = std::localtime(&rawtime);
+	char buffer[21];
+	strftime(buffer, 21, "%Y-%m-%d %H:%M:%S", tinfo);
+	return "[" + std::string(buffer) + "]";
+}
+
 inline UNICODE_STRING stdWStringToUnicodeString(const std::wstring& str) {
 	UNICODE_STRING unicodeString;
 	DWORD len = 0;
@@ -72,7 +100,12 @@ void updateName(PUNICODE_STRING inputName)
 
 				const std::wstring oldName = inputName->Buffer;
 				const auto newName = oldName + rand;
-
+				if (IsDebug)
+				{
+					outfile.open(nucleusFolder + logFile, std::ios_base::app);
+					outfile << date_string() << "SHOOK32: Mutex function called, renaming mutex " << ws2s(oldName) << " to " << ws2s(newName) << "\n";
+					outfile.close();
+				}
 				pair.second = newName;
 			}
 
@@ -192,7 +225,7 @@ NTSTATUS HookInstall(LPCSTR moduleHandle, LPCSTR proc, void* callBack)
 	// Perform hooking
 	HOOK_TRACE_INFO hHook = { NULL }; // keep track of our hook
 
-	std::ofstream outfile;
+	
 
 		// Install the hook
 	NTSTATUS result = LhInstallHook(
@@ -202,8 +235,11 @@ NTSTATUS HookInstall(LPCSTR moduleHandle, LPCSTR proc, void* callBack)
 		&hHook);
 	if (FAILED(result))
 	{
-		outfile.open("error-log.txt", std::ios_base::app);
-		outfile << "error installing hook: " << proc << ", error msg: " << (LPCWSTR)RtlGetLastErrorString() << "\n";
+		if (IsDebug)
+		{
+			outfile.open(nucleusFolder + logFile, std::ios_base::app);
+			outfile << date_string() << "SHOOK32: Error installing " << proc << " hook, error msg: " << RtlGetLastErrorString() << "\n";
+		}
 	}
 	else
 	{
@@ -214,10 +250,13 @@ NTSTATUS HookInstall(LPCSTR moduleHandle, LPCSTR proc, void* callBack)
 		// Disable the hook for the provided threadIds, enable for all others
 		LhSetExclusiveACL(ACLEntries, 1, &hHook);
 
-		//outfile.open("error-log.txt", std::ios_base::app);
-		//outfile << "hWnd: " << (INT)hWnd << ", hook: " << proc << ", in module: " << moduleHandle << ", result: " << result << "\n";
+		if (IsDebug)
+		{
+			outfile.open(nucleusFolder + logFile, std::ios_base::app);
+			outfile << date_string() << "SHOOK32: Successfully installed " << proc << " hook, in module: " << moduleHandle << ", result: " << result << "\n";
+		}
 	}
-
+	outfile.close();
 
 	return result;
 }
@@ -242,6 +281,12 @@ void installFindMutexHooks(LPCWSTR targets)
 		{
 			std::wstring sub = target_s.substr(startIndex, endIndex - startIndex);
 			std::string s(sub.begin(), sub.end());
+			if (IsDebug)
+			{
+				outfile.open(nucleusFolder + logFile, std::ios_base::app);
+				outfile << date_string() << "SHOOK32: Rename mutex, adding search term: " << ws2s(sub) << "\n";
+				outfile.close();
+			}
 			ADD_SEARCH_TERM(sub);
 			startIndex = endIndex + splitter.size();
 		}
@@ -250,6 +295,12 @@ void installFindMutexHooks(LPCWSTR targets)
 		{
 			//No splitters in string
 			std::wstring sub = target_s.substr(startIndex);
+			if (IsDebug)
+			{
+				outfile.open(nucleusFolder + logFile, std::ios_base::app);
+				outfile << date_string() << "SHOOK32: Rename mutex, adding search term: " << ws2s(sub) << "\n";
+				outfile.close();
+			}
 			ADD_SEARCH_TERM(sub);
 		}
 	}
@@ -271,7 +322,6 @@ void installFindMutexHooks(LPCWSTR targets)
 
 #undef GET_NT_PROC
 
-
 	//Hooks
 	HookInstall("ntdll.dll", "NtCreateMutant", NtCreateMutant_Hook);
 	HookInstall("ntdll.dll", "NtOpenMutant", NtOpenMutant_Hook);
@@ -282,6 +332,12 @@ void installFindMutexHooks(LPCWSTR targets)
 	HookInstall("ntdll.dll", "NtCreateSemaphore", NtCreateSemaphore_Hook);
 	HookInstall("ntdll.dll", "NtOpenSemaphore", NtOpenSemaphore_Hook);
 
+	if (IsDebug)
+	{
+		outfile.open(nucleusFolder + logFile, std::ios_base::app);
+		outfile << date_string() << "SHOOK32: Hook injection complete\n";
+		outfile.close();
+	}
 	RhWakeUpProcess();
 }
 
@@ -298,35 +354,79 @@ void __stdcall NativeInjectionEntryPoint(REMOTE_ENTRY_INFO* inRemoteInfo)
 	const bool HookWindow = data[0] == 1;
 	const bool RenameMutex = data[1] == 1;
 	const bool SetWindow = data[2] == 1;
+	IsDebug = data[3] == 1;
+
+	const size_t pathLength = (data[4] << 24) + (data[5] << 16) + (data[6] << 8) + data[7];
+	auto nucleusFolderPath = static_cast<PWSTR>(malloc(pathLength + sizeof(WCHAR)));
+	memcpy(nucleusFolderPath, &data[12], pathLength);
+	nucleusFolderPath[pathLength / sizeof(WCHAR)] = '\0';
+
+	nucleusFolder = nucleusFolderPath;
+
+	if (IsDebug)
+	{
+		outfile.open(nucleusFolder + logFile, std::ios_base::app);
+		outfile << date_string() << "SHOOK32: Starting hook injection, HookWindow: " << HookWindow << " RenameMutex: " << RenameMutex << " SetWindow: " << SetWindow << "\n";
+		outfile.close();
+	}
 
 	if (SetWindow)
 	{
+		if (IsDebug)
+		{
+			outfile.open(nucleusFolder + logFile, std::ios_base::app);
+			outfile << date_string() << "SHOOK32: Injecting SetWindow hook\n";
+			outfile.close();
+		}
 		HookInstall("user32", "SetWindowPos", SetWindowPos_Hook);
 		if (!HookWindow && !RenameMutex)
 		{
+			if (IsDebug)
+			{
+				outfile.open(nucleusFolder + logFile, std::ios_base::app);
+				outfile << date_string() << "SHOOK32: Hook injection complete\n";
+				outfile.close();
+			}
 			RhWakeUpProcess();
 		}
 	}
 
 	if (HookWindow)
 	{
+		if (IsDebug)
+		{
+			outfile.open(nucleusFolder + logFile, std::ios_base::app);
+			outfile << date_string() << "SHOOK32: Injecting HookWindow hooks\n";
+			outfile.close();
+		}
 		HookInstall("user32", "FindWindowA", FindWindow_Hook);
 		HookInstall("user32", "FindWindowW", FindWindow_Hook);
 		HookInstall("user32", "FindWindowExA", FindWindowEx_Hook);
 		HookInstall("user32", "FindWindowExW", FindWindowEx_Hook);
-
 		HookInstall("user32", "EnumWindows", EnumWindows_Hook);
 		if (!RenameMutex)
 		{
+			if (IsDebug)
+			{
+				outfile.open(nucleusFolder + logFile, std::ios_base::app);
+				outfile << date_string() << "SHOOK32: Hook injection complete\n";
+				outfile.close();
+			}
 			RhWakeUpProcess();
 		}
 	}
 
 	if (RenameMutex)
 	{
-		const size_t targetsLength = (data[3] << 24) + (data[4] << 16) + (data[5] << 8) + data[6];
+		if (IsDebug)
+		{
+			outfile.open(nucleusFolder + logFile, std::ios_base::app);
+			outfile << date_string() << "SHOOK32: Injecting RenameMutex hooks\n";
+			outfile.close();
+		}
+		const size_t targetsLength = (data[8] << 24) + (data[9] << 16) + (data[10] << 8) + data[11];
 		auto targets = static_cast<PWSTR>(malloc(targetsLength + sizeof(WCHAR)));
-		memcpy(targets, &data[7], targetsLength);
+		memcpy(targets, &data[13 + pathLength], targetsLength);
 		targets[targetsLength / sizeof(WCHAR)] = '\0';
 		installFindMutexHooks(targets);
 	}

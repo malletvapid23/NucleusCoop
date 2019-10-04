@@ -30,7 +30,7 @@
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form));
             this.groupBox4 = new System.Windows.Forms.GroupBox();
-            this.mutexLogCheck = new System.Windows.Forms.CheckBox();
+            this.debugLogCheck = new System.Windows.Forms.CheckBox();
             this.useNicksCheck = new System.Windows.Forms.CheckBox();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
             this.label30 = new System.Windows.Forms.Label();
@@ -128,7 +128,7 @@
             // 
             // groupBox4
             // 
-            this.groupBox4.Controls.Add(this.mutexLogCheck);
+            this.groupBox4.Controls.Add(this.debugLogCheck);
             this.groupBox4.Controls.Add(this.useNicksCheck);
             this.groupBox4.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.groupBox4.ForeColor = System.Drawing.Color.White;
@@ -141,13 +141,13 @@
             // 
             // mutexLogCheck
             // 
-            this.mutexLogCheck.AutoSize = true;
-            this.mutexLogCheck.Location = new System.Drawing.Point(19, 63);
-            this.mutexLogCheck.Name = "mutexLogCheck";
-            this.mutexLogCheck.Size = new System.Drawing.Size(196, 25);
-            this.mutexLogCheck.TabIndex = 0;
-            this.mutexLogCheck.Text = "Enable Mutex debug log";
-            this.mutexLogCheck.UseVisualStyleBackColor = true;
+            this.debugLogCheck.AutoSize = true;
+            this.debugLogCheck.Location = new System.Drawing.Point(19, 63);
+            this.debugLogCheck.Name = "mutexLogCheck";
+            this.debugLogCheck.Size = new System.Drawing.Size(155, 25);
+            this.debugLogCheck.TabIndex = 0;
+            this.debugLogCheck.Text = "Enable Debug Log";
+            this.debugLogCheck.UseVisualStyleBackColor = true;
             // 
             // useNicksCheck
             // 
@@ -1256,6 +1256,6 @@
         private System.Windows.Forms.CheckBox enableCustomCheckbox;
         private System.Windows.Forms.GroupBox groupBox4;
         private System.Windows.Forms.Label label30;
-        private System.Windows.Forms.CheckBox mutexLogCheck;
+        private System.Windows.Forms.CheckBox debugLogCheck;
     }
 }

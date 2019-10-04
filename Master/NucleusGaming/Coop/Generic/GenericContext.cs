@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Xml;
@@ -79,8 +80,11 @@ namespace Nucleus.Gaming
         public bool GoldbergNeedSteamInterface;
         public bool XboxOneControllerFix;
         public bool UseForceBindIP;
-        public string XInputPlusDll;
-
+        public string[] XInputPlusDll;
+        public string[] CopyCustomUtils;
+        public int PlayersPerInstance;
+        public bool UseDevReorder;
+        //public string[] HexEditExe;
 
         public Type HandlerType
         {
@@ -143,6 +147,31 @@ namespace Nucleus.Gaming
 
             bHasKeyboardPlayer = hasKeyboard;
         }
+
+        //public void HexEditExe(string[] values)
+        //{
+        //    //if (gen.HexEditExe?.Length > 0)
+        //    //{
+        //    using (StreamWriter writer = new StreamWriter("important.txt", true))
+        //    {
+        //        writer.WriteLine("ExePath: " + ExePath + " Folder.InstancedGameFolder: " + parent.GetFolder(Folder.InstancedGameFolder) + " parent.exePath: " + parent.exePath + " getdirname: " + Path.GetDirectoryName(Assembly.GetEntryAssembly().Location));
+        //    }
+        //    foreach (string asciiValues in values)
+        //    {
+        //        if (File.Exists(Path.Combine(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location) + "\\Data\\45770\\Instance0", "deadrising2otr-ORIG.exe")))
+        //        {
+        //            File.Delete(Path.Combine(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location) + "\\Data\\45770\\Instance0", "deadrising2otr-ORIG.exe"));
+        //        }
+
+        //        File.Move(Path.Combine(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location) + "\\Data\\45770\\Instance0", "deadrising2otr.exe"), Path.Combine(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location) + "\\Data\\45770\\Instance0", "deadrising2otr-ORIG.exe"));
+        //        string[] splitValues = asciiValues.Split('|');
+        //        if (splitValues.Length > 1)
+        //        {
+        //            PatchFile(Path.Combine(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location) + "\\Data\\45770\\Instance0", "deadrising2otr-ORIG.exe"), Path.Combine(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location) + "\\Data\\45770\\Instance0", "deadrising2otr.exe"), splitValues[0], splitValues[1]);
+        //        }
+        //    }
+        //    //}
+        //}
 
         public bool HasKeyboardPlayer()
         {
@@ -554,6 +583,54 @@ namespace Nucleus.Gaming
         {
             // Read file bytes.
             byte[] fileContent = File.ReadAllBytes(originalFile);
+
+            int patchCount = 0;
+            // Detect and patch file.
+            for (int p = 0; p < fileContent.Length; p++)
+            {
+                if (p + patchFind.Length > fileContent.Length)
+                    continue;
+                var toContinue = false;
+                for (int i = 0; i < patchFind.Length; i++)
+                {
+                    if (patchFind[i] != fileContent[p + i])
+                    {
+                        toContinue = true;
+                        break;
+                    }
+                }
+                if (toContinue) continue;
+
+                patchCount++;
+                if (patchCount > 1)
+                {
+                    LogManager.Log("PatchFind pattern is not unique in " + originalFile);
+                }
+                else
+                {
+                    for (int w = 0; w < patchReplace.Length; w++)
+                    {
+                        fileContent[p + w] = patchReplace[w];
+                    }
+                }
+            }
+
+            if (patchCount == 0)
+            {
+                LogManager.Log("PatchFind pattern was not found in " + originalFile);
+            }
+
+            // Save it to another location.
+            File.WriteAllBytes(patchedFile, fileContent);
+        }
+
+        public void PatchFile(string originalFile, string patchedFile, string spatchFind, string spatchReplace)
+        {
+            // Read file bytes.
+            byte[] fileContent = File.ReadAllBytes(originalFile);
+
+            byte[] patchFind = Encoding.ASCII.GetBytes(spatchFind);
+            byte[] patchReplace = Encoding.ASCII.GetBytes(spatchReplace);
 
             int patchCount = 0;
             // Detect and patch file.

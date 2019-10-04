@@ -40,24 +40,38 @@ namespace Nucleus.Inject32
                 bool.TryParse(args[i++], out bool renameMutex);
                 string mutexToRename = args[i++];
                 bool.TryParse(args[i++], out bool setWindow);
+                bool.TryParse(args[i++], out bool isDebug);
+                string nucleusFolderPath = args[i++];
 
                 //IntPtr InPassThruBuffer = Marshal.StringToHGlobalUni(args[i++]);
                 //uint.TryParse(args[i++], out uint InPassThruSize);
 
+                var logPath = Encoding.Unicode.GetBytes(nucleusFolderPath);
+                int logPathLength = logPath.Length;
+
                 var targetsBytes = Encoding.Unicode.GetBytes(mutexToRename);
                 int targetsBytesLength = targetsBytes.Length;
-                int size = 7 + targetsBytesLength;
+
+                int size = 1024;
                 var data = new byte[size];
                 data[0] = isHook == true ? (byte)1 : (byte)0;
                 data[1] = renameMutex == true ? (byte)1 : (byte)0;
                 data[2] = setWindow == true ? (byte)1 : (byte)0;
+                data[3] = isDebug == true ? (byte)1 : (byte)0;
 
-                data[3] = (byte)(targetsBytesLength >> 24);
-                data[4] = (byte)(targetsBytesLength >> 16);
-                data[5] = (byte)(targetsBytesLength >> 8);
-                data[6] = (byte)targetsBytesLength;
+                data[4] = (byte)(logPathLength >> 24);
+                data[5] = (byte)(logPathLength >> 16);
+                data[6] = (byte)(logPathLength >> 8);
+                data[7] = (byte)logPathLength;
 
-                Array.Copy(targetsBytes, 0, data, 7, targetsBytesLength);
+                data[8] = (byte)(targetsBytesLength >> 24);
+                data[9] = (byte)(targetsBytesLength >> 16);
+                data[10] = (byte)(targetsBytesLength >> 8);
+                data[11] = (byte)targetsBytesLength;
+
+                Array.Copy(logPath, 0, data, 12, logPathLength);
+
+                Array.Copy(targetsBytes, 0, data, 13 + logPathLength, targetsBytesLength);
 
                 IntPtr ptr = Marshal.AllocHGlobal(size);
                 Marshal.Copy(data, 0, ptr, size);
@@ -104,21 +118,38 @@ namespace Nucleus.Inject32
                 bool.TryParse(args[i++], out bool renameMutex);
                 string mutexToRename = args[i++];
                 bool.TryParse(args[i++], out bool setWindow);
+                bool.TryParse(args[i++], out bool isDebug);
+                string nucleusFolderPath = args[i++];
+
+                //IntPtr InPassThruBuffer = Marshal.StringToHGlobalUni(args[i++]);
+                //uint.TryParse(args[i++], out uint InPassThruSize);
+
+                var logPath = Encoding.Unicode.GetBytes(nucleusFolderPath);
+                int logPathLength = logPath.Length;
 
                 var targetsBytes = Encoding.Unicode.GetBytes(mutexToRename);
                 int targetsBytesLength = targetsBytes.Length;
-                int size = 7 + targetsBytesLength;
+
+                int size = 1024;
                 var data = new byte[size];
                 data[0] = isHook == true ? (byte)1 : (byte)0;
                 data[1] = renameMutex == true ? (byte)1 : (byte)0;
                 data[2] = setWindow == true ? (byte)1 : (byte)0;
+                data[3] = isDebug == true ? (byte)1 : (byte)0;
 
-                data[3] = (byte)(targetsBytesLength >> 24);
-                data[4] = (byte)(targetsBytesLength >> 16);
-                data[5] = (byte)(targetsBytesLength >> 8);
-                data[6] = (byte)targetsBytesLength;
+                data[4] = (byte)(logPathLength >> 24);
+                data[5] = (byte)(logPathLength >> 16);
+                data[6] = (byte)(logPathLength >> 8);
+                data[7] = (byte)logPathLength;
 
-                Array.Copy(targetsBytes, 0, data, 7, targetsBytesLength);
+                data[8] = (byte)(targetsBytesLength >> 24);
+                data[9] = (byte)(targetsBytesLength >> 16);
+                data[10] = (byte)(targetsBytesLength >> 8);
+                data[11] = (byte)targetsBytesLength;
+
+                Array.Copy(logPath, 0, data, 12, logPathLength);
+
+                Array.Copy(targetsBytes, 0, data, 13 + logPathLength, targetsBytesLength);
 
                 IntPtr ptr = Marshal.AllocHGlobal(size);
                 Marshal.Copy(data, 0, ptr, size);

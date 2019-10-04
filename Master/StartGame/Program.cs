@@ -32,7 +32,12 @@ namespace StartGame
 
         private static string mutexToRename;
 
+        private static bool isDebug;
+        private static string nucleusFolderPath;
+
         private static int pOutPID = 0;
+
+        private static readonly IniFile ini = new Nucleus.Gaming.IniFile(Path.Combine(Directory.GetCurrentDirectory(), "Settings.ini"));
 
         [DllImport("EasyHook64.dll", CharSet = CharSet.Ansi)]
         private static extern int RhCreateAndInject(
@@ -178,10 +183,23 @@ namespace StartGame
             }
         }
 
+        static void Log(string logMessage)
+        {
+            if (ini.IniReadValue("Misc", "DebugLog") == "True")
+            {
+                using (StreamWriter writer = new StreamWriter("debug-log.txt", true))
+                {
+                    writer.WriteLine($"[{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}]STARTGAME: {logMessage}");
+                    writer.Close();
+                }
+            }
+        }
+
         static void StartGame(string path, string args = "", string workingDir = null)
         {
             System.IO.Stream str = new System.IO.MemoryStream();
             GenericGameInfo gen = new GenericGameInfo(null, null, str);
+            bool regMethod = false;
 
             if (!Path.IsPathRooted(path))
             {
@@ -200,31 +218,42 @@ namespace StartGame
                 startInfo.WorkingDirectory = workingDir;
             }
 
-#if RELEASE
+
             try
-#endif
             {
                 //proc = Process.Start(startInfo);
                 string currDir = Directory.GetCurrentDirectory();
- 
+
                 //bool is64 = EasyHook.RemoteHooking.IsX64Process((int)pi.dwProcessId);
 
                 if (isHook || renameMutex || setWindow)
                 {
                     var targetsBytes = Encoding.Unicode.GetBytes(mutexToRename);
                     int targetsBytesLength = targetsBytes.Length;
-                    int size = 7 + targetsBytesLength;
+
+                    var logPath = Encoding.Unicode.GetBytes(nucleusFolderPath);
+                    int logPathLength = logPath.Length;
+
+                    int size = 1024;
                     var data = new byte[size];
                     data[0] = isHook == true ? (byte)1 : (byte)0;
                     data[1] = renameMutex == true ? (byte)1 : (byte)0;
                     data[2] = setWindow == true ? (byte)1 : (byte)0;
+                    data[3] = isDebug == true ? (byte)1 : (byte)0;
 
-                    data[3] = (byte)(targetsBytesLength >> 24);
-                    data[4] = (byte)(targetsBytesLength >> 16);
-                    data[5] = (byte)(targetsBytesLength >> 8);
-                    data[6] = (byte)targetsBytesLength;
+                    data[4] = (byte)(logPathLength >> 24);
+                    data[5] = (byte)(logPathLength >> 16);
+                    data[6] = (byte)(logPathLength >> 8);
+                    data[7] = (byte)logPathLength;
 
-                    Array.Copy(targetsBytes, 0, data, 7, targetsBytesLength);
+                    data[8] = (byte)(targetsBytesLength >> 24);
+                    data[9] = (byte)(targetsBytesLength >> 16);
+                    data[10] = (byte)(targetsBytesLength >> 8);
+                    data[11] = (byte)targetsBytesLength;
+
+                    Array.Copy(logPath, 0, data, 12, logPathLength);
+
+                    Array.Copy(targetsBytes, 0, data, 13 + logPathLength, targetsBytesLength);
 
                     IntPtr ptr = Marshal.AllocHGlobal(size);
                     Marshal.Copy(data, 0, ptr, size);
@@ -258,7 +287,7 @@ namespace StartGame
                                 injstartInfo.FileName = injectorPath;
                                 object[] injargs = new object[]
                                 {
-                                    0, path, args, 0, 0, Path.Combine(currDir, "Nucleus.SHook32.dll"), null, isHook, renameMutex, mutexToRename, setWindow
+                                    0, path, args, 0, 0, Path.Combine(currDir, "Nucleus.SHook32.dll"), null, isHook, renameMutex, mutexToRename, setWindow, isDebug, nucleusFolderPath
                                 };
                                 var sbArgs = new StringBuilder();
                                 foreach (object arg in injargs)
@@ -308,6 +337,8 @@ namespace StartGame
                     }
                     else // delay method
                     {
+                        Log("Starting game using delay method");
+
                         string directoryPath = Path.GetDirectoryName(path);
                         STARTUPINFO si = new STARTUPINFO();
                         PROCESS_INFORMATION pi = new PROCESS_INFORMATION();
@@ -342,7 +373,7 @@ namespace StartGame
                                 injstartInfo.FileName = injectorPath;
                                 object[] injargs = new object[]
                                 {
-                                    1, (int)pi.dwProcessId, 0, 0, Path.Combine(currDir, "Nucleus.SHook32.dll"), null, isHook, renameMutex, mutexToRename, setWindow
+                                    1, (int)pi.dwProcessId, 0, 0, Path.Combine(currDir, "Nucleus.SHook32.dll"), null, isHook, renameMutex, mutexToRename, setWindow, isDebug, nucleusFolderPath
                                 };
                                 var sbArgs = new StringBuilder();
                                 foreach (object arg in injargs)
@@ -385,23 +416,41 @@ namespace StartGame
                 else // regular method (no hooks)
                 {
                     proc = Process.Start(startInfo);
-
+                    
                     pOutPID = proc.Id;
-                }                
+                    regMethod = true;
+                    
+                }
 
+
+                
                 ConsoleU.WriteLine("Game started, process ID:" + pOutPID /*Marshal.ReadInt32(pid)*/ /*proc.Id*/ /*(int)pi.dwProcessId*/, Palette.Success);
+                if(isDebug)
+                {
+                    if (regMethod)
+                    {
+                        Thread.Sleep(100);
+                        Log(string.Format("Game started, process {0} (pid {1})", proc.ProcessName, pOutPID));
+                    }
+                    else
+                    {
+                        Thread.Sleep(100);
+                        Log(string.Format("Game started, process ID: {0}", pOutPID));
+                    }
+                }
             }
-#if RELEASE
-            catch
+
+            catch (Exception ex)
             {
                 tri++;
                 if (tri < tries)
                 {
-                    ConsoleU.WriteLine("Failed to start process. Retrying...");
+                    Log(string.Format("ERROR - Failed to start process. EXCEPTION: {0} STACKTRACE: {1}",ex.Message,ex.StackTrace ));
+
+                    Console.WriteLine("Failed to start process. Retrying...");
                     StartGame(path, args);
                 }
             }
-#endif
         }
 
         public static void proc_OutputDataReceived(object sender, DataReceivedEventArgs e)
@@ -410,6 +459,8 @@ namespace StartGame
             {
                 return;
             }
+            //Log($"Redirected output: {e.Data}");
+            Thread.Sleep(100);
             Console.WriteLine($"Redirected output: {e.Data}");
             int.TryParse(e.Data, out pOutPID);
         }
@@ -434,6 +485,7 @@ namespace StartGame
                 {
                     string arg = args[i];
                     ConsoleU.WriteLine("Parsing line " + i + ": " + arg, Palette.Feedback);
+                    //Log(string.Format("Parsing line {0}: {1}", i, arg));
 
                     string argument = "";
                     for (int j = i; j < args.Length; j++)
@@ -450,6 +502,8 @@ namespace StartGame
                              && !skey.Contains("renamemutex")
                              && !skey.Contains("mutextorename")
                              && !skey.Contains("setwindow")
+                             && !skey.Contains("isdebug")
+                             && !skey.Contains("nucleusfolderpath")
                              && !skey.Contains("output"))
                         {
                             i++;
@@ -463,6 +517,7 @@ namespace StartGame
                             }
                         }
                     }
+                    //Log("Extra arguments:" + argument);
                     ConsoleU.WriteLine("Extra arguments:" + argument, Palette.Feedback);
 
                     string[] splited = (arg + argument).Split(new string[] { "|::|" }, StringSplitOptions.None);
@@ -492,6 +547,18 @@ namespace StartGame
                     {
                         partialMutex = Boolean.Parse(splited[1]);
                     }
+                    else if (key.Contains("setwindow"))
+                    {
+                        setWindow = Boolean.Parse(splited[1]);
+                    }
+                    else if (key.Contains("isdebug"))
+                    {
+                        isDebug = Boolean.Parse(splited[1]);
+                    }
+                    else if (key.Contains("nucleusfolderpath"))
+                    {
+                        nucleusFolderPath = splited[1];
+                    }
                     else if (key.Contains("game"))
                     {
                         string data = splited[1];
@@ -511,6 +578,7 @@ namespace StartGame
                             path = div[0];
                             workingDir = div[1];
                         }
+                        Log($"EXE: {path} ARGS: {argu} WORKDIR: {workingDir}");
                         ConsoleU.WriteLine($"Start game: EXE: {path} ARGS: {argu} WORKDIR: {workingDir}", Palette.Feedback);
                         StartGame(path, argu, workingDir);
                     }

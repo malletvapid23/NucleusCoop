@@ -9,9 +9,37 @@
 //#include <iostream>
 #include <fstream>
 //#include <vector>
+#include <locale>
+#include <codecvt>
+#include <time.h>
+#include <stdio.h>
 using namespace std;
 
 HWND hWnd = 0;
+
+bool IsDebug = false;
+
+std::ofstream outfile;
+std::wstring nucleusFolder;
+std::wstring logFile = L"\\debug-log.txt";
+
+std::string ws2s(const std::wstring& wstr)
+{
+	using convert_typeX = std::codecvt_utf8<wchar_t>;
+	std::wstring_convert<convert_typeX, wchar_t> converterX;
+
+	return converterX.to_bytes(wstr);
+}
+
+inline std::string date_string()
+{
+	time_t rawtime;
+	std::time(&rawtime);
+	struct tm* tinfo = std::localtime(&rawtime);
+	char buffer[21];
+	strftime(buffer, 21, "%Y-%m-%d %H:%M:%S", tinfo);
+	return "[" + std::string(buffer) + "]";
+}
 
 HWND WINAPI GetForegroundWindow_Hook()
 {
@@ -105,8 +133,6 @@ NTSTATUS HookInstall(LPCSTR moduleHandle, LPCSTR proc, void* callBack)
 	// Perform hooking
 	HOOK_TRACE_INFO hHook = { NULL }; // keep track of our hook
 
-	std::ofstream outfile;
-
 	// Install the hook
 	NTSTATUS result = LhInstallHook(
 		GetProcAddress(GetModuleHandle(moduleHandle), proc),
@@ -115,8 +141,11 @@ NTSTATUS HookInstall(LPCSTR moduleHandle, LPCSTR proc, void* callBack)
 		&hHook);
 	if (FAILED(result))
 	{
-		outfile.open("error-log.txt", std::ios_base::app);
-		outfile << "error installing hook: " << proc << ", error msg: " << (LPCWSTR)RtlGetLastErrorString() << "\n";
+		if (IsDebug)
+		{
+			outfile.open(nucleusFolder + logFile, std::ios_base::app);
+			outfile << date_string() << "HOOK32: Error installing " << proc << " hook, error msg: " << RtlGetLastErrorString() << "\n";
+		}
 	}
 	else
 	{
@@ -127,9 +156,13 @@ NTSTATUS HookInstall(LPCSTR moduleHandle, LPCSTR proc, void* callBack)
 		// Disable the hook for the provided threadIds, enable for all others
 		LhSetExclusiveACL(ACLEntries, 1, &hHook);
 
-		//outfile.open("error-log.txt", std::ios_base::app);
-		//outfile << "hWnd: " << (INT)hWnd << ", hook: " << proc << ", in module: " << moduleHandle << ", result: " << result << "\n";
+		if (IsDebug)
+		{
+			outfile.open(nucleusFolder + logFile, std::ios_base::app);
+			outfile << date_string() << "HOOK32: Successfully installed " << proc << " hook, in module: " << moduleHandle << ", result: " << result << "\n";
+		}
 	}
+	outfile.flush();
 	outfile.close();
 	return result;
 }
@@ -151,13 +184,39 @@ void __stdcall NativeInjectionEntryPoint(REMOTE_ENTRY_INFO* inRemoteInfo)
 		hWnd = (HWND)bytesToInt(data);
 	}
 
-	BYTE* _p = data + 7;
+	BYTE* _p = data + 6;
 
+	//IsDebug = data[6] == 1;
+	//const bool HideCursor = data[7] == 1;
+	//const bool HookFocus = data[8] == 1;
+	IsDebug = *(_p++) == 1;
 	bool HideCursor = *(_p++) == 1;
 	bool HookFocus = *(_p++) == 1;
 
+	const size_t pathLength = (data[9] << 24) + (data[10] << 16) + (data[11] << 8) + data[12];
+	auto nucleusFolderPath = static_cast<PWSTR>(malloc(pathLength + sizeof(WCHAR)));
+	memcpy(nucleusFolderPath, &data[13], pathLength);
+	nucleusFolderPath[pathLength / sizeof(WCHAR)] = '\0';
+
+	nucleusFolder = nucleusFolderPath;
+
+	if (IsDebug)
+	{
+		outfile.open(nucleusFolder + logFile, std::ios_base::app);
+		outfile << date_string() << "HOOK32: Starting hook injection, HideCursor: " << HideCursor << " HookFocus: " << HookFocus << "\n";
+		outfile.flush();
+		outfile.close();
+	}
+
 	if (HookFocus)
 	{
+		if (IsDebug)
+		{
+			outfile.open(nucleusFolder + logFile, std::ios_base::app);
+			outfile << date_string() << "HOOK32: Injecting HookFocus hooks\n";
+			outfile.flush();
+			outfile.close();
+		}
 		HookInstall("user32", "GetForegroundWindow", GetForegroundWindow_Hook);
 		HookInstall("user32", "WindowFromPoint", WindowFromPoint_Hook);
 		HookInstall("user32", "GetActiveWindow", GetActiveWindow_Hook);
@@ -168,8 +227,23 @@ void __stdcall NativeInjectionEntryPoint(REMOTE_ENTRY_INFO* inRemoteInfo)
 
 	if (HideCursor)
 	{
+		if (IsDebug)
+		{
+			outfile.open(nucleusFolder + logFile, std::ios_base::app);
+			outfile << date_string() << "HOOK32: Injecting HideCursor hooks\n";
+			outfile.flush();
+			outfile.close();
+		}
 		HookInstall("user32", "ShowCursor", ShowCursor_Hook);
 		HookInstall("user32", "SetCursor", SetCursor_Hook);
+	}
+
+	if (IsDebug)
+	{
+		outfile.open(nucleusFolder + logFile, std::ios_base::app);
+		outfile << date_string() << "HOOK32: Hook injection complete\n";
+		outfile.flush();
+		outfile.close();
 	}
 
 	return;

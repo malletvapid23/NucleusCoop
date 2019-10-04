@@ -49,7 +49,7 @@ namespace Nucleus.Gaming
 
         string UseProcessor { get; }
 
-        string ProcessorPriorityClass { get;  }
+        string ProcessorPriorityClass { get; }
 
         bool CMDLaunch { get; }
 
@@ -107,7 +107,15 @@ namespace Nucleus.Gaming
 
         bool UseForceBindIP { get; }
 
-        string XInputPlusDll { get; }
+        string[] XInputPlusDll { get; }
+
+        string[] CopyCustomUtils { get; }
+
+        int PlayersPerInstance { get; }
+
+        bool UseDevReorder { get; }
+
+        //string[] HexEditExe { get; }
 
     }
 }

@@ -500,6 +500,7 @@ namespace Nucleus.Coop
             //}
             if (handler != null)
             {
+                Log("OnFormClosed method calling Handler End function");
                 handler.End();
             }
 
@@ -515,6 +516,7 @@ namespace Nucleus.Coop
                 }
                 if (handler != null)
                 {
+                    Log("Stop button clicked, calling Handler End function");
                     handler.End();
                 }
                 SetBtnToPlay();
@@ -953,6 +955,18 @@ namespace Nucleus.Coop
                     //this.Controls.Clear();
                     //this.InitializeComponent();
                     RefreshGames();
+                }
+            }
+        }
+
+        private void Log(string logMessage)
+        {
+            if (ini.IniReadValue("Misc", "DebugLog") == "True")
+            {
+                using (StreamWriter writer = new StreamWriter("debug-log.txt", true))
+                {
+                    writer.WriteLine($"[{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}]MAIN: {logMessage}");
+                    writer.Close();
                 }
             }
         }

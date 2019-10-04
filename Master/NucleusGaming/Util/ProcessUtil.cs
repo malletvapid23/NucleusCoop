@@ -31,11 +31,19 @@ namespace Nucleus
         }
         private static void Log(string logMessage)
         {
-            if(ini.IniReadValue("Misc", "MutexLog") == "True")
+            if(ini.IniReadValue("Misc", "DebugLog") == "True")
             {
-                StreamWriter w = new StreamWriter("mutex-debug.txt", true);
-                w.WriteLine($"[{DateTime.Now.ToLongTimeString()} {DateTime.Now.ToLongDateString()}] {logMessage}");
-                w.Dispose();
+                //StreamWriter w = new StreamWriter("debug-log.txt", true);
+                //w.WriteLine($"[{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}]PROCESSUTIL: {logMessage}");
+                //w.Flush();
+                //w.Close();
+                //w.Dispose();
+
+                using (StreamWriter writer = new StreamWriter("debug-log.txt",true))
+                {
+                    writer.WriteLine($"[{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}]PROCESSUTIL: {logMessage}");
+                    writer.Close();
+                }
             }
         }
         public static bool KillMutex(Process process, string mutexType, string mutexName, bool partial)
@@ -69,7 +77,7 @@ namespace Nucleus
                                 return true;
                             }
                         }
-                        Log("----------------END-----------------");
+                        //Log("----------------END-----------------");
                     }
                     return true;
                 }
@@ -105,7 +113,7 @@ namespace Nucleus
                 }
             }
             Log("Mutex was not killed");
-            Log("----------------END-----------------");
+            //Log("----------------END-----------------");
             return false;
         }
 

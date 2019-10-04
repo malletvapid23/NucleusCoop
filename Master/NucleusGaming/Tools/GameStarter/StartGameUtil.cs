@@ -114,7 +114,7 @@ namespace Nucleus.Gaming.Tools.GameStarter
         /// <param name="waitTime"></param>
         /// <param name="mutex"></param>
         /// <returns></returns>
-        public static int StartGame(string pathToGame, string args, bool hook, bool delay, bool renameMutex, string mutexNames, bool setWindow, string workingDir = null)
+        public static int StartGame(string pathToGame, string args, bool hook, bool delay, bool renameMutex, string mutexNames, bool setWindow, bool isDebug, string nucleusFolder, string workingDir = null)
         {
             lock (locker)
             {
@@ -127,7 +127,7 @@ namespace Nucleus.Gaming.Tools.GameStarter
                     workingDir = "|" + workingDir;
                 }
 
-                startInfo.Arguments = "\"" + "hook|::|" + hook + "\" \"delay|::|" + delay + "\" \"renamemutex|::|" + renameMutex + "\" \"mutextorename|::|" + mutexNames + "\" \"setwindow|::|" + setWindow + "\" \"game|::|" + pathToGame + workingDir + ";" + args + "\"";
+                startInfo.Arguments = "\"" + "hook|::|" + hook + "\" \"delay|::|" + delay + "\" \"renamemutex|::|" + renameMutex + "\" \"mutextorename|::|" + mutexNames + "\" \"setwindow|::|" + setWindow + "\" \"isdebug|::|" + isDebug + "\" \"nucleusfolderpath|::|" + nucleusFolder + "\" \"game|::|" + pathToGame + workingDir + ";" + args + "\"";
 
                 startInfo.RedirectStandardOutput = true;
                 startInfo.UseShellExecute = false;
