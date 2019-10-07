@@ -2201,7 +2201,7 @@ namespace Nucleus.Gaming
                     var logPath = Encoding.Unicode.GetBytes(nucleusFolderPath);
                     int logPathLength = logPath.Length;
 
-                    int size = 1024;
+                    int size = 21 + logPathLength;
                     IntPtr intPtr = Marshal.AllocHGlobal(size);
                     byte[] dataToSend = new byte[size];
                     dataToSend[0] = (byte)((int)proc.MainWindowHandle >> 24);

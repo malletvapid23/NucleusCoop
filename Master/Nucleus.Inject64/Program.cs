@@ -99,7 +99,7 @@ namespace Nucleus.Inject64
                 int logPathLength = logPath.Length;
                 //int.TryParse(args[i++], out int InPassThruSize);
 
-                int size = 1024;
+                int size = 21 + logPathLength;
                 IntPtr intPtr = Marshal.AllocHGlobal(size);
                 byte[] dataToSend = new byte[size];
 

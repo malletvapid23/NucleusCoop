@@ -240,7 +240,7 @@ namespace StartGame
                     //var hidBytes = Encoding.Unicode.GetBytes(rawHid);
                     //int hidBytesLength = hidBytes.Length;
 
-                    int size = 1024;
+                    int size = 27 + logPathLength + targetsBytesLength;
                     var data = new byte[size];
                     data[0] = isHook == true ? (byte)1 : (byte)0;
                     data[1] = renameMutex == true ? (byte)1 : (byte)0;

@@ -68,7 +68,7 @@ namespace Nucleus.Inject32
                 var targetsBytes = Encoding.Unicode.GetBytes(mutexToRename);
                 int targetsBytesLength = targetsBytes.Length;
 
-                int size = 1024;
+                int size = 27 + logPathLength + targetsBytesLength;
                 var data = new byte[size];
                 data[0] = isHook == true ? (byte)1 : (byte)0;
                 data[1] = renameMutex == true ? (byte)1 : (byte)0;
@@ -149,7 +149,7 @@ namespace Nucleus.Inject32
                 var targetsBytes = Encoding.Unicode.GetBytes(mutexToRename);
                 int targetsBytesLength = targetsBytes.Length;
 
-                int size = 1024;
+                int size = 27 + logPathLength + targetsBytesLength;
                 var data = new byte[size];
                 data[0] = isHook == true ? (byte)1 : (byte)0;
                 data[1] = renameMutex == true ? (byte)1 : (byte)0;
