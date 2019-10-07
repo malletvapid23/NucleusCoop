@@ -15,7 +15,16 @@
 #include <codecvt>
 #include <time.h>
 #include <stdio.h>
+#include <Xinput.h>
 using namespace std;
+
+#pragma comment(lib, "XInput.lib")
+
+//#ifndef UNICODE  
+//typedef std::string String;
+//#else
+//typedef std::wstring String;
+//#endif
 
 HWND hWnd = 0;
 
@@ -24,6 +33,8 @@ bool IsDebug = false;
 std::ofstream outfile;
 std::wstring nucleusFolder;
 std::wstring logFile = L"\\debug-log.txt";
+
+//std::wstring rawHid;
 
 std::mt19937 randomGenerator;
 
@@ -119,6 +130,141 @@ inline void updateNameObject(POBJECT_ATTRIBUTES ObjectAttributes)
 		updateName(ObjectAttributes->ObjectName);
 	}
 }
+
+//bool compareChar(char& c1, char& c2)
+//{
+//	if (c1 == c2)
+//		return true;
+//	else if (std::toupper(c1) == std::toupper(c2))
+//		return true;
+//	return false;
+//}
+//
+///*
+// * Case Insensitive String Comparision
+// */
+//bool caseInSensStringCompare(std::string& str1, std::string& str2)
+//{
+//	return ((str1.size() == str2.size()) &&
+//		std::equal(str1.begin(), str1.end(), str2.begin(), &compareChar));
+//}
+//
+//BOOL FilterMessage(LPMSG lpMsg)
+//{
+//	UINT Msg = lpMsg->message;
+//	WPARAM _wParam = lpMsg->wParam;
+//	LPARAM _lParam = lpMsg->lParam;
+//
+//#define ALLOW return 1;
+//#define BLOCK memset(lpMsg, 0, sizeof(MSG)); return -1;
+//
+//	//Filter raw input
+//	if (Msg == WM_INPUT)
+//	{
+//		UINT cbSize;
+//		GetRawInputData((HRAWINPUT)_lParam, RID_INPUT, 0, &cbSize, sizeof(RAWINPUTHEADER));
+//		LPBYTE lpbBuffer = new BYTE[cbSize];
+//		GetRawInputData((HRAWINPUT)_lParam, RID_INPUT, lpbBuffer, &cbSize, sizeof(RAWINPUTHEADER));
+//		RAWINPUT* raw = (RAWINPUT*)lpbBuffer;
+//
+//		RID_DEVICE_INFO rdi;
+//		rdi.cbSize = sizeof(RID_DEVICE_INFO);
+//
+//		UINT size = 256;
+//		TCHAR tBuffer[256] = { 0 };
+//
+//		if (GetRawInputDeviceInfo(raw->header.hDevice, RIDI_DEVICENAME, tBuffer, &size) < 0)
+//		{
+//			// Error in reading device name
+//			if (IsDebug)
+//			{
+//				outfile.open(nucleusFolder + logFile, std::ios_base::app);
+//				outfile << date_string() << "error reading device name\n";
+//				outfile.close();
+//			}
+//		}
+//
+//		if (raw->header.dwType == RIM_TYPEHID)
+//		{
+//			if (rdi.hid.usUsage == 4 || rdi.hid.usUsage == 5)
+//			{
+//				std::string str1 = ws2s(rawHid);
+//				std::string str2 = tBuffer;
+//
+//				bool result = caseInSensStringCompare(str1, str2);
+//
+//				if (result)
+//				{
+//					ALLOW;
+//				}
+//				else
+//				{
+//					BLOCK;
+//				}
+//
+//			}
+//		}
+//	}
+//
+//	return 1;
+//
+//#undef ALLOW
+//#undef BLOCK
+//}
+//
+//BOOL WINAPI GetMessageA_Hook(LPMSG lpMsg, HWND hWnd, UINT wMsgFilterMin, UINT wMsgFilterMax)
+//{
+//	BOOL ret = GetMessageA(lpMsg, hWnd, wMsgFilterMin, wMsgFilterMax);
+//
+//	return ret == -1 ? -1 : FilterMessage(lpMsg);
+//}
+//
+//BOOL WINAPI GetMessageW_Hook(LPMSG lpMsg, HWND hWnd, UINT wMsgFilterMin, UINT wMsgFilterMax)
+//{
+//	BOOL ret = GetMessageW(lpMsg, hWnd, wMsgFilterMin, wMsgFilterMax);
+//
+//	return ret == -1 ? -1 : FilterMessage(lpMsg);
+//}
+//
+//BOOL WINAPI PeekMessageA_Hook(LPMSG lpMsg, HWND hWnd, UINT wMsgFilterMin, UINT wMsgFilterMax, UINT wRemoveMsg)
+//{
+//	BOOL ret = PeekMessageA(lpMsg, hWnd, wMsgFilterMin, wMsgFilterMax, wRemoveMsg);
+//
+//	return ret == FALSE ? FALSE : FilterMessage(lpMsg);
+//}
+//
+//BOOL WINAPI PeekMessageW_Hook(LPMSG lpMsg, HWND hWnd, UINT wMsgFilterMin, UINT wMsgFilterMax, UINT wRemoveMsg)
+//{
+//	BOOL ret = PeekMessageW(lpMsg, hWnd, wMsgFilterMin, wMsgFilterMax, wRemoveMsg);
+//
+//	return ret == FALSE ? FALSE : FilterMessage(lpMsg);
+//}
+
+UINT WINAPI GetRawInputDeviceList_Hook(PRAWINPUTDEVICELIST pRawInputDeviceList, PUINT puiNumDevices, UINT cbSize)
+{
+	*puiNumDevices = 0;
+
+	return 0; //GetRawInputDeviceList(pRawInputDeviceList, puiNumDevices, cbSize);
+}
+
+UINT WINAPI GetRegisteredRawInputDevices_Hook(PRAWINPUTDEVICE pRawInputDevices, PUINT puiNumDevices, UINT cbSize)
+{
+	*puiNumDevices = 0;
+
+	return 0; // GetRegisteredRawInputDevices(pRawInputDevices, puiNumDevices, cbSize);
+}
+
+//BOOL WINAPI RegisterRawInputDevices_Hook(PCRAWINPUTDEVICE pRawInputDevices, UINT uiNumDevices, UINT cbSize)
+//{
+//	if (IsDebug)
+//	{
+//		outfile.open(nucleusFolder + logFile, std::ios_base::app);
+//		outfile << date_string() << "RegisterRawInputDevices called\n";
+//		outfile.close();
+//	}
+//
+//	return RegisterRawInputDevices(pRawInputDevices, uiNumDevices, cbSize);
+//}
 
 BOOL WINAPI SetWindowPos_Hook(HWND hWnd, HWND hWndInsertAfter, int X, int Y, int cx, int cy, UINT uFlags)
 {
@@ -351,24 +497,33 @@ void __stdcall NativeInjectionEntryPoint(REMOTE_ENTRY_INFO* inRemoteInfo)
 	DWORD pid = GetCurrentProcessId();
 	hWnd = FindWindowFromProcessId(pid);
 
+
+
 	BYTE* data = inRemoteInfo->UserData;
 	const bool HookWindow = data[0] == 1;
 	const bool RenameMutex = data[1] == 1;
 	const bool SetWindow = data[2] == 1;
 	IsDebug = data[3] == 1;
+	const bool BlockRaw = data[4] == 1;
 
-
-	const size_t pathLength = (data[4] << 24) + (data[5] << 16) + (data[6] << 8) + data[7];
+	const size_t pathLength = (data[10] << 24) + (data[11] << 16) + (data[12] << 8) + data[13];
 	auto nucleusFolderPath = static_cast<PWSTR>(malloc(pathLength + sizeof(WCHAR)));
-	memcpy(nucleusFolderPath, &data[12], pathLength);
+	memcpy(nucleusFolderPath, &data[18], pathLength);
 	nucleusFolderPath[pathLength / sizeof(WCHAR)] = '\0';
 
 	nucleusFolder = nucleusFolderPath;
 
+	//const size_t hidLength = (data[18] << 24) + (data[19] << 16) + (data[20] << 8) + data[21];
+	//auto hidName = static_cast<PWSTR>(malloc(hidLength + sizeof(WCHAR)));
+	//memcpy(hidName, &data[23 + pathLength], hidLength);
+	//hidName[hidLength / sizeof(WCHAR)] = '\0';
+
+	//rawHid = hidName;
+
 	if (IsDebug)
 	{
 		outfile.open(nucleusFolder + logFile, std::ios_base::app);
-		outfile << date_string() << "SHOOK64: Starting hook injection, HookWindow: " << HookWindow << " RenameMutex: " << RenameMutex << " SetWindow: " << SetWindow << "\n";
+		outfile << date_string() << "SHOOK64: Starting hook injection, HookWindow: " << HookWindow << " RenameMutex: " << RenameMutex << " SetWindow: " << SetWindow << " BlockRaw: " << BlockRaw << "\n";
 		outfile.close();
 	}
 
@@ -381,7 +536,7 @@ void __stdcall NativeInjectionEntryPoint(REMOTE_ENTRY_INFO* inRemoteInfo)
 			outfile.close();
 		}
 		HookInstall("user32", "SetWindowPos", SetWindowPos_Hook);
-		if (!HookWindow && !RenameMutex)
+		if (!HookWindow && !RenameMutex && !BlockRaw)
 		{
 			if (IsDebug)
 			{
@@ -406,6 +561,55 @@ void __stdcall NativeInjectionEntryPoint(REMOTE_ENTRY_INFO* inRemoteInfo)
 		HookInstall("user32", "FindWindowExA", FindWindowEx_Hook);
 		HookInstall("user32", "FindWindowExW", FindWindowEx_Hook);
 		HookInstall("user32", "EnumWindows", EnumWindows_Hook);
+		if (!RenameMutex && !BlockRaw)
+		{
+			if (IsDebug)
+			{
+				outfile.open(nucleusFolder + logFile, std::ios_base::app);
+				outfile << date_string() << "SHOOK64: Hook injection complete\n";
+				outfile.close();
+			}
+			RhWakeUpProcess();
+		}
+	}
+
+	if (BlockRaw)
+	{
+		//char mbstr[256];
+		//std::wcstombs(mbstr, rawHid.c_str(), 256);
+
+		if (IsDebug)
+		{
+			outfile.open(nucleusFolder + logFile, std::ios_base::app);
+			outfile << date_string() << "SHOOK64: Injecting BlockRaw hooks\n";
+			outfile.close();
+		}
+
+		/*RAWINPUTDEVICE rawInputDevice[1];
+		rawInputDevice[0].usUsagePage = 1;
+		rawInputDevice[0].usUsage = 5;
+		rawInputDevice[0].dwFlags = 0;
+		rawInputDevice[0].hwndTarget = hWnd;
+
+		BOOL result = RegisterRawInputDevices(rawInputDevice, 1, sizeof(rawInputDevice[0]));
+
+		if (!result)
+		{
+			if (IsDebug)
+			{
+				outfile.open(nucleusFolder + logFile, std::ios_base::app);
+				outfile << date_string() << "block raw RegisterRawInputDevices Error: " << GetLastError() << "\n";
+				outfile.close();
+			}
+		}*/
+
+		//HookInstall("user32", "GetMessageA", GetMessageA_Hook);
+		//HookInstall("user32", "GetMessageW", GetMessageW_Hook);
+		//HookInstall("user32", "PeekMessageA", PeekMessageA_Hook);
+		//HookInstall("user32", "PeekMessageW", PeekMessageW_Hook);
+
+		HookInstall("user32", "GetRawInputDeviceList", GetRawInputDeviceList_Hook);
+		HookInstall("user32", "GetRegisteredRawInputDevices", GetRegisteredRawInputDevices_Hook);
 		if (!RenameMutex)
 		{
 			if (IsDebug)
@@ -426,9 +630,9 @@ void __stdcall NativeInjectionEntryPoint(REMOTE_ENTRY_INFO* inRemoteInfo)
 			outfile << date_string() << "SHOOK64: Injecting RenameMutex hooks\n";
 			outfile.close();
 		}
-		const size_t targetsLength = (data[8] << 24) + (data[9] << 16) + (data[10] << 8) + data[11];
+		const size_t targetsLength = (data[14] << 24) + (data[15] << 16) + (data[16] << 8) + data[17];
 		auto targets = static_cast<PWSTR>(malloc(targetsLength + sizeof(WCHAR)));
-		memcpy(targets, &data[13 + pathLength], targetsLength);
+		memcpy(targets, &data[19 + pathLength], targetsLength);
 		targets[targetsLength / sizeof(WCHAR)] = '\0';
 		installFindMutexHooks(targets);
 	}

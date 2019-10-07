@@ -41,6 +41,11 @@ inline std::string date_string()
 	return "[" + std::string(buffer) + "]";
 }
 
+BOOL WINAPI SetWindowPos_Hook(HWND hWnd, HWND hWndInsertAfter, int X, int Y, int cx, int cy, UINT uFlags)
+{
+	return true;
+}
+
 HWND WINAPI GetForegroundWindow_Hook()
 {
 	return hWnd;
@@ -184,11 +189,12 @@ void __stdcall NativeInjectionEntryPoint(REMOTE_ENTRY_INFO* inRemoteInfo)
 		hWnd = (HWND)bytesToInt(data);
 	}
 
-	BYTE* _p = data + 6;
+	BYTE* _p = data + 5;
 
 	//IsDebug = data[6] == 1;
 	//const bool HideCursor = data[7] == 1;
 	//const bool HookFocus = data[8] == 1;
+	bool SetWindow = *(_p++) == 1;
 	IsDebug = *(_p++) == 1;
 	bool HideCursor = *(_p++) == 1;
 	bool HookFocus = *(_p++) == 1;
@@ -203,9 +209,21 @@ void __stdcall NativeInjectionEntryPoint(REMOTE_ENTRY_INFO* inRemoteInfo)
 	if (IsDebug)
 	{
 		outfile.open(nucleusFolder + logFile, std::ios_base::app);
-		outfile << date_string() << "HOOK32: Starting hook injection, HideCursor: " << HideCursor << " HookFocus: " << HookFocus << "\n";
+		outfile << date_string() << "HOOK32: Starting hook injection, SetWindow: " << SetWindow << " HookFocus: " << HookFocus << " HideCursor: " << HideCursor << "\n";
 		outfile.flush();
 		outfile.close();
+	}
+
+	if (SetWindow)
+	{
+		if (IsDebug)
+		{
+			outfile.open(nucleusFolder + logFile, std::ios_base::app);
+			outfile << date_string() << "HOOK32: Injecting SetWindow hook\n";
+			outfile.flush();
+			outfile.close();
+		}
+		HookInstall("user32", "SetWindowPos", SetWindowPos_Hook);
 	}
 
 	if (HookFocus)

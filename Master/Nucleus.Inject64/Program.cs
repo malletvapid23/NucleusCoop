@@ -4,6 +4,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using EasyHook;
+using Nucleus.Gaming;
 
 namespace Nucleus.Inject64
 {
@@ -21,6 +22,19 @@ namespace Nucleus.Inject64
             uint InPassThruSize,
             IntPtr OutProcessId //Pointer to a UINT (the PID of the new process)
             );
+
+        private static readonly IniFile ini = new IniFile(Path.Combine(Directory.GetCurrentDirectory(), "Settings.ini"));
+        private static void Log(string logMessage)
+        {
+            if (ini.IniReadValue("Misc", "DebugLog") == "True")
+            {
+                using (StreamWriter writer = new StreamWriter("debug-log.txt", true))
+                {
+                    writer.WriteLine($"[{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}]INJECT64: {logMessage}");
+                    writer.Close();
+                }
+            }
+        }
 
         static void Main(string[] args)
         {
@@ -59,10 +73,11 @@ namespace Nucleus.Inject64
                 }
                 catch (Exception ex)
                 {
-                    using (StreamWriter writer = new StreamWriter("error-log.txt", true))
-                    {
-                        writer.WriteLine("[" + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "]" + "ex msg: {0}, ex str: {1}", ex.Message, ex.ToString());
-                    }
+                    Log("ERROR - " + ex.Message);
+                    //using (StreamWriter writer = new StreamWriter("error-log.txt", true))
+                    //{
+                    //    writer.WriteLine("[" + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "]" + "ex msg: {0}, ex str: {1}", ex.Message, ex.ToString());
+                    //}
                 }
             }
             else if (Tier == 1)
@@ -78,6 +93,7 @@ namespace Nucleus.Inject64
                 bool.TryParse(args[i++], out bool hideCursor);
                 bool.TryParse(args[i++], out bool isDebug);
                 string nucleusFolderPath = args[i++];
+                bool.TryParse(args[i++], out bool setWindow);
 
                 var logPath = Encoding.Unicode.GetBytes(nucleusFolderPath);
                 int logPathLength = logPath.Length;
@@ -92,6 +108,7 @@ namespace Nucleus.Inject64
                 dataToSend[2] = (byte)(hWnd >> 8);
                 dataToSend[3] = (byte)(hWnd);
 
+                dataToSend[5] = setWindow == true ? (byte)1 : (byte)0;
                 dataToSend[6] = isDebug == true ? (byte)1 : (byte)0;
                 dataToSend[7] = hideCursor == true ? (byte)1 : (byte)0;
                 dataToSend[8] = hookFocus == true ? (byte)1 : (byte)0;
@@ -116,10 +133,11 @@ namespace Nucleus.Inject64
                 }
                 catch (Exception ex)
                 {
-                    using (StreamWriter writer = new StreamWriter("error-log.txt", true))
-                    {
-                        writer.WriteLine("[" + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "]" + "ex msg: {0}, ex str: {1}", ex.Message, ex.ToString());
-                    }
+                    Log("ERROR - " + ex.Message);
+                    //using (StreamWriter writer = new StreamWriter("error-log.txt", true))
+                    //{
+                    //    writer.WriteLine("[" + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "]" + "ex msg: {0}, ex str: {1}", ex.Message, ex.ToString());
+                    //}
                 }
             }
         }

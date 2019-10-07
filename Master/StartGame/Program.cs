@@ -29,8 +29,11 @@ namespace StartGame
         private static bool isDelay;
         private static bool renameMutex;
         private static bool setWindow;
+        private static bool blockRaw;
 
         private static string mutexToRename;
+
+        //private static string rawHid;
 
         private static bool isDebug;
         private static string nucleusFolderPath;
@@ -226,7 +229,7 @@ namespace StartGame
 
                 //bool is64 = EasyHook.RemoteHooking.IsX64Process((int)pi.dwProcessId);
 
-                if (isHook || renameMutex || setWindow)
+                if (isHook || renameMutex || setWindow || blockRaw)
                 {
                     var targetsBytes = Encoding.Unicode.GetBytes(mutexToRename);
                     int targetsBytesLength = targetsBytes.Length;
@@ -234,26 +237,39 @@ namespace StartGame
                     var logPath = Encoding.Unicode.GetBytes(nucleusFolderPath);
                     int logPathLength = logPath.Length;
 
+                    //var hidBytes = Encoding.Unicode.GetBytes(rawHid);
+                    //int hidBytesLength = hidBytes.Length;
+
                     int size = 1024;
                     var data = new byte[size];
                     data[0] = isHook == true ? (byte)1 : (byte)0;
                     data[1] = renameMutex == true ? (byte)1 : (byte)0;
                     data[2] = setWindow == true ? (byte)1 : (byte)0;
                     data[3] = isDebug == true ? (byte)1 : (byte)0;
+                    data[4] = blockRaw == true ? (byte)1 : (byte)0;
 
-                    data[4] = (byte)(logPathLength >> 24);
-                    data[5] = (byte)(logPathLength >> 16);
-                    data[6] = (byte)(logPathLength >> 8);
-                    data[7] = (byte)logPathLength;
+                    data[10] = (byte)(logPathLength >> 24);
+                    data[11] = (byte)(logPathLength >> 16);
+                    data[12] = (byte)(logPathLength >> 8);
+                    data[13] = (byte)logPathLength;
 
-                    data[8] = (byte)(targetsBytesLength >> 24);
-                    data[9] = (byte)(targetsBytesLength >> 16);
-                    data[10] = (byte)(targetsBytesLength >> 8);
-                    data[11] = (byte)targetsBytesLength;
+                    data[14] = (byte)(targetsBytesLength >> 24);
+                    data[15] = (byte)(targetsBytesLength >> 16);
+                    data[16] = (byte)(targetsBytesLength >> 8);
+                    data[17] = (byte)targetsBytesLength;
 
-                    Array.Copy(logPath, 0, data, 12, logPathLength);
+                    //data[18] = (byte)(hidBytesLength >> 24);
+                    //data[19] = (byte)(hidBytesLength >> 16);
+                    //data[20] = (byte)(hidBytesLength >> 8);
+                    //data[21] = (byte)hidBytesLength;
 
-                    Array.Copy(targetsBytes, 0, data, 13 + logPathLength, targetsBytesLength);
+                    Array.Copy(logPath, 0, data, 18, logPathLength);
+
+                    //Array.Copy(hidBytes, 0, data, 23 + logPathLength, hidBytesLength);
+
+                    Array.Copy(targetsBytes, 0, data, 19 + logPathLength, targetsBytesLength);
+
+
 
                     IntPtr ptr = Marshal.AllocHGlobal(size);
                     Marshal.Copy(data, 0, ptr, size);
@@ -271,10 +287,11 @@ namespace StartGame
                             }
                             catch (Exception ex)
                             {
-                                using (StreamWriter writer = new StreamWriter("error-log.txt", true))
-                                {
-                                    writer.WriteLine("[" + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "]" + "ex msg: {0}, ex str: {1}", ex.Message, ex.ToString());
-                                }
+                                Log(string.Format("ERROR - {0}", ex.Message));
+                                //using (StreamWriter writer = new StreamWriter("error-log.txt", true))
+                                //{
+                                //    writer.WriteLine("[" + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "]" + "ex msg: {0}, ex str: {1}", ex.Message, ex.ToString());
+                                //}
                             }
                         }
                         else if (Is64Bit(path) == false)
@@ -287,7 +304,7 @@ namespace StartGame
                                 injstartInfo.FileName = injectorPath;
                                 object[] injargs = new object[]
                                 {
-                                    0, path, args, 0, 0, Path.Combine(currDir, "Nucleus.SHook32.dll"), null, isHook, renameMutex, mutexToRename, setWindow, isDebug, nucleusFolderPath
+                                    0, path, args, 0, 0, Path.Combine(currDir, "Nucleus.SHook32.dll"), null, isHook, renameMutex, mutexToRename, setWindow, isDebug, nucleusFolderPath, blockRaw
                                 };
                                 var sbArgs = new StringBuilder();
                                 foreach (object arg in injargs)
@@ -321,18 +338,20 @@ namespace StartGame
                             }
                             catch (Exception ex)
                             {
-                                using (StreamWriter writer = new StreamWriter("error-log.txt", true))
-                                {
-                                    writer.WriteLine("[" + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "]" + "is64: false, ex msg: {0}, ex str: {1}", ex.Message, ex.ToString());
-                                }
+                                Log(string.Format("ERROR - {0}", ex.Message));
+                                //using (StreamWriter writer = new StreamWriter("error-log.txt", true))
+                                //{
+                                //    writer.WriteLine("[" + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "]" + "is64: false, ex msg: {0}, ex str: {1}", ex.Message, ex.ToString());
+                                //}
                             }
                         }
                         else
                         {
-                            using (StreamWriter writer = new StreamWriter("error-log.txt", true))
-                            {
-                                writer.WriteLine("[" + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "]" + "Machine type: '{0}' not implemented.", GetDllMachineType(path));
-                            }
+                            Log(string.Format("ERROR - Machine type {0} not implemented", GetDllMachineType(path)));
+                            //using (StreamWriter writer = new StreamWriter("error-log.txt", true))
+                            //{
+                            //    writer.WriteLine("[" + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "]" + "Machine type: '{0}' not implemented.", GetDllMachineType(path));
+                            //}
                         }
                     }
                     else // delay method
@@ -346,10 +365,11 @@ namespace StartGame
 
                         if (!success)
                         {
-                            using (StreamWriter writer = new StreamWriter("error-log.txt", true))
-                            {
-                                writer.WriteLine("[" + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "]" + "createprocess failed - startGamePath: {0}, startArgs: {1}, dirpath: {2}", path, args, directoryPath);
-                            }
+                            Log(string.Format("ERROR - CreateProcess failed - startGamePath: {0}, startArgs: {1}, dirpath: {2}", path, args, directoryPath));
+                            //using (StreamWriter writer = new StreamWriter("error-log.txt", true))
+                            //{
+                            //    writer.WriteLine("[" + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "]" + ");
+                            //}
                             return;
                         }
 
@@ -373,7 +393,7 @@ namespace StartGame
                                 injstartInfo.FileName = injectorPath;
                                 object[] injargs = new object[]
                                 {
-                                    1, (int)pi.dwProcessId, 0, 0, Path.Combine(currDir, "Nucleus.SHook32.dll"), null, isHook, renameMutex, mutexToRename, setWindow, isDebug, nucleusFolderPath
+                                    1, (int)pi.dwProcessId, 0, 0, Path.Combine(currDir, "Nucleus.SHook32.dll"), null, isHook, renameMutex, mutexToRename, setWindow, isDebug, nucleusFolderPath, blockRaw
                                 };
                                 var sbArgs = new StringBuilder();
                                 foreach (object arg in injargs)
@@ -403,10 +423,11 @@ namespace StartGame
                             }
                             catch (Exception ex)
                             {
-                                using (StreamWriter writer = new StreamWriter("error-log.txt", true))
-                                {
-                                    writer.WriteLine("[" + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "]" + "ex msg: {0}, ex str: {1}", ex.Message, ex.ToString());
-                                }
+                                Log(string.Format("ERROR - {0}", ex.Message));
+                                //using (StreamWriter writer = new StreamWriter("error-log.txt", true))
+                                //{
+                                //    writer.WriteLine("[" + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "]" + "ex msg: {0}, ex str: {1}", ex.Message, ex.ToString());
+                                //}
                             }
                         }
                         ResumeThread(pi.hThread);
@@ -445,9 +466,11 @@ namespace StartGame
                 tri++;
                 if (tri < tries)
                 {
-                    Log(string.Format("ERROR - Failed to start process. EXCEPTION: {0} STACKTRACE: {1}",ex.Message,ex.StackTrace ));
-
-                    Console.WriteLine("Failed to start process. Retrying...");
+                    if(!ex.Message.Contains("debug-log"))
+                    {
+                        Log(string.Format("ERROR - Failed to start process. EXCEPTION: {0} STACKTRACE: {1}", ex.Message, ex.StackTrace));
+                        Console.WriteLine("Failed to start process. Retrying...");
+                    }
                     StartGame(path, args);
                 }
             }
@@ -504,6 +527,8 @@ namespace StartGame
                              && !skey.Contains("setwindow")
                              && !skey.Contains("isdebug")
                              && !skey.Contains("nucleusfolderpath")
+                             && !skey.Contains("blockraw")
+                             //&& !skey.Contains("rawhid")
                              && !skey.Contains("output"))
                         {
                             i++;
@@ -559,6 +584,14 @@ namespace StartGame
                     {
                         nucleusFolderPath = splited[1];
                     }
+                    else if (key.Contains("blockraw"))
+                    {
+                        blockRaw = Boolean.Parse(splited[1]);
+                    }
+                    //else if (key.Contains("rawhid"))
+                    //{
+                    //    rawHid = splited[1];
+                    //}
                     else if (key.Contains("game"))
                     {
                         string data = splited[1];

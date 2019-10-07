@@ -29,6 +29,9 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Nucleus.Inject32", "Nucleus.Inject32\Nucleus.Inject32.csproj", "{723547AD-6A1C-48D7-B8E1-F7E3834B98CB}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Nucleus.Inject64", "Nucleus.Inject64\Nucleus.Inject64.csproj", "{0ACFAE83-C6EA-4605-9B8F-FDC34AA78976}"
+	ProjectSection(ProjectDependencies) = postProject
+		{223DBDAE-E362-452C-9455-F518D002B154} = {223DBDAE-E362-452C-9455-F518D002B154}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Nucleus.SHook32", "Nucleus.SHook32\Nucleus.SHook32.vcxproj", "{F6A141FC-FFCA-4115-88D2-92C947762B9C}"
 EndProject

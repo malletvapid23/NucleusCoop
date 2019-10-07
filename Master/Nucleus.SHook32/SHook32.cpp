@@ -17,7 +17,10 @@
 #include <codecvt>
 #include <time.h>
 #include <stdio.h>
+#include <Xinput.h>
 using namespace std;
+
+#pragma comment(lib, "XInput.lib")
 
 HWND hWnd = 0;
 
@@ -122,6 +125,20 @@ inline void updateNameObject(POBJECT_ATTRIBUTES ObjectAttributes)
 	}
 }
 
+UINT WINAPI GetRawInputDeviceList_Hook(PRAWINPUTDEVICELIST pRawInputDeviceList, PUINT puiNumDevices, UINT cbSize)
+{
+	*puiNumDevices = 0;
+
+	return 0; //GetRawInputDeviceList(pRawInputDeviceList, puiNumDevices, cbSize);
+}
+
+UINT WINAPI GetRegisteredRawInputDevices_Hook(PRAWINPUTDEVICE pRawInputDevices, PUINT puiNumDevices, UINT cbSize)
+{
+	*puiNumDevices = 0;
+
+	return 0; // GetRegisteredRawInputDevices(pRawInputDevices, puiNumDevices, cbSize);
+}
+
 BOOL WINAPI SetWindowPos_Hook(HWND hWnd, HWND hWndInsertAfter, int X, int Y, int cx, int cy, UINT uFlags)
 {
 	return true;
@@ -177,6 +194,8 @@ BOOL WINAPI EnumWindows_Hook(WNDENUMPROC lpEnumFunc, LPARAM lParam)
 {
 	return TRUE;
 }
+
+
 
 // Structure used to communicate data from and to enumeration procedure
 struct EnumData {
@@ -355,10 +374,11 @@ void __stdcall NativeInjectionEntryPoint(REMOTE_ENTRY_INFO* inRemoteInfo)
 	const bool RenameMutex = data[1] == 1;
 	const bool SetWindow = data[2] == 1;
 	IsDebug = data[3] == 1;
+	const bool BlockRaw = data[4] == 1;
 
-	const size_t pathLength = (data[4] << 24) + (data[5] << 16) + (data[6] << 8) + data[7];
+	const size_t pathLength = (data[10] << 24) + (data[11] << 16) + (data[12] << 8) + data[13];
 	auto nucleusFolderPath = static_cast<PWSTR>(malloc(pathLength + sizeof(WCHAR)));
-	memcpy(nucleusFolderPath, &data[12], pathLength);
+	memcpy(nucleusFolderPath, &data[18], pathLength);
 	nucleusFolderPath[pathLength / sizeof(WCHAR)] = '\0';
 
 	nucleusFolder = nucleusFolderPath;
@@ -366,7 +386,7 @@ void __stdcall NativeInjectionEntryPoint(REMOTE_ENTRY_INFO* inRemoteInfo)
 	if (IsDebug)
 	{
 		outfile.open(nucleusFolder + logFile, std::ios_base::app);
-		outfile << date_string() << "SHOOK32: Starting hook injection, HookWindow: " << HookWindow << " RenameMutex: " << RenameMutex << " SetWindow: " << SetWindow << "\n";
+		outfile << date_string() << "SHOOK32: Starting hook injection, HookWindow: " << HookWindow << " RenameMutex: " << RenameMutex << " SetWindow: " << SetWindow << " BlockRaw: " << BlockRaw << "\n";
 		outfile.close();
 	}
 
@@ -379,7 +399,7 @@ void __stdcall NativeInjectionEntryPoint(REMOTE_ENTRY_INFO* inRemoteInfo)
 			outfile.close();
 		}
 		HookInstall("user32", "SetWindowPos", SetWindowPos_Hook);
-		if (!HookWindow && !RenameMutex)
+		if (!HookWindow && !RenameMutex && !BlockRaw)
 		{
 			if (IsDebug)
 			{
@@ -404,6 +424,55 @@ void __stdcall NativeInjectionEntryPoint(REMOTE_ENTRY_INFO* inRemoteInfo)
 		HookInstall("user32", "FindWindowExA", FindWindowEx_Hook);
 		HookInstall("user32", "FindWindowExW", FindWindowEx_Hook);
 		HookInstall("user32", "EnumWindows", EnumWindows_Hook);
+		if (!RenameMutex && !BlockRaw)
+		{
+			if (IsDebug)
+			{
+				outfile.open(nucleusFolder + logFile, std::ios_base::app);
+				outfile << date_string() << "SHOOK32: Hook injection complete\n";
+				outfile.close();
+			}
+			RhWakeUpProcess();
+		}
+	}
+
+	if (BlockRaw)
+	{
+		//char mbstr[256];
+		//std::wcstombs(mbstr, rawHid.c_str(), 256);
+
+		if (IsDebug)
+		{
+			outfile.open(nucleusFolder + logFile, std::ios_base::app);
+			outfile << date_string() << "SHOOK32: Injecting BlockRaw hooks\n";
+			outfile.close();
+		}
+
+		/*RAWINPUTDEVICE rawInputDevice[1];
+		rawInputDevice[0].usUsagePage = 1;
+		rawInputDevice[0].usUsage = 5;
+		rawInputDevice[0].dwFlags = 0;
+		rawInputDevice[0].hwndTarget = hWnd;
+
+		BOOL result = RegisterRawInputDevices(rawInputDevice, 1, sizeof(rawInputDevice[0]));
+
+		if (!result)
+		{
+			if (IsDebug)
+			{
+				outfile.open(nucleusFolder + logFile, std::ios_base::app);
+				outfile << date_string() << "block raw RegisterRawInputDevices Error: " << GetLastError() << "\n";
+				outfile.close();
+			}
+		}*/
+
+		//HookInstall("user32", "GetMessageA", GetMessageA_Hook);
+		//HookInstall("user32", "GetMessageW", GetMessageW_Hook);
+		//HookInstall("user32", "PeekMessageA", PeekMessageA_Hook);
+		//HookInstall("user32", "PeekMessageW", PeekMessageW_Hook);
+
+		HookInstall("user32", "GetRawInputDeviceList", GetRawInputDeviceList_Hook);
+		HookInstall("user32", "GetRegisteredRawInputDevices", GetRegisteredRawInputDevices_Hook);
 		if (!RenameMutex)
 		{
 			if (IsDebug)
@@ -424,9 +493,9 @@ void __stdcall NativeInjectionEntryPoint(REMOTE_ENTRY_INFO* inRemoteInfo)
 			outfile << date_string() << "SHOOK32: Injecting RenameMutex hooks\n";
 			outfile.close();
 		}
-		const size_t targetsLength = (data[8] << 24) + (data[9] << 16) + (data[10] << 8) + data[11];
+		const size_t targetsLength = (data[14] << 24) + (data[15] << 16) + (data[16] << 8) + data[17];
 		auto targets = static_cast<PWSTR>(malloc(targetsLength + sizeof(WCHAR)));
-		memcpy(targets, &data[13 + pathLength], targetsLength);
+		memcpy(targets, &data[19 + pathLength], targetsLength);
 		targets[targetsLength / sizeof(WCHAR)] = '\0';
 		installFindMutexHooks(targets);
 	}

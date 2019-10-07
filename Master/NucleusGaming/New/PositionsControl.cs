@@ -1403,7 +1403,7 @@ namespace Nucleus.Coop
                 {
                     GenericGameInfo ggi = game.Game;
                     PlayerInfo info = players[i];
-                    //MessageBox.Show("Game name: " + ggi.GameName + "\nDInputEnabled: " + ggi.Hook.DInputEnabled + "\nDInputForceDisable: " + ggi.Hook.DInputForceDisable + "\nXInputReroute: " + ggi.Hook.XInputReroute + "\nPlayers count: " + players.Count + "\n\nController Name: " + info.GamepadName + "\nHID Device ID: " + info.HIDDeviceID + "\nInstance GUID: " + info.GamepadGuid + "\nSlot: " + i + "\nIsXInput: " + info.IsXInput + "\nIsDInput: " + info.IsDInput + "\nIsKeyboardPlayer: " + info.IsKeyboardPlayer);
+                    //MessageBox.Show("Game name: " + ggi.GameName + "\nDInputEnabled: " + ggi.Hook.DInputEnabled + "\nDInputForceDisable: " + ggi.Hook.DInputForceDisable + "\nXInputReroute: " + ggi.Hook.XInputReroute + "\nPlayers count: " + players.Count + "\n\nController Name: " + info.GamepadName + "\nHID Device ID: " + info.HIDDeviceID + "\nInstance GUID: " + info.GamepadGuid + "\nSlot: " + i + "\nIsXInput: " + info.IsXInput + "\nIsDInput: " + info.IsDInput + "\nIsKeyboardPlayer: " + info.IsKeyboardPlayer + "\nRaw hid: " + info.DInputJoystick.Properties.InterfacePath);
                     Rectangle s = info.EditBounds;
                     g.ResetClip();
                     g.Clip = new Region(new RectangleF(s.X, s.Y, s.Width + 1, s.Height + 1));

@@ -116,6 +116,10 @@ namespace Nucleus.Gaming
         public bool UseDevReorder;
         public string[] HexEditAllExes;
         public string[] HexEditExe;
+        public bool BlockRawInput;
+        public string[] HexEditFile;
+        public string[] HexEditAllFiles;
+        public bool SetWindowHookStart;
 
         public Type HandlerType
         {

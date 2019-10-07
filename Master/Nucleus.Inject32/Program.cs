@@ -4,6 +4,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using EasyHook;
+using Nucleus.Gaming;
 
 namespace Nucleus.Inject32
 {
@@ -21,6 +22,20 @@ namespace Nucleus.Inject32
             uint InPassThruSize,
             IntPtr OutProcessId //Pointer to a UINT (the PID of the new process)
             );
+
+
+        private static readonly IniFile ini = new IniFile(Path.Combine(Directory.GetCurrentDirectory(), "Settings.ini"));
+        private static void Log(string logMessage)
+        {
+            if (ini.IniReadValue("Misc", "DebugLog") == "True")
+            {
+                using (StreamWriter writer = new StreamWriter("debug-log.txt", true))
+                {
+                    writer.WriteLine($"[{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}]INJECT32: {logMessage}");
+                    writer.Close();
+                }
+            }
+        }
 
         static void Main(string[] args)
         {
@@ -42,6 +57,7 @@ namespace Nucleus.Inject32
                 bool.TryParse(args[i++], out bool setWindow);
                 bool.TryParse(args[i++], out bool isDebug);
                 string nucleusFolderPath = args[i++];
+                bool.TryParse(args[i++], out bool blockRaw);
 
                 //IntPtr InPassThruBuffer = Marshal.StringToHGlobalUni(args[i++]);
                 //uint.TryParse(args[i++], out uint InPassThruSize);
@@ -58,20 +74,21 @@ namespace Nucleus.Inject32
                 data[1] = renameMutex == true ? (byte)1 : (byte)0;
                 data[2] = setWindow == true ? (byte)1 : (byte)0;
                 data[3] = isDebug == true ? (byte)1 : (byte)0;
+                data[4] = blockRaw == true ? (byte)1 : (byte)0;
 
-                data[4] = (byte)(logPathLength >> 24);
-                data[5] = (byte)(logPathLength >> 16);
-                data[6] = (byte)(logPathLength >> 8);
-                data[7] = (byte)logPathLength;
+                data[10] = (byte)(logPathLength >> 24);
+                data[11] = (byte)(logPathLength >> 16);
+                data[12] = (byte)(logPathLength >> 8);
+                data[13] = (byte)logPathLength;
 
-                data[8] = (byte)(targetsBytesLength >> 24);
-                data[9] = (byte)(targetsBytesLength >> 16);
-                data[10] = (byte)(targetsBytesLength >> 8);
-                data[11] = (byte)targetsBytesLength;
+                data[14] = (byte)(targetsBytesLength >> 24);
+                data[15] = (byte)(targetsBytesLength >> 16);
+                data[16] = (byte)(targetsBytesLength >> 8);
+                data[17] = (byte)targetsBytesLength;
 
-                Array.Copy(logPath, 0, data, 12, logPathLength);
+                Array.Copy(logPath, 0, data, 18, logPathLength);
 
-                Array.Copy(targetsBytes, 0, data, 13 + logPathLength, targetsBytesLength);
+                Array.Copy(targetsBytes, 0, data, 19 + logPathLength, targetsBytesLength);
 
                 IntPtr ptr = Marshal.AllocHGlobal(size);
                 Marshal.Copy(data, 0, ptr, size);
@@ -99,10 +116,11 @@ namespace Nucleus.Inject32
                 }
                 catch (Exception ex)
                 {
-                    using (StreamWriter writer = new StreamWriter("error-log.txt", true))
-                    {
-                        writer.WriteLine("[" + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "]" + "ex msg: {0}, ex str: {1}", ex.Message, ex.ToString());
-                    }
+                    Log(string.Format("ERROR - {0}", ex.Message));
+                    //using (StreamWriter writer = new StreamWriter("error-log.txt", true))
+                    //{
+                    //    writer.WriteLine("[" + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "]" + "ex msg: {0}, ex str: {1}", ex.Message, ex.ToString());
+                    //}
                 }
             }
             else if(Tier==1)
@@ -120,6 +138,7 @@ namespace Nucleus.Inject32
                 bool.TryParse(args[i++], out bool setWindow);
                 bool.TryParse(args[i++], out bool isDebug);
                 string nucleusFolderPath = args[i++];
+                bool.TryParse(args[i++], out bool blockRaw);
 
                 //IntPtr InPassThruBuffer = Marshal.StringToHGlobalUni(args[i++]);
                 //uint.TryParse(args[i++], out uint InPassThruSize);
@@ -136,20 +155,21 @@ namespace Nucleus.Inject32
                 data[1] = renameMutex == true ? (byte)1 : (byte)0;
                 data[2] = setWindow == true ? (byte)1 : (byte)0;
                 data[3] = isDebug == true ? (byte)1 : (byte)0;
+                data[4] = blockRaw == true ? (byte)1 : (byte)0;
 
-                data[4] = (byte)(logPathLength >> 24);
-                data[5] = (byte)(logPathLength >> 16);
-                data[6] = (byte)(logPathLength >> 8);
-                data[7] = (byte)logPathLength;
+                data[10] = (byte)(logPathLength >> 24);
+                data[11] = (byte)(logPathLength >> 16);
+                data[12] = (byte)(logPathLength >> 8);
+                data[13] = (byte)logPathLength;
 
-                data[8] = (byte)(targetsBytesLength >> 24);
-                data[9] = (byte)(targetsBytesLength >> 16);
-                data[10] = (byte)(targetsBytesLength >> 8);
-                data[11] = (byte)targetsBytesLength;
+                data[14] = (byte)(targetsBytesLength >> 24);
+                data[15] = (byte)(targetsBytesLength >> 16);
+                data[16] = (byte)(targetsBytesLength >> 8);
+                data[17] = (byte)targetsBytesLength;
 
-                Array.Copy(logPath, 0, data, 12, logPathLength);
+                Array.Copy(logPath, 0, data, 18, logPathLength);
 
-                Array.Copy(targetsBytes, 0, data, 13 + logPathLength, targetsBytesLength);
+                Array.Copy(targetsBytes, 0, data, 19 + logPathLength, targetsBytesLength);
 
                 IntPtr ptr = Marshal.AllocHGlobal(size);
                 Marshal.Copy(data, 0, ptr, size);
@@ -160,10 +180,11 @@ namespace Nucleus.Inject32
                 }
                 catch (Exception ex)
                 {
-                    using (StreamWriter writer = new StreamWriter("error-log.txt", true))
-                    {
-                        writer.WriteLine("[" + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "]" + "ex msg: {0}, ex str: {1}", ex.Message, ex.ToString());
-                    }
+                    Log(string.Format("ERROR - {0}", ex.Message));
+                    //using (StreamWriter writer = new StreamWriter("error-log.txt", true))
+                    //{
+                    //    writer.WriteLine("[" + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "]" + "ex msg: {0}, ex str: {1}", ex.Message, ex.ToString());
+                    //}
                 }
             }
         }

@@ -779,9 +779,8 @@ namespace Nucleus.Gaming
 
                 if (gen.HexEditAllExes?.Length > 0)
                 {
-                    //foreach (string asciiValues in gen.HexEditAllExes)
-                    //{
-                    Log("Patching executable");
+                    Log("HexEditAllExes - Patching executable");
+
                     bool origExists = false;
                     if (File.Exists(Path.Combine(Path.GetDirectoryName(exePath), Path.GetFileNameWithoutExtension(exePath) + "-ORIG.exe")))
                     {
@@ -789,50 +788,52 @@ namespace Nucleus.Gaming
                         //File.Delete(Path.Combine(Path.GetDirectoryName(exePath), Path.GetFileNameWithoutExtension(exePath) + "-ORIG.exe"));
                     }
 
-                    if (origExists)
+                    foreach (string asciiValues in gen.HexEditAllExes)
                     {
-                        
-                        
-                        string[] splitValues = gen.HexEditAllExes[i].Split('|');
-                        if (splitValues.Length > 1)
+                        if (origExists)
                         {
-                            Log(string.Format("Temporarily renaming original executable {0} to {1}", gen.ExecutableName, Path.GetFileNameWithoutExtension(gen.ExecutableName) + "-TEMP.exe"));
-                            File.Move(exePath, Path.Combine(Path.GetDirectoryName(exePath), Path.GetFileNameWithoutExtension(exePath) + "-TEMP.exe"));
-                            Log(string.Format("Created patched executable {0} where the text string '{1}' has been replaced with '{2}'", gen.ExecutableName, splitValues[0], splitValues[1]));
-                            context.PatchFile(exePath.Substring(0, exePath.Length - 4) + "-TEMP.exe", exePath, splitValues[0], splitValues[1]);
-                            Log(string.Format("Deleting temporary executable {0}", Path.GetFileNameWithoutExtension(gen.ExecutableName) + "-TEMP.exe"));
-                            File.Delete(Path.Combine(Path.GetDirectoryName(exePath), Path.GetFileNameWithoutExtension(exePath) + "-TEMP.exe"));
+                        
+                        
+                            string[] splitValues = asciiValues.Split('|');
+                            if (splitValues.Length == 2)
+                            {
+                                Log(string.Format("Temporarily renaming original executable {0} to {1}", gen.ExecutableName, Path.GetFileNameWithoutExtension(gen.ExecutableName) + "-TEMP.exe"));
+                                File.Move(exePath, Path.Combine(Path.GetDirectoryName(exePath), Path.GetFileNameWithoutExtension(exePath) + "-TEMP.exe"));
+                                Log(string.Format("Created patched executable {0} where the text string '{1}' has been replaced with '{2}'", gen.ExecutableName, splitValues[0], splitValues[1]));
+                                context.PatchFile(exePath.Substring(0, exePath.Length - 4) + "-TEMP.exe", exePath, splitValues[0], splitValues[1]);
+                                Log(string.Format("Deleting temporary executable {0}", Path.GetFileNameWithoutExtension(gen.ExecutableName) + "-TEMP.exe"));
+                                File.Delete(Path.Combine(Path.GetDirectoryName(exePath), Path.GetFileNameWithoutExtension(exePath) + "-TEMP.exe"));
+                            }
+                            else
+                            {
+                                Log("Invalid # of parameters provided for: " + asciiValues + ", skipping");
+                            }
                         }
                         else
                         {
-                            Log("Nothing specified to change for this instance executable");
-                        }
-                    }
-                    else
-                    {
                         
                         
-                        string[] splitValues = gen.HexEditAllExes[i].Split('|');
-                        if (splitValues.Length > 1)
-                        {
-                            Log(string.Format("Renaming original executable {0} to {1}", gen.ExecutableName, Path.GetFileNameWithoutExtension(gen.ExecutableName) + "-ORIG.exe"));
-                            File.Move(exePath, Path.Combine(Path.GetDirectoryName(exePath), Path.GetFileNameWithoutExtension(exePath) + "-ORIG.exe"));
-                            Log(string.Format("Created patched executable {0} where the text string '{1}' has been replaced with '{2}'", gen.ExecutableName, splitValues[0], splitValues[1]));
-                            context.PatchFile(exePath.Substring(0, exePath.Length - 4) + "-ORIG.exe", exePath, splitValues[0], splitValues[1]);
+                            string[] splitValues = asciiValues.Split('|');
+                            if (splitValues.Length == 2)
+                            {
+                                Log(string.Format("Renaming original executable {0} to {1}", gen.ExecutableName, Path.GetFileNameWithoutExtension(gen.ExecutableName) + "-ORIG.exe"));
+                                File.Move(exePath, Path.Combine(Path.GetDirectoryName(exePath), Path.GetFileNameWithoutExtension(exePath) + "-ORIG.exe"));
+                                Log(string.Format("Created patched executable {0} where the text string '{1}' has been replaced with '{2}'", gen.ExecutableName, splitValues[0], splitValues[1]));
+                                context.PatchFile(exePath.Substring(0, exePath.Length - 4) + "-ORIG.exe", exePath, splitValues[0], splitValues[1]);
+                            }
+                            else
+                            {
+                                Log("Invalid # of parameters provided for: " + asciiValues + ", skipping");
+                            }
                         }
-                        else
-                        {
-                            Log("Nothing specified to change for this instance executable");
-                        }
-                    }
 
-                    //File.Move(exePath, Path.Combine(Path.GetDirectoryName(exePath), Path.GetFileNameWithoutExtension(exePath) + "-ORIG.exe"));
-                    //string[] splitValues = asciiValues.Split('|');
-                    //if (splitValues.Length > 1)
-                    //{
-                    //    context.PatchFile(exePath.Substring(0, exePath.Length - 4) + "-ORIG.exe", exePath, splitValues[0], splitValues[1]);
-                    //}
-                    //}
+                        //File.Move(exePath, Path.Combine(Path.GetDirectoryName(exePath), Path.GetFileNameWithoutExtension(exePath) + "-ORIG.exe"));
+                        //string[] splitValues = asciiValues.Split('|');
+                        //if (splitValues.Length > 1)
+                        //{
+                        //    context.PatchFile(exePath.Substring(0, exePath.Length - 4) + "-ORIG.exe", exePath, splitValues[0], splitValues[1]);
+                        //}
+                    }
                     Log("Patching executable complete");
                 }
 
@@ -840,7 +841,7 @@ namespace Nucleus.Gaming
                 {
                     //foreach (string asciiValues in gen.HexEditExe)
                     //{
-                    Log("Patching executable");
+                    Log("HexEditExe - Patching individual executable");
                     bool origExists = false;
                     if (File.Exists(Path.Combine(Path.GetDirectoryName(exePath), Path.GetFileNameWithoutExtension(exePath) + "-ORIG.exe")))
                     {
@@ -852,18 +853,18 @@ namespace Nucleus.Gaming
                     {
 
                         string[] splitValues = gen.HexEditExe[i].Split('|');
-                        if (splitValues.Length > 1)
+                        if (splitValues.Length == 2)
                         {
                             Log(string.Format("Temporarily renaming original executable {0} to {1}", gen.ExecutableName, Path.GetFileNameWithoutExtension(gen.ExecutableName) + "-TEMP.exe"));
-                            File.Move(exePath, Path.Combine(Path.GetDirectoryName(exePath), Path.GetFileNameWithoutExtension(exePath) + "-TEMP.exe"));
-                            Log(string.Format("Created patched executable {0} where {1} has been replaced with {2}", gen.ExecutableName, splitValues[0], splitValues[1]));
+                            File.Move(exePath, Path.Combine(Path.GetDirectoryName(exePath), Path.GetFileNameWithoutExtension(exePath) + "-TEMP.exe"));                          
+                            Log(string.Format("Created patched executable {0} where the text string '{1}' has been replaced with '{2}'", gen.ExecutableName, splitValues[0], splitValues[1]));
                             context.PatchFile(exePath.Substring(0, exePath.Length - 4) + "-TEMP.exe", exePath, splitValues[0], splitValues[1]);
                             Log(string.Format("Deleting temporary executable {0}", Path.GetFileNameWithoutExtension(gen.ExecutableName) + "-TEMP.exe"));
                             File.Delete(Path.Combine(Path.GetDirectoryName(exePath), Path.GetFileNameWithoutExtension(exePath) + "-TEMP.exe"));
                         }
                         else
                         {
-                            Log("Nothing specified to change for this instance executable");
+                            Log("Invalid # of parameters provided for: " + gen.HexEditExe[i] + ", skipping");
                         }
 
                     }
@@ -871,7 +872,7 @@ namespace Nucleus.Gaming
                     {
 
                         string[] splitValues = gen.HexEditExe[i].Split('|');
-                        if (splitValues.Length > 1)
+                        if (splitValues.Length == 2)
                         {
                             Log(string.Format("Renaming original executable {0} to {1}", gen.ExecutableName, Path.GetFileNameWithoutExtension(gen.ExecutableName) + "-ORIG.exe"));
                             File.Move(exePath, Path.Combine(Path.GetDirectoryName(exePath), Path.GetFileNameWithoutExtension(exePath) + "-ORIG.exe"));
@@ -880,12 +881,116 @@ namespace Nucleus.Gaming
                         }
                         else
                         {
-                            Log("Nothing specified to change for this instance executable");
+                            if (string.IsNullOrEmpty(gen.HexEditExe[i]))
+                            {
+                                Log("Nothing to change for this instance's executable");
+                            }
+                            else
+                            {
+                                Log("Invalid # of parameters provided for: " + gen.HexEditFile[i] + ", skipping");
+                            }
                         }
                     }
 
                     Log("Patching executable complete");
                     //}
+                }
+
+                if (gen.HexEditAllFiles?.Length > 0)
+                {
+                    foreach (string asciiValues in gen.HexEditAllFiles)
+                    {
+                        string[] splitValues = asciiValues.Split('|');
+                        if(splitValues.Length == 3)
+                        {
+                            string filePath = splitValues[0];
+                            string fullPath = Path.Combine(Path.Combine(linkFolder, filePath));
+                            string fullFileName = Path.GetFileName(filePath);
+                            string strToSearch = splitValues[1];
+                            string replacedStr = splitValues[2];
+                            Log(string.Format("HexEditAllFiles - Patching file: {0}",filePath));
+
+                            //if(!File.Exists(Path.GetFileNameWithoutExtension(fullPath)))
+                            //{
+                            //    if (File.Exists(Path.Combine(rootFolder, filePath)))
+                            //    {
+                            //        File.Copy(Path.Combine(rootFolder, filePath), fullPath, true);
+                            //    }
+                            //}
+                            
+                            bool origExists = false;
+                            if (File.Exists(Path.GetDirectoryName(fullPath) + "\\" + Path.GetFileNameWithoutExtension(fullPath) + "-ORIG" + Path.GetExtension(filePath)))
+                            {
+                                origExists = true;
+                                //File.Delete(Path.Combine(Path.GetDirectoryName(exePath), Path.GetFileNameWithoutExtension(exePath) + "-ORIG.exe"));
+                            }
+
+                            if (origExists)
+                            {
+                                Log(string.Format("Temporarily renaming original file {0} to {1}", fullFileName, Path.GetFileNameWithoutExtension(fullFileName) + "-TEMP" + Path.GetExtension(filePath)));
+                                File.Move(fullPath, Path.Combine(Path.GetDirectoryName(fullPath), Path.GetFileNameWithoutExtension(fullPath) + "-TEMP" + Path.GetExtension(filePath)));
+                                Log(string.Format("Created patched executable {0} where the text string '{1}' has been replaced with '{2}'", fullFileName, strToSearch, replacedStr));
+                                context.PatchFile(fullPath.Substring(0, fullPath.Length - 4) + "-TEMP" + Path.GetExtension(filePath), fullPath, splitValues[1], splitValues[2]);
+                                Log(string.Format("Deleting temporary file {0}", Path.GetFileNameWithoutExtension(fullFileName) + "-TEMP" + Path.GetExtension(filePath)));
+                                File.Delete(Path.Combine(Path.GetDirectoryName(fullPath), Path.GetFileNameWithoutExtension(fullPath) + "-TEMP" + Path.GetExtension(filePath)));
+                            }
+                            else
+                            {
+                                Log(string.Format("Renaming original file {0} to {1}", fullFileName, Path.GetFileNameWithoutExtension(fullFileName) + "-ORIG" + Path.GetExtension(filePath)));
+                                File.Move(fullPath, Path.Combine(Path.GetDirectoryName(fullPath), Path.GetFileNameWithoutExtension(fullPath) + "-ORIG" + Path.GetExtension(filePath)));
+                                Log(string.Format("Created patched file {0} where the text string '{1}' has been replaced with '{2}'", fullFileName, strToSearch, replacedStr));
+                                context.PatchFile(fullPath.Substring(0, fullPath.Length - 4) + "-ORIG" + Path.GetExtension(filePath), fullPath, splitValues[1], splitValues[2]);
+                            }
+                        }
+                        else
+                        {
+                            Log("Invalid # of parameters provided for: " + asciiValues + ", skipping");
+                        }
+                    }
+                    Log("Patching executable complete");
+                }
+
+                if (gen.HexEditFile?.Length > 0)
+                {
+                    string[] splitValues = gen.HexEditFile[i].Split('|');
+                    if (splitValues.Length == 3)
+                    {
+                        string filePath = splitValues[0];
+                        string fullPath = Path.Combine(Path.Combine(linkFolder, filePath));
+                        string fullFileName = Path.GetFileName(filePath);
+                        string strToSearch = splitValues[1];
+                        string replacedStr = splitValues[2];
+                        Log(string.Format("HexEditFile - Patching file: {0}", filePath));
+
+                        bool origExists = false;
+                        if (File.Exists(Path.GetDirectoryName(fullPath) + "\\" + Path.GetFileNameWithoutExtension(fullPath) + "-ORIG" + Path.GetExtension(filePath)))
+                        {
+                            origExists = true;
+                            //File.Delete(Path.Combine(Path.GetDirectoryName(exePath), Path.GetFileNameWithoutExtension(exePath) + "-ORIG.exe"));
+                        }
+
+                        if (origExists)
+                        {
+                            Log(string.Format("Temporarily renaming original file {0} to {1}", fullFileName, Path.GetFileNameWithoutExtension(fullFileName) + "-TEMP" + Path.GetExtension(filePath)));
+                            File.Move(fullPath, Path.Combine(Path.GetDirectoryName(fullPath), Path.GetFileNameWithoutExtension(fullPath) + "-TEMP" + Path.GetExtension(filePath)));
+                            Log(string.Format("Created patched executable {0} where the text string '{1}' has been replaced with '{2}'", fullFileName, strToSearch, replacedStr));
+                            context.PatchFile(fullPath.Substring(0, fullPath.Length - 4) + "-TEMP" + Path.GetExtension(filePath), fullPath, splitValues[1], splitValues[2]);
+                            Log(string.Format("Deleting temporary file {0}", Path.GetFileNameWithoutExtension(fullFileName) + "-TEMP" + Path.GetExtension(filePath)));
+                            File.Delete(Path.Combine(Path.GetDirectoryName(fullPath), Path.GetFileNameWithoutExtension(fullPath) + "-TEMP" + Path.GetExtension(filePath)));
+                        }
+                        else
+                        {
+                            Log(string.Format("Renaming original file {0} to {1}", fullFileName, Path.GetFileNameWithoutExtension(fullFileName) + "-ORIG" + Path.GetExtension(filePath)));
+                            File.Move(fullPath, Path.Combine(Path.GetDirectoryName(fullPath), Path.GetFileNameWithoutExtension(fullPath) + "-ORIG" + Path.GetExtension(filePath)));
+                            Log(string.Format("Created patched file {0} where the text string '{1}' has been replaced with '{2}'", fullFileName, strToSearch, replacedStr));
+                            context.PatchFile(fullPath.Substring(0, fullPath.Length - 4) + "-ORIG" + Path.GetExtension(filePath), fullPath, splitValues[1], splitValues[2]);
+                        }
+                    }
+                    else
+                    {
+                        Log("Invalid # of parameters provided for: " + gen.HexEditFile[i] + ", skipping");
+                    }
+                    Log("Patching executable complete");
                 }
 
                 if (gen.UseGoldberg)
@@ -1112,10 +1217,11 @@ namespace Nucleus.Gaming
                     }
                     else
                     {
-                        using (StreamWriter writer = new StreamWriter("error-log.txt", true))
-                        {
-                            writer.WriteLine("[" + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "]" + "Machine type: '{0}' not implemented.", GetDllMachineType(exePath));
-                        }
+                        Log(string.Format("ERROR - Machine type {0} not implemented", GetDllMachineType(exePath)));
+                        //using (StreamWriter writer = new StreamWriter("error-log.txt", true))
+                        //{
+                        //    writer.WriteLine("[" + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "]" + "Machine type: '{0}' not implemented.", GetDllMachineType(exePath));
+                        //}
                     }
 
                     foreach(string xinputDllName in gen.XInputPlusDll)
@@ -1134,7 +1240,7 @@ namespace Nucleus.Gaming
                         {
                             xinputDll = "Dinput8.dl_";
                         }
-                        Log("Using " + xinputDll + "(" + arch + ") as base and naming it: " + xinputDllName);
+                        Log("Using " + xinputDll + " (" + arch + ") as base and naming it: " + xinputDllName);
                         File.Copy(Path.Combine(utilFolder, arch + "\\" + xinputDll), Path.Combine(linkBinFolder, xinputDllName), true);
 
                         if (File.Exists(Path.Combine(linkBinFolder, "XInputPlus.ini")))
@@ -1186,10 +1292,11 @@ namespace Nucleus.Gaming
                     }
                     else
                     {
-                        using (StreamWriter writer = new StreamWriter("error-log.txt", true))
-                        {
-                            writer.WriteLine("[" + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "]" + "Machine type: '{0}' not implemented.", GetDllMachineType(exePath));
-                        }
+                        Log(string.Format("ERROR - Machine type {0} not implemented", GetDllMachineType(exePath)));
+                        //using (StreamWriter writer = new StreamWriter("error-log.txt", true))
+                        //{
+                        //    writer.WriteLine("[" + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "]" + "Machine type: '{0}' not implemented.", GetDllMachineType(exePath));
+                        //}
                     }
 
                     if (File.Exists(Path.Combine(linkBinFolder, "dinput8.dll")))
@@ -1242,10 +1349,11 @@ namespace Nucleus.Gaming
                         }
                         else
                         {
-                            using (StreamWriter writer = new StreamWriter("error-log.txt", true))
-                            {
-                                writer.WriteLine("[" + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "]" + "Machine type: '{0}' not implemented.", GetDllMachineType(exePath));
-                            }
+                            Log(string.Format("ERROR - Machine type {0} not implemented", GetDllMachineType(exePath)));
+                            //using (StreamWriter writer = new StreamWriter("error-log.txt", true))
+                            //{
+                            //    writer.WriteLine("[" + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "]" + "Machine type: '{0}' not implemented.", GetDllMachineType(exePath));
+                            //}
                         }
 
                         if (File.Exists(Path.Combine(linkBinFolder, x360exe)))
@@ -1406,6 +1514,11 @@ namespace Nucleus.Gaming
                     }
                     else
                     {
+                        if(gen.Hook.UseAlpha8CustomDll)
+                        {
+                            Log("Using Alpha 10 custom dll as there is no Alpha 8 x64 custom dll");
+                        }
+
                         if (Is64Bit(exePath) == true)
                         {
                             xdata = Properties.Resources.xinput1_3_a10_x64;
@@ -1417,10 +1530,11 @@ namespace Nucleus.Gaming
                         else
                         {
                             xdata = null;
-                            using (StreamWriter writer = new StreamWriter("error-log.txt", true))
-                            {
-                                writer.WriteLine("[" + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "]" + "Machine type: '{0}' not implemented.", GetDllMachineType(exePath));
-                            }
+                            Log(string.Format("ERROR - Machine type {0} not implemented", GetDllMachineType(exePath)));
+                            //using (StreamWriter writer = new StreamWriter("error-log.txt", true))
+                            //{
+                            //    writer.WriteLine("[" + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "]" + "Machine type: '{0}' not implemented.", GetDllMachineType(exePath));
+                            //}
                         }
                     }
                     
@@ -1634,7 +1748,7 @@ namespace Nucleus.Gaming
                 }
                 else
                 {
-                    if ((context.KillMutex?.Length > 0 || (gen.HookInit || gen.RenameNotKillMutex || gen.SetWindowHook)) && !gen.CMDLaunch && !gen.UseForceBindIP) /*|| (gen.CMDLaunch && i==0))*/
+                    if ((context.KillMutex?.Length > 0 || (gen.HookInit || gen.RenameNotKillMutex || gen.SetWindowHookStart || gen.BlockRawInput)) && !gen.CMDLaunch && !gen.UseForceBindIP) /*|| (gen.CMDLaunch && i==0))*/
                     {
 
                         string mu = "";
@@ -1651,10 +1765,18 @@ namespace Nucleus.Gaming
                             }
                         }
 
+
+                        
+                        //string rawHID = player.DInputJoystick.Properties.InterfacePath;
+                        //string frmtRawHidPartA = rawHID.Substring(0, rawHID.LastIndexOf("&")).ToUpper();
+                        //string frmtRawHidPartB = rawHID.Substring(rawHID.LastIndexOf("&") + 1);
+                        //string frmtRawHid = frmtRawHidPartA + frmtRawHidPartB;
+                        //MessageBox.Show(frmtRawHid);
+
                         Log(string.Format("Launching game through StartGameUtil located at {0}", GetRelativePath(exePath, nucleusRootFolder)));
                         proc = Process.GetProcessById(StartGameUtil.StartGame(
                             GetRelativePath(exePath, nucleusRootFolder), startArgs,
-                            gen.HookInit, gen.HookInitDelay, gen.RenameNotKillMutex, mu, gen.SetWindowHook, isDebug, nucleusRootFolder, GetRelativePath(linkFolder, nucleusRootFolder)));
+                            gen.HookInit, gen.HookInitDelay, gen.RenameNotKillMutex, mu, gen.SetWindowHookStart, isDebug, nucleusRootFolder, gen.BlockRawInput, /*rawHID,*/ GetRelativePath(linkFolder, nucleusRootFolder)));
                     }
                     else
                     {
@@ -1689,10 +1811,11 @@ namespace Nucleus.Gaming
                                 }
                                 else
                                 {
-                                    using (StreamWriter writer = new StreamWriter("error-log.txt", true))
-                                    {
-                                        writer.WriteLine("[" + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "]" + "Machine type: '{0}' not implemented.", GetDllMachineType(exePath));
-                                    }
+                                    Log(string.Format("ERROR - Machine type {0} not implemented", GetDllMachineType(exePath)));
+                                    //using (StreamWriter writer = new StreamWriter("error-log.txt", true))
+                                    //{
+                                    //    writer.WriteLine("[" + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "]" + "Machine type: '{0}' not implemented.", GetDllMachineType(exePath));
+                                    //}
                                 }
                                 string cmdLine = "\"" + Path.Combine(GameManager.Instance.GetUtilsPath(), "ForceBindIP\\" + forceBindexe) + "\" 127.0.0." + (i + 2) + " \"" + exePath + "\" " + startArgs;
                                 Log(string.Format("Launching game using ForceBindIP command line argument: {0}", cmdLine));
@@ -1962,7 +2085,7 @@ namespace Nucleus.Gaming
                     }
 
 
-                    if (gen.HookFocus || gen.SetWindowHook)
+                    if (gen.HookFocus || gen.SetWindowHook || gen.HideCursor)
                     {
                         if (!data.Setted)
                         {
@@ -2026,10 +2149,11 @@ namespace Nucleus.Gaming
                     }
                     if (times == 199 && (int)proc.MainWindowHandle == 0)
                     {
-                        using (StreamWriter writer = new StreamWriter("error-log.txt", true))
-                        {
-                            writer.WriteLine("[" + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "]" + "InjectDLLs: Could not find main window handle for {0} (pid:{1})", proc.ProcessName, proc.Id);
-                        }
+                        Log(string.Format("ERROR - InjectDLLs could not find main window handle for {0} (pid {1})", proc.ProcessName, proc.Id));
+                        //using (StreamWriter writer = new StreamWriter("error-log.txt", true))
+                        //{
+                        //    writer.WriteLine("[" + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "]" + "InjectDLLs: Could not find main window handle for {0} (pid:{1})", proc.ProcessName, proc.Id);
+                        //}
                     }
                 }
             }
@@ -2053,7 +2177,7 @@ namespace Nucleus.Gaming
                     startInfo.FileName = injectorPath;
                     object[] args = new object[]
                     {
-                        1, proc.Id, 0, 0, null, Path.Combine(currDir, "Nucleus.Hook64.dll"), proc.MainWindowHandle, gen.HookFocus, gen.HideCursor, isDebug, nucleusFolderPath
+                        1, proc.Id, 0, 0, null, Path.Combine(currDir, "Nucleus.Hook64.dll"), proc.MainWindowHandle, gen.HookFocus, gen.HideCursor, isDebug, nucleusFolderPath, gen.SetWindowHook
                     };
                     var sbArgs = new StringBuilder();
                     foreach (object arg in args)
@@ -2085,6 +2209,7 @@ namespace Nucleus.Gaming
                     dataToSend[2] = (byte)((int)proc.MainWindowHandle >> 8);
                     dataToSend[3] = (byte)((int)proc.MainWindowHandle);
 
+                    dataToSend[5] = gen.SetWindowHook == true ? (byte)1 : (byte)0;
                     dataToSend[6] = isDebug == true ? (byte)1 : (byte)0;
                     dataToSend[7] = gen.HideCursor == true ? (byte)1 : (byte)0;
                     dataToSend[8] = gen.HookFocus == true ? (byte)1 : (byte)0;
