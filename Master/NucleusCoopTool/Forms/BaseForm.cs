@@ -19,7 +19,8 @@ namespace Nucleus.Coop
             // 12 * 300% = 36
             // 12 * 125% = 15
             // 12 * 150% = 18
-            AutoScaleMode = AutoScaleMode.None;
+            AutoScaleMode = AutoScaleMode.Font;
+            AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             BackColor = Color.FromArgb(50, 50, 50);
             ForeColor = Color.White;
             Margin = new Padding(4, 4, 4, 4);
@@ -44,17 +45,18 @@ namespace Nucleus.Coop
                 return;
             }
 
-            //SuspendLayout();
+            SuspendLayout();
 
-            //Font = DPIManager.Font;
-
+            Font = DPIManager.Font;
+            //AutoScaleMode = AutoScaleMode.Font;
+            //AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             //Size defaultSize = DefaultSize;
             //int wid = DPIManager.Adjust(defaultSize.Width, scale);
             //int hei = DPIManager.Adjust(defaultSize.Height, scale);
             ////Size = new Size(wid, hei);
             //Console.WriteLine("Changed to {0}x{1}", wid, hei);
 
-            //ResumeLayout();
+            ResumeLayout();
         }
 
         /// <summary>

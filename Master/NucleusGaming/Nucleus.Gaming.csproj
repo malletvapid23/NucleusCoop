@@ -254,6 +254,9 @@
     <EmbeddedResource Include="New\PlayerCountControl.resx">
       <DependentUpon>PlayerCountControl.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="New\PositionsControl.resx">
+      <DependentUpon>PositionsControl.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <SubType>Designer</SubType>
@@ -296,9 +299,6 @@
     <None Include="Resources\16players.png" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\keyboard.png" />
-  </ItemGroup>
-  <ItemGroup>
     <Content Include="EasyHook32.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -321,6 +321,8 @@
     <None Include="Resources\6players.png" />
     <None Include="Resources\8players.png" />
     <None Include="Resources\customLayout.png" />
+    <None Include="Resources\keyboard_computer_hardware-512.png" />
+    <None Include="Resources\keyboard.png" />
     <Content Include="Resources\xinput1_3.dll" />
     <None Include="Resources\xinput1_3_a10_log.dll" />
     <None Include="Resources\xinput1_3_a10_x64.dll" />

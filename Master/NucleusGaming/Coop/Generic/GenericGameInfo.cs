@@ -51,6 +51,7 @@ namespace Nucleus.Gaming
 
         public bool FakeFocus;
 
+
         public void AddOption(string name, string desc, string key, object value, object defaultValue)
         {
             Options.Add(new GameOption(name, desc, key, value, defaultValue));
@@ -101,9 +102,8 @@ namespace Nucleus.Gaming
         public string HookFocusInstances;
         public bool KeepAspectRatio;
         public bool HideDesktop;
-        //public bool UseAlpha8CustomDll;
         //public int FakeFocusInterval;
-        //public bool ResetWindows;
+        public bool ResetWindows;
         public bool PartialMutexSearch;
         public bool UseGoldberg;
         public string OrigSteamDllPath;
@@ -120,6 +120,8 @@ namespace Nucleus.Gaming
         public string[] HexEditFile;
         public string[] HexEditAllFiles;
         public bool SetWindowHookStart;
+        public string GoldbergLanguage;
+        public string Description;
 
         public Type HandlerType
         {

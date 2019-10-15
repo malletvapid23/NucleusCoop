@@ -33,6 +33,7 @@
             // PlayerCountControl
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(59F, 142F);
+            //this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(50)))), ((int)(((byte)(50)))), ((int)(((byte)(50)))));
             this.Font = new System.Drawing.Font("Segoe UI", 80F);

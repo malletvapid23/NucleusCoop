@@ -1,11 +1,9 @@
 ﻿using Nucleus.Gaming.Windows;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading;
 using System.Windows.Forms;
 using System.Drawing;
+using System.IO;
 
 namespace Nucleus.Gaming
 {
@@ -14,11 +12,20 @@ namespace Nucleus.Gaming
         public static float Scale = 1f;
         private static List<IDynamicSized> components = new List<IDynamicSized>();
 
+        private static readonly IniFile ini = new Gaming.IniFile(Path.Combine(Directory.GetCurrentDirectory(), "Settings.ini"));
+
         public static Font Font;
 
         public static void PreInitialize()
         {
-            Scale = User32Util.GetDPIScalingFactor();
+            if(ini.IniReadValue("Advanced","Scale") != "")
+            {
+                Scale = float.Parse(ini.IniReadValue("Advanced", "Scale"));
+            }
+            else
+            {
+                Scale = User32Util.GetDPIScalingFactor();
+            }
         }
 
         private static void UpdateFont()
@@ -28,7 +35,16 @@ namespace Nucleus.Gaming
                 Font.Dispose();
             }
 
-            int fontSize = (int)(12 * DPIManager.Scale);
+            int fontSize = (int)(12 / DPIManager.Scale);
+            //if (Scale > 1)
+            //{
+            //    fontSize = (int)(12 / (0.7 * DPIManager.Scale));
+            //}
+            if (ini.IniReadValue("Advanced", "Font") != "")
+            {
+                fontSize = Int32.Parse(ini.IniReadValue("Advanced", "Font"));
+            }
+
             Font = new Font("Segoe UI", fontSize, GraphicsUnit.Point);
         }
 
@@ -48,10 +64,17 @@ namespace Nucleus.Gaming
         private static void AppForm_LocationChanged(object sender, EventArgs e)
         {
             Form form = (Form)sender;
+            //uint val = Convert.ToUInt32(User32Util.GetDPIScalingFactor() * 96.0f); //User32Util.GetDpiForWindow(form.Handle);
             uint val = User32Util.GetDpiForWindow(form.Handle);
+            //uint val = 96;
             float newScale = val / 96.0f;
+            if (ini.IniReadValue("Advanced", "Scale") != "")
+            {
+                newScale = Scale;
+            }
             float dif = Math.Abs(newScale - Scale);
 
+            //MessageBox.Show("val: " + val + " \nnewScale: " + newScale + "\nUser32Util.GetDPIScalingFactor(): " + User32Util.GetDPIScalingFactor() + "\nUser32Util.GetDpiForWindow(form.Handle): " + User32Util.GetDpiForWindow(form.Handle));
             if (dif > 0.001f)
             {
                 // DPI changed
@@ -82,7 +105,7 @@ namespace Nucleus.Gaming
 
         public static int Adjust(float value, float scale)
         {
-            return (int)(value * scale);
+            return (int)(value / scale);
         }
 
         public static void Register(IDynamicSized component)

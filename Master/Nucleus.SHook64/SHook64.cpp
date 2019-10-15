@@ -170,6 +170,12 @@ inline void updateNameObject(POBJECT_ATTRIBUTES ObjectAttributes)
 //		RID_DEVICE_INFO rdi;
 //		rdi.cbSize = sizeof(RID_DEVICE_INFO);
 //
+//		cbSize = rdi.cbSize;
+//		if (GetRawInputDeviceInfo(raw->header.hDevice, RIDI_DEVICEINFO, &rdi, &cbSize) < 0)
+//		{
+//			// Error in reading information
+//		}
+//
 //		UINT size = 256;
 //		TCHAR tBuffer[256] = { 0 };
 //
@@ -184,25 +190,34 @@ inline void updateNameObject(POBJECT_ATTRIBUTES ObjectAttributes)
 //			}
 //		}
 //
+//		if (IsDebug)
+//		{
+//			outfile.open(nucleusFolder + logFile, std::ios_base::app);
+//			outfile << date_string() << "Device name: " << tBuffer << "\n";
+//			outfile.close();
+//		}
+//
 //		if (raw->header.dwType == RIM_TYPEHID)
 //		{
-//			if (rdi.hid.usUsage == 4 || rdi.hid.usUsage == 5)
-//			{
-//				std::string str1 = ws2s(rawHid);
-//				std::string str2 = tBuffer;
+//			//if (rdi.hid.usUsage == 4 || rdi.hid.usUsage == 5)
+//			//{
 //
-//				bool result = caseInSensStringCompare(str1, str2);
 //
-//				if (result)
-//				{
-//					ALLOW;
-//				}
-//				else
-//				{
-//					BLOCK;
-//				}
+//				//std::string str1 = ws2s(rawHid);
+//				//std::string str2 = tBuffer;
 //
-//			}
+//				//bool result = caseInSensStringCompare(str1, str2);
+//
+//				//if (result)
+//				//{
+//				//	ALLOW;
+//				//}
+//				//else
+//				//{
+//				//	BLOCK;
+//				//}
+//
+//			//}
 //		}
 //	}
 //
@@ -256,10 +271,38 @@ UINT WINAPI GetRegisteredRawInputDevices_Hook(PRAWINPUTDEVICE pRawInputDevices, 
 
 //BOOL WINAPI RegisterRawInputDevices_Hook(PCRAWINPUTDEVICE pRawInputDevices, UINT uiNumDevices, UINT cbSize)
 //{
+//
+//	RAWINPUTDEVICE rawInputDevice[1];
+//	rawInputDevice[0].usUsagePage = 1;
+//	rawInputDevice[0].usUsage = 5;
+//	rawInputDevice[0].dwFlags = RIDEV_INPUTSINK;
+//	rawInputDevice[0].hwndTarget = hWnd;
+//
+//	BOOL result = RegisterRawInputDevices(rawInputDevice, 1, sizeof(rawInputDevice[0]));
+//
+//	if (!result)
+//	{
+//		if (IsDebug)
+//		{
+//			outfile.open(nucleusFolder + logFile, std::ios_base::app);
+//			outfile << date_string() << "block raw RegisterRawInputDevices Error: " << GetLastError() << "\n";
+//			outfile.close();
+//		}
+//	}
+//	else
+//	{
+//		if (IsDebug)
+//		{
+//			outfile.open(nucleusFolder + logFile, std::ios_base::app);
+//			outfile << date_string() << "injection entry registered\n";
+//			outfile.close();
+//		}
+//	}
+//
 //	if (IsDebug)
 //	{
 //		outfile.open(nucleusFolder + logFile, std::ios_base::app);
-//		outfile << date_string() << "RegisterRawInputDevices called\n";
+//		outfile << date_string() << "RegisterRawInputDevices called " << "usage: " << pRawInputDevices->usUsage << " usagepage: " << pRawInputDevices->usUsagePage << " dwflags: " << pRawInputDevices->dwFlags << " hwndtarget: " << pRawInputDevices->hwndTarget <<  endl;
 //		outfile.close();
 //	}
 //
@@ -585,24 +628,6 @@ void __stdcall NativeInjectionEntryPoint(REMOTE_ENTRY_INFO* inRemoteInfo)
 			outfile.close();
 		}
 
-		/*RAWINPUTDEVICE rawInputDevice[1];
-		rawInputDevice[0].usUsagePage = 1;
-		rawInputDevice[0].usUsage = 5;
-		rawInputDevice[0].dwFlags = 0;
-		rawInputDevice[0].hwndTarget = hWnd;
-
-		BOOL result = RegisterRawInputDevices(rawInputDevice, 1, sizeof(rawInputDevice[0]));
-
-		if (!result)
-		{
-			if (IsDebug)
-			{
-				outfile.open(nucleusFolder + logFile, std::ios_base::app);
-				outfile << date_string() << "block raw RegisterRawInputDevices Error: " << GetLastError() << "\n";
-				outfile.close();
-			}
-		}*/
-
 		//HookInstall("user32", "GetMessageA", GetMessageA_Hook);
 		//HookInstall("user32", "GetMessageW", GetMessageW_Hook);
 		//HookInstall("user32", "PeekMessageA", PeekMessageA_Hook);
@@ -610,6 +635,8 @@ void __stdcall NativeInjectionEntryPoint(REMOTE_ENTRY_INFO* inRemoteInfo)
 
 		HookInstall("user32", "GetRawInputDeviceList", GetRawInputDeviceList_Hook);
 		HookInstall("user32", "GetRegisteredRawInputDevices", GetRegisteredRawInputDevices_Hook);
+		//HookInstall("user32", "RegisterRawInputDevices", RegisterRawInputDevices_Hook);
+
 		if (!RenameMutex)
 		{
 			if (IsDebug)

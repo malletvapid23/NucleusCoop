@@ -13,6 +13,8 @@ namespace Nucleus.Gaming
     {
         public static readonly long MaxSize = 1024 * 1024 * 1024; // 1mb
 
+        private static readonly IniFile ini = new Gaming.IniFile(Path.Combine(Directory.GetCurrentDirectory(), "Settings.ini"));
+
         private static LogManager instance;
         public static LogManager Instance
         {
@@ -97,10 +99,20 @@ namespace Nucleus.Gaming
         public static void Log(string str)
         {
             Instance.PLog(str);
+
+            if (ini.IniReadValue("Misc", "DebugLog") == "True")
+            {
+                using (StreamWriter writer = new StreamWriter("debug-log.txt", true))
+                {
+                    writer.WriteLine($"[{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}]LOGMANAGER: {str}");
+                    writer.Close();
+                }
+            }
         }
 
         public void LogExceptionFile(Exception ex)
         {
+            Log("ERROR - " + ex.Message + " | Stacktrace: " + ex.StackTrace);
             string local = GetAppDataPath();
             DateTime now = DateTime.Now;
             string file = string.Format("{0}{1}{2}_{3}{4}{5}", now.Day.ToString("00"), now.Month.ToString("00"), now.Year.ToString("0000"), now.Hour.ToString("00"), now.Minute.ToString("00"), now.Second.ToString("00")) + ".log";
@@ -133,6 +145,7 @@ namespace Nucleus.Gaming
                     }
                 }
             }
+            Nucleus.Gaming.Windows.User32Util.ShowTaskBar();
 
             MessageBox.Show("Application crash. Log generated at Data/" + file);
             Application.Exit();

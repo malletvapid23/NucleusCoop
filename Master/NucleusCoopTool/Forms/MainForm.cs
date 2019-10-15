@@ -24,9 +24,9 @@ namespace Nucleus.Coop
     /// </summary>
     public partial class MainForm : BaseForm
     {
-        public string version = "v0.9.7.0 ALPHA";
+        public string version = "v0.9.7.1 ALPHA";
 
-        private Form settingsForm = null;
+        private Settings settingsForm = null;
 
         private int currentStepIndex;
         private bool formClosing;
@@ -75,12 +75,25 @@ namespace Nucleus.Coop
 
         public MainForm()
         {
+            if (Process.GetProcessesByName(Process.GetCurrentProcess().ProcessName).Length > 1)
+            {
+                MessageBox.Show("Nucleus Coop is already running.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                Application.Exit();
+                this.Close();
+                return;
+            }
+
             InitializeComponent();
 
+            if (ini.IniReadValue("Advanced", "Font") != "")
+            {
+                btn_gameOptions.Font = new Font("Segoe UI", float.Parse((ini.IniReadValue("Advanced", "Font")))-1.75f);
+            }
+                
             sideInfoLbl.Text = "Modded by ZeroFox" + "\n" + version;
 
             positionsControl = new PositionsControl();
-            Form settingsForm = new Form(this, positionsControl);
+            Settings settingsForm = new Settings(this, positionsControl);
 
             positionsControl.Paint += PositionsControl_Paint;
 
@@ -98,6 +111,8 @@ namespace Nucleus.Coop
 
             // selects the list of games, so the buttons look equal
             list_Games.Select();
+
+            //MessageBox.Show("list games: " + list_Games.Height + "\nform: " + this.Height + "\nbtnsearhc y coord: " + btnSearch.Location.Y + "\nsteppanel: " + StepPanel.Height);
 
             //list_Games.AutoScroll = false;
             //int vertScrollWidth = SystemInformation.VerticalScrollBarWidth;
@@ -148,7 +163,7 @@ namespace Nucleus.Coop
 
         //protected override void OnActivated(EventArgs e)
         //{
-            
+
         //    if (btn_Play.Text == "S T O P")
         //    {
         //        if (handler == null)
@@ -185,6 +200,7 @@ namespace Nucleus.Coop
             if (m.Msg == 0x0312 && m.WParam.ToInt32() == KillProcess_HotkeyID)
             {
                 //System.Diagnostics.Process.GetCurrentProcess().Kill();
+                User32Util.ShowTaskBar();
                 Close();
             }
             else if (m.Msg == 0x0312 && m.WParam.ToInt32() == TopMost_HotkeyID)
@@ -193,6 +209,13 @@ namespace Nucleus.Coop
                 {
                     try
                     {
+                        //Process[] procs = Process.GetProcesses();
+                        //foreach (Process proc in procs)
+                        //{
+                        //    if (proc.ProcessName.ToLower() == Path.GetFileNameWithoutExtension(currentGame.Hook.For gen.ExecutableName.ToLower()) || attachedIds.Contains(proc.Id) || proc.MainWindowTitle == gen.Hook.ForceFocusWindowName)
+                        //    {
+                        //    }
+                        //}
                         Process[] procs = Process.GetProcessesByName(Path.GetFileNameWithoutExtension(currentGame.ExecutableName.ToLower()));
                         if (procs.Length > 0)
                         {
@@ -211,7 +234,7 @@ namespace Nucleus.Coop
                     this.BringToFront();
                     TopMostToggle = false;
                 }
-                else if(!TopMostToggle && handler != null)
+                else if (!TopMostToggle && handler != null)
                 {
                     Process[] procs = Process.GetProcessesByName(Path.GetFileNameWithoutExtension(currentGame.ExecutableName.ToLower()));
                     if (procs.Length > 0)
@@ -316,7 +339,7 @@ namespace Nucleus.Coop
             string iconPath = ini.IniReadValue("GameIcons", game.Game.GameName);
             if (!string.IsNullOrEmpty(iconPath))
             {
-                if(iconPath.EndsWith(".exe"))
+                if (iconPath.EndsWith(".exe"))
                 {
                     Icon icon = Shell32.GetIcon(iconPath, false);
                     bmp = icon.ToBitmap();
@@ -355,10 +378,7 @@ namespace Nucleus.Coop
             currentGameInfo = currentControl.UserGameInfo;
             if (currentGameInfo == null)
             {
-                btn_delete.Visible = false;
-                btn_details.Visible = false;
-                btn_openScript.Visible = false;
-                btn_open_data.Visible = false;
+                btn_gameOptions.Visible = false;
                 return;
             }
 
@@ -381,14 +401,11 @@ namespace Nucleus.Coop
 
             gameNameControl.GameInfo = currentGameInfo;
 
-            btn_delete.Location = new Point(384 + (gameNameControl.Width - 100), 39);
-            btn_delete.Visible = true;
-            btn_details.Location = new Point(384 + (gameNameControl.Width - 100), 8);
-            btn_details.Visible = true;
-            btn_openScript.Location = new Point(450 + (gameNameControl.Width - 100), 8);
-            btn_openScript.Visible = true;
-            btn_open_data.Location = new Point(450 + (gameNameControl.Width - 100), 39);
-            btn_open_data.Visible = true;
+            btn_gameOptions.Left = 384;
+
+            //btn_gameOptions.Location = new Point(384 + (gameNameControl.Width - 100), 39);
+            btn_gameOptions.Left += gameNameControl.Width - 100;
+            btn_gameOptions.Visible = true;
 
             if (content != null)
             {
@@ -503,27 +520,34 @@ namespace Nucleus.Coop
                 Log("OnFormClosed method calling Handler End function");
                 handler.End();
             }
-
+            User32Util.ShowTaskBar();
         }
 
         private void btn_Play_Click(object sender, EventArgs e)
         {
             if (btn_Play.Text == "S T O P")
             {
-                if (handler.FakeFocus != null)
+                try
                 {
-                    handler.FakeFocus.Abort();
+                    if (handler.FakeFocus != null)
+                    {
+                        handler.FakeFocus.Abort();
+                    }
+                    if (handler != null)
+                    {
+                        Log("Stop button clicked, calling Handler End function");
+                        handler.End();
+                    }
+
                 }
-                if (handler != null)
-                {
-                    Log("Stop button clicked, calling Handler End function");
-                    handler.End();
-                }
+                catch { }
+                User32Util.ShowTaskBar();
                 SetBtnToPlay();
                 btn_Play.Enabled = false;
-                this.Controls.Clear();
-                this.InitializeComponent();
+                //this.Controls.Clear();
+                //this.InitializeComponent();
                 RefreshGames();
+                GoToStep(0);
 
                 return;
             }
@@ -549,7 +573,7 @@ namespace Nucleus.Coop
 
             if (currentGame.HideDesktop)
             {
-                foreach(Screen screen in Screen.AllScreens)
+                foreach (Screen screen in Screen.AllScreens)
                 {
                     System.Windows.Forms.Form hform = new System.Windows.Forms.Form();
                     hform.BackColor = Color.Black;
@@ -574,6 +598,7 @@ namespace Nucleus.Coop
 
         private void handler_Ended()
         {
+            User32Util.ShowTaskBar();
             handler = null;
             if (handlerThread != null)
             {
@@ -585,7 +610,7 @@ namespace Nucleus.Coop
 
         private void UpdateGameManager(object state)
         {
-            for (;;)
+            for (; ; )
             {
                 try
                 {
@@ -605,7 +630,7 @@ namespace Nucleus.Coop
                     handler.Update(handler.TimerInterval);
                     Thread.Sleep(TimeSpan.FromMilliseconds(handler.TimerInterval));
                 }
-                catch(ThreadAbortException)
+                catch (ThreadAbortException)
                 {
                     return;
                 }
@@ -650,15 +675,27 @@ namespace Nucleus.Coop
                         {
                             UserGameInfo game = gameManager.TryAddGame(path, list.Selected);
 
-                            if (game == null)
-                            {
-                                MessageBox.Show("Game already in your library!");
-                            }
-                            else
+                            //if (game == null)
+                            //{
+                            //    MessageBox.Show("Game already in your library!");
+                            //}
+                            //else
+                            //{
+
+                            //if (GameManager.Instance.User.Games.Any(c => c.ExePath.ToLower() == path.ToLower()))
+                            //{
+                            //    DialogResult dialogResult = MessageBox.Show("This game's executable is already in your library. Do you wish to add it anyway?\n\nExecutable Path: " + path, "Already exists", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+                            //    if (dialogResult == DialogResult.Yes)
+                            //    {
+                            if (game != null)
                             {
                                 MessageBox.Show("Game accepted as " + game.Game.GameName);
                                 RefreshGames();
                             }
+
+                            //}
+                            //}
+                            //}
                         }
                     }
                     else if (info.Count == 1)
@@ -669,7 +706,7 @@ namespace Nucleus.Coop
                     }
                     else
                     {
-                        MessageBox.Show("Unknown game");
+                        MessageBox.Show(string.Format("The executable '{0}' was not found in any game script's Game.ExecutableName field. Game has not been added.", Path.GetFileName(path)), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }
                 }
             }
@@ -694,6 +731,7 @@ namespace Nucleus.Coop
 
         private void Form_FormClosed(object sender, FormClosedEventArgs e)
         {
+            User32Util.ShowTaskBar();
             form = null;
         }
 
@@ -704,18 +742,8 @@ namespace Nucleus.Coop
 
         private void SettingsBtn_Click(object sender, EventArgs e)
         {
-            settingsForm = new Form(this, positionsControl);
+            settingsForm = new Settings(this, positionsControl);
             settingsForm.Show();
-        }
-
-        private void Btn_delete_Click(object sender, EventArgs e)
-        {
-            DeleteGame();
-        }
-
-        private void Btn_details_Click(object sender, EventArgs e)
-        {
-            GetDetails();
         }
 
         private void DetailsToolStripMenuItem_Click(object sender, EventArgs e)
@@ -746,7 +774,7 @@ namespace Nucleus.Coop
 
                     if (gameGuid == currentGameInfo.GameGuid && exePath == currentGameInfo.ExePath)
                     {
-                        MessageBox.Show(string.Format("Game Name: {0}\nSteam ID: {1}\nProfiles: {2}\nExe Path: {3}\nScript Filename: {4}\nNucleus Game Data Path: {5}", currentGameInfo.Game.GameName, currentGameInfo.Game.SteamID, profiles, exePath, currentGameInfo.Game.JsFileName, Path.Combine(gameManager.GetAppDataPath(),gameGuid)), "Game Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        MessageBox.Show(string.Format("Game Name: {0}\nSteam ID: {1}\nProfiles: {2}\nExe Path: {3}\nScript Filename: {4}\nNucleus Game Data Path: {5}", currentGameInfo.Game.GameName, currentGameInfo.Game.SteamID, profiles, exePath, currentGameInfo.Game.JsFileName, Path.Combine(gameManager.GetAppDataPath(), gameGuid)), "Game Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     }
                 }
             }
@@ -777,8 +805,8 @@ namespace Nucleus.Coop
                             jObject["Games"][i].Remove();
                             string output = JsonConvert.SerializeObject(jObject, Formatting.Indented);
                             File.WriteAllText(userProfile, output);
-                            this.Controls.Clear();
-                            this.InitializeComponent();
+                            //this.Controls.Clear();
+                            //this.InitializeComponent();
                             RefreshGames();
                         }
                     }
@@ -811,15 +839,28 @@ namespace Nucleus.Coop
                 }
             }
 
-            if (selectedControl.GetType() == typeof(GameControl))
+            if (selectedControl.GetType() == typeof(GameControl) || selectedControl.GetType() == typeof(Button))
             {
-                currentControl = (GameControl)selectedControl;
-                currentGameInfo = currentControl.UserGameInfo;
+                bool btnClick = false;
+                if (selectedControl.GetType() == typeof(GameControl))
+                {
+                    currentControl = (GameControl)selectedControl;
+                    currentGameInfo = currentControl.UserGameInfo;
+                    gameContextMenuStrip.Items[0].Visible = true;
+                    gameContextMenuStrip.Items[2].Visible = true;
+                }
+                else
+                {
+                    btnClick = true;
+                    gameContextMenuStrip.Items[0].Visible = false;
+                }
+
+                gameContextMenuStrip.Items[1].Visible = false;
 
                 if (string.IsNullOrEmpty(currentGameInfo.GameGuid) || currentGameInfo == null)
                 {
                     gameContextMenuStrip.Items[0].Text = "No game selected...";
-                    for (int i=1; i<gameContextMenuStrip.Items.Count; i++)
+                    for (int i = 1; i < gameContextMenuStrip.Items.Count; i++)
                     {
                         gameContextMenuStrip.Items[i].Visible = false;
                     }
@@ -829,7 +870,20 @@ namespace Nucleus.Coop
                     gameContextMenuStrip.Items[0].Text = currentGameInfo.Game.GameName;
                     for (int i = 1; i < gameContextMenuStrip.Items.Count; i++)
                     {
+                        //if(i > 1 || (i == 1 && currentGameInfo.Game.Description?.Length > 0))
+                        //{
+                        //    gameContextMenuStrip.Items[i].Visible = true;
+                        //}
                         gameContextMenuStrip.Items[i].Visible = true;
+                        if (i == 1 && currentGameInfo.Game.Description == null)
+                        {
+                            gameContextMenuStrip.Items[i].Visible = false;
+                            if (btnClick)
+                            {
+                                gameContextMenuStrip.Items[2].Visible = false;
+                                i++;
+                            }
+                        }
                     }
                 }
             }
@@ -866,15 +920,10 @@ namespace Nucleus.Coop
             return null;
         }
 
-        private void Btn_openScript_Click(object sender, EventArgs e)
-        {
-            OpenRawGameScript();
-        }
-
         private void OpenRawGameScript()
         {
             var nppDir = (string)Registry.GetValue("HKEY_LOCAL_MACHINE\\SOFTWARE\\Notepad++", null, null);
-            if(nppDir != null)
+            if (nppDir != null)
             {
                 var nppExePath = Path.Combine(nppDir, "Notepad++.exe");
                 var nppReadmePath = Path.Combine(nppDir, "readme.txt");
@@ -891,11 +940,6 @@ namespace Nucleus.Coop
         private void OpenScriptToolStripMenuItem_Click(object sender, EventArgs e)
         {
             OpenRawGameScript();
-        }
-
-        private void Btn_open_data_Click(object sender, EventArgs e)
-        {
-            OpenDataFolder();
         }
 
         private void OpenDataFolder()
@@ -937,7 +981,7 @@ namespace Nucleus.Coop
                     // and assign that to the PictureBox.Image property
                     //PictureBox1.Image = new Bitmap(dlg.FileName);
 
-                    if(dlg.FileName.EndsWith(".exe"))
+                    if (dlg.FileName.EndsWith(".exe"))
                     {
                         Icon icon = Shell32.GetIcon(dlg.FileName, false);
 
@@ -969,6 +1013,19 @@ namespace Nucleus.Coop
                     writer.Close();
                 }
             }
+        }
+
+        private void ScriptNotesToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            MessageBox.Show(currentGameInfo.Game.Description, "Script Author Notes", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+
+        private void Button1_Click(object sender, EventArgs e)
+        {
+            Button btnSender = (Button)sender;
+            Point ptLowerLeft = new Point(0, btnSender.Height);
+            ptLowerLeft = btnSender.PointToScreen(ptLowerLeft);
+            gameContextMenuStrip.Show(ptLowerLeft);
         }
     }
 }

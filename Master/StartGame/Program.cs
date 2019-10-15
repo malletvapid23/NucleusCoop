@@ -381,7 +381,7 @@ namespace StartGame
 
                         if (Is64Bit(path) == true)
                         {
-                            NativeAPI.RhInjectLibrary((int)pi.dwProcessId, 0, 0, null, Path.Combine(currDir, "Nucleus.Hook64.dll"), ptr, size);
+                            NativeAPI.RhInjectLibrary((int)pi.dwProcessId, 0, 0, null, Path.Combine(currDir, "Nucleus.SHook64.dll"), ptr, size);
                             pOutPID = (int)pi.dwProcessId;
                         }
                         else if (Is64Bit(path) == false)

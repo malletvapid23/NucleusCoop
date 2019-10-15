@@ -8,6 +8,7 @@ using System.Threading;
 using Ionic.Zip;
 using Nucleus.Gaming.Properties;
 using Nucleus.Gaming.Coop;
+using System.Windows.Forms;
 
 namespace Nucleus.Gaming
 {
@@ -174,7 +175,11 @@ namespace Nucleus.Gaming
             // search for the same exe on the user profile
             if (GameManager.Instance.User.Games.Any(c => c.ExePath.ToLower() == lower))
             {
-                return null;
+                DialogResult dialogResult = MessageBox.Show("This game's executable is already in your library. Do you wish to add it anyway?\n\nExecutable Path: " + exePath, "Already exists", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+                if (dialogResult == DialogResult.No)
+                {
+                    return null;
+                }               
             }
 
             LogManager.Log("Found game: {0}, full path: {1}", game.GameName, exePath);
@@ -538,18 +543,26 @@ namespace Nucleus.Gaming
             for (int i = 0; i < files.Length; i++)
             {
                 FileInfo f = files[i];
-                using (Stream str = f.OpenRead())
+                try
                 {
-                    string ext = Path.GetFileNameWithoutExtension(f.Name);
-                    string pathBlock = Path.Combine(f.Directory.FullName, ext);
+                    using (Stream str = f.OpenRead())
+                    {
+                        string ext = Path.GetFileNameWithoutExtension(f.Name);
+                        string pathBlock = Path.Combine(f.Directory.FullName, ext);
 
-                    GenericGameInfo info = new GenericGameInfo(f.Name, pathBlock, str);
-                    LogManager.Log("Found game info: " + info.GameName);
+                        GenericGameInfo info = new GenericGameInfo(f.Name, pathBlock, str);
 
-                    games.Add(info.GUID, info);
-                    //breaks anything? idk
-                    //gameInfos.Add(info.ExecutableName, info);
+                        LogManager.Log("Found game info: " + info.GameName);
+                        games.Add(info.GUID, info);
+                        //breaks anything? idk
+                        //gameInfos.Add(info.ExecutableName, info);
+                    }
                 }
+                catch
+                {
+                    MessageBox.Show(string.Format("There is an error in the game script {0}. The game this script is for will not appear in the list. If the issue has been fixed, please try re-adding the game.\n\nCommon errors include:\n- A syntax error (such as a \',\' \';\' or \']\' missing)\n- Another script has this GUID (must be unique!)\n- Code is not in the right place or format (for example: methods using Context must be within the Game.Play function)", f.Name), "Error in script", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+
             }
         }
         #endregion

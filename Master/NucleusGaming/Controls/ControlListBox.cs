@@ -30,6 +30,10 @@ namespace Nucleus.Gaming
             //this.AutoScroll = true;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScroll = false;
+            this.HorizontalScroll.Maximum = 0;
+            this.AutoScroll = false;
+            this.VerticalScroll.Visible = false;
+            this.AutoScroll = true;
         }
 
         public override bool AutoScroll
@@ -66,6 +70,7 @@ namespace Nucleus.Gaming
             totalHeight = 0;
             bool isVerticalVisible = VerticalScroll.Visible;
             int v = isVerticalVisible ? (1 + SystemInformation.VerticalScrollBarWidth) : 0;
+
 
             for (int i = 0; i < this.Controls.Count; i++)
             {

@@ -39,8 +39,12 @@ namespace Nucleus.Coop
 
         public SearchDisksForm(MainForm main)
         {
+            
             this.main = main;
             InitializeComponent();
+
+            DPIManager.AddForm(this);
+            DPIManager.ForceUpdate();
 
             DriveInfo[] drives = DriveInfo.GetDrives();
             CheckedListBox checkedBox = disksBox;

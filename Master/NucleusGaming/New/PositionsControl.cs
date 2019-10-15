@@ -31,6 +31,7 @@ namespace Nucleus.Coop
         private Font playerCustomFont;
         private Font smallTextFont;
         private Font playerTextFont;
+        private Font extraSmallTextFont;
 
         private RectangleF screensArea;
         private RectangleF playersArea;
@@ -111,6 +112,18 @@ namespace Nucleus.Coop
             playerCustomFont = new Font("Segoe UI", 16);
             playerTextFont = new Font("Segoe UI", 18);
             smallTextFont = new Font("Segoe UI", 12);
+            extraSmallTextFont = new Font("Segoe UI", 10);
+            if (ini.IniReadValue("Advanced", "Font") != "")
+            {
+                float fontSize = 12F;
+                fontSize = float.Parse(ini.IniReadValue("Advanced", "Font"));
+                playerFont = new Font("Segoe UI", fontSize);
+                playerCustomFont = new Font("Segoe UI", fontSize);
+                playerTextFont = new Font("Segoe UI", fontSize);
+                smallTextFont = new Font("Segoe UI", fontSize);
+                extraSmallTextFont = new Font("Segoe UI", fontSize);
+            }
+
 
             gamepadImg = Resources.gamepad;
             genericImg = Resources.generic;
@@ -1123,8 +1136,7 @@ namespace Nucleus.Coop
                     }
                 }
             }
-            else if (e.Button == MouseButtons.Right ||
-                     e.Button == MouseButtons.Middle)
+            else if (e.Button == MouseButtons.Right || e.Button == MouseButtons.Middle)
             {
                 // if over a player on a screen, change the type
                 for (int i = 0; i < players.Count; i++)
@@ -1135,16 +1147,58 @@ namespace Nucleus.Coop
                     {
                         if (p.ScreenIndex != -1)
                         {
+
+
                             UserScreen screen = screens[p.ScreenIndex];
-                            int halfWidth = screen.MonitorBounds.Width / 2;
-                            int halfHeight = screen.MonitorBounds.Height / 2;
+
+                            int verLines = 2;
+                            int horLines = 2;
+                            switch (screen.Type)
+                            {
+                                case UserScreenType.FourPlayers:
+                                    {
+                                        verLines = 2;
+                                        horLines = 2;
+                                    }
+                                    break;
+                                case UserScreenType.SixPlayers:
+                                    {
+                                        verLines = 3;
+                                        horLines = 2;
+                                    }
+                                    break;
+                                case UserScreenType.EightPlayers:
+                                    {
+                                        verLines = 4;
+                                        horLines = 2;
+                                    }
+                                    break;
+                                case UserScreenType.SixteenPlayers:
+                                    {
+                                        verLines = 4;
+                                        horLines = 4;
+                                    }
+                                    break;
+                                case UserScreenType.Custom:
+                                    {
+                                        horLines = int.Parse(ini.IniReadValue("CustomLayout", "HorizontalLines")) + 1;
+                                        verLines = int.Parse(ini.IniReadValue("CustomLayout", "VerticalLines")) + 1;
+                                    }
+                                    break;
+                            }
+
+                            //int halfWidth = screen.MonitorBounds.Width / 2;
+                            //int halfHeight = screen.MonitorBounds.Height / 2;
+                            int halfWidth = screen.MonitorBounds.Width / verLines;
+                            int halfHeight = screen.MonitorBounds.Height / horLines;
+
+
 
                             Rectangle bounds = p.MonitorBounds;
-                            if (screen.Type == UserScreenType.FourPlayers)
+                            if ((int)screen.Type >= 3)
                             {
                                 // check if the size is 1/4th of screen
-                                if (bounds.Width == halfWidth &&
-                                    bounds.Height == halfHeight)
+                                if (bounds.Width == halfWidth && bounds.Height == halfHeight)
                                 {
                                     bool hasLeftRightSpace = true;
                                     bool hasTopBottomSpace = true;
@@ -1193,8 +1247,8 @@ namespace Nucleus.Coop
                                             edit.X -= edit.Width;
                                         }
 
-                                        bounds.Width *= 2;
-                                        edit.Width *= 2;
+                                        bounds.Width *= verLines;
+                                        edit.Width *= verLines;
 
                                         p.EditBounds = edit;
                                         p.MonitorBounds = bounds;
@@ -1203,24 +1257,34 @@ namespace Nucleus.Coop
                                     }
                                     else if (hasTopBottomSpace)
                                     {
-                                        bounds.Height *= 2;
-                                        p.MonitorBounds = bounds;
                                         Rectangle edit = p.EditBounds;
-                                        edit.Height *= 2;
-                                        p.EditBounds = edit;
+                                        if (bounds.Y == screen.MonitorBounds.Y + bounds.Height)
+                                        {
+                                            bounds.Y -= bounds.Height;
+                                            edit.Y -= edit.Height;
+                                        }
 
+                                        bounds.Height *= horLines;
+                                        edit.Height *= horLines;
+
+                                        p.EditBounds = edit;
+                                        p.MonitorBounds = bounds;
                                         Invalidate();
                                     }
                                 }
                                 else
                                 {
-                                    bounds.Width = screen.MonitorBounds.Width / 2;
-                                    bounds.Height = screen.MonitorBounds.Height / 2;
+                                    //bounds.Width = screen.MonitorBounds.Width / 2;
+                                    //bounds.Height = screen.MonitorBounds.Height / 2;
+                                    bounds.Width = screen.MonitorBounds.Width / verLines;
+                                    bounds.Height = screen.MonitorBounds.Height / horLines;
                                     p.MonitorBounds = bounds;
 
                                     Rectangle edit = p.EditBounds;
-                                    edit.Width = screen.UIBounds.Width / 2;
-                                    edit.Height = screen.UIBounds.Height / 2;
+                                    //edit.Width = screen.UIBounds.Width / 2;
+                                    //edit.Height = screen.UIBounds.Height / 2;
+                                    edit.Width = screen.UIBounds.Width / verLines;
+                                    edit.Height = screen.UIBounds.Height / horLines;
                                     p.EditBounds = edit;
 
                                     Invalidate();
@@ -1348,7 +1412,7 @@ namespace Nucleus.Coop
             base.OnPaint(e);
 
             Graphics g = e.Graphics;
-
+            
 #if DEBUG
             //g.FillRectangle(Brushes.Green, playersArea);
             //g.FillRectangle(Brushes.CornflowerBlue, screensArea);
@@ -1399,9 +1463,10 @@ namespace Nucleus.Coop
             }
             else
             {
+                
                 for (int i = 0; i < players.Count; i++)
                 {
-                    GenericGameInfo ggi = game.Game;
+                    
                     PlayerInfo info = players[i];
                     //MessageBox.Show("Game name: " + ggi.GameName + "\nDInputEnabled: " + ggi.Hook.DInputEnabled + "\nDInputForceDisable: " + ggi.Hook.DInputForceDisable + "\nXInputReroute: " + ggi.Hook.XInputReroute + "\nPlayers count: " + players.Count + "\n\nController Name: " + info.GamepadName + "\nHID Device ID: " + info.HIDDeviceID + "\nInstance GUID: " + info.GamepadGuid + "\nSlot: " + i + "\nIsXInput: " + info.IsXInput + "\nIsDInput: " + info.IsDInput + "\nIsKeyboardPlayer: " + info.IsKeyboardPlayer + "\nRaw hid: " + info.DInputJoystick.Properties.InterfacePath);
                     Rectangle s = info.EditBounds;
@@ -1487,15 +1552,36 @@ namespace Nucleus.Coop
             g.DrawString("Gamepads", playerTextFont, Brushes.White, new PointF(10, 10));
 
             SizeF dragEachGamepadSize;
-            string dragEachGamepad = "Drag each gamepad to a screen";
-            dragEachGamepad = StringUtil.WrapString(Width * 0.6f, dragEachGamepad, g, playerTextFont, out dragEachGamepadSize);
-            g.DrawString(dragEachGamepad, playerTextFont, Brushes.White, new PointF(Width - dragEachGamepadSize.Width, playersArea.Y));
+            string dragEachGamepad = "Drag each gamepad to a screen\nClick top-left corner to change layout\nRight click player to change size";
+            dragEachGamepad = StringUtil.WrapString(Width /** 0.3f*/, dragEachGamepad, g, extraSmallTextFont, out dragEachGamepadSize);
+            g.DrawString(dragEachGamepad, extraSmallTextFont, Brushes.White, new PointF(Width - dragEachGamepadSize.Width, 4/*playersArea.Y - 50*/));
 
-            SizeF bottomTextSize;
-            string bottomText = "Click on screen's top-left corner to change players on that screen. (4-player only) Right click player to change size";
-            bottomText = StringUtil.WrapString(Width - 20, bottomText, g, playerTextFont, out bottomTextSize);
-            g.DrawString(bottomText, playerTextFont, Brushes.White, new PointF(10, Height - bottomTextSize.Height - 10));
+            string bottomText = "";
+            GenericGameInfo ggi = game.Game;
+            if (ggi.Description?.Length > 0)
+            {
+                bottomText = "Script Author Notes: " + ggi.Description;
+                SizeF bottomTextSize;
+                //string bottomText = ggi.Description; //"Click on screen's top-left corner to change players on that screen. (4-player only) Right click player to change size";
+                bottomText = StringUtil.WrapString(Width - 20, bottomText, g, smallTextFont, out bottomTextSize);
+                g.DrawString(bottomText, smallTextFont, Brushes.White, new PointF(10, Height - bottomTextSize.Height - 30));
+            }
 
+            
+            
         }
+
+        //private void InitializeComponent()
+        //{
+        //    this.SuspendLayout();
+        //    // 
+        //    // PositionsControl
+        //    // 
+        //    this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+        //    this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+        //    this.Name = "PositionsControl";
+        //    this.ResumeLayout(false);
+
+        //}
     }
 }

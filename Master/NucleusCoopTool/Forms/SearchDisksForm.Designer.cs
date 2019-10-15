@@ -1,4 +1,6 @@
-﻿namespace Nucleus.Coop
+﻿using System.Drawing;
+
+namespace Nucleus.Coop
 {
     partial class SearchDisksForm
     {
@@ -44,6 +46,7 @@
             | System.Windows.Forms.AnchorStyles.Left)));
             this.disksBox.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(70)))), ((int)(((byte)(70)))), ((int)(((byte)(70)))));
             this.disksBox.CheckOnClick = true;
+            //this.disksBox.Font = new System.Drawing.Font("Segoe UI", 12F);
             this.disksBox.ForeColor = System.Drawing.Color.White;
             this.disksBox.FormattingEnabled = true;
             this.disksBox.IntegralHeight = false;
@@ -57,7 +60,7 @@
             this.label1.AutoSize = true;
             this.label1.Location = new System.Drawing.Point(12, 9);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(115, 28);
+            this.label1.Size = new System.Drawing.Size(92, 21);
             this.label1.TabIndex = 1;
             this.label1.Text = "Select Drive";
             // 
@@ -66,7 +69,7 @@
             this.label2.AutoSize = true;
             this.label2.Location = new System.Drawing.Point(354, 9);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(132, 28);
+            this.label2.Size = new System.Drawing.Size(106, 21);
             this.label2.TabIndex = 2;
             this.label2.Text = "Found Games";
             // 
@@ -79,7 +82,7 @@
             this.listGames.ForeColor = System.Drawing.Color.White;
             this.listGames.FormattingEnabled = true;
             this.listGames.IntegralHeight = false;
-            this.listGames.ItemHeight = 28;
+            this.listGames.ItemHeight = 21;
             this.listGames.Location = new System.Drawing.Point(357, 33);
             this.listGames.Name = "listGames";
             this.listGames.Size = new System.Drawing.Size(337, 412);
@@ -99,7 +102,7 @@
             this.lblProgress.AutoSize = true;
             this.lblProgress.Location = new System.Drawing.Point(12, 394);
             this.lblProgress.Name = "lblProgress";
-            this.lblProgress.Size = new System.Drawing.Size(87, 28);
+            this.lblProgress.Size = new System.Drawing.Size(71, 21);
             this.lblProgress.TabIndex = 7;
             this.lblProgress.Text = "Progress";
             this.lblProgress.Visible = false;
@@ -118,7 +121,8 @@
             // 
             // SearchDisksForm
             // 
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
+            this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
             this.ClientSize = new System.Drawing.Size(703, 461);
             this.Controls.Add(this.btnSearch);
             this.Controls.Add(this.lblProgress);

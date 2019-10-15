@@ -31,6 +31,7 @@ namespace Nucleus.Gaming
         [DllImport("User32")]
         private static extern int ShowWindow(int hwnd, int nCmdShow);
 
+
         [StructLayout(LayoutKind.Sequential)]
         public struct RECT
         {
@@ -84,6 +85,7 @@ namespace Nucleus.Gaming
         private bool dllRepos = false;
 
         public string exePath;
+        private string instanceExeFolder;
 
         private readonly IniFile ini = new Gaming.IniFile(Path.Combine(Directory.GetCurrentDirectory(), "Settings.ini"));
         bool isDebug;
@@ -195,33 +197,55 @@ namespace Nucleus.Gaming
             // search for game instances left behind
             try
             {
-                Process[] procs;
-                if(gen.GameName == "Halo Custom Edition")
-                {
-                    procs = Process.GetProcessesByName("haloce");
-                }
-                else
-                {
-                    procs = Process.GetProcessesByName(Path.GetFileNameWithoutExtension(gen.ExecutableName.ToLower()));
-                }
+                Process[] procs = Process.GetProcesses();
+                //if(gen.GameName == "Halo Custom Edition")
+                //{
+                //    procs = Process.GetProcessesByName("haloce");
+                //}
+                //else
+                //{
+                //    procs = Process.GetProcessesByName(Path.GetFileNameWithoutExtension(gen.ExecutableName.ToLower()));
+                //}
                 
-                if (procs.Length > 0)
-                {
-                    for (int i = 0; i < procs.Length; i++)
+                //if (procs.Length > 0)
+                //{
+                    foreach(Process proc in procs)
                     {
                         try
                         {
-                            procs[i].Kill();
+                            if (proc.ProcessName.ToLower() == Path.GetFileNameWithoutExtension(gen.ExecutableName.ToLower()) || attachedIds.Contains(proc.Id) || proc.MainWindowTitle == gen.Hook.ForceFocusWindowName)
+                            {
+                                Log(string.Format("Killing process {0} (pid {1})", proc.ProcessName, proc.Id));
+                                proc.Kill();
+                            }
                         }
                         catch
                         {
 
                         }
                     }
-                }
+                //}
             }
             catch { }
         }
+
+        //public static void RecursiveDelete(DirectoryInfo baseDir)
+        //{
+        //    if (!baseDir.Exists)
+        //        return;
+
+        //    foreach (var dir in baseDir.EnumerateDirectories())
+        //    {
+        //        RecursiveDelete(dir);
+        //    }
+        //    var files = baseDir.GetFiles();
+        //    foreach (var file in files)
+        //    {
+        //        file.IsReadOnly = false;
+        //        file.Delete();
+        //    }
+        //    baseDir.Delete();
+        //}
 
         public void End()
         {
@@ -247,26 +271,92 @@ namespace Nucleus.Gaming
 
             Thread.Sleep(1000);
             // delete symlink folder
-            try
-            {
+
+            int tempIndex = 0;
+
 #if RELEASE
-                if(gen.KeepSymLinkOnExit == false)
+            if (gen.KeepSymLinkOnExit == false)
+            {
+                for (int i = 0; i < profile.PlayerData.Count; i++)
                 {
-                    for (int i = 0; i < profile.PlayerData.Count; i++)
+                    tempIndex = i;
+                    string linkFolder = Path.Combine(backupDir, "Instance" + i);
+                    Log(string.Format("Deleting folder {0} and all of its contents.", linkFolder));
+                    int retries = 0;
+                    while (Directory.Exists(linkFolder))
                     {
-                        string linkFolder = Path.Combine(backupDir, "Instance" + i);
-                        if (Directory.Exists(linkFolder))
+                        
+                        try
                         {
                             Directory.Delete(linkFolder, true);
                         }
+                        catch (UnauthorizedAccessException ex)
+                        {
+                            Log("ERROR - UnauthorizedAccessException - " + ex.Message);
+                            int pFrom = ex.Message.IndexOf("\'") + 1;
+                            int pTo = ex.Message.LastIndexOf("\'");
+                            string fileName = ex.Message.Substring(pFrom, pTo - pFrom);
+
+                            //string linkFolder = Path.Combine(backupDir, "Instance" + tempIndex);
+                            if (!fileName.Contains("\\"))
+                            {
+                                string[] files = Directory.GetFiles(linkFolder, fileName, SearchOption.AllDirectories);
+                                foreach (string file in files)
+                                {
+                                    FileInfo fi = new FileInfo(file);
+                                    if (fi.IsReadOnly/*fi.Attributes == FileAttributes.ReadOnly*/)
+                                    {
+                                        Log(string.Format("File was read-only. Setting '{0}' to normal file attributes and deleting", fileName));
+                                        File.SetAttributes(file, FileAttributes.Normal);
+                                        File.Delete(file);
+                                    }
+                                    else
+                                    {
+                                        Log("ERROR - Unknown reason why file cannot be deleted. Skipping this file for now");
+                                    }
+                                }
+                            }
+
+                            if (retries < 10)
+                            {
+                                retries++;
+                                Log("Retrying to delete folder and all its contents");
+                            }
+                            else
+                            {
+                                Log("Abandoning trying to delete folder and all its contents");
+                                throw;
+                            }
+
+                        }
+                        catch (Exception ex)
+                        {
+                            Log("ERROR - " + ex.Message);
+
+                            if (retries < 10)
+                            {
+                                retries++;
+                                Log("Retrying to delete folder and all its contents");
+                            }
+                            else
+                            {
+                                Log("Abandoning trying to delete folder and all its contents");
+                                throw;
+                            }
+                        }
+                        if(Directory.Exists(linkFolder))
+                        {
+                            Thread.Sleep(1000);
+                        }
+                        else
+                        {
+                            Log("Folder and all its contents have successfully been deleted");
+                        }
                     }
                 }
+                Log("File deletion complete");
+            }
 #endif
-            }
-            catch
-            {
-
-            }
 
             if (Ended != null)
             {
@@ -421,7 +511,7 @@ namespace Nucleus.Gaming
             if (isDebug)
             {
                 Log("--------------------- START ---------------------");
-                Log(string.Format("Game: {0}, Arch: {1}, Executable: {2}, SteamID: {3}, Script: {4}, Data: {5}, DPIHandling: {6}", gen.GameName, garch, gen.ExecutableName, gen.SteamID, gen.JsFileName, gen.GUID, gen.DPIHandling));
+                Log(string.Format("Game: {0}, Arch: {1}, Executable: {2}, SteamID: {3}, Script: {4}, Data: {5}, DPIHandling: {6}, DPI Scale: {7}", gen.GameName, garch, gen.ExecutableName, gen.SteamID, gen.JsFileName, gen.GUID, gen.DPIHandling, DPIManager.Scale));
 
                 if (string.IsNullOrEmpty(gen.StartArguments))
                 {
@@ -440,7 +530,7 @@ namespace Nucleus.Gaming
                     Log(string.Format("Mutexes - Handle(s): ({0}), KillMutexDelay: {1}, KillMutexType: {2}, RenameNotKillMutex: {3}, PartialMutexSearch: {4}", mutexList, gen.KillMutexDelay, gen.KillMutexType, gen.RenameNotKillMutex, gen.PartialMutexSearch));
                 }
 
-                Log("NucleusCoop mod version: 0.9.6.7 ALPHA");
+                Log("NucleusCoop mod version: 0.9.7.1 ALPHA");
                 string pcSpecs = "PC Info - ";
                 var name = (from x in new ManagementObjectSearcher("SELECT Caption FROM Win32_OperatingSystem").Get().Cast<ManagementObject>()
                             select x.GetPropertyValue("Caption")).FirstOrDefault();
@@ -530,12 +620,15 @@ namespace Nucleus.Gaming
                 ProcessData procData = player.ProcessData;
                 bool hasSetted = procData != null && procData.Setted;
 
-                //SlimDX.XInput.Controller gamePad = new SlimDX.XInput.Controller(SlimDX.XInput.UserIndex.One);
-                //SlimDX.XInput.Vibration vib = new SlimDX.XInput.Vibration();
+                //if (ini.IniReadValue("Misc", "VibrateOpen") == "True")
+                //{
+                //    SlimDX.XInput.Controller gamePad = new SlimDX.XInput.Controller((SlimDX.XInput.UserIndex)i);
+                //    SlimDX.XInput.Vibration vib = new SlimDX.XInput.Vibration();
 
-                //vib.LeftMotorSpeed = 32000;
-                //vib.RightMotorSpeed = 16000;
-                //gamePad.SetVibration(vib);
+                //    vib.LeftMotorSpeed = 32000;
+                //    vib.RightMotorSpeed = 16000;
+                //    gamePad.SetVibration(vib);
+                //}
 
                 //SlimDX.DirectInput.Get
                 //SlimDX.DirectInput.Joystick device = new SlimDX.DirectInput.Joystick()
@@ -671,6 +764,7 @@ namespace Nucleus.Gaming
                     }
 
                     origRootFolder = rootFolder;
+                    instanceExeFolder = linkBinFolder;
 
                     if (!string.IsNullOrEmpty(gen.WorkingFolder))
                     {
@@ -760,12 +854,12 @@ namespace Nucleus.Gaming
                 if(gen.ChangeExe)
                 {
                     string newExe = Path.GetFileNameWithoutExtension(this.userGame.Game.ExecutableName) + " - Player " + (i + 1) + ".exe";
-                    if(File.Exists(Path.Combine(linkBinFolder, newExe)))
+                    if(File.Exists(Path.Combine(instanceExeFolder, newExe)))
                     {
-                        File.Delete(Path.Combine(linkBinFolder, newExe));
+                        File.Delete(Path.Combine(instanceExeFolder, newExe));
                     }
-                    File.Move(Path.Combine(linkBinFolder, this.userGame.Game.ExecutableName), Path.Combine(linkBinFolder, newExe));
-                    exePath = Path.Combine(linkBinFolder, newExe);
+                    File.Move(Path.Combine(instanceExeFolder, this.userGame.Game.ExecutableName), Path.Combine(instanceExeFolder, newExe));
+                    exePath = Path.Combine(instanceExeFolder, newExe);
                     Log("Changed game executable from " + gen.ExecutableName + " to " + newExe);
                 }
 
@@ -1102,12 +1196,23 @@ namespace Nucleus.Gaming
                             File.Delete(Path.Combine(instanceSteamSettingsFolder, "user_steam_id.txt"));
                         }
                         File.WriteAllText(Path.Combine(instanceSteamSettingsFolder, "user_steam_id.txt"), (random_steam_id + i).ToString());
-                        Log("Generating language.txt with language set to " + gen.GetSteamLanguage());
+
+                        string lang = "english";
+                        if(gen.GoldbergLanguage?.Length > 0)
+                        {
+                            lang = gen.GoldbergLanguage;
+                        }
+                        else
+                        {
+                            lang = gen.GetSteamLanguage();
+                        }
+                        Log("Generating language.txt with language set to " + lang);
                         if (File.Exists(Path.Combine(instanceSteamSettingsFolder, "language.txt")))
                         {
                             File.Delete(Path.Combine(instanceSteamSettingsFolder, "language.txt"));
                         }
-                        File.WriteAllText(Path.Combine(instanceSteamSettingsFolder, "language.txt"), gen.GetSteamLanguage());
+                        File.WriteAllText(Path.Combine(instanceSteamSettingsFolder, "language.txt"), lang);
+
                         Log("Generating steam_appid.txt using game steam ID " + gen.SteamID);
                         if (File.Exists(Path.Combine(instanceSteamDllFolder, "steam_appid.txt")))
                         {
@@ -1227,9 +1332,9 @@ namespace Nucleus.Gaming
                     foreach(string xinputDllName in gen.XInputPlusDll)
                     {
                         
-                        if (File.Exists(Path.Combine(linkBinFolder, xinputDllName)))
+                        if (File.Exists(Path.Combine(instanceExeFolder, xinputDllName)))
                         {
-                            File.Delete(Path.Combine(linkBinFolder, xinputDllName));
+                            File.Delete(Path.Combine(instanceExeFolder, xinputDllName));
                         }
                         string xinputDll = "xinput1_3.dl_";
                         if (xinputDllName.ToLower().StartsWith("dinput."))
@@ -1241,38 +1346,38 @@ namespace Nucleus.Gaming
                             xinputDll = "Dinput8.dl_";
                         }
                         Log("Using " + xinputDll + " (" + arch + ") as base and naming it: " + xinputDllName);
-                        File.Copy(Path.Combine(utilFolder, arch + "\\" + xinputDll), Path.Combine(linkBinFolder, xinputDllName), true);
+                        File.Copy(Path.Combine(utilFolder, arch + "\\" + xinputDll), Path.Combine(instanceExeFolder, xinputDllName), true);
 
-                        if (File.Exists(Path.Combine(linkBinFolder, "XInputPlus.ini")))
+                        if (File.Exists(Path.Combine(instanceExeFolder, "XInputPlus.ini")))
                         {
-                            File.Delete(Path.Combine(linkBinFolder, "XInputPlus.ini"));
+                            File.Delete(Path.Combine(instanceExeFolder, "XInputPlus.ini"));
                         }
                         Log("Copying XInputPlus.ini");
-                        File.Copy(Path.Combine(utilFolder, "XInputPlus.ini"), Path.Combine(linkBinFolder, "XInputPlus.ini"), true);
+                        File.Copy(Path.Combine(utilFolder, "XInputPlus.ini"), Path.Combine(instanceExeFolder, "XInputPlus.ini"), true);
 
                         //string[] change = new string[] {
-                        //    context.FindLineNumberInTextFile(Path.Combine(linkBinFolder, "XInputPlus.ini"), "Controller1=", SearchType.StartsWith) + "|Controller1=" + (i + 1),
-                        //    context.FindLineNumberInTextFile(Path.Combine(linkBinFolder, "XInputPlus.ini"), "FileVersion=", SearchType.StartsWith) + "|FileVersion=" + arch,
+                        //    context.FindLineNumberInTextFile(Path.Combine(instanceExeFolder, "XInputPlus.ini"), "Controller1=", SearchType.StartsWith) + "|Controller1=" + (i + 1),
+                        //    context.FindLineNumberInTextFile(Path.Combine(instanceExeFolder, "XInputPlus.ini"), "FileVersion=", SearchType.StartsWith) + "|FileVersion=" + arch,
                         //};
 
                         Log("Making changes to the lines in XInputPlus.ini; FileVersion and Controller values");
                         List<string> textChanges = new List<string>();
-                        textChanges.Add(context.FindLineNumberInTextFile(Path.Combine(linkBinFolder, "XInputPlus.ini"), "FileVersion=", SearchType.StartsWith) + "|FileVersion=" + arch);
+                        textChanges.Add(context.FindLineNumberInTextFile(Path.Combine(instanceExeFolder, "XInputPlus.ini"), "FileVersion=", SearchType.StartsWith) + "|FileVersion=" + arch);
 
                         if(gen.PlayersPerInstance > 1)
                         {
                             for(int x = 1; x <= gen.PlayersPerInstance; x++)
                             {
-                                textChanges.Add(context.FindLineNumberInTextFile(Path.Combine(linkBinFolder, "XInputPlus.ini"), "Controller" + x + "=", SearchType.StartsWith) + "|Controller" + x + "=" + (x + plyrIndex));
+                                textChanges.Add(context.FindLineNumberInTextFile(Path.Combine(instanceExeFolder, "XInputPlus.ini"), "Controller" + x + "=", SearchType.StartsWith) + "|Controller" + x + "=" + (x + plyrIndex));
                             }
                             plyrIndex += gen.PlayersPerInstance;
                         }
                         else
                         {
-                            textChanges.Add(context.FindLineNumberInTextFile(Path.Combine(linkBinFolder, "XInputPlus.ini"), "Controller1=", SearchType.StartsWith) + "|Controller1=" + (i + 1));
+                            textChanges.Add(context.FindLineNumberInTextFile(Path.Combine(instanceExeFolder, "XInputPlus.ini"), "Controller1=", SearchType.StartsWith) + "|Controller1=" + (i + 1));
                         }
 
-                        context.ReplaceLinesInTextFile(Path.Combine(linkBinFolder, "XInputPlus.ini"), textChanges.ToArray());
+                        context.ReplaceLinesInTextFile(Path.Combine(instanceExeFolder, "XInputPlus.ini"), textChanges.ToArray());
                     }
                     Log("XInput Plus setup complete");
                 }
@@ -1299,16 +1404,16 @@ namespace Nucleus.Gaming
                         //}
                     }
 
-                    if (File.Exists(Path.Combine(linkBinFolder, "dinput8.dll")))
+                    if (File.Exists(Path.Combine(instanceExeFolder, "dinput8.dll")))
                     {
-                        File.Delete(Path.Combine(linkBinFolder, "dinput8.dll"));
+                        File.Delete(Path.Combine(instanceExeFolder, "dinput8.dll"));
                     }
                     Log("Copying dinput8.dll");
-                    File.Copy(Path.Combine(utilFolder, arch + "\\dinput8.dll"), Path.Combine(linkBinFolder, "dinput8.dll"), true);
+                    File.Copy(Path.Combine(utilFolder, arch + "\\dinput8.dll"), Path.Combine(instanceExeFolder, "dinput8.dll"), true);
 
-                    if (File.Exists(Path.Combine(linkBinFolder, "devreorder.ini")))
+                    if (File.Exists(Path.Combine(instanceExeFolder, "devreorder.ini")))
                     {
-                        File.Delete(Path.Combine(linkBinFolder, "devreorder.ini"));
+                        File.Delete(Path.Combine(instanceExeFolder, "devreorder.ini"));
                     }
 
                     List<string> iniConfig = new List<string>();
@@ -1325,7 +1430,7 @@ namespace Nucleus.Gaming
                         }
                     }
                     Log("Writing devreorder.ini with the only visible gamepad guid: " + player.GamepadGuid);
-                    File.WriteAllLines(Path.Combine(linkBinFolder, "devreorder.ini"), iniConfig.ToArray());
+                    File.WriteAllLines(Path.Combine(instanceExeFolder, "devreorder.ini"), iniConfig.ToArray());
                     Log("devreorder setup complete");
                 }
 
@@ -1356,16 +1461,16 @@ namespace Nucleus.Gaming
                             //}
                         }
 
-                        if (File.Exists(Path.Combine(linkBinFolder, x360exe)))
+                        if (File.Exists(Path.Combine(instanceExeFolder, x360exe)))
                         {
-                            File.Delete(Path.Combine(linkBinFolder, "x360ce.exe"));
+                            File.Delete(Path.Combine(instanceExeFolder, "x360ce.exe"));
                         }
                         Log("Copying over " + x360exe);
-                        File.Copy(Path.Combine(utilFolder, x360exe), Path.Combine(linkBinFolder, x360exe), true);
+                        File.Copy(Path.Combine(utilFolder, x360exe), Path.Combine(instanceExeFolder, x360exe), true);
 
-                        if (File.Exists(Path.Combine(linkBinFolder, "xinput1_3.dll")))
+                        if (File.Exists(Path.Combine(instanceExeFolder, "xinput1_3.dll")))
                         {
-                            File.Delete(Path.Combine(linkBinFolder, "xinput1_3.dll"));
+                            File.Delete(Path.Combine(instanceExeFolder, "xinput1_3.dll"));
                         }
                         if(x360dll != "xinput1_3.dll")
                         {
@@ -1375,38 +1480,38 @@ namespace Nucleus.Gaming
                         {
                             Log("Copying over " + x360dll);
                         }
-                        File.Copy(Path.Combine(utilFolder, x360dll), Path.Combine(linkBinFolder, "xinput1_3.dll"), true);
+                        File.Copy(Path.Combine(utilFolder, x360dll), Path.Combine(instanceExeFolder, "xinput1_3.dll"), true);
 
                         Log("Starting x360ce process");
                         ProcessStartInfo startInfo = new ProcessStartInfo();
                         startInfo.UseShellExecute = true;
                         startInfo.WorkingDirectory = Path.GetDirectoryName(exePath);
-                        startInfo.FileName = Path.Combine(linkBinFolder, x360exe);
+                        startInfo.FileName = Path.Combine(instanceExeFolder, x360exe);
                         Process util = Process.Start(startInfo);
                         Log("Waiting until x360ce process is exited");
                         util.WaitForExit();
                     }
                     else
                     {
-                        if (File.Exists(Path.Combine(linkBinFolder, "x360ce.ini")))
+                        if (File.Exists(Path.Combine(instanceExeFolder, "x360ce.ini")))
                         {
-                            File.Delete(Path.Combine(linkBinFolder, "x360ce.ini"));
+                            File.Delete(Path.Combine(instanceExeFolder, "x360ce.ini"));
                         }
-                        if (File.Exists(Path.Combine(linkBinFolder, "xinput1_3.dll")))
+                        if (File.Exists(Path.Combine(instanceExeFolder, "xinput1_3.dll")))
                         {
-                            File.Delete(Path.Combine(linkBinFolder, "xinput1_3.dll"));
+                            File.Delete(Path.Combine(instanceExeFolder, "xinput1_3.dll"));
                         }
                         Log("Carrying over xinput1_3.dll and x360ce.ini from Instance0");
-                        File.Copy(Path.Combine(linkBinFolder.Substring(0, linkBinFolder.LastIndexOf('\\') + 1) + "Instance0", "xinput1_3.dll"), Path.Combine(linkBinFolder, "xinput1_3.dll"), true);
-                        File.Copy(Path.Combine(linkBinFolder.Substring(0, linkBinFolder.LastIndexOf('\\') + 1) + "Instance0", "x360ce.ini"), Path.Combine(linkBinFolder, "x360ce.ini"), true);
+                        File.Copy(Path.Combine(instanceExeFolder.Substring(0, instanceExeFolder.LastIndexOf('\\') + 1) + "Instance0", "xinput1_3.dll"), Path.Combine(instanceExeFolder, "xinput1_3.dll"), true);
+                        File.Copy(Path.Combine(instanceExeFolder.Substring(0, instanceExeFolder.LastIndexOf('\\') + 1) + "Instance0", "x360ce.ini"), Path.Combine(instanceExeFolder, "x360ce.ini"), true);
                     }
 
                     Log("Making changes to x360ce.ini; PAD mapping to player");
                     //string[] change = new string[] {
-                    //    context.FindLineNumberInTextFile(Path.Combine(linkBinFolder, "x360ce.ini"), "PAD1=", SearchType.StartsWith) + "|PAD1=" + context.x360ceGamepadGuid,
-                    //    context.FindLineNumberInTextFile(Path.Combine(linkBinFolder, "x360ce.ini"), "PAD2=", SearchType.StartsWith) + "|PAD2=",
-                    //    context.FindLineNumberInTextFile(Path.Combine(linkBinFolder, "x360ce.ini"), "PAD3=", SearchType.StartsWith) + "|PAD3=",
-                    //    context.FindLineNumberInTextFile(Path.Combine(linkBinFolder, "x360ce.ini"), "PAD4=", SearchType.StartsWith) + "|PAD4="
+                    //    context.FindLineNumberInTextFile(Path.Combine(instanceExeFolder, "x360ce.ini"), "PAD1=", SearchType.StartsWith) + "|PAD1=" + context.x360ceGamepadGuid,
+                    //    context.FindLineNumberInTextFile(Path.Combine(instanceExeFolder, "x360ce.ini"), "PAD2=", SearchType.StartsWith) + "|PAD2=",
+                    //    context.FindLineNumberInTextFile(Path.Combine(instanceExeFolder, "x360ce.ini"), "PAD3=", SearchType.StartsWith) + "|PAD3=",
+                    //    context.FindLineNumberInTextFile(Path.Combine(instanceExeFolder, "x360ce.ini"), "PAD4=", SearchType.StartsWith) + "|PAD4="
                     //};
 
                     List<string> textChanges = new List<string>();
@@ -1416,29 +1521,29 @@ namespace Nucleus.Gaming
                     {
                         for (int x = 1; x <= gen.PlayersPerInstance; x++)
                         {
-                            //textChanges.Add(context.FindLineNumberInTextFile(Path.Combine(linkBinFolder, "XInputPlus.ini"), "Controller" + x + "=", SearchType.StartsWith) + "|Controller" + x + "=" + (x + plyrIndex));
-                            textChanges.Add(context.FindLineNumberInTextFile(Path.Combine(linkBinFolder, "x360ce.ini"), "PAD" + x + "=", SearchType.StartsWith) + "|PAD" + x + "=IG_" + players[x].GamepadGuid.ToString().Replace("-", string.Empty));
+                            //textChanges.Add(context.FindLineNumberInTextFile(Path.Combine(instanceExeFolder, "XInputPlus.ini"), "Controller" + x + "=", SearchType.StartsWith) + "|Controller" + x + "=" + (x + plyrIndex));
+                            textChanges.Add(context.FindLineNumberInTextFile(Path.Combine(instanceExeFolder, "x360ce.ini"), "PAD" + x + "=", SearchType.StartsWith) + "|PAD" + x + "=IG_" + players[x].GamepadGuid.ToString().Replace("-", string.Empty));
                         }
                         for (int x = gen.PlayersPerInstance + 1; x <= 4; x++)
                         {
-                            textChanges.Add(context.FindLineNumberInTextFile(Path.Combine(linkBinFolder, "x360ce.ini"), "PAD" + x + "=", SearchType.StartsWith) + "|PAD" + x + "=IG_" + players[x].GamepadGuid.ToString().Replace("-", string.Empty));
+                            textChanges.Add(context.FindLineNumberInTextFile(Path.Combine(instanceExeFolder, "x360ce.ini"), "PAD" + x + "=", SearchType.StartsWith) + "|PAD" + x + "=IG_" + players[x].GamepadGuid.ToString().Replace("-", string.Empty));
                         }
                         plyrIndex += gen.PlayersPerInstance;
                     }
                     else
                     {
-                        textChanges.Add(context.FindLineNumberInTextFile(Path.Combine(linkBinFolder, "x360ce.ini"), "PAD1=", SearchType.StartsWith) + "|PAD1=" + context.x360ceGamepadGuid);
-                        textChanges.Add(context.FindLineNumberInTextFile(Path.Combine(linkBinFolder, "x360ce.ini"), "PAD2=", SearchType.StartsWith) + "|PAD2=");
-                        textChanges.Add(context.FindLineNumberInTextFile(Path.Combine(linkBinFolder, "x360ce.ini"), "PAD3=", SearchType.StartsWith) + "|PAD3=");
-                        textChanges.Add(context.FindLineNumberInTextFile(Path.Combine(linkBinFolder, "x360ce.ini"), "PAD4=", SearchType.StartsWith) + "|PAD4=");
+                        textChanges.Add(context.FindLineNumberInTextFile(Path.Combine(instanceExeFolder, "x360ce.ini"), "PAD1=", SearchType.StartsWith) + "|PAD1=" + context.x360ceGamepadGuid);
+                        textChanges.Add(context.FindLineNumberInTextFile(Path.Combine(instanceExeFolder, "x360ce.ini"), "PAD2=", SearchType.StartsWith) + "|PAD2=");
+                        textChanges.Add(context.FindLineNumberInTextFile(Path.Combine(instanceExeFolder, "x360ce.ini"), "PAD3=", SearchType.StartsWith) + "|PAD3=");
+                        textChanges.Add(context.FindLineNumberInTextFile(Path.Combine(instanceExeFolder, "x360ce.ini"), "PAD4=", SearchType.StartsWith) + "|PAD4=");
                     }
 
-                    context.ReplaceLinesInTextFile(Path.Combine(linkBinFolder, "x360ce.ini"), textChanges.ToArray());
+                    context.ReplaceLinesInTextFile(Path.Combine(instanceExeFolder, "x360ce.ini"), textChanges.ToArray());
 
                     if(gen.XboxOneControllerFix)
                     {
                         Log("Implementing Xbox One controller fix");
-                        //change = new string[] { context.FindLineNumberInTextFile(Path.Combine(linkBinFolder, "x360ce.ini"), "HookMode=1", SearchType.Full) + "|" +
+                        //change = new string[] { context.FindLineNumberInTextFile(Path.Combine(instanceExeFolder, "x360ce.ini"), "HookMode=1", SearchType.Full) + "|" +
                         //    "HookLL=0\n" +
                         //    "HookCOM=1\n" +
                         //    "HookSA=0\n" +
@@ -1449,7 +1554,7 @@ namespace Nucleus.Gaming
                         //    "HookMode=0\n"
                         //};
                         textChanges.Clear();
-                        textChanges.Add(context.FindLineNumberInTextFile(Path.Combine(linkBinFolder, "x360ce.ini"), "HookMode=1", SearchType.Full) + "|" +
+                        textChanges.Add(context.FindLineNumberInTextFile(Path.Combine(instanceExeFolder, "x360ce.ini"), "HookMode=1", SearchType.Full) + "|" +
                             "HookLL=0\n" +
                             "HookCOM=1\n" +
                             "HookSA=0\n" +
@@ -1459,7 +1564,7 @@ namespace Nucleus.Gaming
                             "HookName=0\n" +
                             "HookMode=0\n"
                         );
-                        context.ReplaceLinesInTextFile(Path.Combine(linkBinFolder, "x360ce.ini"), textChanges.ToArray());
+                        context.ReplaceLinesInTextFile(Path.Combine(instanceExeFolder, "x360ce.ini"), textChanges.ToArray());
                     }
                     Log("x360ce setup complete");
                 }
@@ -1541,7 +1646,7 @@ namespace Nucleus.Gaming
                     if (context.Hook.XInputNames == null)
                     {
                         Log(string.Format("Writing custom dll xinput1_3.dll to {0}", Path.GetDirectoryName(GetRelativePath(exePath, nucleusRootFolder))));
-                        using (Stream str = File.OpenWrite(Path.Combine(linkBinFolder, "xinput1_3.dll")))
+                        using (Stream str = File.OpenWrite(Path.Combine(instanceExeFolder, "xinput1_3.dll")))
                         {
                             str.Write(xdata, 0, xdata.Length);
                         }
@@ -1553,7 +1658,7 @@ namespace Nucleus.Gaming
                         {
                             string xinputName = xinputs[z];
                             Log(string.Format("Writing custom dll {0} to {1}", xinputName, Path.GetDirectoryName(GetRelativePath(exePath, nucleusRootFolder))));
-                            using (Stream str = File.OpenWrite(Path.Combine(linkBinFolder, xinputName)))
+                            using (Stream str = File.OpenWrite(Path.Combine(instanceExeFolder, xinputName)))
                             {
                                 str.Write(xdata, 0, xdata.Length);
                             }
@@ -1561,7 +1666,7 @@ namespace Nucleus.Gaming
                     }
 
                     Log(string.Format("Writing ncoop.ini to {0} with Game.Hook values", Path.GetDirectoryName(GetRelativePath(exePath, nucleusRootFolder))));
-                    string ncoopIni = Path.Combine(linkBinFolder, "ncoop.ini");
+                    string ncoopIni = Path.Combine(instanceExeFolder, "ncoop.ini");
                     using (Stream str = File.OpenWrite(ncoopIni))
                     {
                         byte[] ini = Properties.Resources.ncoop;
@@ -1919,12 +2024,40 @@ namespace Nucleus.Gaming
                     }
                 }
 
-                //if (i > 0 && gen.ResetWindows && prevProcessData != null)
-                //{
-                //    MessageBox.Show("Going to attempt to reposition and resize instance " + (i - 1));
-                //    prevProcessData.HWnd.Location = new Point(prevWindowX, prevWindowY);
-                //    prevProcessData.HWnd.Size = new Size(prevWindowWidth, prevWindowHeight);
-                //}
+                if (i > 0 && gen.ResetWindows && prevProcessData != null)
+                {
+                    Log("Attempting to repoisition, resize and strip borders for instance " + (i - 1));
+                    //MessageBox.Show("Going to attempt to reposition and resize instance " + (i - 1));
+                    try
+                    {
+                        prevProcessData.HWnd.Location = new Point(prevWindowX, prevWindowY);
+                        prevProcessData.HWnd.Size = new Size(prevWindowWidth, prevWindowHeight);
+                        uint lStyle = User32Interop.GetWindowLong(prevProcessData.HWnd.NativePtr, User32_WS.GWL_STYLE);
+                        lStyle = lStyle & ~User32_WS.WS_CAPTION;
+                        lStyle = lStyle & ~User32_WS.WS_THICKFRAME;
+                        lStyle = lStyle & ~User32_WS.WS_MINIMIZE;
+                        lStyle = lStyle & ~User32_WS.WS_MAXIMIZE;
+                        lStyle = lStyle & ~User32_WS.WS_SYSMENU;
+                        User32Interop.SetWindowLong(prevProcessData.HWnd.NativePtr, User32_WS.GWL_STYLE, lStyle);
+
+                        lStyle = User32Interop.GetWindowLong(prevProcessData.HWnd.NativePtr, User32_WS.GWL_EXSTYLE);
+                        lStyle = lStyle & ~User32_WS.WS_EX_DLGMODALFRAME;
+                        lStyle = lStyle & ~User32_WS.WS_EX_CLIENTEDGE;
+                        lStyle = lStyle & ~User32_WS.WS_EX_STATICEDGE;
+                        User32Interop.SetWindowLong(prevProcessData.HWnd.NativePtr, User32_WS.GWL_EXSTYLE, lStyle);
+                        User32Interop.SetWindowPos(prevProcessData.HWnd.NativePtr, IntPtr.Zero, 0, 0, 0, 0, (uint)(PositioningFlags.SWP_FRAMECHANGED | PositioningFlags.SWP_NOMOVE | PositioningFlags.SWP_NOSIZE | PositioningFlags.SWP_NOZORDER | PositioningFlags.SWP_NOOWNERZORDER));
+
+                    }
+                    catch (Exception ex)
+                    {
+                        Log("ERROR - ResetWindows was unsuccessful for instance " + (i - 1) + ". " + ex.Message);
+                    }
+                    if(prevProcessData.HWnd.Location != new Point(prevWindowX, prevWindowY) || prevProcessData.HWnd.Size != new Size(prevWindowWidth, prevWindowHeight))
+                    {
+                        Log("ERROR - ResetWindows was unsuccessful for instance " + (i - 1));
+                    }
+
+                }
 
                 //using (StreamWriter writer = new StreamWriter("important.txt", true))
                 //{
@@ -2052,6 +2185,52 @@ namespace Nucleus.Gaming
 
                 if (i == (players.Count - 1)) // all instances accounted for
                 {
+                    if (gen.ResetWindows)
+                    {
+
+                        Log("Attempting to repoisition, resize and strip borders for instance " + i);
+                        //prevProcessData.HWnd.Location = new Point(prevWindowX, prevWindowY);
+                        //prevProcessData.HWnd.Size = new Size(prevWindowWidth, prevWindowHeight);
+                        //uint lStyle = User32Interop.GetWindowLong(prevProcessData.HWnd.NativePtr, User32_WS.GWL_STYLE);
+                        //lStyle = lStyle & ~User32_WS.WS_CAPTION;
+                        //lStyle = lStyle & ~User32_WS.WS_THICKFRAME;
+                        //lStyle = lStyle & ~User32_WS.WS_MINIMIZE;
+                        //lStyle = lStyle & ~User32_WS.WS_MAXIMIZE;
+                        //lStyle = lStyle & ~User32_WS.WS_SYSMENU;
+                        //User32Interop.SetWindowLong(prevProcessData.HWnd.NativePtr, User32_WS.GWL_STYLE, lStyle);
+
+                        //lStyle = User32Interop.GetWindowLong(prevProcessData.HWnd.NativePtr, User32_WS.GWL_EXSTYLE);
+                        //lStyle = lStyle & ~User32_WS.WS_EX_DLGMODALFRAME;
+                        //lStyle = lStyle & ~User32_WS.WS_EX_CLIENTEDGE;
+                        //lStyle = lStyle & ~User32_WS.WS_EX_STATICEDGE;
+                        //User32Interop.SetWindowLong(prevProcessData.HWnd.NativePtr, User32_WS.GWL_EXSTYLE, lStyle);
+                        //User32Interop.SetWindowPos(prevProcessData.HWnd.NativePtr, IntPtr.Zero, 0, 0, 0, 0, (uint)(PositioningFlags.SWP_FRAMECHANGED | PositioningFlags.SWP_NOMOVE | PositioningFlags.SWP_NOSIZE | PositioningFlags.SWP_NOZORDER | PositioningFlags.SWP_NOOWNERZORDER));
+                        try
+                        {
+                            data.HWnd.Location = new Point(prevWindowX, prevWindowY);
+                            data.HWnd.Size = new Size(prevWindowWidth, prevWindowHeight);
+                            uint lStyle = User32Interop.GetWindowLong(data.HWnd.NativePtr, User32_WS.GWL_STYLE);
+                            lStyle = lStyle & ~User32_WS.WS_CAPTION;
+                            lStyle = lStyle & ~User32_WS.WS_THICKFRAME;
+                            lStyle = lStyle & ~User32_WS.WS_MINIMIZE;
+                            lStyle = lStyle & ~User32_WS.WS_MAXIMIZE;
+                            lStyle = lStyle & ~User32_WS.WS_SYSMENU;
+                            User32Interop.SetWindowLong(data.HWnd.NativePtr, User32_WS.GWL_STYLE, lStyle);
+
+                            lStyle = User32Interop.GetWindowLong(data.HWnd.NativePtr, User32_WS.GWL_EXSTYLE);
+                            lStyle = lStyle & ~User32_WS.WS_EX_DLGMODALFRAME;
+                            lStyle = lStyle & ~User32_WS.WS_EX_CLIENTEDGE;
+                            lStyle = lStyle & ~User32_WS.WS_EX_STATICEDGE;
+                            User32Interop.SetWindowLong(data.HWnd.NativePtr, User32_WS.GWL_EXSTYLE, lStyle);
+                            User32Interop.SetWindowPos(data.HWnd.NativePtr, IntPtr.Zero, 0, 0, 0, 0, (uint)(PositioningFlags.SWP_FRAMECHANGED | PositioningFlags.SWP_NOMOVE | PositioningFlags.SWP_NOSIZE | PositioningFlags.SWP_NOZORDER | PositioningFlags.SWP_NOOWNERZORDER));
+                        }
+                        catch(Exception ex)
+                        {
+                            Log("ERROR - ResetWindows was unsuccessful for instance " + i + ". " + ex.Message);
+                        }
+                    }
+
+
                     if (gen.FakeFocus)
                     {
                         Log("Start sending fake focus messages every 1000 ms");
@@ -2130,6 +2309,7 @@ namespace Nucleus.Gaming
 
                         }
                     }
+
                 }               
             }
 
@@ -2623,12 +2803,6 @@ namespace Nucleus.Gaming
         {
             if (ini.IniReadValue("Misc", "DebugLog") == "True")
             {
-                //StreamWriter w = new StreamWriter("debug-log.txt", true);
-                //w.WriteLine($"[{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}]HANDLER: {logMessage}");
-                //w.Flush();
-                //w.Close();
-                //w.Dispose();
-
                 using (StreamWriter writer = new StreamWriter("debug-log.txt",true))
                 {
                     writer.WriteLine($"[{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}]HANDLER: {logMessage}");

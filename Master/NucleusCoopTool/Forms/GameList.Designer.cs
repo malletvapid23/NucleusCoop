@@ -1,4 +1,6 @@
-﻿namespace Nucleus.Coop
+﻿using System.Drawing;
+
+namespace Nucleus.Coop
 {
     partial class GameList
     {
@@ -62,8 +64,8 @@
             // 
             // GameList
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 21F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.AutoScaleDimensions = new SizeF(6F, 13F);
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(50)))), ((int)(((byte)(50)))), ((int)(((byte)(50)))));
             this.ClientSize = new System.Drawing.Size(424, 671);
             this.Controls.Add(this.btnOk);
@@ -71,7 +73,7 @@
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Margin = new System.Windows.Forms.Padding(6, 8, 6, 8);
             this.Name = "GameList";
-            this.Text = "Split Play PC";
+            this.Text = "Select which game to add";
             this.ResumeLayout(false);
 
         }

@@ -15,7 +15,7 @@ using System.Runtime.InteropServices;
 
 namespace Nucleus.Coop
 {
-    public partial class Form : BaseForm
+    public partial class Settings : BaseForm
     {
         private readonly IniFile ini = new Gaming.IniFile(Path.Combine(Directory.GetCurrentDirectory(), "Settings.ini"));
 
@@ -31,9 +31,12 @@ namespace Nucleus.Coop
 
         private DirectInput dinput;
 
-        public Form(MainForm mf, PositionsControl pc)
+        public Settings(MainForm mf, PositionsControl pc)
         {
             InitializeComponent();
+
+            DPIManager.AddForm(this);
+            DPIManager.ForceUpdate();
 
             Invalidate();
 
@@ -114,6 +117,25 @@ namespace Nucleus.Coop
                 debugLogCheck.Checked = Boolean.Parse(ini.IniReadValue("Misc", "DebugLog"));
             }
 
+            //if (ini.IniReadValue("Misc", "VibrateOpen") != "")
+            //{
+            //    check_Vibrate.Checked = Boolean.Parse(ini.IniReadValue("Misc", "VibrateOpen"));
+            //}
+
+        }
+
+        public Settings()
+        {
+            InitializeComponent();
+            DPIManager.AddForm(this);
+            DPIManager.ForceUpdate();
+        }
+
+        protected override void OnShown(EventArgs e)
+        {
+            base.OnShown(e);
+
+            DPIManager.ForceUpdate();
         }
 
         private void GetControllers()
@@ -187,6 +209,8 @@ namespace Nucleus.Coop
                 ini.IniWriteValue("CustomLayout", "HorizontalLines", numHorDiv.Value.ToString());
                 ini.IniWriteValue("CustomLayout", "VerticalLines", numVerDiv.Value.ToString());
                 ini.IniWriteValue("CustomLayout", "MaxPlayers", numMaxPlyrs.Value.ToString());
+
+                //ini.IniWriteValue("Misc", "VibrateOpen", check_Vibrate.Checked.ToString());
 
                 MessageBox.Show("Settings saved succesfully!", "Saved", MessageBoxButtons.OK, MessageBoxIcon.None);
             }
