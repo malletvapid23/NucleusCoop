@@ -213,7 +213,7 @@ namespace Nucleus.Gaming
                     {
                         try
                         {
-                            if (proc.ProcessName.ToLower() == Path.GetFileNameWithoutExtension(gen.ExecutableName.ToLower()) || attachedIds.Contains(proc.Id) || proc.MainWindowTitle == gen.Hook.ForceFocusWindowName)
+                            if (proc.ProcessName.ToLower() == Path.GetFileNameWithoutExtension(gen.ExecutableName.ToLower()) || attachedIds.Contains(proc.Id) || (gen.Hook.ForceFocusWindowName != "" && proc.MainWindowTitle == gen.Hook.ForceFocusWindowName))
                             {
                                 Log(string.Format("Killing process {0} (pid {1})", proc.ProcessName, proc.Id));
                                 proc.Kill();
