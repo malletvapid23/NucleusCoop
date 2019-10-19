@@ -139,10 +139,6 @@ HWND FindWindowFromProcess(HANDLE hProcess) {
 
 NTSTATUS HookInstall(LPCSTR moduleHandle, LPCSTR proc, void* callBack)
 {
-
-	USES_CONVERSION;
-	LPCWSTR moduleHandlew = A2W(moduleHandle);
-
 	// Perform hooking
 	HOOK_TRACE_INFO hHook = { NULL }; // keep track of our hook
 
@@ -152,6 +148,7 @@ NTSTATUS HookInstall(LPCSTR moduleHandle, LPCSTR proc, void* callBack)
 		callBack,
 		NULL,
 		&hHook);
+	
 	if (FAILED(result))
 	{
 		if (IsDebug)
