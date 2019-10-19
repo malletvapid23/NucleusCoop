@@ -269,19 +269,19 @@ namespace StartGame
 
                     Array.Copy(targetsBytes, 0, data, 19 + logPathLength, targetsBytesLength);
 
-
-
                     IntPtr ptr = Marshal.AllocHGlobal(size);
                     Marshal.Copy(data, 0, ptr, size);
 
                     if (!isDelay) // CreateandInject method
                     {
+                        Log("Starting game and injecting start up hooks using create and inject method");
                         if (Is64Bit(path) == true)
                         {
                             try
                             {
+                                Log("x64 game detected, injecting Nucleus.SHook64.dll");
                                 IntPtr pid = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(uint)));
-                                RhCreateAndInject(path, args, 0, 0, Path.Combine(currDir, "Nucleus.SHook32.dll"), Path.Combine(currDir, "Nucleus.SHook64.dll"), ptr, (uint)size, pid);
+                                RhCreateAndInject(path, args, 0, 0, null, Path.Combine(currDir, "Nucleus.SHook64.dll"), ptr, (uint)size, pid);
                                 pOutPID = Marshal.ReadInt32(pid);
                                 Marshal.FreeHGlobal(pid);
                             }
@@ -298,6 +298,7 @@ namespace StartGame
                         {
                             try
                             {
+                                Log("x32 game detected, using Nucleus.Inject32 and injecting Nucleus.SHook32.dll");
                                 //pidTest = gen.Inject(path, args, 0, 0, Path.Combine(currDir, "Nucleus.Hook32.dll"), null, IntPtr.Zero, 0);
                                 string injectorPath = Path.Combine(currDir, "Nucleus.Inject32.exe");
                                 ProcessStartInfo injstartInfo = new ProcessStartInfo();
@@ -356,7 +357,7 @@ namespace StartGame
                     }
                     else // delay method
                     {
-                        Log("Starting game using delay method");
+                        Log("Starting game and injecting start up hooks using delay method");
 
                         string directoryPath = Path.GetDirectoryName(path);
                         STARTUPINFO si = new STARTUPINFO();
@@ -381,6 +382,7 @@ namespace StartGame
 
                         if (Is64Bit(path) == true)
                         {
+                            Log("x64 game detected, injecting Nucleus.SHook64.dll");
                             NativeAPI.RhInjectLibrary((int)pi.dwProcessId, 0, 0, null, Path.Combine(currDir, "Nucleus.SHook64.dll"), ptr, size);
                             pOutPID = (int)pi.dwProcessId;
                         }
@@ -388,6 +390,7 @@ namespace StartGame
                         {
                             try
                             {
+                                Log("x32 game detected, using Nucleus.Inject32 and injecting Nucleus.SHook32.dll");
                                 string injectorPath = Path.Combine(currDir, "Nucleus.Inject32.exe");
                                 ProcessStartInfo injstartInfo = new ProcessStartInfo();
                                 injstartInfo.FileName = injectorPath;
@@ -436,6 +439,7 @@ namespace StartGame
                 }
                 else // regular method (no hooks)
                 {
+                    Log("Starting game via regular process start method (no hooks enabled)");
                     proc = Process.Start(startInfo);
                     
                     pOutPID = proc.Id;
@@ -645,10 +649,12 @@ namespace StartGame
                         try
                         {
                             proc = Process.GetProcessById(id);
+                            Log(string.Format($"Process ID {id} found!"));
                             ConsoleU.WriteLine($"Process ID {id} found!", Palette.Success);
                         }
                         catch
                         {
+                            Log(string.Format($"Process ID {id} not found"));
                             ConsoleU.WriteLine($"Process ID {id} not found", Palette.Error);
                         }
                     }

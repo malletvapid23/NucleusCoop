@@ -213,7 +213,7 @@ namespace Nucleus.Gaming
                     {
                         try
                         {
-                            if (proc.ProcessName.ToLower() == Path.GetFileNameWithoutExtension(gen.ExecutableName.ToLower()) || attachedIds.Contains(proc.Id) || (gen.Hook.ForceFocusWindowName != "" && proc.MainWindowTitle == gen.Hook.ForceFocusWindowName))
+                            if (proc.ProcessName.ToLower() == Path.GetFileNameWithoutExtension(gen.ExecutableName.ToLower()) || (proc.Id != 0 && attachedIds.Contains(proc.Id)) || (gen.Hook.ForceFocusWindowName != "" && proc.MainWindowTitle == gen.Hook.ForceFocusWindowName))
                             {
                                 Log(string.Format("Killing process {0} (pid {1})", proc.ProcessName, proc.Id));
                                 proc.Kill();
@@ -325,7 +325,7 @@ namespace Nucleus.Gaming
                             else
                             {
                                 Log("Abandoning trying to delete folder and all its contents");
-                                throw;
+                                //throw;
                             }
 
                         }
@@ -341,7 +341,7 @@ namespace Nucleus.Gaming
                             else
                             {
                                 Log("Abandoning trying to delete folder and all its contents");
-                                throw;
+                                //throw;
                             }
                         }
                         if(Directory.Exists(linkFolder))
@@ -1798,12 +1798,26 @@ namespace Nucleus.Gaming
                 if (context.NeedsSteamEmulation)
                 {
                     Log("Setting up SmartSteamEmu");
-                    Log(string.Format("Extracting SmartSteamEmu to {0}", linkFolder));
-                    string steamEmu = GameManager.Instance.ExtractSteamEmu(Path.Combine(linkFolder, "SmartSteamLoader"));
-                    //string steamEmu = GameManager.Instance.ExtractSteamEmu();
-                    if (string.IsNullOrEmpty(steamEmu))
+                    
+                    string steamEmu = Path.Combine(linkFolder, "SmartSteamLoader"); //GameManager.Instance.ExtractSteamEmu(Path.Combine(linkFolder, "SmartSteamLoader"));
+                    string sourcePath = Path.Combine(GameManager.Instance.GetUtilsPath(), "SmartSteamEmu");
+
+                    Log(string.Format("Copying SmartSteamEmu files to {0}", Path.GetDirectoryName(GetRelativePath(steamEmu, nucleusRootFolder))));
+                    try
                     {
-                        Log(string.Format("ERROR - Extraction of SmartSteamEmu failed!"));
+                        //Create all of the directories
+                        foreach (string dirPath in Directory.GetDirectories(sourcePath, "*",
+                            SearchOption.AllDirectories))
+                            Directory.CreateDirectory(dirPath.Replace(sourcePath, steamEmu));
+
+                        //Copy all the files & Replaces any files with the same name
+                        foreach (string newPath in Directory.GetFiles(sourcePath, "*.*",
+                            SearchOption.AllDirectories))
+                            File.Copy(newPath, newPath.Replace(sourcePath, steamEmu), true);
+                    }
+                    catch
+                    {
+                        Log(string.Format("ERROR - Copying of SmartSteamEmu files failed!"));
                         return "Extraction of SmartSteamEmu failed!";
                     }
 
@@ -2168,10 +2182,10 @@ namespace Nucleus.Gaming
                     Log(string.Format("Prompted user for Instance {0}", (i + 1)));
                     MessageBox.Show("Press OK when ready to launch instance " + (i + 1) + ".", "Waiting", MessageBoxButtons.OK, MessageBoxIcon.None, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly);
                 }
-                else if (gen.PromptBetweenInstances && i == players.Count - 1 && gen.HookFocus)
+                else if (gen.PromptBetweenInstances && i == players.Count - 1 && (gen.HookFocus || gen.FakeFocus || gen.SetWindowHook || gen.HideCursor))
                 {
                     Log("Prompted user to install focus hooks");
-                    MessageBox.Show("Press OK when ready to install focus hooks.", "Waiting", MessageBoxButtons.OK, MessageBoxIcon.None, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly);
+                    MessageBox.Show("Press OK when ready to install hooks and/or start sending fake messages.", "Waiting", MessageBoxButtons.OK, MessageBoxIcon.None, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly);
                     foreach (Process aproc in attached)
                     {
                         User32Interop.SetWindowPos(aproc.MainWindowHandle, new IntPtr(-1), 0, 0, 0, 0, (uint)(PositioningFlags.SWP_NOMOVE | PositioningFlags.SWP_NOSIZE | PositioningFlags.SWP_SHOWWINDOW));

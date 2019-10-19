@@ -112,6 +112,7 @@ namespace Nucleus.Coop
             // selects the list of games, so the buttons look equal
             list_Games.Select();
 
+            gameManager.ReorderUserProfile();
             //MessageBox.Show("list games: " + list_Games.Height + "\nform: " + this.Height + "\nbtnsearhc y coord: " + btnSearch.Location.Y + "\nsteppanel: " + StepPanel.Height);
 
             //list_Games.AutoScroll = false;
@@ -774,7 +775,7 @@ namespace Nucleus.Coop
 
                     if (gameGuid == currentGameInfo.GameGuid && exePath == currentGameInfo.ExePath)
                     {
-                        MessageBox.Show(string.Format("Game Name: {0}\nSteam ID: {1}\nProfiles: {2}\nExe Path: {3}\nScript Filename: {4}\nNucleus Game Data Path: {5}", currentGameInfo.Game.GameName, currentGameInfo.Game.SteamID, profiles, exePath, currentGameInfo.Game.JsFileName, Path.Combine(gameManager.GetAppDataPath(), gameGuid)), "Game Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        MessageBox.Show(string.Format("Game Name: {0}\nSteam ID: {1}\nExe Path: {2}\nScript Filename: {3}\nNucleus Game Data Path: {4}", currentGameInfo.Game.GameName, currentGameInfo.Game.SteamID, exePath, currentGameInfo.Game.JsFileName, Path.Combine(gameManager.GetAppDataPath(), gameGuid)), "Game Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     }
                 }
             }

@@ -1138,13 +1138,46 @@ namespace Nucleus.Coop
             }
             else if (e.Button == MouseButtons.Right || e.Button == MouseButtons.Middle)
             {
+                for (int i = 0; i < screens.Length; i++)
+                {
+                    UserScreen screen = screens[i];
+                    if (screen.SwapTypeBounds.Contains(e.Location))
+                    {
+                        if (screen.Type == UserScreenType.FullScreen)
+                        {
+                            screen.Type = UserScreenType.Custom;
+                        }
+                        else
+                        {
+                            screen.Type--;
+                        }
+
+                        // invalidate all players inside screen
+                        for (int j = 0; j < players.Count; j++)
+                        {
+                            // return to default position
+                            PlayerInfo p = players[j];
+                            if (p.ScreenIndex == i)
+                            {
+                                p.EditBounds = GetDefaultBounds(j);
+                                p.ScreenIndex = -1;
+                            }
+                        }
+
+                        Invalidate();
+                        return;
+                    }
+                }
+
                 // if over a player on a screen, change the type
                 for (int i = 0; i < players.Count; i++)
                 {
+
                     PlayerInfo p = players[i];
                     Rectangle r = p.EditBounds;
                     if (r.Contains(e.Location))
                     {
+                        
                         if (p.ScreenIndex != -1)
                         {
 
