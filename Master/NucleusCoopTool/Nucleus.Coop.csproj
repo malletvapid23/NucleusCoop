@@ -274,7 +274,9 @@
   </Target>
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
   <PropertyGroup>
-    <PostBuildEvent>echo.&gt;Built.flag</PostBuildEvent>
+    <PostBuildEvent>echo.&gt;Built.flag
+copy $(SolutionDir)ThirdParty\easyhook\*.dll $(TargetPath)\..
+copy $(SolutionDir)ThirdParty\easyhook\*.exe $(TargetPath)\..</PostBuildEvent>
   </PropertyGroup>
   <PropertyGroup>
     <PreBuildEvent>
