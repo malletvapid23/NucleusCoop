@@ -74,11 +74,12 @@ std::string ws2s(const std::wstring& wstr)
 
 inline std::string date_string()
 {
+	tm tinfo;
 	time_t rawtime;
 	std::time(&rawtime);
-	struct tm* tinfo = std::localtime(&rawtime);
+	localtime_s(&tinfo, &rawtime);
 	char buffer[21];
-	strftime(buffer, 21, "%Y-%m-%d %H:%M:%S", tinfo);
+	strftime(buffer, 21, "%Y-%m-%d %H:%M:%S", &tinfo);
 	return "[" + std::string(buffer) + "]";
 }
 
@@ -409,12 +410,6 @@ HWND FindWindowFromProcess(HANDLE hProcess) {
 
 NTSTATUS HookInstall(LPCSTR moduleHandle, LPCSTR proc, void* callBack)
 {
-	USES_CONVERSION;
-	LPCWSTR moduleHandlew = A2W(moduleHandle);
-
-	
-
-
 	// Perform hooking
 	HOOK_TRACE_INFO hHook = { NULL }; // keep track of our hook
 
@@ -500,7 +495,8 @@ void installFindMutexHooks(LPCWSTR targets)
 
 	//Ntdll functions
 #define GET_NT_PROC(name, type) (type)GetProcAddress(GetModuleHandle("ntdll.dll"), name)
-
+	
+	NtCreateMutant = GET_NT_PROC("NtCreateMutant", t_NtCreateMutant);
 	NtCreateMutant = GET_NT_PROC("NtCreateMutant", t_NtCreateMutant);
 	NtOpenMutant = GET_NT_PROC("NtOpenMutant", t_NtOpenMutant);
 
