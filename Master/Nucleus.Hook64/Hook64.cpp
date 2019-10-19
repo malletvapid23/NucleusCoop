@@ -16,7 +16,11 @@ using namespace std;
 
 HWND hWnd = 0;
 
+#ifdef DEBUG
 bool IsDebug = false;
+#else
+bool IsDebug = true;
+#endif
 
 std::ofstream outfile;
 std::wstring nucleusFolder;
