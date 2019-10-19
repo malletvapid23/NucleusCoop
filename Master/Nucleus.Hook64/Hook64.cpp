@@ -9,8 +9,9 @@
 #include <atlbase.h>
 #include <locale>
 #include <codecvt>
-#include <time.h>
+#include <ctime>
 #include <stdio.h>
+#include <iomanip>
 using namespace std;
 
 HWND hWnd = 0;
@@ -31,11 +32,12 @@ std::string ws2s(const std::wstring& wstr)
 
 inline std::string date_string()
 {
+	tm tinfo;
 	time_t rawtime;
 	std::time(&rawtime);
-	struct tm* tinfo = std::localtime(&rawtime);
+	localtime_s(&tinfo, &rawtime);
 	char buffer[21];
-	strftime(buffer, 21, "%Y-%m-%d %H:%M:%S", tinfo);
+	strftime(buffer, 21, "%Y-%m-%d %H:%M:%S", &tinfo);
 	return "[" + std::string(buffer) + "]";
 }
 
