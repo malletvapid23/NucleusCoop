@@ -86,7 +86,94 @@ namespace Nucleus.Inject64
 
             if (Tier == 0)
             {
-                string InEXEPath = args[i++];
+				string InEXEPath = args[i++];
+				string InCommandLine = args[i++];
+				uint.TryParse(args[i++], out uint InProcessCreationFlags);
+				uint.TryParse(args[i++], out uint InInjectionOptions);
+				string InLibraryPath_x86 = args[i++];
+				string InLibraryPath_x64 = args[i++];
+				bool.TryParse(args[i++], out bool hookWindow); // E.g. FindWindow, etc
+				bool.TryParse(args[i++], out bool renameMutex);
+				string mutexToRename = args[i++];
+				bool.TryParse(args[i++], out bool setWindow);
+				bool.TryParse(args[i++], out bool isDebug);
+				string nucleusFolderPath = args[i++];
+				bool.TryParse(args[i++], out bool blockRaw);
+
+				//IntPtr InPassThruBuffer = Marshal.StringToHGlobalUni(args[i++]);
+				//uint.TryParse(args[i++], out uint InPassThruSize);
+
+				var logPath = Encoding.Unicode.GetBytes(nucleusFolderPath);
+				int logPathLength = logPath.Length;
+
+				var targetsBytes = Encoding.Unicode.GetBytes(mutexToRename);
+				int targetsBytesLength = targetsBytes.Length;
+
+				int size = 27 + logPathLength + targetsBytesLength;
+				var data = new byte[size];
+				data[0] = hookWindow == true ? (byte)1 : (byte)0;
+				data[1] = renameMutex == true ? (byte)1 : (byte)0;
+				data[2] = setWindow == true ? (byte)1 : (byte)0;
+				data[3] = isDebug == true ? (byte)1 : (byte)0;
+				data[4] = blockRaw == true ? (byte)1 : (byte)0;
+
+				data[10] = (byte)(logPathLength >> 24);
+				data[11] = (byte)(logPathLength >> 16);
+				data[12] = (byte)(logPathLength >> 8);
+				data[13] = (byte)logPathLength;
+
+				data[14] = (byte)(targetsBytesLength >> 24);
+				data[15] = (byte)(targetsBytesLength >> 16);
+				data[16] = (byte)(targetsBytesLength >> 8);
+				data[17] = (byte)targetsBytesLength;
+
+				Array.Copy(logPath, 0, data, 18, logPathLength);
+
+				Array.Copy(targetsBytes, 0, data, 19 + logPathLength, targetsBytesLength);
+
+				IntPtr ptr = Marshal.AllocHGlobal(size);
+				Marshal.Copy(data, 0, ptr, size);
+
+
+
+				IntPtr pid = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(int)));
+
+				try
+				{
+					int result = -1;
+					int attempts = 0; // 5 attempts to inject
+
+					while (result != 0)
+					{
+						if (is64)
+							result = Injector64.RhCreateAndInject(InEXEPath, InCommandLine, InProcessCreationFlags, InInjectionOptions, "", InLibraryPath_x64, ptr, (uint)size, pid);
+						else
+							result = Injector32.RhCreateAndInject(InEXEPath, InCommandLine, InProcessCreationFlags, InInjectionOptions, InLibraryPath_x86, "", ptr, (uint)size, pid);
+						
+						Thread.Sleep(1000);
+						attempts++;
+
+						if (attempts == 4)
+							break;
+					}
+					Marshal.FreeHGlobal(pid);
+
+					Console.WriteLine(Marshal.ReadInt32(pid).ToString());
+				}
+				catch (Exception ex)
+				{
+					Log(string.Format("ERROR - {0}", ex.Message));
+					//using (StreamWriter writer = new StreamWriter("error-log.txt", true))
+					//{
+					//    writer.WriteLine("[" + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "]" + "ex msg: {0}, ex str: {1}", ex.Message, ex.ToString());
+					//}
+				}
+
+				/**
+				Outdated. Need the CreateAndInject method originally from Inject32
+
+                 
+				string InEXEPath = args[i++];
                 string InCommandLine = args[i++];
                 uint.TryParse(args[i++], out uint InProcessCreationFlags);
                 uint.TryParse(args[i++], out uint InInjectionOptions);
@@ -124,8 +211,8 @@ namespace Nucleus.Inject64
                     //{
                     //    writer.WriteLine("[" + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "]" + "ex msg: {0}, ex str: {1}", ex.Message, ex.ToString());
                     //}
-                }
-            }
+                }*/
+			}
             else if (Tier == 1)
             {
                 int.TryParse(args[i++], out int InTargetPID);

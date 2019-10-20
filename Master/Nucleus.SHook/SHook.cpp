@@ -542,7 +542,7 @@ void __stdcall NativeInjectionEntryPoint(REMOTE_ENTRY_INFO* inRemoteInfo)
 	const bool HookWindow = data[0] == 1;
 	const bool RenameMutex = data[1] == 1;
 	const bool SetWindow = data[2] == 1;
-	IsDebug = data[3] == 1;
+	IsDebug = data[3] == 1; // TODO: Is this really necessary to pass IsDebug in from C#? Better and easier to just use #ifdef Debug
 	const bool BlockRaw = data[4] == 1;
 
 	const size_t pathLength = (data[10] << 24) + (data[11] << 16) + (data[12] << 8) + data[13];

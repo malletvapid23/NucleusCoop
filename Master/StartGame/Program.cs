@@ -225,23 +225,27 @@ namespace StartGame
             try
             {
                 //proc = Process.Start(startInfo);
-                string currDir = Directory.GetCurrentDirectory();
+                //string currDir = Directory.GetCurrentDirectory();
 
-                //bool is64 = EasyHook.RemoteHooking.IsX64Process((int)pi.dwProcessId);
+				// This works even if the current directory is set elsewhere.
+                string currDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
 
-                if (isHook || renameMutex || setWindow || blockRaw)
+				//bool is64 = EasyHook.RemoteHooking.IsX64Process((int)pi.dwProcessId);
+
+				if (isHook || renameMutex || setWindow || blockRaw)
                 {
-                    var targetsBytes = Encoding.Unicode.GetBytes(mutexToRename);
-                    int targetsBytesLength = targetsBytes.Length;
+                    //var targetsBytes = Encoding.Unicode.GetBytes(mutexToRename);
+                    //int targetsBytesLength = targetsBytes.Length;
 
-                    var logPath = Encoding.Unicode.GetBytes(nucleusFolderPath);
-                    int logPathLength = logPath.Length;
+                    //var logPath = Encoding.Unicode.GetBytes(nucleusFolderPath);
+                    //int logPathLength = logPath.Length;
 
-                    //var hidBytes = Encoding.Unicode.GetBytes(rawHid);
-                    //int hidBytesLength = hidBytes.Length;
+					#region unused
+					//var hidBytes = Encoding.Unicode.GetBytes(rawHid);
+					//int hidBytesLength = hidBytes.Length;
 
-                    int size = 27 + logPathLength + targetsBytesLength;
-                    var data = new byte[size];
+					//int size = 27 + logPathLength + targetsBytesLength;
+					/*var data = new byte[size];
                     data[0] = isHook == true ? (byte)1 : (byte)0;
                     data[1] = renameMutex == true ? (byte)1 : (byte)0;
                     data[2] = setWindow == true ? (byte)1 : (byte)0;
@@ -261,21 +265,85 @@ namespace StartGame
                     //data[18] = (byte)(hidBytesLength >> 24);
                     //data[19] = (byte)(hidBytesLength >> 16);
                     //data[20] = (byte)(hidBytesLength >> 8);
-                    //data[21] = (byte)hidBytesLength;
+                    //data[21] = (byte)hidBytesLength;*/
 
-                    Array.Copy(logPath, 0, data, 18, logPathLength);
+					//Array.Copy(logPath, 0, data, 18, logPathLength);
 
-                    //Array.Copy(hidBytes, 0, data, 23 + logPathLength, hidBytesLength);
+					//Array.Copy(hidBytes, 0, data, 23 + logPathLength, hidBytesLength);
 
-                    Array.Copy(targetsBytes, 0, data, 19 + logPathLength, targetsBytesLength);
+					//Array.Copy(targetsBytes, 0, data, 19 + logPathLength, targetsBytesLength);
 
-                    IntPtr ptr = Marshal.AllocHGlobal(size);
-                    Marshal.Copy(data, 0, ptr, size);
+					//IntPtr ptr = Marshal.AllocHGlobal(size);
+					//Marshal.Copy(data, 0, ptr, size);
+					#endregion
 
-                    if (!isDelay) // CreateandInject method
+					if (!isDelay) // CreateandInject method
                     {
-                        Log("Starting game and injecting start up hooks using create and inject method");
-                        if (Is64Bit(path) == true)
+                        Log("(StartGame) Starting game and injecting start up hooks via Nucleus.Inject");
+
+                        bool? is64_n = Is64Bit(path);
+
+						if (!is64_n.HasValue)
+						{
+							Log(string.Format("ERROR - Machine type {0} not implemented", GetDllMachineType(path)));
+							return;
+						}
+
+						bool is64 = is64_n.Value;
+
+						try
+						{
+							string injectorPath = Path.Combine(currDir, $"Nucleus.Inject{(is64 ? 64 : 32)}.exe");
+							ProcessStartInfo injstartInfo = new ProcessStartInfo();
+							injstartInfo.FileName = injectorPath;
+							object[] injargs = new object[]
+							{
+									0, // Tier 0 : start up hook
+									path, // EXE path
+									args, // Command line arguments. TODO: these args should be converted to base64 to prevent any special characters e.g. " breaking the injargs
+									0, // Process creation flags
+									0, // InInjectionOptions (EasyHook)
+									Path.Combine(currDir, "Nucleus.SHook32.dll"), // lib path 32
+									Path.Combine(currDir, "Nucleus.SHook64.dll"), // lib path 64
+									isHook, // Window hooks
+									renameMutex, // Renames mutexes/semaphores/events hook
+									mutexToRename,
+									setWindow, // Set window hook
+									isDebug,
+									nucleusFolderPath,
+									blockRaw
+							};
+
+							var sbArgs = new StringBuilder();
+							foreach (object arg in injargs)
+							{
+								sbArgs.Append(" \"");
+								sbArgs.Append(arg);
+								sbArgs.Append("\"");
+							}
+
+							string arguments = sbArgs.ToString();
+							injstartInfo.Arguments = arguments;
+							//injstartInfo.WindowStyle = ProcessWindowStyle.Hidden;
+							//injstartInfo.CreateNoWindow = true;
+							injstartInfo.UseShellExecute = false;
+							injstartInfo.RedirectStandardOutput = true;
+
+							Process injectProc = Process.Start(injstartInfo);
+							injectProc.OutputDataReceived += proc_OutputDataReceived;
+							injectProc.BeginOutputReadLine();
+							injectProc.WaitForExit();
+						}
+						catch (Exception ex)
+						{
+							Log(string.Format("ERROR - {0}", ex.Message));
+							//using (StreamWriter writer = new StreamWriter("error-log.txt", true))
+							//{
+							//    writer.WriteLine("[" + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "]" + "is64: false, ex msg: {0}, ex str: {1}", ex.Message, ex.ToString());
+							//}
+						}
+
+						/*if (Is64Bit(path) == true)
                         {
                             try
                             {
@@ -353,8 +421,8 @@ namespace StartGame
                             //{
                             //    writer.WriteLine("[" + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "]" + "Machine type: '{0}' not implemented.", GetDllMachineType(path));
                             //}
-                        }
-                    }
+                        }*/
+					}
                     else // delay method
                     {
                         Log("Starting game and injecting start up hooks using delay method");
