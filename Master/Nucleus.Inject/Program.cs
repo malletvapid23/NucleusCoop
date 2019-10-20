@@ -6,7 +6,7 @@ using System.Threading;
 using EasyHook;
 using Nucleus.Gaming;
 
-namespace Nucleus.Inject64
+namespace Nucleus.Inject
 {
     class Program
     {
@@ -17,20 +17,20 @@ namespace Nucleus.Inject64
 				uint InTargetPID,
 				uint InWakeUpTID,
 				uint InInjectionOptions,
-				[MarshalAsAttribute(UnmanagedType.LPWStr)] string InLibraryPath_x86,
-				[MarshalAsAttribute(UnmanagedType.LPWStr)] string InLibraryPath_x64,
+				[MarshalAs(UnmanagedType.LPWStr)] string InLibraryPath_x86,
+				[MarshalAs(UnmanagedType.LPWStr)] string InLibraryPath_x64,
 				IntPtr InPassThruBuffer,
 				uint InPassThruSize
 				);
 
 			[DllImport("EasyHook32.dll", CharSet = CharSet.Ansi)]
 			public static extern int RhCreateAndInject(
-				[MarshalAsAttribute(UnmanagedType.LPWStr)] string InEXEPath,
-				[MarshalAsAttribute(UnmanagedType.LPWStr)] string InCommandLine,
+				[MarshalAs(UnmanagedType.LPWStr)] string InEXEPath,
+				[MarshalAs(UnmanagedType.LPWStr)] string InCommandLine,
 				uint InProcessCreationFlags,
 				uint InInjectionOptions,
-				[MarshalAsAttribute(UnmanagedType.LPWStr)] string InLibraryPath_x86,
-				[MarshalAsAttribute(UnmanagedType.LPWStr)] string InLibraryPath_x64,
+				[MarshalAs(UnmanagedType.LPWStr)] string InLibraryPath_x86,
+				[MarshalAs(UnmanagedType.LPWStr)] string InLibraryPath_x64,
 				IntPtr InPassThruBuffer,
 				uint InPassThruSize,
 				IntPtr OutProcessId //Pointer to a UINT (the PID of the new process)
@@ -44,20 +44,20 @@ namespace Nucleus.Inject64
 				uint InTargetPID,
 				uint InWakeUpTID,
 				uint InInjectionOptions,
-				[MarshalAsAttribute(UnmanagedType.LPWStr)] string InLibraryPath_x86,
-				[MarshalAsAttribute(UnmanagedType.LPWStr)] string InLibraryPath_x64,
+				[MarshalAs(UnmanagedType.LPWStr)] string InLibraryPath_x86,
+				[MarshalAs(UnmanagedType.LPWStr)] string InLibraryPath_x64,
 				IntPtr InPassThruBuffer,
 				uint InPassThruSize
 				);
 
 			[DllImport("EasyHook64.dll", CharSet = CharSet.Ansi)]
 			public static extern int RhCreateAndInject(
-				[MarshalAsAttribute(UnmanagedType.LPWStr)] string InEXEPath,
-				[MarshalAsAttribute(UnmanagedType.LPWStr)] string InCommandLine,
+				[MarshalAs(UnmanagedType.LPWStr)] string InEXEPath,
+				[MarshalAs(UnmanagedType.LPWStr)] string InCommandLine,
 				uint InProcessCreationFlags,
 				uint InInjectionOptions,
-				[MarshalAsAttribute(UnmanagedType.LPWStr)] string InLibraryPath_x86,
-				[MarshalAsAttribute(UnmanagedType.LPWStr)] string InLibraryPath_x64,
+				[MarshalAs(UnmanagedType.LPWStr)] string InLibraryPath_x86,
+				[MarshalAs(UnmanagedType.LPWStr)] string InLibraryPath_x64,
 				IntPtr InPassThruBuffer,
 				uint InPassThruSize,
 				IntPtr OutProcessId //Pointer to a UINT (the PID of the new process)
@@ -71,7 +71,7 @@ namespace Nucleus.Inject64
             {
                 using (StreamWriter writer = new StreamWriter("debug-log.txt", true))
                 {
-                    writer.WriteLine($"[{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}]INJECT64: {logMessage}");
+                    writer.WriteLine($"[{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}]INJECT: {logMessage}");
                     writer.Close();
                 }
             }
