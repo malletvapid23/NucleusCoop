@@ -10,20 +10,61 @@ namespace Nucleus.Inject64
 {
     class Program
     {
-        [DllImport("EasyHook64.dll", CharSet = CharSet.Ansi)]
-        public static extern int RhCreateAndInject(
-            [MarshalAsAttribute(UnmanagedType.LPWStr)] string InEXEPath,
-            [MarshalAsAttribute(UnmanagedType.LPWStr)] string InCommandLine,
-            uint InProcessCreationFlags,
-            uint InInjectionOptions,
-            [MarshalAsAttribute(UnmanagedType.LPWStr)] string InLibraryPath_x86,
-            [MarshalAsAttribute(UnmanagedType.LPWStr)] string InLibraryPath_x64,
-            IntPtr InPassThruBuffer,
-            uint InPassThruSize,
-            IntPtr OutProcessId //Pointer to a UINT (the PID of the new process)
-            );
+		class Injector32
+		{
+			[DllImport("EasyHook32.dll", CharSet = CharSet.Ansi)]
+			public static extern int RhInjectLibrary(
+				uint InTargetPID,
+				uint InWakeUpTID,
+				uint InInjectionOptions,
+				[MarshalAsAttribute(UnmanagedType.LPWStr)] string InLibraryPath_x86,
+				[MarshalAsAttribute(UnmanagedType.LPWStr)] string InLibraryPath_x64,
+				IntPtr InPassThruBuffer,
+				uint InPassThruSize
+				);
 
-        private static readonly IniFile ini = new IniFile(Path.Combine(Directory.GetCurrentDirectory(), "Settings.ini"));
+			[DllImport("EasyHook32.dll", CharSet = CharSet.Ansi)]
+			public static extern int RhCreateAndInject(
+				[MarshalAsAttribute(UnmanagedType.LPWStr)] string InEXEPath,
+				[MarshalAsAttribute(UnmanagedType.LPWStr)] string InCommandLine,
+				uint InProcessCreationFlags,
+				uint InInjectionOptions,
+				[MarshalAsAttribute(UnmanagedType.LPWStr)] string InLibraryPath_x86,
+				[MarshalAsAttribute(UnmanagedType.LPWStr)] string InLibraryPath_x64,
+				IntPtr InPassThruBuffer,
+				uint InPassThruSize,
+				IntPtr OutProcessId //Pointer to a UINT (the PID of the new process)
+				);
+		}
+
+		class Injector64
+		{
+			[DllImport("EasyHook64.dll", CharSet = CharSet.Ansi)]
+			public static extern int RhInjectLibrary(
+				uint InTargetPID,
+				uint InWakeUpTID,
+				uint InInjectionOptions,
+				[MarshalAsAttribute(UnmanagedType.LPWStr)] string InLibraryPath_x86,
+				[MarshalAsAttribute(UnmanagedType.LPWStr)] string InLibraryPath_x64,
+				IntPtr InPassThruBuffer,
+				uint InPassThruSize
+				);
+
+			[DllImport("EasyHook64.dll", CharSet = CharSet.Ansi)]
+			public static extern int RhCreateAndInject(
+				[MarshalAsAttribute(UnmanagedType.LPWStr)] string InEXEPath,
+				[MarshalAsAttribute(UnmanagedType.LPWStr)] string InCommandLine,
+				uint InProcessCreationFlags,
+				uint InInjectionOptions,
+				[MarshalAsAttribute(UnmanagedType.LPWStr)] string InLibraryPath_x86,
+				[MarshalAsAttribute(UnmanagedType.LPWStr)] string InLibraryPath_x64,
+				IntPtr InPassThruBuffer,
+				uint InPassThruSize,
+				IntPtr OutProcessId //Pointer to a UINT (the PID of the new process)
+				);
+		}
+
+		private static readonly IniFile ini = new IniFile(Path.Combine(Directory.GetCurrentDirectory(), "Settings.ini"));
         private static void Log(string logMessage)
         {
             if (ini.IniReadValue("Misc", "DebugLog") == "True")
@@ -38,6 +79,7 @@ namespace Nucleus.Inject64
 
         static void Main(string[] args)
         {
+	        bool is64 = Environment.Is64BitProcess;
 
             int i = 0;
             int.TryParse(args[i++], out int Tier);
@@ -56,15 +98,19 @@ namespace Nucleus.Inject64
 
                 try
                 {
-                    int result = RhCreateAndInject(InEXEPath, InCommandLine, InProcessCreationFlags, InInjectionOptions, InLibraryPath_x86, InLibraryPath_x64, InPassThruBuffer, InPassThruSize, pid);
-                    int attmpts = 0; // 4 additional attempts to inject
+	                int result = -1; //RhCreateAndInject(InEXEPath, InCommandLine, InProcessCreationFlags, InInjectionOptions, InLibraryPath_x86, InLibraryPath_x64, InPassThruBuffer, InPassThruSize, pid);
+                    int attempts = 0; // 5 attempts to inject
                     while (result != 0)
                     {
-                        Thread.Sleep(1000);
-                        attmpts++;
-                        result = RhCreateAndInject(InEXEPath, InCommandLine, InProcessCreationFlags, InInjectionOptions, InLibraryPath_x86, InLibraryPath_x64, InPassThruBuffer, InPassThruSize, pid);
+						if (is64)
+							result = Injector64.RhCreateAndInject(InEXEPath, InCommandLine, InProcessCreationFlags, InInjectionOptions, "", InLibraryPath_x64, InPassThruBuffer, InPassThruSize, pid);
+						else
+							result = Injector32.RhCreateAndInject(InEXEPath, InCommandLine, InProcessCreationFlags, InInjectionOptions, InLibraryPath_x86, "", InPassThruBuffer, InPassThruSize, pid);
 
-                        if (attmpts == 4)
+						Thread.Sleep(1000);
+                        attempts++;
+
+						if (attempts == 4)
                             break;
                     }
                     Marshal.FreeHGlobal(pid);
@@ -129,7 +175,14 @@ namespace Nucleus.Inject64
 
                 try
                 {
-                    NativeAPI.RhInjectLibrary(InTargetPID, InWakeUpTID, InInjectionOptions, InLibraryPath_x86, InLibraryPath_x64, intPtr, size);
+	                if (is64)
+	                {
+		                Injector64.RhInjectLibrary((uint)InTargetPID, (uint)InWakeUpTID, (uint)InInjectionOptions, "", InLibraryPath_x64, intPtr, (uint)size);
+	                }
+					else
+	                {
+						Injector32.RhInjectLibrary((uint)InTargetPID, (uint)InWakeUpTID, (uint)InInjectionOptions, InLibraryPath_x86, "", intPtr, (uint)size);
+					}
                 }
                 catch (Exception ex)
                 {
