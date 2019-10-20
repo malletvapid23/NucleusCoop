@@ -2364,7 +2364,7 @@ namespace Nucleus.Gaming
 
             try
             {
-	            string injectorPath = Path.Combine(currDir, $"Nucleus.Inject{(is64 ? "64" : "32")}.exe");
+	            string injectorPath = Path.Combine(currDir, $"Nucleus.IJ{(is64 ? "x64" : "x86")}.exe");
 	            ProcessStartInfo startInfo = new ProcessStartInfo();
 	            startInfo.FileName = injectorPath;
 
