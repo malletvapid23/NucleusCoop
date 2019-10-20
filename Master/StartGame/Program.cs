@@ -277,7 +277,8 @@ namespace StartGame
 					//Marshal.Copy(data, 0, ptr, size);
 					#endregion
 
-					if (!isDelay) // CreateandInject method
+					// (Always works with updated version of EasyHook)
+					//if (!isDelay) // CreateandInject method
                     {
                         Log("(StartGame) Starting game and injecting start up hooks via Nucleus.Inject");
 
@@ -423,8 +424,10 @@ namespace StartGame
                             //}
                         }*/
 					}
-                    else // delay method
+					// Redundant with updated version of EasyHook
+                    /**else // delay method
                     {
+						
                         Log("Starting game and injecting start up hooks using delay method");
 
                         string directoryPath = Path.GetDirectoryName(path);
@@ -503,7 +506,7 @@ namespace StartGame
                         }
                         ResumeThread(pi.hThread);
                         pOutPID = (int)pi.dwProcessId;
-                    }
+                    }*/
                 }
                 else // regular method (no hooks)
                 {
