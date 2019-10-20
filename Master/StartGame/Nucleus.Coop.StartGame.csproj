@@ -61,10 +61,6 @@
     <None Include="app.manifest" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Nucleus.Inject32\Nucleus.Inject32.csproj">
-      <Project>{723547ad-6a1c-48d7-b8e1-f7e3834b98cb}</Project>
-      <Name>Nucleus.Inject32</Name>
-    </ProjectReference>
     <ProjectReference Include="..\NucleusGaming\Nucleus.Gaming.csproj">
       <Project>{223dbdae-e362-452c-9455-f518d002b154}</Project>
       <Name>Nucleus.Gaming</Name>
