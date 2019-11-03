@@ -39,6 +39,22 @@ inline std::string date_string()
 	return "[" + std::string(buffer) + "]";
 }
 
+LRESULT CALLBACK WndProc_Hook(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+{
+	switch (uMsg)
+	{
+		case WM_KILLFOCUS:
+		{
+			//SetFocus(hWnd);
+			return -1;
+		}
+
+		default:
+			DefWindowProc(hwnd, uMsg, wParam, lParam);
+	}
+	return 1;
+}
+
 BOOL WINAPI SetWindowPos_Hook(HWND hWnd, HWND hWndInsertAfter, int X, int Y, int cx, int cy, UINT uFlags)
 {
 	return true;
@@ -190,11 +206,12 @@ void __stdcall NativeInjectionEntryPoint(REMOTE_ENTRY_INFO* inRemoteInfo)
 		hWnd = (HWND)bytesToInt(data);
 	}
 
-	BYTE* _p = data + 5;
+	BYTE* _p = data + 4;
 
 	//IsDebug = data[6] == 1;
 	//const bool HideCursor = data[7] == 1;
 	//const bool HookFocus = data[8] == 1;
+	bool PreventWindowDeactivation = *(_p++) == 1;
 	bool SetWindow = *(_p++) == 1;
 	IsDebug = *(_p++) == 1;
 	bool HideCursor = *(_p++) == 1;
@@ -210,7 +227,7 @@ void __stdcall NativeInjectionEntryPoint(REMOTE_ENTRY_INFO* inRemoteInfo)
 	if (IsDebug)
 	{
 		outfile.open(nucleusFolder + logFile, std::ios_base::app);
-		outfile << date_string() << "HOOK64: Starting hook injection, SetWindow: " << SetWindow << " HookFocus: " << HookFocus << " HideCursor: " << HideCursor << "\n";
+		outfile << date_string() << "HOOK64: Starting hook injection, SetWindow: " << SetWindow << " HookFocus: " << HookFocus << " HideCursor: " << HideCursor << " PreventWindowDeactivation: " << PreventWindowDeactivation << "\n";
 		outfile.flush();
 		outfile.close();
 	}
@@ -244,6 +261,19 @@ void __stdcall NativeInjectionEntryPoint(REMOTE_ENTRY_INFO* inRemoteInfo)
 		HookInstall("user32", "GetCapture", GetCapture_Hook);
 	}
 
+	if (PreventWindowDeactivation)
+	{
+		if (IsDebug)
+		{
+			outfile.open(nucleusFolder + logFile, std::ios_base::app);
+			outfile << date_string() << "HOOK64: Preventing window deactivation by blocking WM_KILLFOCUS\n";
+			outfile.flush();
+			outfile.close();
+		}
+
+		WNDPROC g_OldWndProc = (WNDPROC)SetWindowLongPtr(hWnd, GWLP_WNDPROC, (LONG_PTR)WndProc_Hook);
+	}
+
 	if (HideCursor)
 	{
 		if (IsDebug)
@@ -255,6 +285,8 @@ void __stdcall NativeInjectionEntryPoint(REMOTE_ENTRY_INFO* inRemoteInfo)
 		}
 		HookInstall("user32", "ShowCursor", ShowCursor_Hook);
 		HookInstall("user32", "SetCursor", SetCursor_Hook);
+
+		//WNDPROC g_OldWndProc = (WNDPROC)SetWindowLongPtr(hWnd, GWLP_WNDPROC, (LONG_PTR)WndProc_Hook);
 	}
 
 	if (IsDebug)

@@ -17,8 +17,12 @@ namespace Nucleus.Coop
         public UserGameInfo UserGameInfo { get; private set; }
 
         private PictureBox picture;
+        private PictureBox playerIcon;
         private Label title;
+        private Label players;
+        private ToolTip numPlayersTt;
         public string TitleText { get; set; }
+        public string PlayerText { get; set; }
 
         public GameControl(GenericGameInfo game, UserGameInfo userGame)
         {
@@ -28,22 +32,46 @@ namespace Nucleus.Coop
             picture = new PictureBox();
             picture.SizeMode = PictureBoxSizeMode.StretchImage;
 
+            playerIcon = new PictureBox();
+            playerIcon.SizeMode = PictureBoxSizeMode.StretchImage;
+            playerIcon.Image = Gaming.Properties.Resources.players;
+
+            numPlayersTt = new ToolTip();
+            numPlayersTt.SetToolTip(playerIcon, "Number of players");
+
             title = new Label();
+            title.Font = new Font("Segoe UI", 11, FontStyle.Bold);
+            players = new Label();
+            players.Font = new Font("Segoe UI", 9);
             if (game == null)
             {
                 title.Text = "No games";
+                players.Text = string.Empty;
+                title.Font = new Font("Segoe UI", 11, FontStyle.Regular);
             }
             else
             {
                 title.Text = GameInfo.GameName;
+                if(GameInfo.MaxPlayers > 2)
+                {
+                    players.Text = "2-" + GameInfo.MaxPlayers;
+                }
+                else
+                {
+                    players.Text = GameInfo.MaxPlayers.ToString();
+                }
+                //players.Text = "Players: " + GameInfo.MaxPlayers;
             }
             TitleText = title.Text;
+            PlayerText = players.Text;
 
             BackColor = Color.FromArgb(30, 30, 30);
             Size = new Size(200, 52);
 
             Controls.Add(picture);
             Controls.Add(title);
+            Controls.Add(players);
+            Controls.Add(playerIcon);
 
             DPIManager.Register(this);
         }
@@ -71,6 +99,7 @@ namespace Nucleus.Coop
             Height = DPIManager.Adjust(52, scale);
 
             Size labelSize = TextRenderer.MeasureText(TitleText, title.Font);
+            Size plabelSize = TextRenderer.MeasureText(PlayerText, players.Font);
             float reservedSpaceLabel = this.Width - picture.Width;
 
             if (labelSize.Width > reservedSpaceLabel)
@@ -85,12 +114,18 @@ namespace Nucleus.Coop
             {
                 title.Text = TitleText;
             }
+            players.Text = PlayerText;
             title.Size = labelSize;
+            players.Size = plabelSize;
 
             float height = this.Height / 2.0f;
             float lheight = labelSize.Height / 2.0f;
 
-            title.Location = new Point(picture.Width + picture.Left + border, (int)(height - lheight));
+            title.Location = new Point(picture.Width + picture.Left + border, (int)(height - labelSize.Height)/*(int)(height - lheight)*/);
+            players.Location = new Point(picture.Width + picture.Left + border + playerIcon.Width + 10, (int)height);
+
+            playerIcon.Location = new Point(picture.Width + picture.Left + border + 10, (int)height);
+            playerIcon.Size = new Size(DPIManager.Adjust(players.Size.Height, scale), DPIManager.Adjust(players.Size.Height, scale));
 
             ResumeLayout();
         }

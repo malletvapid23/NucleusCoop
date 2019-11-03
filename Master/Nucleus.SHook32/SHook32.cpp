@@ -16,11 +16,11 @@
 #include <locale>
 #include <codecvt>
 #include <time.h>
-#include <stdio.h>
-#include <Xinput.h>
+//#include <stdio.h>
+//#include <Xinput.h>
 using namespace std;
 
-#pragma comment(lib, "XInput.lib")
+//#pragma comment(lib, "XInput.lib")
 
 HWND hWnd = 0;
 
@@ -88,6 +88,149 @@ inline UNICODE_STRING stdWStringToUnicodeString(const std::wstring& str) {
 	unicodeString.MaximumLength = (USHORT)((len + 1) * sizeof(WCHAR));
 	return unicodeString;
 }
+
+//BOOL FilterMessage(LPMSG lpMsg)
+//{
+//	UINT Msg = lpMsg->message;
+//	WPARAM _wParam = lpMsg->wParam;
+//	LPARAM _lParam = lpMsg->lParam;
+//
+//#define ALLOW return 1;
+//#define BLOCK memset(lpMsg, 0, sizeof(MSG)); return -1;
+//
+//	if (Msg == WM_KILLFOCUS)
+//	{
+//		if (IsDebug)
+//		{
+//			outfile.open(nucleusFolder + logFile, std::ios_base::app);
+//			outfile << date_string() << "killfocus called\n";
+//			outfile.close();
+//		}
+//		BLOCK;
+//	}
+//	else if (Msg == WM_MOUSEACTIVATE)
+//	{
+//		if (IsDebug)
+//		{
+//			outfile.open(nucleusFolder + logFile, std::ios_base::app);
+//			outfile << date_string() << "mouseactivate called\n";
+//			outfile.close();
+//		}
+//	}
+//	else if (Msg == WM_SETFOCUS)
+//	{
+//		if (IsDebug)
+//		{
+//			outfile.open(nucleusFolder + logFile, std::ios_base::app);
+//			outfile << date_string() << "setfocus called\n";
+//			outfile.close();
+//		}
+//	}
+//	else if (Msg == WM_CAPTURECHANGED)
+//	{
+//		if (IsDebug)
+//		{
+//			outfile.open(nucleusFolder + logFile, std::ios_base::app);
+//			outfile << date_string() << "capturechanged called\n";
+//			outfile.close();
+//		}
+//	}
+//	//else if (Msg == WM_INPUT)
+//	//{
+//	//	UINT cbSize;
+//	//	GetRawInputData((HRAWINPUT)_lParam, RID_INPUT, 0, &cbSize, sizeof(RAWINPUTHEADER));
+//	//	LPBYTE lpbBuffer = new BYTE[cbSize];
+//	//	GetRawInputData((HRAWINPUT)_lParam, RID_INPUT, lpbBuffer, &cbSize, sizeof(RAWINPUTHEADER));
+//	//	RAWINPUT* raw = (RAWINPUT*)lpbBuffer;
+//
+//	//	RID_DEVICE_INFO rdi;
+//	//	rdi.cbSize = sizeof(RID_DEVICE_INFO);
+//
+//	//	cbSize = rdi.cbSize;
+//	//	if (GetRawInputDeviceInfo(raw->header.hDevice, RIDI_DEVICEINFO, &rdi, &cbSize) < 0)
+//	//	{
+//	//		// Error in reading information
+//	//	}
+//
+//	//	UINT size = 256;
+//	//	TCHAR tBuffer[256] = { 0 };
+//
+//	//	if (GetRawInputDeviceInfo(raw->header.hDevice, RIDI_DEVICENAME, tBuffer, &size) < 0)
+//	//	{
+//	//		// Error in reading device name
+//	//		if (IsDebug)
+//	//		{
+//	//			outfile.open(nucleusFolder + logFile, std::ios_base::app);
+//	//			outfile << date_string() << "error reading device name\n";
+//	//			outfile.close();
+//	//		}
+//	//	}
+//
+//	//	if (IsDebug)
+//	//	{
+//	//		outfile.open(nucleusFolder + logFile, std::ios_base::app);
+//	//		outfile << date_string() << "Device name: " << tBuffer << "\n";
+//	//		outfile.close();
+//	//	}
+//
+//	//	if (raw->header.dwType == RIM_TYPEHID)
+//	//	{
+//	//		//if (rdi.hid.usUsage == 4 || rdi.hid.usUsage == 5)
+//	//		//{
+//
+//
+//	//			//std::string str1 = ws2s(rawHid);
+//	//			//std::string str2 = tBuffer;
+//
+//	//			//bool result = caseInSensStringCompare(str1, str2);
+//
+//	//			//if (result)
+//	//			//{
+//	//			//	ALLOW;
+//	//			//}
+//	//			//else
+//	//			//{
+//	//			//	BLOCK;
+//	//			//}
+//
+//	//		//}
+//	//	}
+//	//}
+//
+//	return 1;
+//
+//#undef ALLOW
+//#undef BLOCK
+//}
+//
+//BOOL WINAPI GetMessageA_Hook(LPMSG lpMsg, HWND hWnd, UINT wMsgFilterMin, UINT wMsgFilterMax)
+//{
+//	BOOL ret = GetMessageA(lpMsg, hWnd, wMsgFilterMin, wMsgFilterMax);
+//
+//	return ret == -1 ? -1 : FilterMessage(lpMsg);
+//}
+//
+//BOOL WINAPI GetMessageW_Hook(LPMSG lpMsg, HWND hWnd, UINT wMsgFilterMin, UINT wMsgFilterMax)
+//{
+//	BOOL ret = GetMessageW(lpMsg, hWnd, wMsgFilterMin, wMsgFilterMax);
+//
+//	return ret == -1 ? -1 : FilterMessage(lpMsg);
+//}
+//
+//BOOL WINAPI PeekMessageA_Hook(LPMSG lpMsg, HWND hWnd, UINT wMsgFilterMin, UINT wMsgFilterMax, UINT wRemoveMsg)
+//{
+//	BOOL ret = PeekMessageA(lpMsg, hWnd, wMsgFilterMin, wMsgFilterMax, wRemoveMsg);
+//
+//	return ret == FALSE ? FALSE : FilterMessage(lpMsg);
+//}
+//
+//BOOL WINAPI PeekMessageW_Hook(LPMSG lpMsg, HWND hWnd, UINT wMsgFilterMin, UINT wMsgFilterMax, UINT wRemoveMsg)
+//{
+//	BOOL ret = PeekMessageW(lpMsg, hWnd, wMsgFilterMin, wMsgFilterMax, wRemoveMsg);
+//
+//	return ret == FALSE ? FALSE : FilterMessage(lpMsg);
+//}
+
 
 void updateName(PUNICODE_STRING inputName)
 {
@@ -448,24 +591,6 @@ void __stdcall NativeInjectionEntryPoint(REMOTE_ENTRY_INFO* inRemoteInfo)
 			outfile.close();
 		}
 
-		/*RAWINPUTDEVICE rawInputDevice[1];
-		rawInputDevice[0].usUsagePage = 1;
-		rawInputDevice[0].usUsage = 5;
-		rawInputDevice[0].dwFlags = 0;
-		rawInputDevice[0].hwndTarget = hWnd;
-
-		BOOL result = RegisterRawInputDevices(rawInputDevice, 1, sizeof(rawInputDevice[0]));
-
-		if (!result)
-		{
-			if (IsDebug)
-			{
-				outfile.open(nucleusFolder + logFile, std::ios_base::app);
-				outfile << date_string() << "block raw RegisterRawInputDevices Error: " << GetLastError() << "\n";
-				outfile.close();
-			}
-		}*/
-
 		//HookInstall("user32", "GetMessageA", GetMessageA_Hook);
 		//HookInstall("user32", "GetMessageW", GetMessageW_Hook);
 		//HookInstall("user32", "PeekMessageA", PeekMessageA_Hook);
@@ -473,6 +598,8 @@ void __stdcall NativeInjectionEntryPoint(REMOTE_ENTRY_INFO* inRemoteInfo)
 
 		HookInstall("user32", "GetRawInputDeviceList", GetRawInputDeviceList_Hook);
 		HookInstall("user32", "GetRegisteredRawInputDevices", GetRegisteredRawInputDevices_Hook);
+		//HookInstall("user32", "RegisterRawInputDevices", RegisterRawInputDevices_Hook);
+
 		if (!RenameMutex)
 		{
 			if (IsDebug)

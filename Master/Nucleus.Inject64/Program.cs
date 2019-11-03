@@ -94,12 +94,13 @@ namespace Nucleus.Inject64
                 bool.TryParse(args[i++], out bool isDebug);
                 string nucleusFolderPath = args[i++];
                 bool.TryParse(args[i++], out bool setWindow);
+                bool.TryParse(args[i++], out bool preventWindowDeactivation);
 
                 var logPath = Encoding.Unicode.GetBytes(nucleusFolderPath);
                 int logPathLength = logPath.Length;
                 //int.TryParse(args[i++], out int InPassThruSize);
 
-                int size = 21 + logPathLength;
+                int size = 42 + logPathLength;
                 IntPtr intPtr = Marshal.AllocHGlobal(size);
                 byte[] dataToSend = new byte[size];
 
@@ -108,6 +109,7 @@ namespace Nucleus.Inject64
                 dataToSend[2] = (byte)(hWnd >> 8);
                 dataToSend[3] = (byte)(hWnd);
 
+                dataToSend[4] = preventWindowDeactivation == true ? (byte)1 : (byte)0;
                 dataToSend[5] = setWindow == true ? (byte)1 : (byte)0;
                 dataToSend[6] = isDebug == true ? (byte)1 : (byte)0;
                 dataToSend[7] = hideCursor == true ? (byte)1 : (byte)0;

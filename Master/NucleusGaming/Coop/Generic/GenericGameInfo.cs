@@ -122,6 +122,16 @@ namespace Nucleus.Gaming
         public bool SetWindowHookStart;
         public string GoldbergLanguage;
         public string Description;
+        public bool GoldbergExperimental;
+        public bool GoldbergIgnoreSteamAppId;
+        public bool UseSteamStubDRMPatcher;
+        public bool HardlinkGame;
+        //public bool RunAsAdmin;
+        public bool SetForegroundWindowElsewhere;
+        //public bool GoldbergLobbyConnect;
+        public bool PreventWindowDeactivation;
+        public bool SymlinkFolders;
+        public bool CreateSteamAppIdByExe;
 
         public Type HandlerType
         {

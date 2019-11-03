@@ -29,7 +29,13 @@ namespace Nucleus.Gaming
             ExecuteCommand(fromFile, out exitCode, cmd);
         }
 
-        public static void LinkDirectory(string root, DirectoryInfo currentDir, string destination, out int exitCode, string[] dirExclusions, string[] fileExclusions, string[] fileCopyInstead, bool overrideSpecial = false)
+        public static void MkHardLinkFile(string fromFile, string toFile, out int exitCode)
+        {
+            string cmd = string.Format("mklink /h \"{0}\" \"{1}\"", toFile, fromFile);
+            ExecuteCommand(fromFile, out exitCode, cmd);
+        }
+
+        public static void LinkDirectory(string root, DirectoryInfo currentDir, string destination, out int exitCode, string[] dirExclusions, string[] fileExclusions, string[] fileCopyInstead, bool isSymlink, bool overrideSpecial = false)
         {
             exitCode = 1;
 
@@ -51,13 +57,14 @@ namespace Nucleus.Gaming
             {
                 // this folder has a child that cant be symlinked
                 Directory.CreateDirectory(destination);
-                CmdUtil.LinkFiles(currentDir.FullName, destination, out exitCode, fileExclusions, fileCopyInstead);
+                CmdUtil.LinkFiles(currentDir.FullName, destination, out exitCode, fileExclusions, fileCopyInstead, isSymlink);
+                
 
                 DirectoryInfo[] children = currentDir.GetDirectories();
                 for (int i = 0; i < children.Length; i++)
                 {
                     DirectoryInfo child = children[i];
-                    LinkDirectory(root, child, Path.Combine(destination, child.Name), out exitCode, dirExclusions, fileExclusions, fileCopyInstead);
+                    LinkDirectory(root, child, Path.Combine(destination, child.Name), out exitCode, dirExclusions, fileExclusions, fileCopyInstead, isSymlink);
                 }
             }
             else
@@ -67,7 +74,7 @@ namespace Nucleus.Gaming
             }
         }
 
-        public static void LinkFiles(string rootFolder, string destination, out int exitCode, string[] exclusions, string[] copyInstead)
+        public static void LinkFiles(string rootFolder, string destination, out int exitCode, string[] exclusions, string[] copyInstead, bool isSymlink)
         {
             exitCode = 1;
 
@@ -114,7 +121,14 @@ namespace Nucleus.Gaming
                 }
                 else
                 {
-                    CmdUtil.MkLinkFile(file.FullName, linkPath, out exitCode);
+                    if (isSymlink)
+                    {
+                        CmdUtil.MkLinkFile(file.FullName, linkPath, out exitCode);
+                    }
+                    else //hardlink
+                    {
+                        CmdUtil.MkHardLinkFile(file.FullName, linkPath, out exitCode);
+                    }
                 }
             }
         }

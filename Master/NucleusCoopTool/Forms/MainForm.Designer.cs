@@ -39,11 +39,13 @@
             this.detailsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.openScriptToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.openDataFolderToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.openOrigExePathToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem2 = new System.Windows.Forms.ToolStripSeparator();
             this.changeIconToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.deleteToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.btn_gameOptions = new System.Windows.Forms.Button();
             this.sideInfoLbl = new System.Windows.Forms.Label();
+            this.gameNameControl = new Nucleus.Coop.Controls.GameNameControl();
             this.btn_Next = new System.Windows.Forms.Button();
             this.btnAutoSearch = new System.Windows.Forms.Button();
             this.btnBack = new System.Windows.Forms.Button();
@@ -52,8 +54,9 @@
             this.label_StepTitle = new System.Windows.Forms.Label();
             this.list_Games = new Nucleus.Gaming.ControlListBox();
             this.StepPanel = new System.Windows.Forms.Panel();
+            this.scriptAuthorLbl = new System.Windows.Forms.Label();
+            this.scriptAuthorTxt = new System.Windows.Forms.TextBox();
             this.lblVersion = new System.Windows.Forms.Label();
-            this.gameNameControl = new Nucleus.Coop.Controls.GameNameControl();
             this.gameContextMenuStrip.SuspendLayout();
             this.StepPanel.SuspendLayout();
             this.SuspendLayout();
@@ -82,23 +85,24 @@
             this.detailsToolStripMenuItem,
             this.openScriptToolStripMenuItem,
             this.openDataFolderToolStripMenuItem,
+            this.openOrigExePathToolStripMenuItem,
             this.toolStripMenuItem2,
             this.changeIconToolStripMenuItem,
             this.deleteToolStripMenuItem});
             this.gameContextMenuStrip.Name = "gameContextMenuStrip";
-            this.gameContextMenuStrip.Size = new System.Drawing.Size(179, 170);
+            this.gameContextMenuStrip.Size = new System.Drawing.Size(186, 192);
             this.gameContextMenuStrip.Opening += new System.ComponentModel.CancelEventHandler(this.GameContextMenuStrip_Opening);
             // 
             // nullToolStripMenuItem
             // 
             this.nullToolStripMenuItem.Name = "nullToolStripMenuItem";
-            this.nullToolStripMenuItem.Size = new System.Drawing.Size(178, 22);
+            this.nullToolStripMenuItem.Size = new System.Drawing.Size(185, 22);
             this.nullToolStripMenuItem.Text = "null";
             // 
             // scriptNotesToolStripMenuItem
             // 
             this.scriptNotesToolStripMenuItem.Name = "scriptNotesToolStripMenuItem";
-            this.scriptNotesToolStripMenuItem.Size = new System.Drawing.Size(178, 22);
+            this.scriptNotesToolStripMenuItem.Size = new System.Drawing.Size(185, 22);
             this.scriptNotesToolStripMenuItem.Text = "Script Author Notes";
             this.scriptNotesToolStripMenuItem.Visible = false;
             this.scriptNotesToolStripMenuItem.Click += new System.EventHandler(this.ScriptNotesToolStripMenuItem_Click);
@@ -106,45 +110,52 @@
             // toolStripMenuItem1
             // 
             this.toolStripMenuItem1.Name = "toolStripMenuItem1";
-            this.toolStripMenuItem1.Size = new System.Drawing.Size(175, 6);
+            this.toolStripMenuItem1.Size = new System.Drawing.Size(182, 6);
             // 
             // detailsToolStripMenuItem
             // 
             this.detailsToolStripMenuItem.Name = "detailsToolStripMenuItem";
-            this.detailsToolStripMenuItem.Size = new System.Drawing.Size(178, 22);
+            this.detailsToolStripMenuItem.Size = new System.Drawing.Size(185, 22);
             this.detailsToolStripMenuItem.Text = "Details";
             this.detailsToolStripMenuItem.Click += new System.EventHandler(this.DetailsToolStripMenuItem_Click);
             // 
             // openScriptToolStripMenuItem
             // 
             this.openScriptToolStripMenuItem.Name = "openScriptToolStripMenuItem";
-            this.openScriptToolStripMenuItem.Size = new System.Drawing.Size(178, 22);
+            this.openScriptToolStripMenuItem.Size = new System.Drawing.Size(185, 22);
             this.openScriptToolStripMenuItem.Text = "Open Script";
             this.openScriptToolStripMenuItem.Click += new System.EventHandler(this.OpenScriptToolStripMenuItem_Click);
             // 
             // openDataFolderToolStripMenuItem
             // 
             this.openDataFolderToolStripMenuItem.Name = "openDataFolderToolStripMenuItem";
-            this.openDataFolderToolStripMenuItem.Size = new System.Drawing.Size(178, 22);
-            this.openDataFolderToolStripMenuItem.Text = "Open Data Folder";
+            this.openDataFolderToolStripMenuItem.Size = new System.Drawing.Size(185, 22);
+            this.openDataFolderToolStripMenuItem.Text = "Open Content Folder";
             this.openDataFolderToolStripMenuItem.Click += new System.EventHandler(this.OpenDataFolderToolStripMenuItem_Click);
+            // 
+            // openOrigExePathToolStripMenuItem
+            // 
+            this.openOrigExePathToolStripMenuItem.Name = "openOrigExePathToolStripMenuItem";
+            this.openOrigExePathToolStripMenuItem.Size = new System.Drawing.Size(185, 22);
+            this.openOrigExePathToolStripMenuItem.Text = "Open Orig Exe Path";
+            this.openOrigExePathToolStripMenuItem.Click += new System.EventHandler(this.OpenOrigExePathToolStripMenuItem_Click);
             // 
             // toolStripMenuItem2
             // 
             this.toolStripMenuItem2.Name = "toolStripMenuItem2";
-            this.toolStripMenuItem2.Size = new System.Drawing.Size(175, 6);
+            this.toolStripMenuItem2.Size = new System.Drawing.Size(182, 6);
             // 
             // changeIconToolStripMenuItem
             // 
             this.changeIconToolStripMenuItem.Name = "changeIconToolStripMenuItem";
-            this.changeIconToolStripMenuItem.Size = new System.Drawing.Size(178, 22);
+            this.changeIconToolStripMenuItem.Size = new System.Drawing.Size(185, 22);
             this.changeIconToolStripMenuItem.Text = "Change Icon";
             this.changeIconToolStripMenuItem.Click += new System.EventHandler(this.ChangeIconToolStripMenuItem_Click);
             // 
             // deleteToolStripMenuItem
             // 
             this.deleteToolStripMenuItem.Name = "deleteToolStripMenuItem";
-            this.deleteToolStripMenuItem.Size = new System.Drawing.Size(178, 22);
+            this.deleteToolStripMenuItem.Size = new System.Drawing.Size(185, 22);
             this.deleteToolStripMenuItem.Text = "Delete";
             this.deleteToolStripMenuItem.Click += new System.EventHandler(this.DeleteToolStripMenuItem_Click);
             // 
@@ -170,6 +181,15 @@
             this.sideInfoLbl.Size = new System.Drawing.Size(0, 21);
             this.sideInfoLbl.TabIndex = 14;
             this.sideInfoLbl.TextAlign = System.Drawing.ContentAlignment.TopRight;
+            // 
+            // gameNameControl
+            // 
+            this.gameNameControl.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
+            this.gameNameControl.GameInfo = null;
+            this.gameNameControl.Location = new System.Drawing.Point(280, 12);
+            this.gameNameControl.Name = "gameNameControl";
+            this.gameNameControl.Size = new System.Drawing.Size(98, 46);
+            this.gameNameControl.TabIndex = 13;
             // 
             // btn_Next
             // 
@@ -270,11 +290,41 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.StepPanel.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.StepPanel.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(40)))), ((int)(((byte)(40)))), ((int)(((byte)(40)))));
+            this.StepPanel.Controls.Add(this.scriptAuthorLbl);
+            this.StepPanel.Controls.Add(this.scriptAuthorTxt);
             this.StepPanel.Controls.Add(this.lblVersion);
             this.StepPanel.Location = new System.Drawing.Point(280, 101);
             this.StepPanel.Name = "StepPanel";
             this.StepPanel.Size = new System.Drawing.Size(766, 588);
             this.StepPanel.TabIndex = 0;
+            // 
+            // scriptAuthorLbl
+            // 
+            this.scriptAuthorLbl.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.scriptAuthorLbl.AutoSize = true;
+            this.scriptAuthorLbl.Font = new System.Drawing.Font("Segoe UI", 11F);
+            this.scriptAuthorLbl.Location = new System.Drawing.Point(12, 478);
+            this.scriptAuthorLbl.Name = "scriptAuthorLbl";
+            this.scriptAuthorLbl.Size = new System.Drawing.Size(151, 20);
+            this.scriptAuthorLbl.TabIndex = 14;
+            this.scriptAuthorLbl.Text = "Script Author\'s Notes:";
+            this.scriptAuthorLbl.Visible = false;
+            // 
+            // scriptAuthorTxt
+            // 
+            this.scriptAuthorTxt.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.scriptAuthorTxt.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
+            this.scriptAuthorTxt.Font = new System.Drawing.Font("Segoe UI", 11F);
+            this.scriptAuthorTxt.ForeColor = System.Drawing.Color.White;
+            this.scriptAuthorTxt.Location = new System.Drawing.Point(16, 502);
+            this.scriptAuthorTxt.Multiline = true;
+            this.scriptAuthorTxt.Name = "scriptAuthorTxt";
+            this.scriptAuthorTxt.ReadOnly = true;
+            this.scriptAuthorTxt.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            this.scriptAuthorTxt.Size = new System.Drawing.Size(733, 79);
+            this.scriptAuthorTxt.TabIndex = 13;
+            this.scriptAuthorTxt.Visible = false;
             // 
             // lblVersion
             // 
@@ -286,15 +336,6 @@
             this.lblVersion.Size = new System.Drawing.Size(71, 21);
             this.lblVersion.TabIndex = 12;
             this.lblVersion.Text = "ALPHA 8";
-            // 
-            // gameNameControl
-            // 
-            this.gameNameControl.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
-            this.gameNameControl.GameInfo = null;
-            this.gameNameControl.Location = new System.Drawing.Point(280, 12);
-            this.gameNameControl.Name = "gameNameControl";
-            this.gameNameControl.Size = new System.Drawing.Size(98, 46);
-            this.gameNameControl.TabIndex = 13;
             // 
             // MainForm
             // 
@@ -352,5 +393,8 @@
         private System.Windows.Forms.ToolStripMenuItem changeIconToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem scriptNotesToolStripMenuItem;
         private System.Windows.Forms.Button btn_gameOptions;
+        private System.Windows.Forms.Label scriptAuthorLbl;
+        private System.Windows.Forms.TextBox scriptAuthorTxt;
+        private System.Windows.Forms.ToolStripMenuItem openOrigExePathToolStripMenuItem;
     }
 }

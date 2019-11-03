@@ -16,11 +16,15 @@ namespace Nucleus
     {
         private static readonly IniFile ini = new Gaming.IniFile(Path.Combine(Directory.GetCurrentDirectory(), "Settings.ini"));
 
-        public static Process RunOrphanProcess(string path, string arguments = "")
+        public static Process RunOrphanProcess(string path, /*bool runAdmin,*/ string arguments = "")
         {
             ProcessStartInfo psi = new System.Diagnostics.ProcessStartInfo();
-            psi.FileName = @"cmd";
+            psi.FileName = @"cmd.exe";
             psi.Arguments = "/C \"" + path + "\" " + arguments;
+            //if (runAdmin)
+            //{
+            //    psi.Verb = "runas";
+            //}
             return Process.Start(psi);
             //ThreadPool.QueueUserWorkItem(KillParent, p);
         }

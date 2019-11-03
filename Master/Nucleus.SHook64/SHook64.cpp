@@ -14,11 +14,13 @@
 #include <locale>
 #include <codecvt>
 #include <time.h>
-#include <stdio.h>
-#include <Xinput.h>
+//#include <stdio.h>
+//#include <Xinput.h>
 using namespace std;
 
-#pragma comment(lib, "XInput.lib")
+//#pragma comment(lib, "XInput.lib")
+
+//typedef DWORD(WINAPI* XInputGetStateExProc)(DWORD dwUserIndex, XINPUT_STATE* pState);
 
 //#ifndef UNICODE  
 //typedef std::string String;
@@ -27,6 +29,7 @@ using namespace std;
 //#endif
 
 HWND hWnd = 0;
+//WNDPROC g_OldWndProc;
 
 bool IsDebug = false;
 
@@ -131,6 +134,115 @@ inline void updateNameObject(POBJECT_ATTRIBUTES ObjectAttributes)
 	}
 }
 
+//LONG_PTR CALLBACK WndProc_Hook(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+//
+//LONG_PTR CALLBACK WndProc_Hook(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+//{
+//	//if (IsDebug)
+//	//{
+//	//	outfile.open(nucleusFolder + logFile, std::ios_base::app);
+//	//	outfile << date_string() << "SHOOK64: uMsg: " << uMsg << " wParam: " << wParam << " lParam: " << lParam << "\n";
+//	//	outfile.close();
+//	//}
+//	switch (uMsg)
+//	{
+//	//case WM_INPUT:
+//	//{
+//	//	break;
+//	//}
+//	//case WM_KILLFOCUS:
+//	//{
+//	//	SetFocus(hWnd);
+//	//	return -1;
+//	//}
+//	//case WM_NCACTIVATE:
+//	//{
+//	//	return 1;
+//	//}
+//	case WM_ACTIVATEAPP:
+//	{
+//		if (IsDebug)
+//		{
+//			outfile.open(nucleusFolder + logFile, std::ios_base::app);
+//			outfile << date_string() << "SHOOK64: uMsg: " << uMsg << " wParam: " << wParam << " lParam: " << lParam << "\n";
+//			outfile.close();
+//		}
+//		return 0;
+//	}
+//	case WM_ACTIVATE:
+//	{
+//		//if (wParam == WA_INACTIVE)
+//		//{
+//		if (IsDebug)
+//		{
+//			outfile.open(nucleusFolder + logFile, std::ios_base::app);
+//			outfile << date_string() << "SHOOK64: uMsg: " << uMsg << " wParam: " << wParam << " lParam: " << lParam << "\n";
+//			outfile.close();
+//		}
+//			return 0;
+//		//}
+//	}
+//	case WM_NCHITTEST:
+//		// System is checking if the mouse is inside the game screen, but we dont want
+//		// that call to ever be recognized by the game
+//		// ??? needed for borderlands to detect mouse
+//		if (IsDebug)
+//		{
+//			outfile.open(nucleusFolder + logFile, std::ios_base::app);
+//			outfile << date_string() << "SHOOK64: uMsg: " << uMsg << " wParam: " << wParam << " lParam: " << lParam << "\n";
+//			outfile.close();
+//		}
+//		return HTNOWHERE;
+//
+//	case WM_MOUSEHOVER:
+//			//PrintLog(("No MKB Input blocked: " + int_to_hex(message) + " " + std::to_string(gameSetWindowLongW)).c_str());
+//		if (IsDebug)
+//		{
+//			outfile.open(nucleusFolder + logFile, std::ios_base::app);
+//			outfile << date_string() << "SHOOK64: uMsg: " << uMsg << " wParam: " << wParam << " lParam: " << lParam << "\n";
+//			outfile.close();
+//		}
+//			return 0;
+//
+//	case WM_SETCURSOR:
+//
+//			// return true to stop Windows from trying to
+//			// keep sending WM_SETCURSOR to the process
+//			// (prevents crashes in all Borderlands with early clicks, not sure other games)
+//		if (IsDebug)
+//		{
+//			outfile.open(nucleusFolder + logFile, std::ios_base::app);
+//			outfile << date_string() << "SHOOK64: uMsg: " << uMsg << " wParam: " << wParam << " lParam: " << lParam << "\n";
+//			outfile.close();
+//		}
+//			return true;
+//		break;
+//	case WM_MOUSEMOVE:
+//		// clip everytime, TODO: benchmark this
+//			//PrintLog(("No MKB Input blocked: " + int_to_hex(message) + " " + std::to_string(gameSetWindowLongW)).c_str());
+//		if (IsDebug)
+//		{
+//			outfile.open(nucleusFolder + logFile, std::ios_base::app);
+//			outfile << date_string() << "SHOOK64: uMsg: " << uMsg << " wParam: " << wParam << " lParam: " << lParam << "\n";
+//			outfile.close();
+//		}
+//			return 0;
+//
+//	case WM_SYSKEYUP:
+//			//PrintLog(("No MKB Input keyboard blocked: " + int_to_hex(message) + " " + std::to_string(gameSetWindowLongW)).c_str());
+//		if (IsDebug)
+//		{
+//			outfile.open(nucleusFolder + logFile, std::ios_base::app);
+//			outfile << date_string() << "SHOOK64: uMsg: " << uMsg << " wParam: " << wParam << " lParam: " << lParam << "\n";
+//			outfile.close();
+//		}
+//			return 0;
+//	default:
+//		DefWindowProc(hwnd, uMsg, wParam, lParam);
+//	}
+//	return 1;
+//}
+
 //bool compareChar(char& c1, char& c2)
 //{
 //	if (c1 == c2)
@@ -159,7 +271,44 @@ inline void updateNameObject(POBJECT_ATTRIBUTES ObjectAttributes)
 //#define BLOCK memset(lpMsg, 0, sizeof(MSG)); return -1;
 //
 //	//Filter raw input
-//	if (Msg == WM_INPUT)
+//	if (Msg == WM_KILLFOCUS)
+//	{
+//		if (IsDebug)
+//		{
+//			outfile.open(nucleusFolder + logFile, std::ios_base::app);
+//			outfile << date_string() << "killfocus called\n";
+//			outfile.close();
+//		}
+//		BLOCK;
+//	}
+//	else if (Msg == WM_MOUSEACTIVATE)
+//	{
+//		if (IsDebug)
+//		{
+//			outfile.open(nucleusFolder + logFile, std::ios_base::app);
+//			outfile << date_string() << "mouseactivate called\n";
+//			outfile.close();
+//		}
+//	}
+//	else if (Msg == WM_SETFOCUS)
+//	{
+//		if (IsDebug)
+//		{
+//			outfile.open(nucleusFolder + logFile, std::ios_base::app);
+//			outfile << date_string() << "setfocus called\n";
+//			outfile.close();
+//		}
+//	}
+//	else if (Msg == WM_CAPTURECHANGED)
+//	{
+//		if (IsDebug)
+//		{
+//			outfile.open(nucleusFolder + logFile, std::ios_base::app);
+//			outfile << date_string() << "capturechanged called\n";
+//			outfile.close();
+//		}
+//	}
+//	else if (Msg == WM_INPUT)
 //	{
 //		UINT cbSize;
 //		GetRawInputData((HRAWINPUT)_lParam, RID_INPUT, 0, &cbSize, sizeof(RAWINPUTHEADER));
@@ -258,6 +407,23 @@ inline void updateNameObject(POBJECT_ATTRIBUTES ObjectAttributes)
 UINT WINAPI GetRawInputDeviceList_Hook(PRAWINPUTDEVICELIST pRawInputDeviceList, PUINT puiNumDevices, UINT cbSize)
 {
 	*puiNumDevices = 0;
+
+//#define MAX_CONTROLLERS 4
+//
+//	HMODULE xinput_lib = LoadLibrary("xinput1_3.dll");
+//
+//	XInputGetStateExProc XInputGetStateEx;
+//	int XInputGetStateExOrdinal = 100;
+//	XInputGetStateEx = (XInputGetStateExProc)GetProcAddress(xinput_lib, (LPCTSTR)XInputGetStateExOrdinal);
+//
+//	for (DWORD i = 0; i < MAX_CONTROLLERS; i++)
+//	{
+//		XINPUT_STATE state;
+//		ZeroMemory(&state, sizeof(XINPUT_STATE));
+//		DWORD dwResult = XInputGetState(i, &state);
+//		ZeroMemory(&state, sizeof(XINPUT_STATE));
+//		DWORD dwResultEx = XInputGetStateEx(i, &state);
+//	}
 
 	return 0; //GetRawInputDeviceList(pRawInputDeviceList, puiNumDevices, cbSize);
 }
@@ -540,8 +706,6 @@ void __stdcall NativeInjectionEntryPoint(REMOTE_ENTRY_INFO* inRemoteInfo)
 	DWORD pid = GetCurrentProcessId();
 	hWnd = FindWindowFromProcessId(pid);
 
-
-
 	BYTE* data = inRemoteInfo->UserData;
 	const bool HookWindow = data[0] == 1;
 	const bool RenameMutex = data[1] == 1;
@@ -636,6 +800,9 @@ void __stdcall NativeInjectionEntryPoint(REMOTE_ENTRY_INFO* inRemoteInfo)
 		HookInstall("user32", "GetRawInputDeviceList", GetRawInputDeviceList_Hook);
 		HookInstall("user32", "GetRegisteredRawInputDevices", GetRegisteredRawInputDevices_Hook);
 		//HookInstall("user32", "RegisterRawInputDevices", RegisterRawInputDevices_Hook);
+
+		/*LONG_PTR g_OldWndProc = SetWindowLongPtr(hWnd, GWLP_WNDPROC, (LONG_PTR)WndProc_Hook);*/
+
 
 		if (!RenameMutex)
 		{

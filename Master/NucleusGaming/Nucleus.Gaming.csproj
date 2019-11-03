@@ -157,7 +157,10 @@
     <Compile Include="DPI\DPIMonitor.cs" />
     <Compile Include="DPI\IDynamicSized.cs" />
     <Compile Include="Globals.cs" />
+    <Compile Include="Platform\IO\WinDirectoryUtil.cs" />
     <Compile Include="Platform\Windows\Interop\Gdi32\Gdi32Interop.cs" />
+    <Compile Include="Platform\Windows\Interop\Kernel32\Kernel32Interop.cs" />
+    <Compile Include="Platform\Windows\Interop\Kernel32\SymbolicLink.cs" />
     <Compile Include="Platform\Windows\Interop\Shcore\ShcoreInterop.cs" />
     <Compile Include="Platform\Windows\Interop\User32\Structures\Display.cs" />
     <Compile Include="Platform\Windows\Interop\User32\C\Rect.cs" />
@@ -323,10 +326,22 @@
     <None Include="Resources\customLayout.png" />
     <None Include="Resources\keyboard_computer_hardware-512.png" />
     <None Include="Resources\keyboard.png" />
+    <None Include="Resources\players.png" />
     <Content Include="Resources\xinput1_3.dll" />
     <None Include="Resources\xinput1_3_a10_log.dll" />
     <None Include="Resources\xinput1_3_a10_x64.dll" />
     <None Include="Resources\xinput1_3_a10.dll" />
+  </ItemGroup>
+  <ItemGroup>
+    <COMReference Include="IWshRuntimeLibrary">
+      <Guid>{F935DC20-1CF0-11D0-ADB9-00C04FD58A0B}</Guid>
+      <VersionMajor>1</VersionMajor>
+      <VersionMinor>0</VersionMinor>
+      <Lcid>0</Lcid>
+      <WrapperTool>tlbimp</WrapperTool>
+      <Isolated>False</Isolated>
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+    </COMReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />

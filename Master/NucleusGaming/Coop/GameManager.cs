@@ -54,10 +54,10 @@ namespace Nucleus.Gaming
             games = new Dictionary<string, GenericGameInfo>();
             gameInfos = new Dictionary<string, GenericGameInfo>();
 
-            string appData = GetAppDataPath();
+            string appData = GetAppContentPath();
             Directory.CreateDirectory(appData);
 
-            string gameJs = GetJsGamesPath();
+            string gameJs = GetJsScriptsPath();
             Directory.CreateDirectory(gameJs);
 
             Initialize();
@@ -308,21 +308,21 @@ namespace Nucleus.Gaming
 
         #region Initialize
 
-        public string GetAppDataPath()
+        public string GetAppContentPath()
         {
 #if ALPHA
             string local = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
-            return Path.Combine(local, "Data");
+            return Path.Combine(local, "content");
 #else
             string appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
             return Path.Combine(appData, "Nucleus Coop");
 #endif
         }
 
-        public string GetJsGamesPath()
+        public string GetJsScriptsPath()
         {
             string local = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
-            return Path.Combine(local, "games");
+            return Path.Combine(local, "scripts");
         }
 
         public string GetUtilsPath()
@@ -333,7 +333,7 @@ namespace Nucleus.Gaming
 
         public string GetUserProfilePath()
         {
-            return Path.Combine(GetAppDataPath(), "userprofile.json");
+            return Path.Combine(GetAppContentPath(), "userprofile.json");
         }
 
         public int Compare(UserGameInfo x, UserGameInfo y)
@@ -358,7 +358,7 @@ namespace Nucleus.Gaming
 
         public void BeginBackup(GenericGameInfo game)
         {
-            string appData = GetAppDataPath();
+            string appData = GetAppContentPath();
             string gamePath = Path.Combine(appData, game.GUID);
             Directory.CreateDirectory(gamePath);
 
@@ -372,13 +372,13 @@ namespace Nucleus.Gaming
 
         public string GempTempFolder(GenericGameInfo game)
         {
-            string appData = GetAppDataPath();
+            string appData = GetAppContentPath();
             return Path.Combine(appData, game.GUID);
         }
 
         public BackupFile BackupFile(GenericGameInfo game, string path)
         {
-            string appData = GetAppDataPath();
+            string appData = GetAppContentPath();
             string gamePath = Path.Combine(appData, game.GUID);
             string destination = Path.Combine(gamePath, Path.GetFileName(path));
 
@@ -413,7 +413,7 @@ namespace Nucleus.Gaming
                 return;
             }
 
-            string appData = GetAppDataPath();
+            string appData = GetAppContentPath();
             string gamePath = Path.Combine(appData, game.GUID);
 
             for (int i = 0; i < backupFiles.Count; i++)
@@ -546,7 +546,7 @@ namespace Nucleus.Gaming
         private void Initialize()
         {
             // Search for Javascript games-infos
-            string jsfolder = GetJsGamesPath();
+            string jsfolder = GetJsScriptsPath();
             DirectoryInfo jsFolder = new DirectoryInfo(jsfolder);
             FileInfo[] files = jsFolder.GetFiles("*.js");
             for (int i = 0; i < files.Length; i++)
@@ -602,6 +602,7 @@ namespace Nucleus.Gaming
                 }
                 catch
                 {
+                    LogManager.Instance.LogExceptionFile(ex);
                     error = "We failed so hard we failed while trying to record the reason we failed initially. Sorry.";
                     return;
                 }

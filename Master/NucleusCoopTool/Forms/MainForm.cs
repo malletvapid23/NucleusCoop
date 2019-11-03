@@ -24,7 +24,7 @@ namespace Nucleus.Coop
     /// </summary>
     public partial class MainForm : BaseForm
     {
-        public string version = "v0.9.7.2 ALPHA";
+        public string version = "v0.9.8.0 ALPHA";
 
         private Settings settingsForm = null;
 
@@ -59,6 +59,68 @@ namespace Nucleus.Coop
         private Thread handlerThread;
 
         private bool TopMostToggle = true;
+
+        public enum MachineType : ushort
+        {
+            IMAGE_FILE_MACHINE_UNKNOWN = 0x0,
+            IMAGE_FILE_MACHINE_AM33 = 0x1d3,
+            IMAGE_FILE_MACHINE_AMD64 = 0x8664,
+            IMAGE_FILE_MACHINE_ARM = 0x1c0,
+            IMAGE_FILE_MACHINE_EBC = 0xebc,
+            IMAGE_FILE_MACHINE_I386 = 0x14c,
+            IMAGE_FILE_MACHINE_IA64 = 0x200,
+            IMAGE_FILE_MACHINE_M32R = 0x9041,
+            IMAGE_FILE_MACHINE_MIPS16 = 0x266,
+            IMAGE_FILE_MACHINE_MIPSFPU = 0x366,
+            IMAGE_FILE_MACHINE_MIPSFPU16 = 0x466,
+            IMAGE_FILE_MACHINE_POWERPC = 0x1f0,
+            IMAGE_FILE_MACHINE_POWERPCFP = 0x1f1,
+            IMAGE_FILE_MACHINE_R4000 = 0x166,
+            IMAGE_FILE_MACHINE_SH3 = 0x1a2,
+            IMAGE_FILE_MACHINE_SH3DSP = 0x1a3,
+            IMAGE_FILE_MACHINE_SH4 = 0x1a6,
+            IMAGE_FILE_MACHINE_SH5 = 0x1a8,
+            IMAGE_FILE_MACHINE_THUMB = 0x1c2,
+            IMAGE_FILE_MACHINE_WCEMIPSV2 = 0x169,
+        }
+
+        public static MachineType GetDllMachineType(string dllPath)
+        {
+            // See http://www.microsoft.com/whdc/system/platform/firmware/PECOFF.mspx
+            // Offset to PE header is always at 0x3C.
+            // The PE header starts with "PE\0\0" =  0x50 0x45 0x00 0x00,
+            // followed by a 2-byte machine type field (see the document above for the enum).
+            //
+            FileStream fs = new FileStream(dllPath, FileMode.Open, FileAccess.Read);
+            BinaryReader br = new BinaryReader(fs);
+            fs.Seek(0x3c, SeekOrigin.Begin);
+            Int32 peOffset = br.ReadInt32();
+            fs.Seek(peOffset, SeekOrigin.Begin);
+            UInt32 peHead = br.ReadUInt32();
+
+            if (peHead != 0x00004550) // "PE\0\0", little-endian
+                throw new Exception("Can't find PE header");
+
+            MachineType machineType = (MachineType)br.ReadUInt16();
+            br.Close();
+            fs.Close();
+            return machineType;
+        }
+
+        // Returns true if the exe is 64-bit, false if 32-bit, and null if unknown
+        public static bool? Is64Bit(string exePath)
+        {
+            switch (GetDllMachineType(exePath))
+            {
+                case MachineType.IMAGE_FILE_MACHINE_AMD64:
+                case MachineType.IMAGE_FILE_MACHINE_IA64:
+                    return true;
+                case MachineType.IMAGE_FILE_MACHINE_I386:
+                    return false;
+                default:
+                    return null;
+            }
+        }
 
         private enum ShowWindowEnum
         {
@@ -408,6 +470,21 @@ namespace Nucleus.Coop
             btn_gameOptions.Left += gameNameControl.Width - 100;
             btn_gameOptions.Visible = true;
 
+            if(currentGameInfo.Game.Description?.Length > 0)
+            {
+                //StepPanel.SendToBack();
+                scriptAuthorLbl.Visible = true;
+                //scriptAuthorLbl.BringToFront();
+                scriptAuthorTxt.Visible = true;
+                scriptAuthorTxt.Text = currentGameInfo.Game.Description;
+            }
+            else
+            {
+                scriptAuthorLbl.Visible = false;
+                scriptAuthorTxt.Visible = false;
+            }
+
+
             if (content != null)
             {
                 content.Dispose();
@@ -450,12 +527,37 @@ namespace Nucleus.Coop
         private void btnNext_Click(object sender, EventArgs e)
         {
             GoToStep(currentStepIndex + 1);
+            scriptAuthorLbl.Visible = false;
+            scriptAuthorTxt.Visible = false;
         }
 
         private void KillCurrentStep()
         {
             currentStep?.Ended();
-            this.StepPanel.Controls.Clear();
+            //this.StepPanel.Controls.Clear();
+
+            if (currentGameInfo.Game.Description?.Length > 0)
+            {
+                scriptAuthorLbl.Visible = true;
+                scriptAuthorTxt.Visible = true;
+            }
+
+
+            if (currentStepIndex == 0)
+            {
+                foreach (Control c in StepPanel.Controls)
+                {
+                    if (!c.Name.Equals("scriptAuthorLbl") && !c.Name.Equals("scriptAuthorTxt"))
+                    {
+                        StepPanel.Controls.Remove(c);
+                    }
+                }
+            }
+            else
+            {
+                this.StepPanel.Controls.Clear();
+            }
+
         }
 
         private void GoToStep(int step)
@@ -775,7 +877,20 @@ namespace Nucleus.Coop
 
                     if (gameGuid == currentGameInfo.GameGuid && exePath == currentGameInfo.ExePath)
                     {
-                        MessageBox.Show(string.Format("Game Name: {0}\nSteam ID: {1}\nExe Path: {2}\nScript Filename: {3}\nNucleus Game Data Path: {4}", currentGameInfo.Game.GameName, currentGameInfo.Game.SteamID, exePath, currentGameInfo.Game.JsFileName, Path.Combine(gameManager.GetAppDataPath(), gameGuid)), "Game Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        string arch = "";
+                        if(Is64Bit(exePath) == true)
+                        {
+                            arch = "x64";
+                        }
+                        else if(Is64Bit(exePath) == true)
+                        {
+                            arch = "x86";
+                        }
+                        else
+                        {
+                            arch = "Unknown";
+                        }
+                        MessageBox.Show(string.Format("Game Name: {0}\nArchitecture: {1}\nSteam ID: {2}\n\nScript Filename: {3}\nNucleus Game Content Path: {4}\nOrig Exe Path: {5}\n\nMax Players: {6}\nSupports XInput: {7}\nSupports DInput: {8}\nSupports Keyboard: {9}", currentGameInfo.Game.GameName, arch, currentGameInfo.Game.SteamID, currentGameInfo.Game.JsFileName, Path.Combine(gameManager.GetAppContentPath(), gameGuid), exePath, currentGameInfo.Game.MaxPlayers, currentGameInfo.Game.Hook.XInputEnabled, currentGameInfo.Game.Hook.DInputEnabled, currentGameInfo.Game.SupportsKeyboard), "Game Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     }
                 }
             }
@@ -923,18 +1038,13 @@ namespace Nucleus.Coop
 
         private void OpenRawGameScript()
         {
-            var nppDir = (string)Registry.GetValue("HKEY_LOCAL_MACHINE\\SOFTWARE\\Notepad++", null, null);
-            if (nppDir != null)
+            try
             {
-                var nppExePath = Path.Combine(nppDir, "Notepad++.exe");
-                var nppReadmePath = Path.Combine(nppDir, "readme.txt");
-                var sb = new StringBuilder();
-                sb.AppendFormat("\"{0}\" -n{1}", nppReadmePath);
-                Process.Start(nppExePath, sb.ToString());
+                Process.Start("notepad++.exe", "\"" + Path.Combine(gameManager.GetJsScriptsPath(), currentGameInfo.Game.JsFileName) + "\"");
             }
-            else
+            catch
             {
-                Process.Start("notepad.exe", Path.Combine(gameManager.GetJsGamesPath(), currentGameInfo.Game.JsFileName));
+                Process.Start("notepad.exe", Path.Combine(gameManager.GetJsScriptsPath(), currentGameInfo.Game.JsFileName));
             }
         }
 
@@ -945,7 +1055,7 @@ namespace Nucleus.Coop
 
         private void OpenDataFolder()
         {
-            string path = Path.Combine(gameManager.GetAppDataPath(), currentGameInfo.Game.GUID);
+            string path = Path.Combine(gameManager.GetAppContentPath(), currentGameInfo.Game.GUID);
             if (Directory.Exists(path))
             {
                 Process.Start(path);
@@ -1027,6 +1137,19 @@ namespace Nucleus.Coop
             Point ptLowerLeft = new Point(0, btnSender.Height);
             ptLowerLeft = btnSender.PointToScreen(ptLowerLeft);
             gameContextMenuStrip.Show(ptLowerLeft);
+        }
+
+        private void OpenOrigExePathToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            string path = Path.GetDirectoryName(currentGameInfo.ExePath);
+            if (Directory.Exists(path))
+            {
+                Process.Start(path);
+            }
+            else
+            {
+                MessageBox.Show("Unable to open original executable path for this game.", "Not found", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
     }
 }
