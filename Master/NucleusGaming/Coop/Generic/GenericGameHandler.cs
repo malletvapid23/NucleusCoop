@@ -60,6 +60,7 @@ namespace Nucleus.Gaming
         private int prevProcId = 0;
 
         private int plyrIndex = 0;
+        private int kbi = 1;
 
         private long random_steam_id = 76561199023125438;
 
@@ -534,7 +535,7 @@ namespace Nucleus.Gaming
                     Log(string.Format("Mutexes - Handle(s): ({0}), KillMutexDelay: {1}, KillMutexType: {2}, RenameNotKillMutex: {3}, PartialMutexSearch: {4}", mutexList, gen.KillMutexDelay, gen.KillMutexType, gen.RenameNotKillMutex, gen.PartialMutexSearch));
                 }
 
-                Log("NucleusCoop mod version: 0.9.8.0 ALPHA");
+                Log("NucleusCoop mod version: 0.9.8.1 ALPHA");
                 string pcSpecs = "PC Info - ";
                 var name = (from x in new ManagementObjectSearcher("SELECT Caption FROM Win32_OperatingSystem").Get().Cast<ManagementObject>()
                             select x.GetPropertyValue("Caption")).FirstOrDefault();
@@ -1502,43 +1503,43 @@ namespace Nucleus.Gaming
                             CmdUtil.ExecuteCommand(utilFolder, out int exitCode, "copy \"" + Path.Combine(utilFolder, garch + "\\" + xinputDll) + "\" \"" + Path.Combine(instanceExeFolder, xinputDllName) + "\"");
                         }
 
-                        if (File.Exists(Path.Combine(instanceExeFolder, "XInputPlus.ini")))
-                        {
-                            File.Delete(Path.Combine(instanceExeFolder, "XInputPlus.ini"));
-                        }
-                        Log("Copying XInputPlus.ini");
-                        File.Copy(Path.Combine(utilFolder, "XInputPlus.ini"), Path.Combine(instanceExeFolder, "XInputPlus.ini"), true);
-
-                        //string[] change = new string[] {
-                        //    context.FindLineNumberInTextFile(Path.Combine(instanceExeFolder, "XInputPlus.ini"), "Controller1=", SearchType.StartsWith) + "|Controller1=" + (i + 1),
-                        //    context.FindLineNumberInTextFile(Path.Combine(instanceExeFolder, "XInputPlus.ini"), "FileVersion=", SearchType.StartsWith) + "|FileVersion=" + arch,
-                        //};
-
-                        Log("Making changes to the lines in XInputPlus.ini; FileVersion and Controller values");
                         List<string> textChanges = new List<string>();
-                        textChanges.Add(context.FindLineNumberInTextFile(Path.Combine(instanceExeFolder, "XInputPlus.ini"), "FileVersion=", SearchType.StartsWith) + "|FileVersion=" + garch);
-
-                        if(!player.IsKeyboardPlayer)
+                        if (!player.IsKeyboardPlayer || (player.IsKeyboardPlayer && gen.PlayersPerInstance <= 1))
                         {
-                            if (gen.PlayersPerInstance > 1)
+                            if (File.Exists(Path.Combine(instanceExeFolder, "XInputPlus.ini")))
                             {
-                                for (int x = 1; x <= gen.PlayersPerInstance; x++)
+                                File.Delete(Path.Combine(instanceExeFolder, "XInputPlus.ini"));
+                            }
+                            Log("Copying XInputPlus.ini");
+                            File.Copy(Path.Combine(utilFolder, "XInputPlus.ini"), Path.Combine(instanceExeFolder, "XInputPlus.ini"), true);
+                        
+                            Log("Making changes to the lines in XInputPlus.ini; FileVersion and Controller values");
+                        
+                            textChanges.Add(context.FindLineNumberInTextFile(Path.Combine(instanceExeFolder, "XInputPlus.ini"), "FileVersion=", SearchType.StartsWith) + "|FileVersion=" + garch);
+
+                            if (!player.IsKeyboardPlayer)
+                            {
+                                if (gen.PlayersPerInstance > 1)
                                 {
-                                    textChanges.Add(context.FindLineNumberInTextFile(Path.Combine(instanceExeFolder, "XInputPlus.ini"), "Controller" + x + "=", SearchType.StartsWith) + "|Controller" + x + "=" + (x + plyrIndex));
+                                    for (int x = 1; x <= gen.PlayersPerInstance; x++)
+                                    {
+                                        textChanges.Add(context.FindLineNumberInTextFile(Path.Combine(instanceExeFolder, "XInputPlus.ini"), "Controller" + x + "=", SearchType.StartsWith) + "|Controller" + x + "=" + (x + plyrIndex));
+                                    }
+                                    plyrIndex += gen.PlayersPerInstance;
                                 }
-                                plyrIndex += gen.PlayersPerInstance;
+                                else
+                                {
+                                    textChanges.Add(context.FindLineNumberInTextFile(Path.Combine(instanceExeFolder, "XInputPlus.ini"), "Controller1=", SearchType.StartsWith) + "|Controller1=" + (i + kbi));
+                                }
                             }
                             else
                             {
-                                textChanges.Add(context.FindLineNumberInTextFile(Path.Combine(instanceExeFolder, "XInputPlus.ini"), "Controller1=", SearchType.StartsWith) + "|Controller1=" + (i + 1));
+                                Log("Skipping setting controller value for this instance, as this player is using keyboard");
+                                kbi = 0;
                             }
-                        }
-                        else
-                        {
-                            Log("Skipping setting controller value for this instance, as this player is using keyboard");
-                        }
 
-                        context.ReplaceLinesInTextFile(Path.Combine(instanceExeFolder, "XInputPlus.ini"), textChanges.ToArray());
+                            context.ReplaceLinesInTextFile(Path.Combine(instanceExeFolder, "XInputPlus.ini"), textChanges.ToArray());
+                        }
                     }
                     Log("XInput Plus setup complete");
                 }
@@ -2392,11 +2393,21 @@ namespace Nucleus.Gaming
                 
                 if (gen.PromptBetweenInstances && i < (players.Count - 1))
                 {
-                    Log(string.Format("Prompted user for Instance {0}", (i + 1)));
-                    MessageBox.Show("Press OK when ready to launch instance " + (i + 1) + ".", "Waiting", MessageBoxButtons.OK, MessageBoxIcon.None, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly);
+                    if(gen.PauseBetweenStarts > 0)
+                    {
+                        Log(string.Format("Pausing for {0} seconds", gen.PauseBetweenStarts));
+                        Thread.Sleep(TimeSpan.FromSeconds(gen.PauseBetweenStarts));
+                    }
+                    Log(string.Format("Prompted user for Instance {0}", (i + 2)));
+                    MessageBox.Show("Press OK when ready to launch instance " + (i + 2) + ".", "Waiting", MessageBoxButtons.OK, MessageBoxIcon.None, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly);
                 }
-                else if (gen.PromptBetweenInstances && i == players.Count - 1 && (gen.HookFocus || gen.FakeFocus || gen.SetWindowHook || gen.HideCursor))
+                else if (gen.PromptBetweenInstances && i == players.Count - 1 && (gen.HookFocus || gen.FakeFocus || gen.SetWindowHook || gen.HideCursor || gen.PreventWindowDeactivation))
                 {
+                    if (gen.PauseBetweenStarts > 0)
+                    {
+                        Log(string.Format("Pausing for {0} seconds", gen.PauseBetweenStarts));
+                        Thread.Sleep(TimeSpan.FromSeconds(gen.PauseBetweenStarts));
+                    }
                     Log("Prompted user to install focus hooks");
                     MessageBox.Show("Press OK when ready to install hooks and/or start sending fake messages.", "Waiting", MessageBoxButtons.OK, MessageBoxIcon.None, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly);
                     foreach (Process aproc in attached)
