@@ -1589,16 +1589,22 @@ namespace Nucleus.Coop
             dragEachGamepad = StringUtil.WrapString(Width /** 0.3f*/, dragEachGamepad, g, extraSmallTextFont, out dragEachGamepadSize);
             g.DrawString(dragEachGamepad, extraSmallTextFont, Brushes.White, new PointF(Width - dragEachGamepadSize.Width, 4/*playersArea.Y - 50*/));
 
-            string bottomText = "";
-            GenericGameInfo ggi = game.Game;
-            if (ggi.Description?.Length > 0)
-            {
-                bottomText = "Script Author Notes: " + ggi.Description;
-                SizeF bottomTextSize;
-                //string bottomText = ggi.Description; //"Click on screen's top-left corner to change players on that screen. (4-player only) Right click player to change size";
-                bottomText = StringUtil.WrapString(Width - 20, bottomText, g, smallTextFont, out bottomTextSize);
-                g.DrawString(bottomText, smallTextFont, Brushes.White, new PointF(10, Height - bottomTextSize.Height - 30));
-            }
+            //string bottomText = "";
+            //GenericGameInfo ggi = game.Game;
+            //if (ggi.Description?.Length > 0)
+            //{
+            //    bottomText = "Script Author Notes: " + ggi.Description;
+            //    SizeF bottomTextSize;
+            //    //string bottomText = ggi.Description; //"Click on screen's top-left corner to change players on that screen. (4-player only) Right click player to change size";
+            //    bottomText = StringUtil.WrapString(Width - 20, bottomText, g, smallTextFont, out bottomTextSize);
+            //    g.DrawString(bottomText, smallTextFont, Brushes.White, new PointF(10, (Height * 0.95f)));
+
+            //    // make text smaller
+            //    //int charSize = TextRenderer.MeasureText("g", title.Font).Width;
+            //    //int toRemove = (int)((reservedSpaceLabel - labelSize.Width) / (float)charSize);
+            //    //toRemove = Math.Max(toRemove + 3, 7);
+            //    //title.Text = TitleText.Remove(TitleText.Length - toRemove, toRemove) + "...";
+            //}
 
             
             

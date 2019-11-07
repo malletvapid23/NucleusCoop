@@ -173,6 +173,16 @@ namespace Nucleus.Gaming.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap players {
+            get {
+                object obj = ResourceManager.GetObject("players", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap vertical {
             get {
                 object obj = ResourceManager.GetObject("vertical", resourceCulture);

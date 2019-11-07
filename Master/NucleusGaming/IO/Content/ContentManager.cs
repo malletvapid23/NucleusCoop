@@ -12,7 +12,7 @@ namespace Nucleus.Gaming
         private Dictionary<string, Image> loadedImages;
         private bool isDisposed;
         private GenericGameInfo game;
-        private string gamesFolder;
+        private string scriptsFolder;
         private string pkgFolder;
 
         public ContentManager(GenericGameInfo game)
@@ -20,8 +20,8 @@ namespace Nucleus.Gaming
             this.game = game;
             loadedImages = new Dictionary<string, Image>();
 
-            gamesFolder = GameManager.Instance.GetJsGamesPath();
-            pkgFolder = Path.Combine(gamesFolder, Path.GetFileNameWithoutExtension(game.JsFileName));
+            scriptsFolder = GameManager.Instance.GetJsScriptsPath();
+            pkgFolder = Path.Combine(scriptsFolder, Path.GetFileNameWithoutExtension(game.JsFileName));
         }
 
         public void Dispose()

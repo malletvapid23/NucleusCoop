@@ -7,6 +7,7 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
 using EasyHook;
+using IWshRuntimeLibrary;
 
 namespace Nucleus.Gaming.Tools.GameStarter
 {
@@ -114,7 +115,7 @@ namespace Nucleus.Gaming.Tools.GameStarter
         /// <param name="waitTime"></param>
         /// <param name="mutex"></param>
         /// <returns></returns>
-        public static int StartGame(string pathToGame, string args, bool hook, bool delay, bool renameMutex, string mutexNames, bool setWindow, bool isDebug, string nucleusFolder, bool blockRaw, /*string rawHid,*/ string workingDir = null)
+        public static int StartGame(string pathToGame, string args, bool hook, bool delay, bool renameMutex, string mutexNames, bool setWindow, bool isDebug, string nucleusFolder, bool blockRaw, /*bool runAdmin, string rawHid,*/ string workingDir = null)
         {
             lock (locker)
             {
@@ -127,11 +128,32 @@ namespace Nucleus.Gaming.Tools.GameStarter
                     workingDir = "|" + workingDir;
                 }
 
-                startInfo.Arguments = "\"" + "hook|::|" + hook + "\" \"delay|::|" + delay + "\" \"renamemutex|::|" + renameMutex + "\" \"mutextorename|::|" + mutexNames + "\" \"setwindow|::|" + setWindow + "\" \"isdebug|::|" + isDebug + "\" \"nucleusfolderpath|::|" + nucleusFolder + "\" \"blockraw|::|" + blockRaw /*+ "\" \"rawhid|::|" + rawHid*/ + "\" \"game|::|" + pathToGame + workingDir + ";" + args + "\"";
+                //string arguments = 
+                startInfo.Arguments = "\"" + "hook|::|" + hook + "\" \"delay|::|" + delay + "\" \"renamemutex|::|" + renameMutex + "\" \"mutextorename|::|" + mutexNames + "\" \"setwindow|::|" + setWindow + "\" \"isdebug|::|" + isDebug + "\" \"nucleusfolderpath|::|" + nucleusFolder + "\" \"blockraw|::|" + blockRaw /*+ "\" \"runadmin|::|" + runAdmin + "\" \"rawhid|::|" + rawHid*/ + "\" \"game|::|" + pathToGame + workingDir + ";" + args + "\"";
 
                 startInfo.RedirectStandardOutput = true;
                 startInfo.UseShellExecute = false;
 
+                //if(runNotAdmin)
+                //{
+                //    WshShell shell = new WshShell();
+                //    //string shortcutAddress = (string)shell.SpecialFolders.Item(ref shDesktop) + @"\Notepad.lnk";
+                //    string shortcutAddress = Path.GetDirectoryName(startGamePath) + @"\StartGame.lnk";
+                //    IWshShortcut shortcut = (IWshShortcut)shell.CreateShortcut(shortcutAddress);
+                //    shortcut.Description = "Shortcut for Startgame";
+                //    //shortcut.Hotkey = "Ctrl+Shift+N";
+                //    shortcut.TargetPath = startGamePath;
+                //    shortcut.Arguments = arguments;
+                //    shortcut.Save();
+
+                //    startInfo.FileName = "explorer";
+                //    startInfo.Arguments = shortcutAddress;
+
+                //}
+                //if(runAdmin)
+                //{
+                //    startInfo.Verb = "runas";
+                //}
                 Process proc = Process.Start(startInfo);
                 proc.OutputDataReceived += proc_OutputDataReceived;
                 proc.BeginOutputReadLine();
@@ -150,6 +172,60 @@ namespace Nucleus.Gaming.Tools.GameStarter
             }
             Console.WriteLine($"Redirected output: {e.Data}");
             lastLine = e.Data;
+        }
+
+        public static bool SymlinkGame(string root, string destination, out int exitCode,
+            string[] dirExclusions, string[] fileExclusions, string[] fileCopyInstead, bool hardLink, bool symFolders, int numPlayers)
+        {
+            exitCode = 1;
+
+            lock (locker)
+            {
+                string startGamePath = GetStartGamePath();
+                ProcessStartInfo startInfo = new ProcessStartInfo();
+                startInfo.FileName = startGamePath;
+
+                string de = "";
+                for (int i = 0; i < dirExclusions.Length; i++)
+                {
+                    de += dirExclusions[i];
+                    if (i != dirExclusions.Length - 1)
+                    {
+                        de += "|==|";
+                    }
+                }
+
+                string fe = "";
+                for (int i = 0; i < fileExclusions.Length; i++)
+                {
+                    fe += fileExclusions[i];
+                    if (i != fileExclusions.Length - 1)
+                    {
+                        fe += "|==|";
+                    }
+                }
+
+                string fc = "";
+                for (int i = 0; i < fileCopyInstead.Length; i++)
+                {
+                    fc += fileCopyInstead[i];
+                    if (i != fileCopyInstead.Length - 1)
+                    {
+                        fc += "|==|";
+                    }
+                }
+
+                startInfo.Arguments = "\"" + "root|::|" + root.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar) /*+ "\" \"currentdir|::|" + currentDir */+ "\" \"destination|::|" + destination + "\" \"direxclusions|::|" + de + "\" \"fileexclusions|::|" + fe + "\" \"filecopyinstead|::|" + fc + "\" \"hardlink|::|" + hardLink + "\" \"symfolders|::|" + symFolders + "\" \"numplayers|::|" + numPlayers /*+ "\" \"overridespecial|::|" + overrideSpecial*/ + "\" \"symlink|::|" + "true";
+                //"\"" + "hook|::|" + hook + "\" \"delay|::|"
+                startInfo.UseShellExecute = true;
+                startInfo.Verb = "runas";
+                startInfo.WindowStyle = ProcessWindowStyle.Hidden;
+                Process proc = Process.Start(startInfo);
+
+                proc.WaitForExit();
+
+                return true;
+            }
         }
     }
 }

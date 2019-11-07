@@ -2,25 +2,22 @@
 #include "easyhook.h"
 #include "framework.h"
 //#include "string"
-#include "windows.h"
+//#include "windows.h"
+//#include "winuser.h"
 //#include <sstream>
 //#include <ios>
+//#include <iostream>
 #include <fstream>
-#include <atlbase.h>
+//#include <vector>
 #include <locale>
 #include <codecvt>
-#include <ctime>
+#include <time.h>
 #include <stdio.h>
-#include <iomanip>
 using namespace std;
 
 HWND hWnd = 0;
 
-#ifdef DEBUG
 bool IsDebug = false;
-#else
-bool IsDebug = true;
-#endif
 
 std::ofstream outfile;
 std::wstring nucleusFolder;
@@ -36,12 +33,11 @@ std::string ws2s(const std::wstring& wstr)
 
 inline std::string date_string()
 {
-	tm tinfo;
 	time_t rawtime;
 	std::time(&rawtime);
-	localtime_s(&tinfo, &rawtime);
+	struct tm* tinfo = std::localtime(&rawtime);
 	char buffer[21];
-	strftime(buffer, 21, "%Y-%m-%d %H:%M:%S", &tinfo);
+	strftime(buffer, 21, "%Y-%m-%d %H:%M:%S", tinfo);
 	return "[" + std::string(buffer) + "]";
 }
 
@@ -54,7 +50,6 @@ LRESULT CALLBACK WndProc_Hook(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam
 			//SetFocus(hWnd);
 			return -1;
 		}
-
 		default:
 			DefWindowProc(hwnd, uMsg, wParam, lParam);
 	}
@@ -164,13 +159,12 @@ NTSTATUS HookInstall(LPCSTR moduleHandle, LPCSTR proc, void* callBack)
 		callBack,
 		NULL,
 		&hHook);
-	
 	if (FAILED(result))
 	{
 		if (IsDebug)
 		{
 			outfile.open(nucleusFolder + logFile, std::ios_base::app);
-			outfile << date_string() << "HOOK64: Error installing " << proc << " hook, error msg: " << RtlGetLastErrorString() << "\n";
+			outfile << date_string() << "HOOK32: Error installing " << proc << " hook, error msg: " << RtlGetLastErrorString() << "\n";
 		}
 	}
 	else
@@ -185,7 +179,7 @@ NTSTATUS HookInstall(LPCSTR moduleHandle, LPCSTR proc, void* callBack)
 		if (IsDebug)
 		{
 			outfile.open(nucleusFolder + logFile, std::ios_base::app);
-			outfile << date_string() << "HOOK64: Successfully installed " << proc << " hook, in module: " << moduleHandle << ", result: " << result << "\n";
+			outfile << date_string() << "HOOK32: Successfully installed " << proc << " hook, in module: " << moduleHandle << ", result: " << result << "\n";
 		}
 	}
 	outfile.flush();
@@ -206,6 +200,7 @@ void __stdcall NativeInjectionEntryPoint(REMOTE_ENTRY_INFO* inRemoteInfo)
 
 	if ((INT)hWnd == 0)
 	{
+		
 		hWnd = (HWND)bytesToInt(data);
 	}
 
@@ -230,7 +225,7 @@ void __stdcall NativeInjectionEntryPoint(REMOTE_ENTRY_INFO* inRemoteInfo)
 	if (IsDebug)
 	{
 		outfile.open(nucleusFolder + logFile, std::ios_base::app);
-		outfile << date_string() << "HOOK64: Starting hook injection, SetWindow: " << SetWindow << " HookFocus: " << HookFocus << " HideCursor: " << HideCursor << " PreventWindowDeactivation: " << PreventWindowDeactivation << "\n";
+		outfile << date_string() << "HOOK32: Starting hook injection, SetWindow: " << SetWindow << " HookFocus: " << HookFocus << " HideCursor: " << HideCursor << " PreventWindowDeactivation: " << PreventWindowDeactivation << "\n";
 		outfile.flush();
 		outfile.close();
 	}
@@ -240,7 +235,7 @@ void __stdcall NativeInjectionEntryPoint(REMOTE_ENTRY_INFO* inRemoteInfo)
 		if (IsDebug)
 		{
 			outfile.open(nucleusFolder + logFile, std::ios_base::app);
-			outfile << date_string() << "HOOK64: Injecting SetWindow hook\n";
+			outfile << date_string() << "HOOK32: Injecting SetWindow hook\n";
 			outfile.flush();
 			outfile.close();
 		}
@@ -252,7 +247,7 @@ void __stdcall NativeInjectionEntryPoint(REMOTE_ENTRY_INFO* inRemoteInfo)
 		if (IsDebug)
 		{
 			outfile.open(nucleusFolder + logFile, std::ios_base::app);
-			outfile << date_string() << "HOOK64: Injecting HookFocus hooks\n";
+			outfile << date_string() << "HOOK32: Injecting HookFocus hooks\n";
 			outfile.flush();
 			outfile.close();
 		}
@@ -269,7 +264,7 @@ void __stdcall NativeInjectionEntryPoint(REMOTE_ENTRY_INFO* inRemoteInfo)
 		if (IsDebug)
 		{
 			outfile.open(nucleusFolder + logFile, std::ios_base::app);
-			outfile << date_string() << "HOOK64: Preventing window deactivation by blocking WM_KILLFOCUS\n";
+			outfile << date_string() << "HOOK32: Preventing window deactivation by blocking WM_KILLFOCUS\n";
 			outfile.flush();
 			outfile.close();
 		}
@@ -282,7 +277,7 @@ void __stdcall NativeInjectionEntryPoint(REMOTE_ENTRY_INFO* inRemoteInfo)
 		if (IsDebug)
 		{
 			outfile.open(nucleusFolder + logFile, std::ios_base::app);
-			outfile << date_string() << "HOOK64: Injecting HideCursor hooks\n";
+			outfile << date_string() << "HOOK32: Injecting HideCursor hooks\n";
 			outfile.flush();
 			outfile.close();
 		}
@@ -295,7 +290,7 @@ void __stdcall NativeInjectionEntryPoint(REMOTE_ENTRY_INFO* inRemoteInfo)
 	if (IsDebug)
 	{
 		outfile.open(nucleusFolder + logFile, std::ios_base::app);
-		outfile << date_string() << "HOOK64: Hook injection complete\n";
+		outfile << date_string() << "HOOK32: Hook injection complete\n";
 		outfile.flush();
 		outfile.close();
 	}

@@ -63,7 +63,7 @@ namespace Nucleus.Gaming
         {
 #if ALPHA
             string local = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
-            return Path.Combine(local, "Data");
+            return Path.Combine(local, "content");
 #else
             string appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
             return Path.Combine(appData, "Nucleus Coop");

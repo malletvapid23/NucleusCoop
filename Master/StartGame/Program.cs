@@ -30,6 +30,19 @@ namespace StartGame
         private static bool renameMutex;
         private static bool setWindow;
         private static bool blockRaw;
+        //private static bool runAdmin;
+
+        private static string root;
+        private static string currentDir;
+        private static string destination;
+        private static string[] dirExclusions;
+        private static string[] fileExclusions;
+        private static string[] fileCopyInstead;
+        private static bool hardLink;
+        private static bool symFolders;
+        private static int numPlayers;
+
+        private static bool gameIs64 = false;
 
         private static string mutexToRename;
 
@@ -201,7 +214,7 @@ namespace StartGame
         static void StartGame(string path, string args = "", string workingDir = null)
         {
             System.IO.Stream str = new System.IO.MemoryStream();
-            GenericGameInfo gen = new GenericGameInfo(null, null, str);
+            //GenericGameInfo gen = new GenericGameInfo(null, null, str);
             bool regMethod = false;
 
             if (!Path.IsPathRooted(path))
@@ -227,8 +240,15 @@ namespace StartGame
                 //proc = Process.Start(startInfo);
                 //string currDir = Directory.GetCurrentDirectory();
 
+
 				// This works even if the current directory is set elsewhere.
                 string currDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+
+                //bool is64 = EasyHook.RemoteHooking.IsX64Process((int)pi.dwProcessId);
+                if (Is64Bit(path) == true)
+                {
+                    gameIs64 = true;
+                }
 
 				//bool is64 = EasyHook.RemoteHooking.IsX64Process((int)pi.dwProcessId);
 
@@ -345,6 +365,10 @@ namespace StartGame
 						}
 
 						/*if (Is64Bit(path) == true)
+
+                        Log("Starting game and injecting start up hooks using create and inject method");
+                        if (gameIs64)
+
                         {
                             try
                             {
@@ -363,7 +387,7 @@ namespace StartGame
                                 //}
                             }
                         }
-                        else if (Is64Bit(path) == false)
+                        else //if (Is64Bit(path) == false)
                         {
                             try
                             {
@@ -391,6 +415,12 @@ namespace StartGame
                                 injstartInfo.UseShellExecute = false;
                                 injstartInfo.RedirectStandardOutput = true;
 
+                                //if (runAdmin)
+                                //{
+                                //    //    injstartInfo.FileName = "explorer";
+                                //    //    injstartInfo.Arguments = injectorPath + " " + arguments;
+                                //    injstartInfo.Verb = "runas";
+                                //}
                                 Process injectProc = Process.Start(injstartInfo);
                                 injectProc.OutputDataReceived += proc_OutputDataReceived;
                                 injectProc.BeginOutputReadLine();
@@ -415,6 +445,7 @@ namespace StartGame
                                 //}
                             }
                         }
+
                         else
                         {
                             Log(string.Format("ERROR - Machine type {0} not implemented", GetDllMachineType(path)));
@@ -426,6 +457,17 @@ namespace StartGame
 					}
 					// Redundant with updated version of EasyHook
                     /**else // delay method
+
+                        //else
+                        //{
+                        //    Log(string.Format("ERROR - Machine type {0} not implemented", GetDllMachineType(path)));
+                        //    //using (StreamWriter writer = new StreamWriter("error-log.txt", true))
+                        //    //{
+                        //    //    writer.WriteLine("[" + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "]" + "Machine type: '{0}' not implemented.", GetDllMachineType(path));
+                        //    //}
+                        //}
+                    }
+                    else // delay method
                     {
 						
                         Log("Starting game and injecting start up hooks using delay method");
@@ -451,13 +493,13 @@ namespace StartGame
 
                         SuspendThread(pi.hThread);
 
-                        if (Is64Bit(path) == true)
+                        if (gameIs64)
                         {
                             Log("x64 game detected, injecting Nucleus.SHook64.dll");
                             NativeAPI.RhInjectLibrary((int)pi.dwProcessId, 0, 0, null, Path.Combine(currDir, "Nucleus.SHook64.dll"), ptr, size);
                             pOutPID = (int)pi.dwProcessId;
                         }
-                        else if (Is64Bit(path) == false)
+                        else //if (Is64Bit(path) == false)
                         {
                             try
                             {
@@ -483,6 +525,13 @@ namespace StartGame
                                 //injstartInfo.CreateNoWindow = true;
                                 injstartInfo.UseShellExecute = false;
                                 injstartInfo.RedirectStandardOutput = true;
+
+                                //if (runAdmin)
+                                //{
+                                //    //injstartInfo.FileName = "explorer";
+                                //    //injstartInfo.Arguments = injectorPath + " " + arguments;
+                                //    injstartInfo.Verb = "runas";
+                                //}
                                 Process injectProc = Process.Start(injstartInfo);
                                 //injectProc.OutputDataReceived += proc_OutputDataReceived;
                                 //injectProc.BeginOutputReadLine();
@@ -510,9 +559,16 @@ namespace StartGame
                 }
                 else // regular method (no hooks)
                 {
-                    Log("Starting game via regular process start method (no hooks enabled)");
+                    Log("Starting game via regular process start method (no start up hooks enabled)");
+                    //if(runAdmin)
+                    //{
+                    //    //startInfo.FileName = "explorer";
+                    //    //startInfo.Arguments = path + " " + args;
+                    //    startInfo.Verb = "runas";
+                    //}
                     proc = Process.Start(startInfo);
-                    
+
+
                     pOutPID = proc.Id;
                     regMethod = true;
                     
@@ -603,8 +659,20 @@ namespace StartGame
                              && !skey.Contains("isdebug")
                              && !skey.Contains("nucleusfolderpath")
                              && !skey.Contains("blockraw")
+                             //&& !skey.Contains("runadmin")
+                             && !skey.Contains("root")
+                             && !skey.Contains("destination")
+                             && !skey.Contains("direxclusions")
+                             && !skey.Contains("fileexclusions")
+                             && !skey.Contains("filecopyinstead")
+                             && !skey.Contains("hardlink")
+                             && !skey.Contains("symfolder")
+                             && !skey.Contains("numplayers")
+                             && !skey.Contains("symlink")
                              //&& !skey.Contains("rawhid")
                              && !skey.Contains("output"))
+                             
+                                                          
                         {
                             i++;
                             if (string.IsNullOrEmpty(argument))
@@ -662,6 +730,54 @@ namespace StartGame
                     else if (key.Contains("blockraw"))
                     {
                         blockRaw = Boolean.Parse(splited[1]);
+                    }
+                    //else if (key.Contains("runnotadmin"))
+                    //{
+                    //    runAdmin = Boolean.Parse(splited[1]);
+                    //}
+                    else if (key.Contains("root"))
+                    {
+                        root = splited[1];
+                    }
+                    else if (key.Contains("currentdir"))
+                    {
+                        currentDir = splited[1];
+                    }
+                    else if (key.Contains("destination"))
+                    {
+                        destination = splited[1].Substring(0,splited[1].LastIndexOf('\\'));
+                    }
+                    else if (key.Contains("direxclusions"))
+                    {
+                        dirExclusions = splited[1].Split(new string[] { "|==|" }, StringSplitOptions.None);
+                    }
+                    else if (key.Contains("fileexclusions"))
+                    {
+                        fileExclusions = splited[1].Split(new string[] { "|==|" }, StringSplitOptions.None);
+                    }
+                    else if (key.Contains("filecopyinstead"))
+                    {
+                        fileCopyInstead = splited[1].Split(new string[] { "|==|" }, StringSplitOptions.None);
+                    }
+                    else if (key.Contains("hardlink"))
+                    {
+                        hardLink = Boolean.Parse(splited[1]);
+                    }
+                    else if (key.Contains("symfolder"))
+                    {
+                        symFolders = Boolean.Parse(splited[1]);
+                    }
+                    else if (key.Contains("numplayers"))
+                    {
+                         numPlayers = int.Parse(splited[1]);
+                    }
+                    else if (key.Contains("symlink"))
+                    {
+                        int exitCode = 1;
+                        for (int p = 0; p < numPlayers; p++)
+                        {
+                            Nucleus.Gaming.Platform.Windows.IO.WinDirectoryUtil.LinkDirectory(root, new DirectoryInfo(root), destination + "\\Instance" + p, out exitCode, dirExclusions, fileExclusions, fileCopyInstead, hardLink, symFolders);
+                        }
                     }
                     //else if (key.Contains("rawhid"))
                     //{
@@ -731,7 +847,7 @@ namespace StartGame
                     }
                     else if (key.Contains("output"))
                     {
-                        string[] mutex = splited[1].Split(';');
+                        string[] mutex = splited[1].Split(new string[] { "|==|" }, StringSplitOptions.None);
                         bool all = true;
 
                         for (int j = 0; j < mutex.Length; j++)
