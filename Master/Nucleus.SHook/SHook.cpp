@@ -6,7 +6,7 @@
 //#include <sstream>
 //#include <ios>
 #include <fstream>
-#include <atlbase.h>
+//#include <atlbase.h>
 #include <random>
 #include <string>
 #include <map>

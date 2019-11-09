@@ -2600,7 +2600,7 @@ namespace Nucleus.Gaming
                 }
             }
 
-            //bool is64 = EasyHook.RemoteHooking.IsX64Process(proc.Id);                 
+            bool is64 = EasyHook.RemoteHooking.IsX64Process(proc.Id);                 
             string currDir = Directory.GetCurrentDirectory();
 
 
