@@ -2600,7 +2600,7 @@ namespace Nucleus.Gaming
                 }
             }
 
-            //bool is64 = EasyHook.RemoteHooking.IsX64Process(proc.Id);                 
+            bool is64 = EasyHook.RemoteHooking.IsX64Process(proc.Id);                 
             string currDir = Directory.GetCurrentDirectory();
 
 
@@ -2611,7 +2611,48 @@ namespace Nucleus.Gaming
 
             try
             {
-                if (gameIs64)
+	            string injectorPath = Path.Combine(currDir, $"Nucleus.IJ{(is64 ? "x64" : "x86")}.exe");
+	            ProcessStartInfo startInfo = new ProcessStartInfo();
+	            startInfo.FileName = injectorPath;
+
+	            object[] args = new object[]
+	            {
+		            1, // Tier. 0 == start up hook, 1 == runtime hook
+		            proc.Id, // Target PID
+		            0, // WakeUp Thread ID
+		            0, // InInjectionOptions (EasyHook)
+		            "Nucleus.Hook32.dll", // lib path x86. Inject32/64 will decide which one to use, so pass in both
+		            "Nucleus.Hook64.dll", // lib path x64
+		            proc.MainWindowHandle, // Game hWnd
+		            gen.HookFocus, // Hook GetForegroundWindow/etc
+		            gen.HideCursor,
+		            isDebug,
+		            nucleusFolderPath, // Primarily for log output
+		            gen.SetWindowHook, // SetWindow hook (prevents window from moving)
+					gen.PreventWindowDeactivation
+				};
+
+	            var sbArgs = new StringBuilder();
+	            foreach (object arg in args)
+	            {
+		            sbArgs.Append(" \"");
+		            sbArgs.Append(arg);
+		            sbArgs.Append("\"");
+	            }
+
+	            string arguments = sbArgs.ToString();
+	            startInfo.Arguments = arguments;
+	            startInfo.WindowStyle = ProcessWindowStyle.Hidden;
+	            startInfo.CreateNoWindow = true;
+	            startInfo.UseShellExecute = false;
+	            startInfo.RedirectStandardOutput = true;
+	            Process injectProc = Process.Start(startInfo);
+	            injectProc.WaitForExit();
+
+				/**
+                 * This should be generalised, and Inject32/64 code shouldn't be duplicated here.
+                 *
+                 * if (is64)
                 {
                     Log("x64 game detected, injecting Nucleus.Hook64.dll");
                     try
@@ -2680,8 +2721,8 @@ namespace Nucleus.Gaming
 
                     Marshal.Copy(dataToSend, 0, intPtr, size);
                     NativeAPI.RhInjectLibrary(proc.Id, 0, 0, Path.Combine(currDir, "Nucleus.Hook32.dll"), null, intPtr, size);
-                }
-            }
+                }*/
+			}
             catch (Exception ex)
             {
                 Log(string.Format("ERROR - {0}", ex.Message));
