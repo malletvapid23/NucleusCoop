@@ -357,9 +357,13 @@ namespace Nucleus.Gaming
         {
             this.userGame = game;
             this.profile = profile;
-            isDebug = Boolean.Parse(ini.IniReadValue("Misc", "DebugLog"));
+#if DEBUG
+			isDebug = true;
+#else
+			isDebug = false
+#endif
 
-            List<PlayerInfo> players = profile.PlayerData;
+			List<PlayerInfo> players = profile.PlayerData;
             gen = game.Game as GenericGameInfo;
             // see if we have any save game to backup
             if (gen == null)
