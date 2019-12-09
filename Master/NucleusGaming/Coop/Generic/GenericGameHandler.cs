@@ -2767,6 +2767,7 @@ namespace Nucleus.Gaming
             while(true)
             {
                 //should make user defined?
+				//TODO: some games need this on a short (10ms) timer
                 Thread.Sleep(1000);
 
                 foreach (Process proc in attached)
