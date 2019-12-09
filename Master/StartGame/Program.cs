@@ -1,20 +1,13 @@
 ﻿using Nucleus;
 using Nucleus.Gaming;
 using Nucleus.Gaming.Windows;
-using Nucleus.Interop.User32;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
-using EasyHook;
 using System.Runtime.InteropServices;
-using Nucleus.Gaming.Coop;
-using System.Security;
 
 namespace StartGame
 {
@@ -240,7 +233,6 @@ namespace StartGame
                 //proc = Process.Start(startInfo);
                 //string currDir = Directory.GetCurrentDirectory();
 
-
 				// This works even if the current directory is set elsewhere.
                 string currDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
 
@@ -358,10 +350,6 @@ namespace StartGame
 						catch (Exception ex)
 						{
 							Log(string.Format("ERROR - {0}", ex.Message));
-							//using (StreamWriter writer = new StreamWriter("error-log.txt", true))
-							//{
-							//    writer.WriteLine("[" + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "]" + "is64: false, ex msg: {0}, ex str: {1}", ex.Message, ex.ToString());
-							//}
 						}
 
 						/*if (Is64Bit(path) == true)
@@ -381,10 +369,6 @@ namespace StartGame
                             catch (Exception ex)
                             {
                                 Log(string.Format("ERROR - {0}", ex.Message));
-                                //using (StreamWriter writer = new StreamWriter("error-log.txt", true))
-                                //{
-                                //    writer.WriteLine("[" + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "]" + "ex msg: {0}, ex str: {1}", ex.Message, ex.ToString());
-                                //}
                             }
                         }
                         else //if (Is64Bit(path) == false)
@@ -425,12 +409,6 @@ namespace StartGame
                                 injectProc.OutputDataReceived += proc_OutputDataReceived;
                                 injectProc.BeginOutputReadLine();
 
-                                //using (StreamWriter writer = new StreamWriter("important.txt", true))
-                                //{
-                                //    writer.WriteLine("readtoend: {0}, readline: {1}", injectProc.StandardOutput.ReadToEnd(), injectProc.StandardOutput.ReadLine());
-                                //}
-
-
                                 injectProc.WaitForExit();
 
                                 //GenericGameHandler.RhCreateAndInject(path, args, 0, 0, Path.Combine(currDir, "Nucleus.Hook32.dll"), Path.Combine(currDir, "Nucleus.Hook64.dll"), IntPtr.Zero, 0, pid);
@@ -439,20 +417,12 @@ namespace StartGame
                             catch (Exception ex)
                             {
                                 Log(string.Format("ERROR - {0}", ex.Message));
-                                //using (StreamWriter writer = new StreamWriter("error-log.txt", true))
-                                //{
-                                //    writer.WriteLine("[" + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "]" + "is64: false, ex msg: {0}, ex str: {1}", ex.Message, ex.ToString());
-                                //}
                             }
                         }
 
                         else
                         {
                             Log(string.Format("ERROR - Machine type {0} not implemented", GetDllMachineType(path)));
-                            //using (StreamWriter writer = new StreamWriter("error-log.txt", true))
-                            //{
-                            //    writer.WriteLine("[" + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "]" + "Machine type: '{0}' not implemented.", GetDllMachineType(path));
-                            //}
                         }*/
 					}
 					// Redundant with updated version of EasyHook
@@ -461,10 +431,6 @@ namespace StartGame
                         //else
                         //{
                         //    Log(string.Format("ERROR - Machine type {0} not implemented", GetDllMachineType(path)));
-                        //    //using (StreamWriter writer = new StreamWriter("error-log.txt", true))
-                        //    //{
-                        //    //    writer.WriteLine("[" + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "]" + "Machine type: '{0}' not implemented.", GetDllMachineType(path));
-                        //    //}
                         //}
                     }
                     else // delay method
@@ -480,10 +446,6 @@ namespace StartGame
                         if (!success)
                         {
                             Log(string.Format("ERROR - CreateProcess failed - startGamePath: {0}, startArgs: {1}, dirpath: {2}", path, args, directoryPath));
-                            //using (StreamWriter writer = new StreamWriter("error-log.txt", true))
-                            //{
-                            //    writer.WriteLine("[" + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "]" + ");
-                            //}
                             return;
                         }
 
@@ -536,21 +498,11 @@ namespace StartGame
                                 //injectProc.OutputDataReceived += proc_OutputDataReceived;
                                 //injectProc.BeginOutputReadLine();
 
-                                //using (StreamWriter writer = new StreamWriter("important.txt", true))
-                                //{
-                                //    writer.WriteLine("readtoend: {0}, readline: {1}", injectProc.StandardOutput.ReadToEnd(), injectProc.StandardOutput.ReadLine());
-                                //}
-
-
                                 injectProc.WaitForExit();
                             }
                             catch (Exception ex)
                             {
                                 Log(string.Format("ERROR - {0}", ex.Message));
-                                //using (StreamWriter writer = new StreamWriter("error-log.txt", true))
-                                //{
-                                //    writer.WriteLine("[" + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "]" + "ex msg: {0}, ex str: {1}", ex.Message, ex.ToString());
-                                //}
                             }
                         }
                         ResumeThread(pi.hThread);

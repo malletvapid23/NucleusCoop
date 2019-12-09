@@ -84,7 +84,6 @@ namespace Nucleus.Gaming
         public string[] CopyCustomUtils;
         public int PlayersPerInstance;
         public bool UseDevReorder;
-        //public string[] HexEditExe;
 
         public Type HandlerType
         {
@@ -147,31 +146,6 @@ namespace Nucleus.Gaming
 
             bHasKeyboardPlayer = hasKeyboard;
         }
-
-        //public void HexEditExe(string[] values)
-        //{
-        //    //if (gen.HexEditExe?.Length > 0)
-        //    //{
-        //    using (StreamWriter writer = new StreamWriter("important.txt", true))
-        //    {
-        //        writer.WriteLine("ExePath: " + ExePath + " Folder.InstancedGameFolder: " + parent.GetFolder(Folder.InstancedGameFolder) + " parent.exePath: " + parent.exePath + " getdirname: " + Path.GetDirectoryName(Assembly.GetEntryAssembly().Location));
-        //    }
-        //    foreach (string asciiValues in values)
-        //    {
-        //        if (File.Exists(Path.Combine(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location) + "\\Data\\45770\\Instance0", "deadrising2otr-ORIG.exe")))
-        //        {
-        //            File.Delete(Path.Combine(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location) + "\\Data\\45770\\Instance0", "deadrising2otr-ORIG.exe"));
-        //        }
-
-        //        File.Move(Path.Combine(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location) + "\\Data\\45770\\Instance0", "deadrising2otr.exe"), Path.Combine(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location) + "\\Data\\45770\\Instance0", "deadrising2otr-ORIG.exe"));
-        //        string[] splitValues = asciiValues.Split('|');
-        //        if (splitValues.Length > 1)
-        //        {
-        //            PatchFile(Path.Combine(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location) + "\\Data\\45770\\Instance0", "deadrising2otr-ORIG.exe"), Path.Combine(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location) + "\\Data\\45770\\Instance0", "deadrising2otr.exe"), splitValues[0], splitValues[1]);
-        //        }
-        //    }
-        //    //}
-        //}
 
         public bool HasKeyboardPlayer()
         {

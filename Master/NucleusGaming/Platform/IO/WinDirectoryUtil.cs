@@ -4,11 +4,29 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Windows.Forms;
 
 namespace Nucleus.Gaming.Platform.Windows.IO
 {
     public static class WinDirectoryUtil
     {
+        //public static void CopyFile(string source, string dest)
+        //{
+        //    using (FileStream sourceStream = new FileStream(source, FileMode.Open))
+        //    {
+        //        byte[] buffer = new byte[64 * 1024]; // Change to suitable size after testing performance
+        //        using (FileStream destStream = new FileStream(dest, FileMode.Create))
+        //        {
+        //            int i;
+        //            while ((i = sourceStream.Read(buffer, 0, buffer.Length)) > 0)
+        //            {
+        //                destStream.Write(buffer, 0, i);
+        //            }
+        //        }
+        //    }
+        //}
+
+
         public static void LinkFiles(string rootFolder, string destination, out int exitCode, string[] exclusions, string[] copyInstead, bool hardLink)
         {
             exitCode = 1;
@@ -59,7 +77,17 @@ namespace Nucleus.Gaming.Platform.Windows.IO
                 if (exclude)
                 {
                     // should copy!
-                    File.Copy(file.FullName, linkPath, true);
+                    try
+                    {
+                        File.Copy(file.FullName, linkPath, true);
+                    }
+                    catch (Exception ex)
+                    {
+                        CmdUtil.ExecuteCommand(Path.GetDirectoryName(linkPath), out int exitCode2, "copy \"" + file.FullName + "\" \"" + linkPath + "\"");
+                    }
+                    
+                    //CopyFile(file.FullName, linkPath);
+                    
                 }
                 else
                 {
@@ -77,7 +105,7 @@ namespace Nucleus.Gaming.Platform.Windows.IO
         }
 
         public static void LinkDirectory(string root, DirectoryInfo currentDir, string destination, out int exitCode,
-            string[] dirExclusions, string[] fileExclusions, string[] fileCopyInstead, bool hardLink, bool symFolders)
+            string[] dirExclusions, string[] fileExclusions, string[] fileCopyInstead, bool hardLink, bool symFolders, bool firstRun = true)
         {
             Console.WriteLine($"Symlinking folder {root} to {destination}");
 
@@ -110,7 +138,7 @@ namespace Nucleus.Gaming.Platform.Windows.IO
                 //Kernel32Interop.CreateSymbolicLink(destination, currentDir.FullName, Nucleus.Gaming.Platform.Windows.Interop.SymbolicLink.Directory);
                 if(symFolders)
                 {
-                    if(!special)
+                    if(!special && !firstRun)
                     {
                         Kernel32Interop.CreateSymbolicLink(destination, currentDir.FullName, Nucleus.Gaming.Platform.Windows.Interop.SymbolicLink.Directory);
                     }
@@ -127,12 +155,11 @@ namespace Nucleus.Gaming.Platform.Windows.IO
                 //CmdUtil.LinkFiles(currentDir.FullName, destination, out exitCode, fileExclusions, fileCopyInstead, true);
                 WinDirectoryUtil.LinkFiles(currentDir.FullName, destination, out exitCode, fileExclusions, fileCopyInstead, hardLink);
 
-
                 DirectoryInfo[] children = currentDir.GetDirectories();
                 for (int i = 0; i < children.Length; i++)
                 {
                     DirectoryInfo child = children[i];
-                    LinkDirectory(root, child, Path.Combine(destination, child.Name), out exitCode, dirExclusions, fileExclusions, fileCopyInstead, hardLink, symFolders);
+                    LinkDirectory(root, child, Path.Combine(destination, child.Name), out exitCode, dirExclusions, fileExclusions, fileCopyInstead, hardLink, symFolders, false);
                 }
             //}
             //else

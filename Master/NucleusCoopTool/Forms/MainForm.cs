@@ -24,7 +24,7 @@ namespace Nucleus.Coop
     /// </summary>
     public partial class MainForm : BaseForm
     {
-        public string version = "v0.9.8.1 ALPHA";
+        public string version = "v0.9.8.2 ALPHA";
 
         private Settings settingsForm = null;
 
@@ -175,7 +175,6 @@ namespace Nucleus.Coop
             list_Games.Select();
 
             gameManager.ReorderUserProfile();
-            //MessageBox.Show("list games: " + list_Games.Height + "\nform: " + this.Height + "\nbtnsearhc y coord: " + btnSearch.Location.Y + "\nsteppanel: " + StepPanel.Height);
 
             //list_Games.AutoScroll = false;
             //int vertScrollWidth = SystemInformation.VerticalScrollBarWidth;
@@ -642,6 +641,11 @@ namespace Nucleus.Coop
                         handler.End();
                     }
 
+                    foreach (Form openForm in Application.OpenForms)
+                    {
+                        if (openForm.Name == "Hide Desktop")
+                            openForm.Close();
+                    }
                 }
                 catch { }
                 User32Util.ShowTaskBar();

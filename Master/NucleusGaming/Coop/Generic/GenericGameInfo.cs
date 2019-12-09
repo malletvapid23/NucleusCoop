@@ -132,6 +132,10 @@ namespace Nucleus.Gaming
         public bool PreventWindowDeactivation;
         public bool SymlinkFolders;
         public bool CreateSteamAppIdByExe;
+        public bool ForceSymlink;
+        public string[] UseProcessorsPerInstance;
+        public bool UseDirectX9Wrapper;
+        public string SteamStubDRMPatcherArch;
 
         public Type HandlerType
         {

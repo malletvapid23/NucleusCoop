@@ -88,6 +88,11 @@ namespace Nucleus.Coop
             //Controll
             GetControllers();
 
+            if (ini.IniReadValue("ControllerMapping", "Keyboard") != "")
+            {
+                keyboardNick.Text = ini.IniReadValue("ControllerMapping", "Keyboard");
+            }
+
             //Custom Layout
             //if (ini.IniReadValue("CustomLayout", "Enabled") != "")
             //{
@@ -200,6 +205,11 @@ namespace Nucleus.Coop
                 if (positionsControl != null)
                 {
                     positionsControl.Refresh();
+                }
+
+                if(!string.IsNullOrEmpty(keyboardNick.Text))
+                {
+                    ini.IniWriteValue("ControllerMapping", "Keyboard", keyboardNick.Text);
                 }
 
                 ini.IniWriteValue("Misc", "UseNicksInGame", useNicksCheck.Checked.ToString());

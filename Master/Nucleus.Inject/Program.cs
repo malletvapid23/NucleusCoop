@@ -163,10 +163,6 @@ namespace Nucleus.Inject
 				catch (Exception ex)
 				{
 					Log(string.Format("ERROR - {0}", ex.Message));
-					//using (StreamWriter writer = new StreamWriter("error-log.txt", true))
-					//{
-					//    writer.WriteLine("[" + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "]" + "ex msg: {0}, ex str: {1}", ex.Message, ex.ToString());
-					//}
 				}
 
 				/**
@@ -207,10 +203,6 @@ namespace Nucleus.Inject
                 catch (Exception ex)
                 {
                     Log("ERROR - " + ex.Message);
-                    //using (StreamWriter writer = new StreamWriter("error-log.txt", true))
-                    //{
-                    //    writer.WriteLine("[" + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "]" + "ex msg: {0}, ex str: {1}", ex.Message, ex.ToString());
-                    //}
                 }*/
 			}
             else if (Tier == 1)
@@ -257,11 +249,6 @@ namespace Nucleus.Inject
 
                 Marshal.Copy(dataToSend, 0, intPtr, size);                
 
-                //using (StreamWriter writer = new StreamWriter("error-log.txt", true))
-                //{
-                //    writer.WriteLine("injecting args: {0}, {1}, {2}, {3}, {4}, {5}, {6}", InTargetPID, InWakeUpTID, InInjectionOptions, InLibraryPath_x86, InLibraryPath_x64, intPtr, InPassThruSize);
-                //}
-
                 try
                 {
 	                if (is64)
@@ -276,10 +263,6 @@ namespace Nucleus.Inject
                 catch (Exception ex)
                 {
                     Log("ERROR - " + ex.Message);
-                    //using (StreamWriter writer = new StreamWriter("error-log.txt", true))
-                    //{
-                    //    writer.WriteLine("[" + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "]" + "ex msg: {0}, ex str: {1}", ex.Message, ex.ToString());
-                    //}
                 }
             }
         }

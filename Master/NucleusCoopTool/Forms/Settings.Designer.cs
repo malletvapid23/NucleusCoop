@@ -43,6 +43,8 @@
             this.enableCustomCheckbox = new System.Windows.Forms.CheckBox();
             this.btn_credits = new System.Windows.Forms.Button();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.keyboardNick = new System.Windows.Forms.TextBox();
+            this.label31 = new System.Windows.Forms.Label();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
             this.controllerEightNick = new System.Windows.Forms.TextBox();
@@ -153,9 +155,9 @@
             this.useNicksCheck.AutoSize = true;
             this.useNicksCheck.Location = new System.Drawing.Point(19, 32);
             this.useNicksCheck.Name = "useNicksCheck";
-            this.useNicksCheck.Size = new System.Drawing.Size(340, 25);
+            this.useNicksCheck.Size = new System.Drawing.Size(200, 25);
             this.useNicksCheck.TabIndex = 20;
-            this.useNicksCheck.Text = "Use Nicknames In-Game (requires Goldberg)";
+            this.useNicksCheck.Text = "Use Nicknames In-Game";
             this.useNicksCheck.UseVisualStyleBackColor = true;
             // 
             // groupBox3
@@ -300,6 +302,8 @@
             // 
             // groupBox2
             // 
+            this.groupBox2.Controls.Add(this.keyboardNick);
+            this.groupBox2.Controls.Add(this.label31);
             this.groupBox2.Controls.Add(this.tabControl1);
             this.groupBox2.Controls.Add(this.btn_Refresh);
             this.groupBox2.ForeColor = System.Drawing.Color.White;
@@ -310,6 +314,24 @@
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Controllers";
             // 
+            // keyboardNick
+            // 
+            this.keyboardNick.Location = new System.Drawing.Point(265, 383);
+            this.keyboardNick.MaxLength = 5;
+            this.keyboardNick.Name = "keyboardNick";
+            this.keyboardNick.Size = new System.Drawing.Size(85, 29);
+            this.keyboardNick.TabIndex = 59;
+            // 
+            // label31
+            // 
+            this.label31.AutoSize = true;
+            this.label31.Location = new System.Drawing.Point(59, 386);
+            this.label31.Name = "label31";
+            this.label31.Size = new System.Drawing.Size(200, 21);
+            this.label31.TabIndex = 60;
+            this.label31.Text = "Keyboard Player Nickname:";
+            this.label31.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            // 
             // tabControl1
             // 
             this.tabControl1.Controls.Add(this.tabPage1);
@@ -317,7 +339,7 @@
             this.tabControl1.Location = new System.Drawing.Point(8, 28);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
-            this.tabControl1.Size = new System.Drawing.Size(387, 368);
+            this.tabControl1.Size = new System.Drawing.Size(387, 342);
             this.tabControl1.TabIndex = 30;
             // 
             // tabPage1
@@ -353,7 +375,7 @@
             this.tabPage1.Location = new System.Drawing.Point(4, 30);
             this.tabPage1.Name = "tabPage1";
             this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage1.Size = new System.Drawing.Size(379, 334);
+            this.tabPage1.Size = new System.Drawing.Size(379, 308);
             this.tabPage1.TabIndex = 0;
             this.tabPage1.Text = "Page 1";
             // 
@@ -624,7 +646,7 @@
             this.tabPage2.Location = new System.Drawing.Point(4, 30);
             this.tabPage2.Name = "tabPage2";
             this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage2.Size = new System.Drawing.Size(379, 334);
+            this.tabPage2.Size = new System.Drawing.Size(379, 308);
             this.tabPage2.TabIndex = 1;
             this.tabPage2.Text = "Page 2";
             // 
@@ -1092,6 +1114,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.numVerDiv)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.numHorDiv)).EndInit();
             this.groupBox2.ResumeLayout(false);
+            this.groupBox2.PerformLayout();
             this.tabControl1.ResumeLayout(false);
             this.tabPage1.ResumeLayout(false);
             this.tabPage1.PerformLayout();
@@ -1190,5 +1213,7 @@
         private System.Windows.Forms.GroupBox groupBox4;
         private System.Windows.Forms.Label label30;
         private System.Windows.Forms.CheckBox debugLogCheck;
+        private System.Windows.Forms.TextBox keyboardNick;
+        private System.Windows.Forms.Label label31;
     }
 }
