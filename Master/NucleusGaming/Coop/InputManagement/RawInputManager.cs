@@ -1,10 +1,7 @@
 ﻿using Nucleus.Gaming.Coop.InputManagement.Enums;
 using Nucleus.Gaming.Coop.InputManagement.Structs;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
 
 namespace Nucleus.Gaming.Coop.InputManagement
 {

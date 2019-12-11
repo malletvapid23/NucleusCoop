@@ -73,6 +73,9 @@
     <Reference Include="System.Drawing" />
     <Reference Include="System.Management" />
     <Reference Include="System.Runtime.Remoting" />
+    <Reference Include="System.ValueTuple, Version=4.0.3.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.ValueTuple.4.5.0\lib\portable-net40+sl4+win8+wp8\System.ValueTuple.dll</HintPath>
+    </Reference>
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -126,14 +129,21 @@
     <Compile Include="Controls\TextMessageBox.Designer.cs">
       <DependentUpon>TextMessageBox.cs</DependentUpon>
     </Compile>
+    <Compile Include="Coop\BasicTypes\IntVector2.cs" />
+    <Compile Include="Coop\BasicTypes\RECT.cs" />
     <Compile Include="Coop\Generic\KeyboardPlayer.cs" />
     <Compile Include="Coop\Generic\RegType.cs" />
     <Compile Include="Coop\Generic\SearchType.cs" />
     <Compile Include="Coop\InputManagement\Enums\DataCommand.cs" />
     <Compile Include="Coop\InputManagement\Enums\HeaderDwType.cs" />
+    <Compile Include="Coop\InputManagement\Enums\KeyboardEvents.cs" />
+    <Compile Include="Coop\InputManagement\Enums\MessageTypes.cs" />
+    <Compile Include="Coop\InputManagement\Enums\MouseEvents.cs" />
+    <Compile Include="Coop\InputManagement\Enums\RawInputButtonFlags.cs" />
     <Compile Include="Coop\InputManagement\Enums\RawInputDevice_dwFlags.cs" />
     <Compile Include="Coop\InputManagement\Logger.cs" />
     <Compile Include="Coop\InputManagement\RawInputManager.cs" />
+    <Compile Include="Coop\InputManagement\RawInputProcessor.cs" />
     <Compile Include="Coop\InputManagement\Structs\RAWHID.cs" />
     <Compile Include="Coop\InputManagement\Structs\RAWINPUT.cs" />
     <Compile Include="Coop\InputManagement\Structs\RAWINPUTDEVICE.cs" />
@@ -147,6 +157,7 @@
     <Compile Include="Coop\InputManagement\Structs\RID_DEVICE_INFO_KEYBOARD.cs" />
     <Compile Include="Coop\InputManagement\Structs\RID_DEVICE_INFO_MOUSE.cs" />
     <Compile Include="Coop\InputManagement\WinApi.cs" />
+    <Compile Include="Coop\Window.cs" />
     <Compile Include="DirectInput\DInputManager.cs" />
     <Compile Include="Coop\GameOption.cs" />
     <Compile Include="Coop\GameOptionValue.cs" />
