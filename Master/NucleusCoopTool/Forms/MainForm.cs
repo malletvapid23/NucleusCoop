@@ -60,6 +60,8 @@ namespace Nucleus.Coop
 
         private bool TopMostToggle = true;
 
+		public Action<Message> RawInputAction { get; set; }
+
         public enum MachineType : ushort
         {
             IMAGE_FILE_MACHINE_UNKNOWN = 0x0,
@@ -162,7 +164,7 @@ namespace Nucleus.Coop
             settingsForm.RegHotkeys(this);
 
             controls = new Dictionary<UserGameInfo, GameControl>();
-            gameManager = new GameManager();
+            gameManager = new GameManager(this);
 
             optionsControl = new PlayerOptionsControl();
             jsControl = new JSUserInputControl();
@@ -259,7 +261,11 @@ namespace Nucleus.Coop
         {
             //int msg = m.Msg;
             //LogManager.Log(msg.ToString());
-            if (m.Msg == 0x0312 && m.WParam.ToInt32() == KillProcess_HotkeyID)
+			if(m.Msg == 0x00FF)//WM_INPUT
+			{
+				RawInputAction(m);
+			}
+            else if (m.Msg == 0x0312 && m.WParam.ToInt32() == KillProcess_HotkeyID)
             {
                 //System.Diagnostics.Process.GetCurrentProcess().Kill();
                 User32Util.ShowTaskBar();

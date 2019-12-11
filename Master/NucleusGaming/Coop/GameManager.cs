@@ -20,6 +20,8 @@ namespace Nucleus.Gaming
     {
         private static GameManager instance;
 
+		public static Form mainForm;
+
         private Dictionary<string, GenericGameInfo> games;
         private Dictionary<string, GenericGameInfo> gameInfos;
         private UserProfile user;
@@ -48,13 +50,15 @@ namespace Nucleus.Gaming
             set { user = value; }
         }
 
-        public GameManager()
+        public GameManager(Form mainForm)
         {
             instance = this;
             games = new Dictionary<string, GenericGameInfo>();
             gameInfos = new Dictionary<string, GenericGameInfo>();
 
-            string appData = GetAppContentPath();
+			GameManager.mainForm = mainForm;
+
+			string appData = GetAppContentPath();
             Directory.CreateDirectory(appData);
 
             string gameJs = GetJsScriptsPath();

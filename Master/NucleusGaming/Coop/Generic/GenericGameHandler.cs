@@ -21,6 +21,8 @@ using System.Text;
 using System.Linq;
 using Microsoft.Win32;
 using System.Management;
+using Nucleus.Gaming.Coop.InputManagement;
+using System.Threading.Tasks;
 
 namespace Nucleus.Gaming
 {
@@ -70,6 +72,10 @@ namespace Nucleus.Gaming
         private GameProfile profile;
         private GenericGameInfo gen;
         private Dictionary<string, string> jsData;
+
+		private RawInputProcessor rawInputProcessor;
+
+		private List<Window> gameWindows;
 
         private double timer;
         private int exited;
@@ -568,32 +574,48 @@ namespace Nucleus.Gaming
 
             bool first = true;
             bool keyboard = false;
-            //if (gen.SupportsKeyboard)
-            //{
-            //    // make sure the keyboard player is the last to be started,
-            //    // so it will get the focus by default
-            //    KeyboardPlayer player = (KeyboardPlayer)profile.Options["KeyboardPlayer"];
-            //    if (player.Value != -1)
-            //    {
-            //        keyboard = true;
-            //        List<PlayerInfo> newPlayers = new List<PlayerInfo>();
+			//if (gen.SupportsKeyboard)
+			//{
+			//    // make sure the keyboard player is the last to be started,
+			//    // so it will get the focus by default
+			//    KeyboardPlayer player = (KeyboardPlayer)profile.Options["KeyboardPlayer"];
+			//    if (player.Value != -1)
+			//    {
+			//        keyboard = true;
+			//        List<PlayerInfo> newPlayers = new List<PlayerInfo>();
 
-            //        for (int i = 0; i < players.Count; i++)
-            //        {
-            //            PlayerInfo p = players[i];
-            //            if (i == player.Value)
-            //            {
-            //                continue;
-            //            }
+			//        for (int i = 0; i < players.Count; i++)
+			//        {
+			//            PlayerInfo p = players[i];
+			//            if (i == player.Value)
+			//            {
+			//                continue;
+			//            }
 
-            //            newPlayers.Add(p);
-            //        }
-            //        newPlayers.Add(players[player.Value]);
-            //        players = newPlayers;
-            //    }
-            //}
+			//            newPlayers.Add(p);
+			//        }
+			//        newPlayers.Add(players[player.Value]);
+			//        players = newPlayers;
+			//    }
+			//}
 
-            Log(string.Format("Number of players: {0}",players.Count));
+			//Raw input setup
+			rawInputProcessor = new RawInputProcessor(gameWindows);
+
+			//TODO: Replace with cleaner method?
+			Action<Message> rawInputAction = rawInputProcessor.WndProc;
+			GameManager.mainForm.GetType().GetProperty("RawInputAction").SetValue(GameManager.mainForm, rawInputAction, new object[]{ });
+			IntPtr rawInputHwnd = GameManager.mainForm.Handle;
+
+			RawInputManager.RegisterRawInput(rawInputHwnd);
+
+			
+			
+
+
+
+
+			Log(string.Format("Number of players: {0}",players.Count));
 
             for (int i = 0; i < players.Count; i++)
             {

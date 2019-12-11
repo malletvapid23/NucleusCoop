@@ -5,9 +5,9 @@ using System.Runtime.InteropServices;
 
 namespace Nucleus.Gaming.Coop.InputManagement
 {
-	class RawInputManager
+	static class RawInputManager
 	{
-		public RawInputManager(IntPtr windowHandle)
+		public static void RegisterRawInput(IntPtr windowHandle)
 		{
 			//GetDeviceList();
 			Logger.WriteLine($"Attempting to RegisterRawInputDevices for window handle {windowHandle}");
@@ -46,7 +46,7 @@ namespace Nucleus.Gaming.Coop.InputManagement
 			}
 		}
 
-		public void GetDeviceList()
+		public static void GetDeviceList()
 		{
 			uint numDevices = 0;
 			int cbSize = Marshal.SizeOf(typeof(RAWINPUTDEVICELIST));

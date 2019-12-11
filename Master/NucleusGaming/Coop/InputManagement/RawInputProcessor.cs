@@ -20,6 +20,7 @@ namespace Nucleus.Gaming.Coop.InputManagement
 
 		#endregion
 
+		ICollection<Window> windows;
 
 		//leftMiddleRight: left=1, middle=2, right=3, xbutton1=4, xbutton2=5
 		private readonly Dictionary<RawInputButtonFlags, (MouseEvents msg, uint wParam, ushort leftMiddleRight, bool isButtonDown, int VKey)> _buttonFlagToMouseEvents = new Dictionary<RawInputButtonFlags, (MouseEvents, uint, ushort, bool, int)>()
@@ -40,7 +41,12 @@ namespace Nucleus.Gaming.Coop.InputManagement
 			{ RawInputButtonFlags.RI_MOUSE_BUTTON_5_UP,         (MouseEvents.WM_XBUTTONUP,      0,          5, false,   0x06) }
 		};
 
-		public void WndProc(ref Message msg)
+		public RawInputProcessor(ICollection<Window> windows)
+		{
+			this.windows = windows;
+		}
+
+		public void WndProc(Message msg)
 		{
 			IntPtr hRawInput = msg.LParam;
 
@@ -52,10 +58,11 @@ namespace Nucleus.Gaming.Coop.InputManagement
 			uint keyboardMessage = rawBuffer.data.keyboard.Message;
 			bool keyUpOrDown = keyboardMessage == (uint)KeyboardEvents.WM_KEYDOWN || keyboardMessage == (uint)KeyboardEvents.WM_KEYUP;
 
-			if (!Program.SplitScreenManager.IsRunningInSplitScreen)
+			//TODO: implement
+			/*if (!Program.SplitScreenManager.IsRunningInSplitScreen)
 			{
 				return;
-			}
+			}*/
 
 			/*if (keyUpOrDown && rawBuffer.data.keyboard.VKey == _endVKey)//End key
 			{
@@ -70,7 +77,12 @@ namespace Nucleus.Gaming.Coop.InputManagement
 				return;
 			}
 
-			foreach (Window window in Program.SplitScreenManager.GetWindowsForDevice(rawBuffer.header.hDevice))
+			Logger.WriteLine("Rec kb, = " + keyboardMessage);
+
+			if (windows == null)
+				return;
+
+			foreach (Window window in windows)
 			{
 				IntPtr hWnd = window.hWnd;
 
