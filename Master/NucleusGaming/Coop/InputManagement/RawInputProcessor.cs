@@ -117,7 +117,7 @@ namespace Nucleus.Gaming.Coop.InputManagement
 
 					if (vKey < keysDown.Length) keysDown[vKey] = keyDown;
 
-					/* TODO: implement
+					/* TODO: implement with GetKeyState/GetAsyncKeyState
 					 if (Options.CurrentOptions.Hook_GetKeyState || Options.CurrentOptions.Hook_GetAsyncKeyState)
 					{
 						if (stateChangedSinceLast)
@@ -141,8 +141,7 @@ namespace Nucleus.Gaming.Coop.InputManagement
 			}
 		}
 
-		/*
-		private void ProcessMouse(IntPtr hRawInput, RAWINPUT rawBuffer)
+		/* private void ProcessMouse(IntPtr hRawInput, RAWINPUT rawBuffer)
 		{
 			RAWMOUSE mouse = rawBuffer.data.mouse;
 			IntPtr mouseHandle = rawBuffer.header.hDevice;
@@ -275,10 +274,7 @@ namespace Nucleus.Gaming.Coop.InputManagement
 		private void Process(IntPtr hRawInput)
 		{
 			uint pbDataSize = 0;
-			/*Return Value (of GetRawInputData)
-			Type: UINT
-			If pData is NULL and the function is successful, the return value is 0.If pData is not NULL and the function is successful, the return value is the number of bytes copied into pData.
-			If there is an error, the return value is (UINT) - 1.*/
+			
 			int ret = WinApi.GetRawInputData(hRawInput, DataCommand.RID_INPUT, IntPtr.Zero, ref pbDataSize, Marshal.SizeOf(typeof(RAWINPUTHEADER)));
 
 			if (ret == 0 && pbDataSize == WinApi.GetRawInputData(hRawInput, DataCommand.RID_INPUT, out RAWINPUT rawBuffer, ref pbDataSize, Marshal.SizeOf(typeof(RAWINPUTHEADER))))

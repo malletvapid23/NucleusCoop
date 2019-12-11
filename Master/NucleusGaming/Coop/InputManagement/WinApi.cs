@@ -11,6 +11,18 @@ namespace Nucleus.Gaming.Coop.InputManagement
 		[DllImport("user32.dll")]
 		public static extern bool RegisterRawInputDevices(RAWINPUTDEVICE[] pRawInputDevice, uint uiNumDevices, uint cbSize);
 
+		/// <summary>
+		/// Return Value
+		/// Type: UINT
+		/// If pData is NULL and the function is successful, the return value is 0.If pData is not NULL and the function is successful, the return value is the number of bytes copied into pData.
+		/// If there is an error, the return value is (UINT) - 1.
+		/// </summary>
+		/// <param name="hRawInput"></param>
+		/// <param name="uiCommand"></param>
+		/// <param name="pData"></param>
+		/// <param name="pcbSize"></param>
+		/// <param name="cbSizeHeader"></param>
+		/// <returns></returns>
 		[DllImport("user32.dll")]
 		public static extern int GetRawInputData(IntPtr hRawInput, DataCommand uiCommand, [Out] IntPtr pData, ref uint pcbSize, int cbSizeHeader);
 		[DllImport("user32.dll")]
