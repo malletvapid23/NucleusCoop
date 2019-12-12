@@ -48,6 +48,7 @@ namespace Nucleus.Coop
         private Image gamepadImg;
         private Image genericImg;
         private Image keyboardImg;
+		private Image mouseImg;
 
         public bool isDisconnected;
         private int dinputPressed = -1;
@@ -128,6 +129,7 @@ namespace Nucleus.Coop
             gamepadImg = Resources.gamepad;
             genericImg = Resources.generic;
             keyboardImg = Resources.keyboard;
+			mouseImg = Resources.mouse;
 
             RemoveFlicker();
         }

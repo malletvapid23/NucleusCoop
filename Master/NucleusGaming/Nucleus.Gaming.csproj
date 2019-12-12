@@ -338,6 +338,8 @@
     <None Include="Resources\keyboard_computer_hardware-512.png" />
     <None Include="Resources\keyboard.png" />
     <None Include="Resources\players.png" />
+    <Content Include="Resources\mouse.png" />
+    <None Include="Resources\rawkeyboard.png" />
     <Content Include="Resources\xinput1_3.dll" />
     <None Include="Resources\xinput1_3_a10_log.dll" />
     <None Include="Resources\xinput1_3_a10_x64.dll" />
