@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
 
-namespace Nucleus.Gaming.Coop.InputManagement
+namespace Nucleus.Gaming.Coop.InputManagement.Logging
 {
 	static class Logger
 	{

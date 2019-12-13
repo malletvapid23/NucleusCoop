@@ -220,7 +220,7 @@ namespace Nucleus.Gaming.Tools.GameStarter
                 startInfo.UseShellExecute = true;
                 startInfo.Verb = "runas";
                 startInfo.WindowStyle = ProcessWindowStyle.Hidden;
-                Process proc = Process.Start(startInfo);
+                Process proc = Process.Start(startInfo);//TODO: can throw error
 
                 proc.WaitForExit();
 

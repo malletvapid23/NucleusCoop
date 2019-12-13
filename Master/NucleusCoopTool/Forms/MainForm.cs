@@ -466,6 +466,7 @@ namespace Nucleus.Coop
 
             currentProfile = new GameProfile();
             currentProfile.InitializeDefault(currentGame);
+			gameManager.UpdateCurrentGameProfile(currentProfile);
 
             gameNameControl.GameInfo = currentGameInfo;
 

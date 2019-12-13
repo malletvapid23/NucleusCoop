@@ -1,9 +1,12 @@
 ﻿using Jint.Parser.Ast;
+using Nucleus.Gaming.Coop.BasicTypes;
 using Nucleus.Gaming.Coop.InputManagement.Enums;
+using Nucleus.Gaming.Coop.InputManagement.Logging;
 using Nucleus.Gaming.Coop.InputManagement.Structs;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -21,6 +24,12 @@ namespace Nucleus.Gaming.Coop.InputManagement
 		#endregion
 
 		ICollection<Window> windows;
+
+		//TODO: implement splitScreenRunning
+		readonly Ref<bool> splitScreenRunning;
+
+		public GameProfile CurrentProfile { get; set; } = null;
+		private List<PlayerInfo> PlayerInfos => CurrentProfile?.PlayerData;
 
 		//leftMiddleRight: left=1, middle=2, right=3, xbutton1=4, xbutton2=5
 		private readonly Dictionary<RawInputButtonFlags, (MouseEvents msg, uint wParam, ushort leftMiddleRight, bool isButtonDown, int VKey)> _buttonFlagToMouseEvents = new Dictionary<RawInputButtonFlags, (MouseEvents, uint, ushort, bool, int)>()
@@ -41,9 +50,10 @@ namespace Nucleus.Gaming.Coop.InputManagement
 			{ RawInputButtonFlags.RI_MOUSE_BUTTON_5_UP,         (MouseEvents.WM_XBUTTONUP,      0,          5, false,   0x06) }
 		};
 
-		public RawInputProcessor(ICollection<Window> windows)
+		public RawInputProcessor(ICollection<Window> windows, Ref<bool> splitScreenRunning)
 		{
 			this.windows = windows;
+			this.splitScreenRunning = splitScreenRunning;
 		}
 
 		public void WndProc(Message msg)
@@ -279,17 +289,27 @@ namespace Nucleus.Gaming.Coop.InputManagement
 
 			if (ret == 0 && pbDataSize == WinApi.GetRawInputData(hRawInput, DataCommand.RID_INPUT, out RAWINPUT rawBuffer, ref pbDataSize, Marshal.SizeOf(typeof(RAWINPUTHEADER))))
 			{
-				switch ((HeaderDwType)rawBuffer.header.dwType)
+				var type = (HeaderDwType)rawBuffer.header.dwType;
+				var hDevice = rawBuffer.header.hDevice;
+
+				if (type == HeaderDwType.RIM_TYPEHID)
+					return;
+
+
+				//TODO: if not running split screen
+				if (PlayerInfos != null)
+				foreach (var toFlash in PlayerInfos.Where(x => x != null && x.RawDeviceHandle.Equals(hDevice)))
 				{
-					case HeaderDwType.RIM_TYPEKEYBOARD:
-						ProcessKeyboard(hRawInput, rawBuffer);
-						break;
-					case HeaderDwType.RIM_TYPEMOUSE:
-						//ProcessMouse(hRawInput, rawBuffer);
-						break;
+					toFlash.FlashIcon();
+				}
+
+				if (type == HeaderDwType.RIM_TYPEKEYBOARD)
+					ProcessKeyboard(hRawInput, rawBuffer);
+				else if (type == HeaderDwType.RIM_TYPEMOUSE)
+				{
+					//ProcessMouse(hRawInput, rawBuffer);
 				}
 			}
-
 		}
 	}
 }

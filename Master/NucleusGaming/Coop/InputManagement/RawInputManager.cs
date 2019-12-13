@@ -1,6 +1,9 @@
 ﻿using Nucleus.Gaming.Coop.InputManagement.Enums;
+using Nucleus.Gaming.Coop.InputManagement.Logging;
 using Nucleus.Gaming.Coop.InputManagement.Structs;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.InteropServices;
 
 namespace Nucleus.Gaming.Coop.InputManagement
@@ -46,7 +49,7 @@ namespace Nucleus.Gaming.Coop.InputManagement
 			}
 		}
 
-		public static void GetDeviceList()
+		public static IEnumerable<(RID_DEVICE_INFO deviceInfo, IntPtr deviceHandle)> GetDeviceList()
 		{
 			uint numDevices = 0;
 			int cbSize = Marshal.SizeOf(typeof(RAWINPUTDEVICELIST));
@@ -65,10 +68,40 @@ namespace Nucleus.Gaming.Coop.InputManagement
 					IntPtr pData = Marshal.AllocHGlobal((int)pcbSize);
 					WinApi.GetRawInputDeviceInfo(rid.hDevice, 0x2000000b, pData, ref pcbSize);
 					var device = (RID_DEVICE_INFO)Marshal.PtrToStructure(pData, typeof(RID_DEVICE_INFO));
-					Logger.WriteLine($"Found device, {device.dwType}, {device.keyboard.dwNumberOfKeysTotal}");
+					if (device.dwType == 0)
+					{
+						//Mouse
+						Logger.WriteLine($"Found mouse. Mouse ID = {device.mouse.dwId}, number of buttons = {device.mouse.dwNumberOfButtons}, sample rate = {device.mouse.dwSampleRate}, has horizontal wheel = {device.mouse.dwSampleRate}");
+					}
+					else if (device.dwType == 1)
+					{
+						//Keyboard
+						Logger.WriteLine($"Found keyboard. Keyboard type = {device.keyboard.dwType}, keyboard subtype = {device.keyboard.dwSubType}, scan code mode = {device.keyboard.dwKeyboardMode}, number of keys = {device.keyboard.dwNumberOfKeysTotal}");
+					}
+					yield return (device, rid.hDevice);
 				}
 
 				Marshal.FreeHGlobal(pRawInputDeviceList);
+			}
+		}
+
+		public static IEnumerable<PlayerInfo> GetDeviceInputInfos()
+		{
+			//TODO: Add device handle zero mouse & keyboard w/ special icon
+
+			int i = 100;
+
+			foreach(var device in GetDeviceList().Where(x => x.deviceInfo.dwType <= 1))
+			{
+				PlayerInfo player = new PlayerInfo
+				{
+					GamepadId = i++,
+					IsRawMouse = device.deviceInfo.dwType == 0,
+					IsRawKeyboard = device.deviceInfo.dwType == 1,
+					RawDeviceHandle = device.deviceHandle
+				};
+
+				yield return player;
 			}
 		}
 	}

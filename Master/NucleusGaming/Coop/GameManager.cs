@@ -9,6 +9,9 @@ using System.Threading;
 using Nucleus.Gaming.Properties;
 using Nucleus.Gaming.Coop;
 using System.Windows.Forms;
+using Nucleus.Gaming.Coop.BasicTypes;
+using System.Diagnostics;
+using Nucleus.Gaming.Coop.InputManagement;
 
 namespace Nucleus.Gaming
 {
@@ -21,6 +24,7 @@ namespace Nucleus.Gaming
         private static GameManager instance;
 
 		public static Form mainForm;
+		public static IntPtr mainFormHandle;
 
         private Dictionary<string, GenericGameInfo> games;
         private Dictionary<string, GenericGameInfo> gameInfos;
@@ -29,8 +33,13 @@ namespace Nucleus.Gaming
         private string error;
         private bool isSaving;
 
-        /// object instance so we can thread-safe save the user profile
-        private object saving = new object();
+		private GameProfile currentProfile;
+
+		private RawInputProcessor rawInputProcessor;
+		private List<Window> gameWindows;
+
+		/// object instance so we can thread-safe save the user profile
+		private object saving = new object();
 
         public string Error { get { return error; } }
 
@@ -57,6 +66,7 @@ namespace Nucleus.Gaming
             gameInfos = new Dictionary<string, GenericGameInfo>();
 
 			GameManager.mainForm = mainForm;
+			GameManager.mainFormHandle = mainForm.Handle;
 
 			string appData = GetAppContentPath();
             Directory.CreateDirectory(appData);
@@ -64,9 +74,25 @@ namespace Nucleus.Gaming
             string gameJs = GetJsScriptsPath();
             Directory.CreateDirectory(gameJs);
 
-            Initialize();
+			//Subscribe to raw input
+			//TODO: update isRunningSplitScreen
+			Debug.WriteLine("Registering raw input");
+			rawInputProcessor = new RawInputProcessor(gameWindows, new Ref<bool>(true));
+			Action<Message> rawInputAction = rawInputProcessor.WndProc;
+			GameManager.mainForm.GetType().GetProperty("RawInputAction").SetValue(GameManager.mainForm, rawInputAction, new object[] { });
+			IntPtr rawInputHwnd = GameManager.mainFormHandle;
+
+			RawInputManager.RegisterRawInput(rawInputHwnd);
+
+			Initialize();
             LoadUser();
         }
+
+		public void UpdateCurrentGameProfile(GameProfile newProfile)
+		{
+			currentProfile = newProfile;
+			rawInputProcessor.CurrentProfile = newProfile;
+		}
 
         /// <summary>
         /// Tests if there's any game with the named exe

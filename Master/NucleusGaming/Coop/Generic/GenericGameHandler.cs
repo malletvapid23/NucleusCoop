@@ -23,6 +23,7 @@ using Microsoft.Win32;
 using System.Management;
 using Nucleus.Gaming.Coop.InputManagement;
 using System.Threading.Tasks;
+using Nucleus.Gaming.Coop.BasicTypes;
 
 namespace Nucleus.Gaming
 {
@@ -73,9 +74,9 @@ namespace Nucleus.Gaming
         private GenericGameInfo gen;
         private Dictionary<string, string> jsData;
 
-		private RawInputProcessor rawInputProcessor;
+		//private RawInputProcessor rawInputProcessor;
 
-		private List<Window> gameWindows;
+		//private List<Window> gameWindows;
 
         private double timer;
         private int exited;
@@ -598,21 +599,6 @@ namespace Nucleus.Gaming
 			//        players = newPlayers;
 			//    }
 			//}
-
-			//Raw input setup
-			rawInputProcessor = new RawInputProcessor(gameWindows);
-
-			//TODO: Replace with cleaner method?
-			Action<Message> rawInputAction = rawInputProcessor.WndProc;
-			GameManager.mainForm.GetType().GetProperty("RawInputAction").SetValue(GameManager.mainForm, rawInputAction, new object[]{ });
-			IntPtr rawInputHwnd = GameManager.mainForm.Handle;
-
-			RawInputManager.RegisterRawInput(rawInputHwnd);
-
-			
-			
-
-
 
 
 			Log(string.Format("Number of players: {0}",players.Count));

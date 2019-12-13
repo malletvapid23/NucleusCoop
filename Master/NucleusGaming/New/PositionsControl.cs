@@ -9,6 +9,9 @@ using SlimDX.DirectInput;
 using SlimDX.XInput;
 using Nucleus.Gaming.Coop;
 using System.IO;
+using Nucleus.Gaming.Coop.InputManagement;
+using System.Drawing.Imaging;
+using System.Diagnostics;
 
 namespace Nucleus.Coop
 {
@@ -48,13 +51,13 @@ namespace Nucleus.Coop
         private Image gamepadImg;
         private Image genericImg;
         private Image keyboardImg;
-		private Image mouseImg;
+		private Image rawKeyboardImg;
+		private Image rawMouseImg;
 
         public bool isDisconnected;
         private int dinputPressed = -1;
-
-
-        private readonly IniFile ini = new Gaming.IniFile(Path.Combine(Directory.GetCurrentDirectory(), "Settings.ini"));
+		
+		private readonly IniFile ini = new Gaming.IniFile(Path.Combine(Directory.GetCurrentDirectory(), "Settings.ini"));
 
         public override bool CanProceed
         {
@@ -129,10 +132,27 @@ namespace Nucleus.Coop
             gamepadImg = Resources.gamepad;
             genericImg = Resources.generic;
             keyboardImg = Resources.keyboard;
-			mouseImg = Resources.mouse;
+			rawMouseImg = Resources.mouse;
+			rawKeyboardImg = Resources.rawkeyboard;
 
             RemoveFlicker();
-        }
+
+
+			{
+				bool wasFlashedLastTick = false;
+				var CheckIconFlashTimer = new System.Timers.Timer(100);
+				CheckIconFlashTimer.Start();
+				CheckIconFlashTimer.Elapsed += (o, e) =>
+				{
+					bool atLeastOneFlash = profile?.PlayerData?.Count(x => x != null &&  x.ShouldFlash) > 0;
+					if (atLeastOneFlash || wasFlashedLastTick)
+					{
+						Invalidate();
+						wasFlashedLastTick = atLeastOneFlash;
+					}						
+				};
+			}
+		}
 
         protected override void Dispose(bool disposing)
         {
@@ -162,7 +182,7 @@ namespace Nucleus.Coop
                 List<PlayerInfo> data = profile.PlayerData;
                 foreach (PlayerInfo player in data)
                 {
-                    if(!player.IsKeyboardPlayer)
+                    if(!player.IsKeyboardPlayer && !player.IsRawKeyboard && !player.IsRawMouse)
                     {
                         PollGamepad(player);
                     }
@@ -563,6 +583,10 @@ namespace Nucleus.Coop
                     playerData.Add(kbPlayer);
                     //keyboardPlayer = true;
                 }
+
+				//Raw mice/keyboards
+				//TODO: Only if the script allows it
+				playerData.AddRange(RawInputManager.GetDeviceInputInfos());
 
                 // make fake data if needed
                 if (testDinputPlayers != -1)
@@ -1544,7 +1568,33 @@ namespace Nucleus.Coop
                     {
                         g.DrawImage(keyboardImg, gamepadRect);
                     }
-                    else
+					else if (info.IsRawKeyboard || info.IsRawMouse)
+					{
+						var img = info.IsRawKeyboard ? rawKeyboardImg : rawMouseImg;
+
+						if (info.ShouldFlash)
+						{
+							//TODO: change colours
+							var colorMatrix = new ColorMatrix(new float[][]
+							{
+							new float[] {0, 0, 1, 0, 0},
+							new float[] {0, 1, 1, 0, 0},
+							new float[] {0, 1, 1, 0, 0},
+							new float[] {0, 1, 0, 1, 0},
+							new float[] {0, 0, 0.5f, 0, 1}
+							});
+
+							var attr = new ImageAttributes();
+							attr.SetColorMatrix(colorMatrix);
+
+							g.DrawImage(img, gamepadRect, 0, 0, img.Width, img.Height, GraphicsUnit.Pixel, attr);
+						}
+						else
+						{
+							g.DrawImage(img, gamepadRect);
+						}
+					}
+					else
                     {
                         loc.Y -= gamepadRect.Height * 0.2f;
                         if (ini.IniReadValue("ControllerMapping", info.HIDDeviceID) != "")

@@ -6,6 +6,7 @@ using System.Drawing;
 using System.Diagnostics;
 using SlimDX.DirectInput;
 using Nucleus.Gaming.Coop;
+using System.Threading;
 
 namespace Nucleus.Gaming.Coop
 {
@@ -31,6 +32,10 @@ namespace Nucleus.Gaming.Coop
         public bool IsXInput;
         public bool IsDInput;
         public bool IsFake;
+
+		public bool IsRawMouse;
+		public bool IsRawKeyboard;
+		public IntPtr RawDeviceHandle = (IntPtr)(-1);
 
         public Guid GamepadProductGuid;
         public Guid GamepadGuid;
@@ -100,8 +105,8 @@ namespace Nucleus.Gaming.Coop
             set { processData = value; }
         }
 
-        
-
-        
+		private Stopwatch flashStopwatch = new Stopwatch();
+		public bool ShouldFlash => flashStopwatch.IsRunning && flashStopwatch.ElapsedMilliseconds < 450;
+        public void FlashIcon() => flashStopwatch.Restart();
     }
 }
