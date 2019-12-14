@@ -10,6 +10,8 @@ namespace Nucleus.Gaming.Coop.InputManagement
 {
 	static class RawInputManager
 	{
+		public static readonly List<Window> windows = new List<Window>();
+
 		public static void RegisterRawInput(IntPtr windowHandle)
 		{
 			//GetDeviceList();

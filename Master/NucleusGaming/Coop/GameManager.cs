@@ -36,7 +36,6 @@ namespace Nucleus.Gaming
 		private GameProfile currentProfile;
 
 		private RawInputProcessor rawInputProcessor;
-		private List<Window> gameWindows;
 
 		/// object instance so we can thread-safe save the user profile
 		private object saving = new object();
@@ -77,7 +76,7 @@ namespace Nucleus.Gaming
 			//Subscribe to raw input
 			//TODO: update isRunningSplitScreen
 			Debug.WriteLine("Registering raw input");
-			rawInputProcessor = new RawInputProcessor(gameWindows, new Ref<bool>(true));
+			rawInputProcessor = new RawInputProcessor(new Ref<bool>(true));
 			Action<Message> rawInputAction = rawInputProcessor.WndProc;
 			GameManager.mainForm.GetType().GetProperty("RawInputAction").SetValue(GameManager.mainForm, rawInputAction, new object[] { });
 			IntPtr rawInputHwnd = GameManager.mainFormHandle;

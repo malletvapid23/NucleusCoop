@@ -22,11 +22,11 @@ namespace Nucleus.Gaming.Coop.InputManagement
 		private static bool sendRawKeyboardInput = false;
 
 		#endregion
-
-		ICollection<Window> windows;
-
+		
 		//TODO: implement splitScreenRunning
 		readonly Ref<bool> splitScreenRunning;
+
+		private List<Window> Windows => RawInputManager.windows;
 
 		public GameProfile CurrentProfile { get; set; } = null;
 		private List<PlayerInfo> PlayerInfos => CurrentProfile?.PlayerData;
@@ -50,9 +50,8 @@ namespace Nucleus.Gaming.Coop.InputManagement
 			{ RawInputButtonFlags.RI_MOUSE_BUTTON_5_UP,         (MouseEvents.WM_XBUTTONUP,      0,          5, false,   0x06) }
 		};
 
-		public RawInputProcessor(ICollection<Window> windows, Ref<bool> splitScreenRunning)
+		public RawInputProcessor(Ref<bool> splitScreenRunning)
 		{
-			this.windows = windows;
 			this.splitScreenRunning = splitScreenRunning;
 		}
 
@@ -63,7 +62,7 @@ namespace Nucleus.Gaming.Coop.InputManagement
 			Process(hRawInput);
 		}
 
-		private void ProcessKeyboard(IntPtr hRawInput, RAWINPUT rawBuffer)
+		private void ProcessKeyboard(IntPtr hRawInput, RAWINPUT rawBuffer, Window window, IntPtr hWnd)
 		{
 			uint keyboardMessage = rawBuffer.data.keyboard.Message;
 			bool keyUpOrDown = keyboardMessage == (uint)KeyboardEvents.WM_KEYDOWN || keyboardMessage == (uint)KeyboardEvents.WM_KEYUP;
@@ -86,68 +85,58 @@ namespace Nucleus.Gaming.Coop.InputManagement
 			{
 				return;
 			}
-
-			Logger.WriteLine("Rec kb, = " + keyboardMessage);
-
-			if (windows == null)
-				return;
-
-			foreach (Window window in windows)
+						
+			if (sendNormalKeyboardInput)
 			{
-				IntPtr hWnd = window.hWnd;
+				uint scanCode = rawBuffer.data.keyboard.MakeCode;
+				ushort vKey = rawBuffer.data.keyboard.VKey;
 
-				if (sendNormalKeyboardInput)
+				bool keyDown = keyboardMessage == (uint)KeyboardEvents.WM_KEYDOWN;
+
+				//uint code = 0x000000000000001 | (scanCode << 16);//32-bit
+				uint code = scanCode << 16;//32-bit
+
+				BitArray keysDown = window.keysDown;
+				bool stateChangedSinceLast = vKey < keysDown.Length && keyDown != keysDown[vKey];
+
+				if (keyDown)
 				{
-					uint scanCode = rawBuffer.data.keyboard.MakeCode;
-					ushort vKey = rawBuffer.data.keyboard.VKey;
-
-					bool keyDown = keyboardMessage == (uint)KeyboardEvents.WM_KEYDOWN;
-
-					//uint code = 0x000000000000001 | (scanCode << 16);//32-bit
-					uint code = scanCode << 16;//32-bit
-
-					BitArray keysDown = window.keysDown;
-					bool stateChangedSinceLast = vKey < keysDown.Length && keyDown != keysDown[vKey];
-
-					if (keyDown)
+					//bit 30 : The previous key state. The value is 1 if the key is down before the message is sent, or it is zero if the key is up.
+					if (vKey < keysDown.Length && keysDown[vKey])
 					{
-						//bit 30 : The previous key state. The value is 1 if the key is down before the message is sent, or it is zero if the key is up.
-						if (vKey < keysDown.Length && keysDown[vKey])
-						{
-							code |= 0x40000000;
-						}
+						code |= 0x40000000;
 					}
-					else
-					{
-						code |= 0xC0000000;//WM_KEYUP requires the bit 31 and 30 to be 1
-						code |= 0x000000000000001;
-					}
-
-					code |= 1;
-
-					if (vKey < keysDown.Length) keysDown[vKey] = keyDown;
-
-					/* TODO: implement with GetKeyState/GetAsyncKeyState
-					 if (Options.CurrentOptions.Hook_GetKeyState || Options.CurrentOptions.Hook_GetAsyncKeyState)
-					{
-						if (stateChangedSinceLast)
-						{
-							window.HooksCPPNamedPipe?.WriteMessage(0x02, vKey, keyDown ? 1 : 0);
-						}
-					}*/
-
-					//This also makes GetKeyboardState work, as windows uses the message queue for GetKeyboardState
-					WinApi.PostMessageA(hWnd, keyboardMessage, (IntPtr)vKey, (UIntPtr)code);
+				}
+				else
+				{
+					code |= 0xC0000000;//WM_KEYUP requires the bit 31 and 30 to be 1
+					code |= 0x000000000000001;
 				}
 
-				//Resend raw input to application. Works for some games only
-				if (sendRawKeyboardInput)
-				{
-					WinApi.PostMessageA(window.hWnd, (uint)MessageTypes.WM_INPUT, (IntPtr)0x0000, hRawInput);
+				code |= 1;
 
-					if (window.DIEmWin_hWnd != IntPtr.Zero)
-						WinApi.PostMessageA(window.DIEmWin_hWnd == IntPtr.Zero ? hWnd : window.DIEmWin_hWnd, (uint)MessageTypes.WM_INPUT, (IntPtr)0x0000, hRawInput);
-				}
+				if (vKey < keysDown.Length) keysDown[vKey] = keyDown;
+
+				/* TODO: implement with GetKeyState/GetAsyncKeyState
+					if (Options.CurrentOptions.Hook_GetKeyState || Options.CurrentOptions.Hook_GetAsyncKeyState)
+				{
+					if (stateChangedSinceLast)
+					{
+						window.HooksCPPNamedPipe?.WriteMessage(0x02, vKey, keyDown ? 1 : 0);
+					}
+				}*/
+
+				//This also makes GetKeyboardState work, as windows uses the message queue for GetKeyboardState
+				WinApi.PostMessageA(hWnd, keyboardMessage, (IntPtr)vKey, (UIntPtr)code);
+			}
+
+			//Resend raw input to application. Works for some games only
+			if (sendRawKeyboardInput)
+			{
+				WinApi.PostMessageA(window.hWnd, (uint)MessageTypes.WM_INPUT, (IntPtr)0x0000, hRawInput);
+
+				if (window.DIEmWin_hWnd != IntPtr.Zero)
+					WinApi.PostMessageA(window.DIEmWin_hWnd == IntPtr.Zero ? hWnd : window.DIEmWin_hWnd, (uint)MessageTypes.WM_INPUT, (IntPtr)0x0000, hRawInput);
 			}
 		}
 
@@ -303,11 +292,20 @@ namespace Nucleus.Gaming.Coop.InputManagement
 					toFlash.FlashIcon();
 				}
 
+
 				if (type == HeaderDwType.RIM_TYPEKEYBOARD)
-					ProcessKeyboard(hRawInput, rawBuffer);
+				{
+					foreach (var window in Windows.Where(x => x.KeyboardAttached == hDevice))
+					{
+						ProcessKeyboard(hRawInput, rawBuffer, window, window.hWnd);
+					}
+				}
 				else if (type == HeaderDwType.RIM_TYPEMOUSE)
 				{
-					//ProcessMouse(hRawInput, rawBuffer);
+					foreach (var window in Windows.Where(x => x.MouseAttached == hDevice))
+					{
+						//ProcessMouse(hRawInput, rawBuffer);
+					}
 				}
 			}
 		}

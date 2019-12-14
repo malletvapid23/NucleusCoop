@@ -117,5 +117,35 @@ namespace Nucleus.Gaming.Coop.InputManagement
 
 		[DllImport("user32.dll")]
 		public static extern bool BlockInput(bool fBlockIt);
+
+		[DllImport("user32.dll", CharSet = CharSet.Auto, ExactSpelling = true)]
+		public static extern bool DrawIcon(IntPtr hDC, int x, int y, IntPtr hIcon);
+
+		[DllImport("user32.dll")]
+		public static extern bool ClientToScreen(IntPtr hWnd, ref System.Drawing.Point lpPoint);
+
+		[DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+		public static extern int GetWindowThreadProcessId(IntPtr handle, out int processId);
+
+		[DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+		public static extern int GetWindowText(IntPtr hWnd, StringBuilder text, int count);
+		[DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Auto)]
+		public static extern int GetWindowTextLength(IntPtr hWnd);
+
+		public static string GetWindowText(IntPtr hWnd)
+		{
+			int length = GetWindowTextLength(hWnd) + 1;
+			StringBuilder Buff = new StringBuilder(length);
+
+			if (GetWindowText(hWnd, Buff, length) > 0)
+			{
+				return Buff.ToString();
+			}
+			return null;
+		}
+
+		public delegate int EnumWindowsProc(IntPtr hwnd, int lParam);
+		[DllImport("user32.Dll")]
+		public static extern int EnumWindows(EnumWindowsProc x, int y);
 	}
 }

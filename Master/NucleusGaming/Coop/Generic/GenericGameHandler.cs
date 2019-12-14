@@ -601,6 +601,8 @@ namespace Nucleus.Gaming
 			//}
 
 
+			RawInputManager.windows.Clear();
+
 			Log(string.Format("Number of players: {0}",players.Count));
 
             for (int i = 0; i < players.Count; i++)
@@ -620,19 +622,19 @@ namespace Nucleus.Gaming
                 ProcessData procData = player.ProcessData;
                 bool hasSetted = procData != null && procData.Setted;
 
-                //if (ini.IniReadValue("Misc", "VibrateOpen") == "True")
-                //{
-                //    SlimDX.XInput.Controller gamePad = new SlimDX.XInput.Controller((SlimDX.XInput.UserIndex)i);
-                //    SlimDX.XInput.Vibration vib = new SlimDX.XInput.Vibration();
+				//if (ini.IniReadValue("Misc", "VibrateOpen") == "True")
+				//{
+				//    SlimDX.XInput.Controller gamePad = new SlimDX.XInput.Controller((SlimDX.XInput.UserIndex)i);
+				//    SlimDX.XInput.Vibration vib = new SlimDX.XInput.Vibration();
 
-                //    vib.LeftMotorSpeed = 32000;
-                //    vib.RightMotorSpeed = 16000;
-                //    gamePad.SetVibration(vib);
-                //}
+				//    vib.LeftMotorSpeed = 32000;
+				//    vib.RightMotorSpeed = 16000;
+				//    gamePad.SetVibration(vib);
+				//}
 
-                //SlimDX.DirectInput.Get
-                //SlimDX.DirectInput.Joystick device = new SlimDX.DirectInput.Joystick()
-
+				//SlimDX.DirectInput.Get
+				//SlimDX.DirectInput.Joystick device = new SlimDX.DirectInput.Joystick()
+				
                 if (!gen.RenameNotKillMutex && i > 0 && (gen.KillMutex?.Length > 0 || !hasSetted))
                 {
                     PlayerInfo before = players[i - 1];
@@ -2554,7 +2556,20 @@ namespace Nucleus.Gaming
                         }
                     }
 
-                    if (i > 0 && (gen.HookFocus || gen.SetWindowHook || gen.HideCursor || gen.PreventWindowDeactivation))
+					//Set up raw input windows
+					if (player.IsRawKeyboard || player.IsRawMouse)
+					{
+						var hWnd = proc.MainWindowHandle;
+						var hdev = player.RawDeviceHandle;
+						RawInputManager.windows.Add(new Window(hWnd)
+						{
+							CursorVisibility = false,//TODO: cursor visibility
+							KeyboardAttached = player.IsRawKeyboard ? hdev : (IntPtr)(-1),
+							MouseAttached = player.IsRawMouse ? hdev : (IntPtr)(-1)
+						});
+					}
+
+					if (i > 0 && (gen.HookFocus || gen.SetWindowHook || gen.HideCursor || gen.PreventWindowDeactivation))
                     {
                         Log("Injecting hook DLL for last instance");
                         InjectDLLs(data.Process);
@@ -2620,7 +2635,45 @@ namespace Nucleus.Gaming
                 }               
             }
 
-            return string.Empty;
+			//Window setup
+			foreach (var window in RawInputManager.windows)
+			{
+				var hWnd = window.hWnd;
+
+				//Logger.WriteLine($"hWnd={hWnd}, mouse={window.MouseAttached}, kb={window.KeyboardAttached}");
+
+				//TODO: create cursor
+				/*if (Options.CurrentOptions.DrawMouse)
+				{
+					window.CreateCursor();
+				}*/
+
+				//Borderlands 2 (and some other games) requires WM_INPUT to be sent to a window named DIEmWin, not the main hWnd.
+				foreach (ProcessThread thread in Process.GetProcessById(window.pid).Threads)
+				{
+
+					int WindowEnum(IntPtr _hWnd, int lParam)
+					{
+						var threadId = WinApi.GetWindowThreadProcessId(_hWnd, out int pid);
+						if (threadId == lParam)
+						{
+							string windowText = WinApi.GetWindowText(_hWnd);
+							//Logger.WriteLine($" - thread id=0x{threadId:x}, _hWnd=0x{_hWnd:x}, window text={windowText}");
+
+							if (windowText != null && windowText.ToLower().Contains("DIEmWin".ToLower()))
+							{
+								window.DIEmWin_hWnd = _hWnd;
+							}
+						}
+
+						return 1;
+					}
+
+					WinApi.EnumWindows(WindowEnum, thread.Id);
+				}
+			}
+
+			return string.Empty;
         }
 
         private void InjectDLLs(Process proc)
