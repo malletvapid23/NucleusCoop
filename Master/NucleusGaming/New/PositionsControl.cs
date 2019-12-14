@@ -667,7 +667,12 @@ namespace Nucleus.Coop
             switch (screen.Type)
             {
                 case UserScreenType.FullScreen:
-                    for (int i = 0; i < players.Count; i++)
+					//TODO: Replace temporary method that allows multiple icons on the same window (raw kb+mouse on same window)
+					monitorBounds = screen.MonitorBounds;
+					editorBounds = screen.UIBounds;
+					return true;
+
+					for (int i = 0; i < players.Count; i++)
                     {
                         PlayerInfo p = players[i];
                         if (p.ScreenIndex == screenIndex)
