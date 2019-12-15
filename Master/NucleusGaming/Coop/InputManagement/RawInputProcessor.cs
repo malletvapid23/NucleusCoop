@@ -20,6 +20,12 @@ namespace Nucleus.Gaming.Coop.InputManagement
 		//TODO: remove temporary options
 		private static bool sendNormalKeyboardInput = true;
 		private static bool sendRawKeyboardInput = false;
+		private static bool forwardRawMouseInput = false;
+		private static bool hookGetCursorPos = false;
+		private static bool hookGetKeyState = false;
+		private static bool hookGetAsyncKeyState = false;
+		private static bool sendScrollWheel = false;
+		private static bool sendNormalMouse = true;
 
 		#endregion
 		
@@ -140,135 +146,122 @@ namespace Nucleus.Gaming.Coop.InputManagement
 			}
 		}
 
-		/* private void ProcessMouse(IntPtr hRawInput, RAWINPUT rawBuffer)
+		private void ProcessMouse(IntPtr hRawInput, RAWINPUT rawBuffer, Window window, IntPtr hWnd)
 		{
 			RAWMOUSE mouse = rawBuffer.data.mouse;
 			IntPtr mouseHandle = rawBuffer.header.hDevice;
-
-			if (!Program.SplitScreenManager.IsRunningInSplitScreen)
+			
+			//Resend raw input to application. Works for some games only
+			if (forwardRawMouseInput)
 			{
-				if ((mouse.usRawInputButtonFlags & (ushort)RawInputButtonFlags.RI_MOUSE_LEFT_BUTTON_UP) > 0 && Program.Form.ButtonPressed)
-				{
-					Logger.WriteLine($"Set mouse, handle = {rawBuffer.header.hDevice}");
-					Program.SplitScreenManager.SetMouseHandle(rawBuffer.header.hDevice);
-				}
-				break;
+				WinApi.PostMessageA(window.hWnd, (uint)MessageTypes.WM_INPUT, (IntPtr)0x0000, hRawInput);
+
+				if (window.DIEmWin_hWnd != IntPtr.Zero)
+					WinApi.PostMessageA(window.DIEmWin_hWnd == IntPtr.Zero ? hWnd : window.DIEmWin_hWnd, (uint)MessageTypes.WM_INPUT, (IntPtr)0x0000, hRawInput);
 			}
 
-			var windows = Program.SplitScreenManager.GetWindowsForDevice(mouseHandle);
-			for (int windowI = 0; windowI < windows.Length; windowI++)
+			IntVector2 mouseVec = window.MousePosition;
+
+			int deltaX = mouse.lLastX;
+			int deltaY = mouse.lLastY;
+
+			mouseVec.x = Math.Min(window.Width, Math.Max(mouseVec.x + deltaX, 0));
+			mouseVec.y = Math.Min(window.Height, Math.Max(mouseVec.y + deltaY, 0));
+
+			if (hookGetCursorPos)
 			{
-				Window window = windows[windowI];
-				IntPtr hWnd = window.hWnd;
+				//TODO: implement
+				//window.HooksCPPNamedPipe?.SendMousePosition(deltaX, deltaY, mouseVec.x, mouseVec.y);
+			}
 
-				//Resend raw input to application. Works for some games only
-				if (Options.CurrentOptions.SendRawMouseInput)
+			long packedXY = mouseVec.y * 0x10000 + mouseVec.x;
+
+			window.UpdateCursorPosition();
+
+			//Mouse buttons.
+			ushort f = mouse.usButtonFlags;
+			if (f != 0)
+			{
+				foreach (var pair in _buttonFlagToMouseEvents)
 				{
-					SendInput.WinApi.PostMessageA(window.borderlands2_DIEmWin_hWnd == IntPtr.Zero ? hWnd : window.borderlands2_DIEmWin_hWnd,
-						(uint)SendMessageTypes.WM_INPUT, (IntPtr)0x0000, hRawInput);
-				}
-
-				IntVector2 mouseVec = window.MousePosition;
-
-				int deltaX = mouse.lLastX;
-				int deltaY = mouse.lLastY;
-
-				mouseVec.x = Math.Min(window.Width, Math.Max(mouseVec.x + deltaX, 0));
-				mouseVec.y = Math.Min(window.Height, Math.Max(mouseVec.y + deltaY, 0));
-
-				if (Options.CurrentOptions.Hook_GetCursorPos)
-				{
-					window.HooksCPPNamedPipe?.SendMousePosition(deltaX, deltaY, mouseVec.x, mouseVec.y);
-				}
-
-				long packedXY = mouseVec.y * 0x10000 + mouseVec.x;
-
-				window.UpdateCursorPosition();
-
-				//Mouse buttons.
-				ushort f = mouse.usRawInputButtonFlags;
-				if (f != 0)
-				{
-					foreach (var pair in _buttonFlagToMouseEvents)
+					if ((f & (ushort)pair.Key) > 0)
 					{
-						if ((f & (ushort)pair.Key) > 0)
+						(MouseEvents msg, uint wParam, ushort leftMiddleRight, bool isButtonDown, int vKey) = pair.Value;
+						//Logger.WriteLine(pair.Key);
+
+						var state = window.MouseState;
+
+						bool oldBtnState = false;
+						if (leftMiddleRight == 1)
+							oldBtnState = state.l;
+						else if (leftMiddleRight == 2)
+							oldBtnState = state.r;
+						else if (leftMiddleRight == 3)
+							oldBtnState = state.m;
+						else if (leftMiddleRight == 4)
+							oldBtnState = state.x1;
+						else if (leftMiddleRight == 5)
+							oldBtnState = state.x2;
+
+						//TODO: needs option?
+						if (oldBtnState != isButtonDown)
+							WinApi.PostMessageA(hWnd, (uint)msg, (IntPtr)wParam, (IntPtr)packedXY);
+
+						//TODO: implement
+						//if (hookGetAsyncKeyState || hookGetKeyState && (oldBtnState != isButtonDown))
+						//	window.HooksCPPNamedPipe?.WriteMessage(0x02, vKey, isButtonDown ? 1 : 0);
+
+
+						if (leftMiddleRight == 1)
 						{
-							(MouseEvents msg, uint wParam, ushort leftMiddleRight, bool isButtonDown, int vKey) = pair.Value;
-							//Logger.WriteLine(pair.Key);
+							state.l = isButtonDown;
 
-							var state = window.MouseState;
-
-							bool oldBtnState = false;
-							if (leftMiddleRight == 1)
-								oldBtnState = state.l;
-							else if (leftMiddleRight == 2)
-								oldBtnState = state.r;
-							else if (leftMiddleRight == 3)
-								oldBtnState = state.m;
-							else if (leftMiddleRight == 4)
-								oldBtnState = state.x1;
-							else if (leftMiddleRight == 5)
-								oldBtnState = state.x2;
-
-							if (oldBtnState != isButtonDown)
-								SendInput.WinApi.PostMessageA(hWnd, (uint)msg, (IntPtr)wParam, (IntPtr)packedXY);
-
-							if (Options.CurrentOptions.Hook_GetAsyncKeyState || Options.CurrentOptions.Hook_GetKeyState && (oldBtnState != isButtonDown))
-								window.HooksCPPNamedPipe?.WriteMessage(0x02, vKey, isButtonDown ? 1 : 0);
-
-
-							if (leftMiddleRight == 1)
-							{
-								state.l = isButtonDown;
-
-								if (Options.CurrentOptions.RefreshWindowBoundsOnMouseClick)
-									window.UpdateBounds();
-							}
-							else if (leftMiddleRight == 2)
-							{
-								state.r = isButtonDown;
-							}
-							else if (leftMiddleRight == 3)
-							{
-								state.m = isButtonDown;
-							}
-							else if (leftMiddleRight == 4)
-							{
-								state.x1 = isButtonDown;
-							}
-							else if (leftMiddleRight == 5)
-							{
-								state.x2 = isButtonDown;
-							}
-
-							window.MouseState = state;
+							//TODO: implement UpdateBounds
+							//if (Options.CurrentOptions.RefreshWindowBoundsOnMouseClick)
+							Debug.WriteLine("Calling UpdateBounds");
+							window.UpdateBounds();
 						}
-					}
+						else if (leftMiddleRight == 2)
+						{
+							state.r = isButtonDown;
+						}
+						else if (leftMiddleRight == 3)
+						{
+							state.m = isButtonDown;
+						}
+						else if (leftMiddleRight == 4)
+						{
+							state.x1 = isButtonDown;
+						}
+						else if (leftMiddleRight == 5)
+						{
+							state.x2 = isButtonDown;
+						}
 
-					if (Options.CurrentOptions.SendScrollwheel && (f & (ushort)RawInputButtonFlags.RI_MOUSE_WHEEL) > 0)
-					{
-						ushort delta = mouse.usButtonData;
-						PostMessageA(hWnd, (uint)MouseEvents.WM_MOUSEWHEEL, (IntPtr)((delta * 0x10000) + 0), (IntPtr)packedXY);
+						window.MouseState = state;
 					}
 				}
 
-				if (Options.CurrentOptions.SendNormalMouseInput)
+				if (sendScrollWheel && (f & (ushort)RawInputButtonFlags.RI_MOUSE_WHEEL) > 0)
 				{
-					ushort mouseMoveState = 0x0000;
-					(bool l, bool m, bool r, bool x1, bool x2) = window.MouseState;
-					if (l) mouseMoveState |= (ushort)WM_MOUSEMOVE_wParam.MK_LBUTTON;
-					if (m) mouseMoveState |= (ushort)WM_MOUSEMOVE_wParam.MK_MBUTTON;
-					if (r) mouseMoveState |= (ushort)WM_MOUSEMOVE_wParam.MK_RBUTTON;
-					if (x1) mouseMoveState |= (ushort)WM_MOUSEMOVE_wParam.MK_XBUTTON1;
-					if (x2) mouseMoveState |= (ushort)WM_MOUSEMOVE_wParam.MK_XBUTTON2;
-					mouseMoveState |= 0b10000000;//Signature for USS 
-					PostMessageA(hWnd, (uint)MouseEvents.WM_MOUSEMOVE, (IntPtr)mouseMoveState, (IntPtr)packedXY);
+					ushort delta = mouse.usButtonData;
+					WinApi.PostMessageA(hWnd, (uint)MouseEvents.WM_MOUSEWHEEL, (IntPtr)((delta * 0x10000) + 0), (IntPtr)packedXY);
 				}
 			}
 
-			break;
+			if (sendNormalMouse)
+			{
+				ushort mouseMoveState = 0x0000;
+				(bool l, bool m, bool r, bool x1, bool x2) = window.MouseState;
+				if (l) mouseMoveState |= (ushort)WM_MOUSEMOVE_wParam.MK_LBUTTON;
+				if (m) mouseMoveState |= (ushort)WM_MOUSEMOVE_wParam.MK_MBUTTON;
+				if (r) mouseMoveState |= (ushort)WM_MOUSEMOVE_wParam.MK_RBUTTON;
+				if (x1) mouseMoveState |= (ushort)WM_MOUSEMOVE_wParam.MK_XBUTTON1;
+				if (x2) mouseMoveState |= (ushort)WM_MOUSEMOVE_wParam.MK_XBUTTON2;
+				mouseMoveState |= 0b10000000;//Signature for USS 
+				WinApi.PostMessageA(hWnd, (uint)MouseEvents.WM_MOUSEMOVE, (IntPtr)mouseMoveState, (IntPtr)packedXY);
+			}
 		}
-		*/
 
 		private void Process(IntPtr hRawInput)
 		{
@@ -287,7 +280,7 @@ namespace Nucleus.Gaming.Coop.InputManagement
 
 				//TODO: if not running split screen
 				if (PlayerInfos != null)
-				foreach (var toFlash in PlayerInfos.Where(x => x != null && x.RawDeviceHandle.Equals(hDevice)))
+				foreach (var toFlash in PlayerInfos.Where(x => x != null && (x.RawMouseDeviceHandle.Equals(hDevice) || x.RawKeyboardDeviceHandle.Equals(hDevice))))
 				{
 					toFlash.FlashIcon();
 				}
@@ -304,7 +297,14 @@ namespace Nucleus.Gaming.Coop.InputManagement
 				{
 					foreach (var window in Windows.Where(x => x.MouseAttached == hDevice))
 					{
-						//ProcessMouse(hRawInput, rawBuffer);
+						if (window.NeedsCursorToBeCreatedOnMainMessageLoop)
+						{
+							//Cursor needs to be created on the MainForm message loop so it can be accessed in the loop.
+							window.NeedsCursorToBeCreatedOnMainMessageLoop = false;
+							window.CreateCursor();
+						}
+
+						ProcessMouse(hRawInput, rawBuffer, window, window.hWnd);
 					}
 				}
 			}

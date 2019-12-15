@@ -100,8 +100,9 @@ namespace Nucleus.Gaming.Coop.InputManagement
 					GamepadId = i++,
 					IsRawMouse = device.deviceInfo.dwType == 0,
 					IsRawKeyboard = device.deviceInfo.dwType == 1,
-					RawDeviceHandle = device.deviceHandle
 				};
+				if (player.IsRawMouse) player.RawMouseDeviceHandle = device.deviceHandle;
+				if (player.IsRawKeyboard) player.RawKeyboardDeviceHandle = device.deviceHandle;
 
 				yield return player;
 			}

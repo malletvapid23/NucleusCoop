@@ -35,9 +35,11 @@ namespace Nucleus.Gaming.Coop
 
 		public bool IsRawMouse;
 		public bool IsRawKeyboard;
-		public IntPtr RawDeviceHandle = (IntPtr)(-1);
+		//public IntPtr RawDeviceHandle = (IntPtr)(-1);
+		public IntPtr RawMouseDeviceHandle = (IntPtr)(-1);
+		public IntPtr RawKeyboardDeviceHandle = (IntPtr)(-1);
 
-        public Guid GamepadProductGuid;
+		public Guid GamepadProductGuid;
         public Guid GamepadGuid;
         public int GamepadId;
         public string GamepadName;

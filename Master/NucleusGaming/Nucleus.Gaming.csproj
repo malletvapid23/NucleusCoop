@@ -157,6 +157,7 @@
     <Compile Include="Coop\InputManagement\Structs\RID_DEVICE_INFO_HID.cs" />
     <Compile Include="Coop\InputManagement\Structs\RID_DEVICE_INFO_KEYBOARD.cs" />
     <Compile Include="Coop\InputManagement\Structs\RID_DEVICE_INFO_MOUSE.cs" />
+    <Compile Include="Coop\InputManagement\Structs\WM_MOUSEMOVE_wParam.cs" />
     <Compile Include="Coop\InputManagement\WinApi.cs" />
     <Compile Include="Coop\Window.cs" />
     <Compile Include="DirectInput\DInputManager.cs" />

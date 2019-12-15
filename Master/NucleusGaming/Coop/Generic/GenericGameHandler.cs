@@ -550,6 +550,25 @@ namespace Nucleus.Gaming
 
             List<PlayerInfo> players = profile.PlayerData;
 
+			//Merge raw keyboard/mouse players into one
+			var groupWindows = players.Where(x => x.IsRawKeyboard || x.IsRawMouse).GroupBy(x => x.MonitorBounds).ToList();
+			foreach(var group in groupWindows)
+			{
+				var firstInGroup = group.First();
+				firstInGroup.IsRawKeyboard = group.Count(x => x.IsRawKeyboard) > 0;
+				firstInGroup.IsRawMouse = group.Count(x => x.IsRawMouse) > 0;
+
+				if (firstInGroup.IsRawKeyboard) firstInGroup.RawKeyboardDeviceHandle = group.First(x => x.RawKeyboardDeviceHandle != (IntPtr)(-1)).RawKeyboardDeviceHandle;
+				if (firstInGroup.IsRawMouse) firstInGroup.RawMouseDeviceHandle = group.First(x => x.RawMouseDeviceHandle != (IntPtr)(-1)).RawMouseDeviceHandle;
+
+				foreach(var x in group)
+				{
+					players.Remove(x);
+				}
+				players.Add(firstInGroup);
+			}
+
+
             for (int i = 0; i < players.Count; i++)
             {
                 players[i].PlayerID = i;
@@ -2560,12 +2579,13 @@ namespace Nucleus.Gaming
 					if (player.IsRawKeyboard || player.IsRawMouse)
 					{
 						var hWnd = proc.MainWindowHandle;
-						var hdev = player.RawDeviceHandle;
+						var mouseHdev = player.RawMouseDeviceHandle;
+						var keyboardHdev = player.RawKeyboardDeviceHandle;
 						RawInputManager.windows.Add(new Window(hWnd)
 						{
 							CursorVisibility = false,//TODO: cursor visibility
-							KeyboardAttached = player.IsRawKeyboard ? hdev : (IntPtr)(-1),
-							MouseAttached = player.IsRawMouse ? hdev : (IntPtr)(-1)
+							KeyboardAttached = keyboardHdev,
+							MouseAttached = mouseHdev
 						});
 					}
 
@@ -2642,11 +2662,15 @@ namespace Nucleus.Gaming
 
 				//Logger.WriteLine($"hWnd={hWnd}, mouse={window.MouseAttached}, kb={window.KeyboardAttached}");
 
-				//TODO: create cursor
-				/*if (Options.CurrentOptions.DrawMouse)
+				//TODO: create cursor option
+				//if (Options.CurrentOptions.DrawMouse)
+				if (true)
 				{
-					window.CreateCursor();
-				}*/
+					//Debug.WriteLine("Creating cursor...");
+					//window.CreateCursor();
+					//Debug.WriteLine("Created cursor");
+					window.NeedsCursorToBeCreatedOnMainMessageLoop = true;
+				}
 
 				//Borderlands 2 (and some other games) requires WM_INPUT to be sent to a window named DIEmWin, not the main hWnd.
 				foreach (ProcessThread thread in Process.GetProcessById(window.pid).Threads)

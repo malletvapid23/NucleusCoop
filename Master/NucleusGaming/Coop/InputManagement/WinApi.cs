@@ -1,4 +1,5 @@
-﻿using Nucleus.Gaming.Coop.InputManagement.Enums;
+﻿using Nucleus.Gaming.Coop.BasicTypes;
+using Nucleus.Gaming.Coop.InputManagement.Enums;
 using Nucleus.Gaming.Coop.InputManagement.Structs;
 using System;
 using System.Runtime.InteropServices;
@@ -147,5 +148,29 @@ namespace Nucleus.Gaming.Coop.InputManagement
 		public delegate int EnumWindowsProc(IntPtr hwnd, int lParam);
 		[DllImport("user32.Dll")]
 		public static extern int EnumWindows(EnumWindowsProc x, int y);
+
+		[DllImport("user32.dll", SetLastError = true)]
+		public static extern bool GetWindowRect(IntPtr hWnd, out RECT lpRect);
+
+		[DllImport("user32.dll", SetLastError = true)]
+		public static extern bool GetClientRect(IntPtr hWnd, out RECT lpRect);
+
+		public static IntPtr SetWindowLongPtr(IntPtr hWnd, int nIndex, IntPtr dwNewLong)
+		{
+			if (IntPtr.Size == 8)
+				return SetWindowLongPtr64(hWnd, nIndex, dwNewLong);
+			else
+				return new IntPtr(SetWindowLong32(hWnd, nIndex, dwNewLong.ToInt32()));
+		}
+
+		[DllImport("user32.dll", EntryPoint = "SetWindowLong")]
+		private static extern int SetWindowLong32(IntPtr hWnd, int nIndex, int dwNewLong);
+
+		[DllImport("user32.dll", EntryPoint = "SetWindowLongPtr")]
+		private static extern IntPtr SetWindowLongPtr64(IntPtr hWnd, int nIndex, IntPtr dwNewLong);
+
+		[DllImport("user32.dll", SetLastError = true)]
+		public static extern bool BringWindowToTop(IntPtr hWnd);
+
 	}
 }

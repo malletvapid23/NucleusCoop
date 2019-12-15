@@ -4,6 +4,8 @@ using Nucleus.Gaming.Coop.InputManagement.Logging;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
@@ -21,7 +23,7 @@ namespace Nucleus.Gaming.Coop
 		public readonly int pid;//Process ID
 
 		public IntPtr MouseAttached { get; set; } = new IntPtr(0);
-		public IntVector2 MousePosition { get; } = new IntVector2();//This is a reference type
+		public IntVector2 MousePosition { get; } = new IntVector2();//This is a reference type. Relative to game window
 		public (bool l, bool m, bool r, bool x1, bool x2) MouseState { get; set; } = (false, false, false, false, false);
 		public byte WASD_State { get; set; } = 0;
 
@@ -51,6 +53,7 @@ namespace Nucleus.Gaming.Coop
 		{
 			IntPtr hicon;
 
+			//Screen coords (relative to primary monitor)
 			public int screenX;
 			public int screenY;
 
@@ -70,9 +73,14 @@ namespace Nucleus.Gaming.Coop
 			const int windowWidth = 1300;//Minimum width
 			const int windowHeight = 800;
 
+			private readonly IntPtr pointerHandle;
+
+
 			public PointerForm(IntPtr hWnd, int gameWindowWidth, int gameWindowHeight, int gameWindowX, int gameWindowY) : base()
 			{
 				this.hWnd = hWnd;
+				this.pointerHandle = this.Handle;
+				//CheckForIllegalCrossThreadCalls = false;
 
 				Width = Math.Max(windowWidth, gameWindowWidth + 100);
 				Height = Math.Max(windowHeight, gameWindowHeight + 100);
@@ -85,6 +93,7 @@ namespace Nucleus.Gaming.Coop
 				BackColor = System.Drawing.Color.Green;
 				TransparencyKey = BackColor;
 				ShowInTaskbar = false;
+				//WinApi.SetWindowLongPtr(pointerHandle, (-8), hWnd);//Sets owner. Always draws above owner.
 
 				hicon = Cursors.Arrow.Handle;
 
@@ -109,7 +118,8 @@ namespace Nucleus.Gaming.Coop
 
 				if (g == null)
 				{
-					g = System.Drawing.Graphics.FromHwnd(this.Handle);
+					//g = System.Drawing.Graphics.FromHwnd(pointerHandle);
+					g = CreateGraphics();
 					h = g.GetHdc();
 				}
 
@@ -135,15 +145,16 @@ namespace Nucleus.Gaming.Coop
 			{
 				try
 				{
-					base.OnPaintBackground(new PaintEventArgs(System.Drawing.Graphics.FromHwnd(this.Handle), Bounds));
+					base.OnPaintBackground(new PaintEventArgs(g, Bounds));
 				}
 				catch (Exception e)
 				{
-					Console.WriteLine($"Error in RepaintAll: {e}");
+					Debug.WriteLine($"Error in RepaintAll: {e}");
 				}
 			}
 		}
 
+		public bool NeedsCursorToBeCreatedOnMainMessageLoop { get; set; } = false;
 		private PointerForm pointerForm = null;
 		public bool CursorVisibility
 		{
@@ -153,7 +164,6 @@ namespace Nucleus.Gaming.Coop
 				if (pointerForm != null)
 				{
 					pointerForm.visible = value;
-					//UpdateCursorPosition();
 				}
 			}
 		}
@@ -174,7 +184,7 @@ namespace Nucleus.Gaming.Coop
 				{
 					hasRepaintedSinceLastInvisible = false;
 					var p = new System.Drawing.Point(MousePosition.x, MousePosition.y);
-					WinApi.ClientToScreen(hWnd, ref p);
+					WinApi.ClientToScreen(hWnd, ref p);//p is screen coords
 
 					pointerForm.screenX = p.X;
 					pointerForm.screenY = p.Y;
@@ -186,6 +196,9 @@ namespace Nucleus.Gaming.Coop
 						pointerForm.RepaintAll();
 						pointerForm.Location = new System.Drawing.Point(p.X - pointerForm.Width / 2, p.Y - pointerForm.Height / 2);
 					}
+
+					//NucleusCoop brings the game window the the top, this brings the mouse top of top
+					WinApi.BringWindowToTop(pointerForm.Handle);
 
 					pointerForm.InvalidateMouse();
 				}
@@ -210,16 +223,16 @@ namespace Nucleus.Gaming.Coop
 		{
 			this.hWnd = hWnd;
 			WinApi.GetWindowThreadProcessId(hWnd, out this.pid);
-			//UpdateBounds();
+			UpdateBounds();
 
 			//Logger.WriteLine($"Bounds for hWnd={hWnd}: Left={Bounds.Left}, Right={Bounds.Right}, Top={Bounds.Top}, Bottom={Bounds.Bottom}, WIDTH={Width}, HEIGHT={Height}");
 		}
 
-		//TODO: implement UpdateBounds (and call in ctor)
-		/*public void UpdateBounds()
+		public void UpdateBounds()
 		{
-			WindowManagement.WinApi.GetClientRect(hWnd, out var bounds);
+			//TODO: on another thread?
+			WinApi.GetClientRect(hWnd, out var bounds);
 			Bounds = bounds;
-		}*/
+		}
 	}
 }
