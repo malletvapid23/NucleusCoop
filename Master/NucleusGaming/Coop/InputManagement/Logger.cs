@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
 
 namespace Nucleus.Gaming.Coop.InputManagement.Logging
@@ -22,6 +23,8 @@ namespace Nucleus.Gaming.Coop.InputManagement.Logging
 				}
 			}
 			catch { }
+
+			Debug.WriteLine(message);
 #endif
 		}
 	}

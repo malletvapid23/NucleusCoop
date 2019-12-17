@@ -27,6 +27,9 @@ namespace Nucleus.Gaming.Coop.InputManagement
 		private static bool sendScrollWheel = false;
 		private static bool sendNormalMouse = true;
 
+		private static int toggleLockInputKey = 0x23;//End
+		private bool inputLocked = false;
+
 		#endregion
 		
 		//TODO: implement splitScreenRunning
@@ -68,23 +71,12 @@ namespace Nucleus.Gaming.Coop.InputManagement
 			Process(hRawInput);
 		}
 
-		private void ProcessKeyboard(IntPtr hRawInput, RAWINPUT rawBuffer, Window window, IntPtr hWnd)
+		private void ProcessKeyboard(IntPtr hRawInput, RAWINPUT rawBuffer, Window window, IntPtr hWnd, uint keyboardMessage, bool keyUpOrDown)
 		{
-			uint keyboardMessage = rawBuffer.data.keyboard.Message;
-			bool keyUpOrDown = keyboardMessage == (uint)KeyboardEvents.WM_KEYDOWN || keyboardMessage == (uint)KeyboardEvents.WM_KEYUP;
-
 			//TODO: implement
 			/*if (!Program.SplitScreenManager.IsRunningInSplitScreen)
 			{
 				return;
-			}*/
-
-			/*if (keyUpOrDown && rawBuffer.data.keyboard.VKey == _endVKey)//End key
-			{
-				Logger.WriteLine("End key pressed");
-				Intercept.InterceptEnabled = false;
-				Program.SplitScreenManager.DeactivateSplitScreen();
-				InputDisabler.Unlock();//Just in case
 			}*/
 
 			if (!keyUpOrDown)
@@ -286,11 +278,25 @@ namespace Nucleus.Gaming.Coop.InputManagement
 				}
 
 
+
 				if (type == HeaderDwType.RIM_TYPEKEYBOARD)
 				{
+					uint keyboardMessage = rawBuffer.data.keyboard.Message;
+					bool keyUpOrDown = keyboardMessage == (uint)KeyboardEvents.WM_KEYDOWN || keyboardMessage == (uint)KeyboardEvents.WM_KEYUP;
+
+					if (keyboardMessage == (uint)KeyboardEvents.WM_KEYUP && (rawBuffer.data.keyboard.Flags | 1) != 0 && rawBuffer.data.keyboard.VKey == toggleLockInputKey)
+					{
+						Debug.WriteLine("Lock input key pressed");
+						inputLocked = !inputLocked;
+						if (inputLocked)
+							LockInput.Lock();
+						else
+							LockInput.Unlock();
+					}
+
 					foreach (var window in Windows.Where(x => x.KeyboardAttached == hDevice))
 					{
-						ProcessKeyboard(hRawInput, rawBuffer, window, window.hWnd);
+						ProcessKeyboard(hRawInput, rawBuffer, window, window.hWnd, keyboardMessage, keyUpOrDown);
 					}
 				}
 				else if (type == HeaderDwType.RIM_TYPEMOUSE)

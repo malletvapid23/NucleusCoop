@@ -172,5 +172,30 @@ namespace Nucleus.Gaming.Coop.InputManagement
 		[DllImport("user32.dll", SetLastError = true)]
 		public static extern bool BringWindowToTop(IntPtr hWnd);
 
+		[DllImport("user32.dll")]
+		public static extern int ShowCursor(bool bShow);
+
+		[DllImport("user32.dll")]
+		public static extern IntPtr SetCursor(IntPtr handle);
+
+		[DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+		[return: MarshalAs(UnmanagedType.Bool)]
+		public static extern bool UnhookWindowsHookEx(IntPtr hhk);
+
+		[DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+		public static extern IntPtr CallNextHookEx(IntPtr hhk, int nCode, IntPtr wParam, IntPtr lParam);
+
+		[DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+		public static extern IntPtr GetModuleHandle(string lpModuleName);
+
+		[DllImport("user32.dll")]
+		public static extern short GetAsyncKeyState(int vKey);
+
+		public delegate IntPtr GetMsgProc(int nCode, IntPtr wParam, IntPtr lParam);
+		[DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+		public static extern IntPtr SetWindowsHookEx(int idHook, GetMsgProc lpfn, IntPtr hMod, uint dwThreadId);
+
+		[DllImport("user32.dll", CharSet = CharSet.Auto)]
+		public static extern IntPtr GetDesktopWindow();
 	}
 }

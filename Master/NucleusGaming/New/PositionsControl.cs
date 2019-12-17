@@ -144,7 +144,7 @@ namespace Nucleus.Coop
 				CheckIconFlashTimer.Start();
 				CheckIconFlashTimer.Elapsed += (o, e) =>
 				{
-					bool atLeastOneFlash = profile?.PlayerData?.Count(x => x != null &&  x.ShouldFlash) > 0;
+					bool atLeastOneFlash = profile?.PlayerData?.ToList().Count(x => x != null &&  x.ShouldFlash) > 0;
 					if (atLeastOneFlash || wasFlashedLastTick)
 					{
 						Invalidate();
