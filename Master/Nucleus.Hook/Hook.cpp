@@ -12,11 +12,12 @@
 #include <ctime>
 #include <stdio.h>
 #include <iomanip>
-using namespace std;
+
+#include "Logging.h"
 
 HWND hWnd = 0;
 
-#ifdef DEBUG
+#ifdef _DEBUG
 bool IsDebug = false;
 #else
 bool IsDebug = true;
@@ -25,6 +26,11 @@ bool IsDebug = true;
 std::ofstream outfile;
 std::wstring nucleusFolder;
 std::wstring logFile = L"\\debug-log.txt";
+
+std::ofstream& get_outfile()
+{
+	return outfile;
+}
 
 std::string ws2s(const std::wstring& wstr)
 {
@@ -167,11 +173,7 @@ NTSTATUS HookInstall(LPCSTR moduleHandle, LPCSTR proc, void* callBack)
 	
 	if (FAILED(result))
 	{
-		if (IsDebug)
-		{
-			outfile.open(nucleusFolder + logFile, std::ios_base::app);
-			outfile << date_string() << "HOOK64: Error installing " << proc << " hook, error msg: " << RtlGetLastErrorString() << "\n";
-		}
+		DEBUGLOG("Error installing " << proc << " hook, error msg: " << RtlGetLastErrorString() << "\n")
 	}
 	else
 	{
@@ -182,14 +184,9 @@ NTSTATUS HookInstall(LPCSTR moduleHandle, LPCSTR proc, void* callBack)
 		// Disable the hook for the provided threadIds, enable for all others
 		LhSetExclusiveACL(ACLEntries, 1, &hHook);
 
-		if (IsDebug)
-		{
-			outfile.open(nucleusFolder + logFile, std::ios_base::app);
-			outfile << date_string() << "HOOK64: Successfully installed " << proc << " hook, in module: " << moduleHandle << ", result: " << result << "\n";
-		}
+		DEBUGLOG("Successfully installed " << proc << " hook, in module: " << moduleHandle << ", result: " << result << "\n")
 	}
-	outfile.flush();
-	outfile.close();
+
 	return result;
 }
 
@@ -227,35 +224,17 @@ void __stdcall NativeInjectionEntryPoint(REMOTE_ENTRY_INFO* inRemoteInfo)
 
 	nucleusFolder = nucleusFolderPath;
 
-	if (IsDebug)
-	{
-		outfile.open(nucleusFolder + logFile, std::ios_base::app);
-		outfile << date_string() << "HOOK64: Starting hook injection, SetWindow: " << SetWindow << " HookFocus: " << HookFocus << " HideCursor: " << HideCursor << " PreventWindowDeactivation: " << PreventWindowDeactivation << "\n";
-		outfile.flush();
-		outfile.close();
-	}
-
+	DEBUGLOG("Starting hook injection, SetWindow: " << SetWindow << " HookFocus: " << HookFocus << " HideCursor: " << HideCursor << " PreventWindowDeactivation: " << PreventWindowDeactivation << "\n");
+	
 	if (SetWindow)
 	{
-		if (IsDebug)
-		{
-			outfile.open(nucleusFolder + logFile, std::ios_base::app);
-			outfile << date_string() << "HOOK64: Injecting SetWindow hook\n";
-			outfile.flush();
-			outfile.close();
-		}
+		DEBUGLOG("Injecting SetWindow hook\n");
 		HookInstall("user32", "SetWindowPos", SetWindowPos_Hook);
 	}
 
 	if (HookFocus)
 	{
-		if (IsDebug)
-		{
-			outfile.open(nucleusFolder + logFile, std::ios_base::app);
-			outfile << date_string() << "HOOK64: Injecting HookFocus hooks\n";
-			outfile.flush();
-			outfile.close();
-		}
+		DEBUGLOG("Injecting HookFocus hooks\n");
 		HookInstall("user32", "GetForegroundWindow", GetForegroundWindow_Hook);
 		HookInstall("user32", "WindowFromPoint", WindowFromPoint_Hook);
 		HookInstall("user32", "GetActiveWindow", GetActiveWindow_Hook);
@@ -266,39 +245,20 @@ void __stdcall NativeInjectionEntryPoint(REMOTE_ENTRY_INFO* inRemoteInfo)
 
 	if (PreventWindowDeactivation)
 	{
-		if (IsDebug)
-		{
-			outfile.open(nucleusFolder + logFile, std::ios_base::app);
-			outfile << date_string() << "HOOK64: Preventing window deactivation by blocking WM_KILLFOCUS\n";
-			outfile.flush();
-			outfile.close();
-		}
-
+		DEBUGLOG("Preventing window deactivation by blocking WM_KILLFOCUS\n");
 		WNDPROC g_OldWndProc = (WNDPROC)SetWindowLongPtr(hWnd, GWLP_WNDPROC, (LONG_PTR)WndProc_Hook);
 	}
 
 	if (HideCursor)
 	{
-		if (IsDebug)
-		{
-			outfile.open(nucleusFolder + logFile, std::ios_base::app);
-			outfile << date_string() << "HOOK64: Injecting HideCursor hooks\n";
-			outfile.flush();
-			outfile.close();
-		}
+		DEBUGLOG("Injecting HideCursor hooks\n")
 		HookInstall("user32", "ShowCursor", ShowCursor_Hook);
 		HookInstall("user32", "SetCursor", SetCursor_Hook);
 
 		//WNDPROC g_OldWndProc = (WNDPROC)SetWindowLongPtr(hWnd, GWLP_WNDPROC, (LONG_PTR)WndProc_Hook);
 	}
 
-	if (IsDebug)
-	{
-		outfile.open(nucleusFolder + logFile, std::ios_base::app);
-		outfile << date_string() << "HOOK64: Hook injection complete\n";
-		outfile.flush();
-		outfile.close();
-	}
+	DEBUGLOG("Hook injection complete\n")
 
 	return;
 }
