@@ -36,8 +36,7 @@ namespace Nucleus.Gaming.Coop
 		public int Width => Bounds.Right - Bounds.Left;
 		public int Height => Bounds.Bottom - Bounds.Top;
 
-		//TODO: Window.HooksNamedPipe
-		//public NamedPipe HooksNamedPipe { get; set; }
+		public HookPipe HookPipe { get; set; }
 
 		#region Mouse Cursor
 		/* How drawing the fake mouse cursor works:

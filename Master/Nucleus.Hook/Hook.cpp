@@ -28,6 +28,23 @@ std::ofstream outfile;
 std::wstring nucleusFolder;
 std::wstring logFile = L"\\debug-log.txt";
 
+std::wstring _writePipeName;
+std::wstring _readPipeName;
+HANDLE hPipeRead;
+HANDLE hPipeWrite;
+bool pipe_closed = false;
+
+CRITICAL_SECTION mcs;
+int fake_x; //Delta X
+int fake_y;
+
+int absolute_x;
+int absolute_y;
+
+//UINT16 vkey_state; //Stores the mouse keys (5 of them) and the WASD keys. (1=on, 0=off)
+
+BYTE* vkeys_state = new BYTE[256 / 8]; //256 vkeys, 8 bits per byte
+
 std::ofstream& get_outfile()
 {
 	outfile.open(nucleusFolder + logFile, std::ios_base::app);
@@ -147,6 +164,140 @@ NTSTATUS HookInstall(LPCSTR moduleHandle, LPCSTR proc, void* callBack)
 	return result;
 }
 
+//TODO: move to respective file
+inline void setVkeyState(int vkey, bool down)
+{
+	if (vkey >= 0xFF) return;
+
+	auto x = (vkey / 8);
+	BYTE shift = (1 << (vkey % 8));
+	if (down)
+		vkeys_state[x] |= shift;
+	else
+		vkeys_state[x] &= (~shift);
+
+	if (vkey == VK_LSHIFT || vkey == VK_RSHIFT) setVkeyState(VK_SHIFT, down);
+	else if (vkey == VK_LMENU || vkey == VK_RMENU) setVkeyState(VK_MENU, down);
+	else if (vkey == VK_LCONTROL || vkey == VK_RCONTROL) setVkeyState(VK_CONTROL, down);
+}
+
+void startPipeListen()
+{
+	//Read pipe
+	char _pipeNameChars[256];
+	sprintf_s(_pipeNameChars, "\\\\.\\pipe\\%s", std::string(_readPipeName.begin(), _readPipeName.end()).c_str());
+
+	hPipeRead = CreateFile(
+		_pipeNameChars,
+		GENERIC_READ,
+		FILE_SHARE_READ | FILE_SHARE_WRITE,
+		nullptr,
+		OPEN_EXISTING,
+		FILE_ATTRIBUTE_NORMAL,
+		nullptr
+	);
+
+	if (hPipeRead == INVALID_HANDLE_VALUE)
+	{
+		DEBUGLOG("Failed to connect to pipe (read)\n")
+		return;
+	}
+
+	DEBUGLOG("Connected to pipe (read)\n")
+
+	//Write pipe
+	char _pipeNameCharsWrite[256];
+	sprintf_s(_pipeNameCharsWrite, "\\\\.\\pipe\\%s", std::string(_writePipeName.begin(), _writePipeName.end()).c_str());
+
+	hPipeWrite = CreateFile(
+		_pipeNameCharsWrite,
+		GENERIC_WRITE,
+		FILE_SHARE_READ | FILE_SHARE_WRITE,
+		nullptr,
+		OPEN_EXISTING,
+		FILE_ATTRIBUTE_NORMAL,
+		nullptr
+	);
+
+	if (hPipeWrite == INVALID_HANDLE_VALUE)
+	{
+		DEBUGLOG("Failed to connect to pipe (write)\n")
+	}
+	else
+	{
+		DEBUGLOG("Connected to pipe (write)\n")
+	}
+
+	//Loop until pipe close message is received
+	for (;;)
+	{
+		BYTE buffer[9]; //9 bytes are sent at a time (1st is message, next 8 for 2 ints)
+		DWORD bytesRead = 0;
+
+		BOOL result = ReadFile(
+			hPipeRead,
+			buffer,
+			9 * sizeof(BYTE),
+			&bytesRead,
+			nullptr
+		);
+
+		if (result && bytesRead == 9)
+		{
+			int param1 = bytesToInt(&buffer[1]);
+
+			int param2 = bytesToInt(&buffer[5]);
+
+			//cout << "Received message. Msg=" << (int)buffer[0] << ", param1=" << param1 << ", param2=" << param2 << "\n";
+
+			switch (buffer[0])
+			{
+			case 0x01: //Add delta cursor pos
+			{
+				EnterCriticalSection(&mcs);
+				fake_x += param1;
+				fake_y += param2;
+				LeaveCriticalSection(&mcs);
+				break;
+			}
+			case 0x04: //Set absolute cursor pos
+			{
+				EnterCriticalSection(&mcs);
+				absolute_x = param1;
+				absolute_y = param2;
+				LeaveCriticalSection(&mcs);
+				break;
+			}
+			case 0x02: //Set VKey
+			{
+				setVkeyState(param1, param2 != 0);
+				break;
+			}
+			case 0x03: //Close named pipe
+			{
+				DEBUGLOG("Received pipe closed message. Closing pipe..." << "\n")
+				pipe_closed = true;
+				return;
+			}
+			case 0x05: //Focus desktop
+			{
+				//If the game brings itself to the foreground, it is the only window that can set something else as foreground (so it's required to do this in Hooks)
+				SetForegroundWindow(GetDesktopWindow());
+				break;
+			}
+			default:
+			{
+				break;
+			}
+			}
+		}
+		else
+		{
+			//cout << "Failed to read message\n";
+		}
+	}
+}
+
 // EasyHook will be looking for this export to support DLL injection. If not found then 
 // DLL injection will fail.
 extern "C" void __declspec(dllexport) __stdcall NativeInjectionEntryPoint(REMOTE_ENTRY_INFO* inRemoteInfo);
@@ -174,20 +325,33 @@ void __stdcall NativeInjectionEntryPoint(REMOTE_ENTRY_INFO* inRemoteInfo)
 	bool HideCursor = *(_p++) == 1;
 	bool HookFocus = *(_p++) == 1;
 
-	const size_t pathLength = (data[9] << 24) + (data[10] << 16) + (data[11] << 8) + data[12];
-	auto nucleusFolderPath = static_cast<PWSTR>(malloc(pathLength + sizeof(WCHAR)));
-	memcpy(nucleusFolderPath, &data[13], pathLength);
-	nucleusFolderPath[pathLength / sizeof(WCHAR)] = '\0';
+	const size_t pathLength = (size_t)bytesToInt(_p);
+	const size_t writePipeNameLength = (size_t)bytesToInt(_p + 4);
+	const size_t readPipeNameLength = (size_t)bytesToInt(_p + 8);
+	_p += 12;
 
+	//C# gives number of bytes without null termination
+	auto nucleusFolderPath = static_cast<PWSTR>(malloc(pathLength + sizeof(WCHAR)));
+	memcpy(nucleusFolderPath, _p, pathLength);
+	_p += pathLength;
+	nucleusFolderPath[pathLength / sizeof(WCHAR)] = '\0';//Null-terminate the string
 	nucleusFolder = nucleusFolderPath;
+
+	_writePipeName = std::wstring(reinterpret_cast<wchar_t*>(_p), writePipeNameLength/2);
+	_p += writePipeNameLength;
+
+	_readPipeName = std::wstring(reinterpret_cast<wchar_t*>(_p), readPipeNameLength/2);
+	_p += readPipeNameLength;
 
 	DEBUGLOG("Starting hook injection," <<
 		" SetWindow: " << SetWindow << 
 		" HookFocus: " << HookFocus << 
 		" HideCursor: " << HideCursor << 
-		" PreventWindowDeactivation: " << PreventWindowDeactivation << 
+		" PreventWindowDeactivation: " << PreventWindowDeactivation <<
+		" WritePipeName: " << std::string(_writePipeName.begin(), _writePipeName.end()) <<
+		" ReadPipeName: " << std::string(_readPipeName.begin(), _readPipeName.end()) <<
 		"\n");
-	
+
 	if (SetWindow)
 	{
 		install_set_window_hook();
@@ -211,6 +375,8 @@ void __stdcall NativeInjectionEntryPoint(REMOTE_ENTRY_INFO* inRemoteInfo)
 
 		//WNDPROC g_OldWndProc = (WNDPROC)SetWindowLongPtr(hWnd, GWLP_WNDPROC, (LONG_PTR)WndProc_Hook);
 	}
+
+	startPipeListen();
 
 	DEBUGLOG("Hook injection complete\n");
 

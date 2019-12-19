@@ -220,12 +220,20 @@ namespace Nucleus.Inject
                 string nucleusFolderPath = args[i++];
                 bool.TryParse(args[i++], out bool setWindow);
 				bool.TryParse(args[i++], out bool preventWindowDeactivation);															 
+				string writePipeName = args[i++];
+				string readPipeName = args[i++];
 
-                var logPath = Encoding.Unicode.GetBytes(nucleusFolderPath);
+				var logPath = Encoding.Unicode.GetBytes(nucleusFolderPath);
                 int logPathLength = logPath.Length;
                 //int.TryParse(args[i++], out int InPassThruSize);
 
-                int size = 42 + logPathLength;
+				var writePipeNameBytes = Encoding.Unicode.GetBytes(writePipeName);
+				int writePipeNameLength = writePipeNameBytes.Length;
+
+				var readPipeNameBytes = Encoding.Unicode.GetBytes(readPipeName);
+				int readPipeNameLength = readPipeNameBytes.Length;
+
+				int size = 42 + logPathLength + writePipeNameLength + readPipeNameLength;
                 IntPtr intPtr = Marshal.AllocHGlobal(size);
                 byte[] dataToSend = new byte[size];
 
@@ -245,9 +253,21 @@ namespace Nucleus.Inject
                 dataToSend[11] = (byte)(logPathLength >> 8);
                 dataToSend[12] = (byte)logPathLength;
 
-                Array.Copy(logPath, 0, dataToSend, 13, logPathLength);
+				dataToSend[13] = (byte)(writePipeNameLength >> 24);
+				dataToSend[14] = (byte)(writePipeNameLength >> 16);
+				dataToSend[15] = (byte)(writePipeNameLength >> 8);
+				dataToSend[16] = (byte)writePipeNameLength;
 
-                Marshal.Copy(dataToSend, 0, intPtr, size);                
+				dataToSend[17] = (byte)(readPipeNameLength >> 24);
+				dataToSend[18] = (byte)(readPipeNameLength >> 16);
+				dataToSend[19] = (byte)(readPipeNameLength >> 8);
+				dataToSend[20] = (byte)readPipeNameLength;
+
+				Array.Copy(logPath,				0, dataToSend,	21,											logPathLength);
+				Array.Copy(writePipeNameBytes,	0, dataToSend,	21 + logPathLength,							writePipeNameLength);
+				Array.Copy(readPipeNameBytes,	0, dataToSend,	21 + logPathLength + writePipeNameLength,	readPipeNameLength);
+
+				Marshal.Copy(dataToSend, 0, intPtr, size);                
 
                 try
                 {

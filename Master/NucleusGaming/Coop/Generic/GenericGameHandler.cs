@@ -699,13 +699,13 @@ namespace Nucleus.Gaming
                     }
                 }
 
-                if(i > 0 && (gen.HookFocus || gen.SetWindowHook || gen.HideCursor || gen.PreventWindowDeactivation))
+                if(i > 0 && (gen.HookFocus || gen.SetWindowHook || gen.HideCursor || gen.PreventWindowDeactivation || true))//TODO: remove temporary true
                 {
                     Log("Injecting hook DLL for previous instance");
                     PlayerInfo before = players[i - 1];
                     Thread.Sleep(1000);
                     ProcessData pdata = before.ProcessData;
-                    InjectDLLs(pdata.Process);
+                    InjectDLLs(pdata.Process, RawInputManager.windows.Last());
                 }
 
                 Rectangle playerBounds = player.MonitorBounds;
@@ -2487,7 +2487,28 @@ namespace Nucleus.Gaming
                     Thread.Sleep(TimeSpan.FromSeconds(gen.PauseBetweenStarts));
                 }
 
-                if (i == (players.Count - 1)) // all instances accounted for
+				//Set up raw input window
+				if (player.IsRawKeyboard || player.IsRawMouse)
+				{
+					//TODO: May be zero, wait until not? (See InjectDLLs)
+					var hWnd = proc.MainWindowHandle;
+					var mouseHdev = player.RawMouseDeviceHandle;
+					var keyboardHdev = player.RawKeyboardDeviceHandle;
+
+					var window = new Window(hWnd)
+					{
+						CursorVisibility = false,//TODO: cursor visibility
+						KeyboardAttached = keyboardHdev,
+						MouseAttached = mouseHdev
+					};
+
+					//TODO: Don't always need write pipe
+					window.HookPipe = new HookPipe(hWnd, window, true);
+
+					RawInputManager.windows.Add(window);
+				}
+
+				if (i == (players.Count - 1)) // all instances accounted for
                 {
                     if (gen.ResetWindows)
                     {
@@ -2575,24 +2596,10 @@ namespace Nucleus.Gaming
                         }
                     }
 
-					//Set up raw input windows
-					if (player.IsRawKeyboard || player.IsRawMouse)
-					{
-						var hWnd = proc.MainWindowHandle;
-						var mouseHdev = player.RawMouseDeviceHandle;
-						var keyboardHdev = player.RawKeyboardDeviceHandle;
-						RawInputManager.windows.Add(new Window(hWnd)
-						{
-							CursorVisibility = false,//TODO: cursor visibility
-							KeyboardAttached = keyboardHdev,
-							MouseAttached = mouseHdev
-						});
-					}
-
-					if (i > 0 && (gen.HookFocus || gen.SetWindowHook || gen.HideCursor || gen.PreventWindowDeactivation))
+					if ((gen.HookFocus || gen.SetWindowHook || gen.HideCursor || gen.PreventWindowDeactivation || true))//TODO: remove temporary true
                     {
                         Log("Injecting hook DLL for last instance");
-                        InjectDLLs(data.Process);
+                        InjectDLLs(data.Process, RawInputManager.windows.Last());
                     }
                     //if (gen.HookFocus || gen.SetWindowHook || gen.HideCursor)
                     //{
@@ -2652,8 +2659,8 @@ namespace Nucleus.Gaming
                         }
                     }
 
-                }               
-            }
+                }
+			}
 
 			//Window setup
 			foreach (var window in RawInputManager.windows)
@@ -2700,7 +2707,7 @@ namespace Nucleus.Gaming
 			return string.Empty;
         }
 
-        private void InjectDLLs(Process proc)
+        private void InjectDLLs(Process proc, Window window)
         {
             if ((int)proc.MainWindowHandle == 0)
             {
@@ -2747,7 +2754,9 @@ namespace Nucleus.Gaming
 		            isDebug,
 		            nucleusFolderPath, // Primarily for log output
 		            gen.SetWindowHook, // SetWindow hook (prevents window from moving)
-					gen.PreventWindowDeactivation
+					gen.PreventWindowDeactivation,
+					window.HookPipe.pipeNameWrite,
+					window.HookPipe.pipeNameRead
 				};
 
 	            var sbArgs = new StringBuilder();

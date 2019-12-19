@@ -143,6 +143,7 @@
     <Compile Include="Coop\InputManagement\Enums\MouseEvents.cs" />
     <Compile Include="Coop\InputManagement\Enums\RawInputButtonFlags.cs" />
     <Compile Include="Coop\InputManagement\Enums\RawInputDevice_dwFlags.cs" />
+    <Compile Include="Coop\InputManagement\HookPipe.cs" />
     <Compile Include="Coop\InputManagement\InputInterceptor.cs" />
     <Compile Include="Coop\InputManagement\LockInput.cs" />
     <Compile Include="Coop\InputManagement\Logger.cs" />
