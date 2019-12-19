@@ -12,8 +12,9 @@
 #include <ctime>
 #include <stdio.h>
 #include <iomanip>
-
 #include "Logging.h"
+#include "InstallHooks.h"
+#include "Globals.h"
 
 HWND hWnd = 0;
 
@@ -29,6 +30,7 @@ std::wstring logFile = L"\\debug-log.txt";
 
 std::ofstream& get_outfile()
 {
+	outfile.open(nucleusFolder + logFile, std::ios_base::app);
 	return outfile;
 }
 
@@ -40,7 +42,7 @@ std::string ws2s(const std::wstring& wstr)
 	return converterX.to_bytes(wstr);
 }
 
-inline std::string date_string()
+std::string date_string()
 {
 	tm tinfo;
 	time_t rawtime;
@@ -65,51 +67,6 @@ LRESULT CALLBACK WndProc_Hook(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam
 			DefWindowProc(hwnd, uMsg, wParam, lParam);
 	}
 	return 1;
-}
-
-BOOL WINAPI SetWindowPos_Hook(HWND hWnd, HWND hWndInsertAfter, int X, int Y, int cx, int cy, UINT uFlags)
-{
-	return true;
-}
-
-HWND WINAPI GetForegroundWindow_Hook()
-{
-	return hWnd;
-}
-
-HWND WINAPI WindowFromPoint_Hook(POINT Point)
-{
-	return hWnd;
-}
-
-HWND WINAPI GetActiveWindow_Hook()
-{
-	return hWnd;
-}
-
-BOOL WINAPI IsWindowEnabled_Hook(HWND hWnd)
-{
-	return TRUE;
-}
-
-HWND WINAPI GetFocus_Hook()
-{
-	return hWnd;
-}
-
-HWND WINAPI GetCapture_Hook()
-{
-	return hWnd;
-}
-
-int WINAPI ShowCursor_Hook(BOOL bShow)
-{
-	return ShowCursor(FALSE);
-}
-
-HCURSOR WINAPI SetCursor_Hook(HCURSOR hCursor)
-{
-	return SetCursor(nullptr);
 }
 
 inline int bytesToInt(BYTE* bytes)
@@ -224,41 +181,38 @@ void __stdcall NativeInjectionEntryPoint(REMOTE_ENTRY_INFO* inRemoteInfo)
 
 	nucleusFolder = nucleusFolderPath;
 
-	DEBUGLOG("Starting hook injection, SetWindow: " << SetWindow << " HookFocus: " << HookFocus << " HideCursor: " << HideCursor << " PreventWindowDeactivation: " << PreventWindowDeactivation << "\n");
+	DEBUGLOG("Starting hook injection," <<
+		" SetWindow: " << SetWindow << 
+		" HookFocus: " << HookFocus << 
+		" HideCursor: " << HideCursor << 
+		" PreventWindowDeactivation: " << PreventWindowDeactivation << 
+		"\n");
 	
 	if (SetWindow)
 	{
-		DEBUGLOG("Injecting SetWindow hook\n");
-		HookInstall("user32", "SetWindowPos", SetWindowPos_Hook);
+		install_set_window_hook();
 	}
 
 	if (HookFocus)
 	{
-		DEBUGLOG("Injecting HookFocus hooks\n");
-		HookInstall("user32", "GetForegroundWindow", GetForegroundWindow_Hook);
-		HookInstall("user32", "WindowFromPoint", WindowFromPoint_Hook);
-		HookInstall("user32", "GetActiveWindow", GetActiveWindow_Hook);
-		HookInstall("user32", "IsWindowEnabled", IsWindowEnabled_Hook);
-		HookInstall("user32", "GetFocus", GetFocus_Hook);
-		HookInstall("user32", "GetCapture", GetCapture_Hook);
+		install_focus_hooks();		
 	}
 
 	if (PreventWindowDeactivation)
 	{
 		DEBUGLOG("Preventing window deactivation by blocking WM_KILLFOCUS\n");
+		//TODO: Windows can terminate hooks if they take too long or intercept too many messages. Replace with GetMessage hooks/etc.
 		WNDPROC g_OldWndProc = (WNDPROC)SetWindowLongPtr(hWnd, GWLP_WNDPROC, (LONG_PTR)WndProc_Hook);
 	}
 
 	if (HideCursor)
 	{
-		DEBUGLOG("Injecting HideCursor hooks\n")
-		HookInstall("user32", "ShowCursor", ShowCursor_Hook);
-		HookInstall("user32", "SetCursor", SetCursor_Hook);
+		install_hide_cursor_hooks();
 
 		//WNDPROC g_OldWndProc = (WNDPROC)SetWindowLongPtr(hWnd, GWLP_WNDPROC, (LONG_PTR)WndProc_Hook);
 	}
 
-	DEBUGLOG("Hook injection complete\n")
+	DEBUGLOG("Hook injection complete\n");
 
 	return;
 }
