@@ -226,6 +226,7 @@ copy $(SolutionDir)$(PlatformTarget)\$(Configuration)\$(TargetName).dll $(Soluti
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</CompileAsManaged>
     </ClCompile>
     <ClCompile Include="FocusHooks.cpp" />
+    <ClCompile Include="GetSetCursorPosHooks.cpp" />
     <ClCompile Include="HideCursorHooks.cpp" />
     <ClCompile Include="Hook.cpp">
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</CompileAsManaged>

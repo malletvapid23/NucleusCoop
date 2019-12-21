@@ -16,17 +16,21 @@
 #include "InstallHooks.h"
 #include "Globals.h"
 
-HWND hWnd = 0;
-
 #ifdef _DEBUG
 bool IsDebug = false;
 #else
 bool IsDebug = true;
 #endif
 
+//TODO: remove temporary hook enabled options
+bool hookSetCursorPos = true;
+bool hookGetCursorPos = true;
+
+HWND hWnd = 0;
+
 std::ofstream outfile;
 std::wstring nucleusFolder;
-std::wstring logFile = L"\\debug-log.txt";
+std::wstring logFile = L"\\debug-log-hooks.txt";//Use different path to C# side or it can crash if writing at the same time
 
 std::wstring _writePipeName;
 std::wstring _readPipeName;
@@ -307,6 +311,8 @@ void __stdcall NativeInjectionEntryPoint(REMOTE_ENTRY_INFO* inRemoteInfo)
 	DWORD pid = GetCurrentProcessId();
 	hWnd = FindWindowFromProcessId(pid);
 
+	InitializeCriticalSection(&mcs);
+
 	BYTE* data = inRemoteInfo->UserData;
 
 	if ((INT)hWnd == 0)
@@ -376,9 +382,19 @@ void __stdcall NativeInjectionEntryPoint(REMOTE_ENTRY_INFO* inRemoteInfo)
 		//WNDPROC g_OldWndProc = (WNDPROC)SetWindowLongPtr(hWnd, GWLP_WNDPROC, (LONG_PTR)WndProc_Hook);
 	}
 
-	startPipeListen();
+	if (hookGetCursorPos)
+	{
+		install_get_cursor_hook();
+	}
+
+	if (hookSetCursorPos)
+	{
+		install_set_cursor_hook();
+	}
 
 	DEBUGLOG("Hook injection complete\n");
+
+	startPipeListen();
 
 	return;
 }

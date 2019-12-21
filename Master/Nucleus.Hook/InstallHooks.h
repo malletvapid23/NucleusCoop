@@ -10,3 +10,7 @@ void install_set_window_hook();
 void install_focus_hooks();
 
 void install_hide_cursor_hooks();
+
+void install_set_cursor_hook();
+
+void install_get_cursor_hook();

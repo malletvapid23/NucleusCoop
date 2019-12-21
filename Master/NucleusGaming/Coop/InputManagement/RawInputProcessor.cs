@@ -21,7 +21,7 @@ namespace Nucleus.Gaming.Coop.InputManagement
 		private static bool sendNormalKeyboardInput = true;
 		private static bool sendRawKeyboardInput = false;
 		private static bool forwardRawMouseInput = false;
-		private static bool hookGetCursorPos = false;
+		private static bool hookGetCursorPos = true;
 		private static bool hookGetKeyState = false;
 		private static bool hookGetAsyncKeyState = false;
 		private static bool sendScrollWheel = false;
@@ -162,8 +162,7 @@ namespace Nucleus.Gaming.Coop.InputManagement
 
 			if (hookGetCursorPos)
 			{
-				//TODO: implement
-				//window.HooksCPPNamedPipe?.SendMousePosition(deltaX, deltaY, mouseVec.x, mouseVec.y);
+				window.HookPipe?.SendMousePosition(deltaX, deltaY, mouseVec.x, mouseVec.y);
 			}
 
 			long packedXY = mouseVec.y * 0x10000 + mouseVec.x;
@@ -208,9 +207,6 @@ namespace Nucleus.Gaming.Coop.InputManagement
 						{
 							state.l = isButtonDown;
 
-							//TODO: implement UpdateBounds
-							//if (Options.CurrentOptions.RefreshWindowBoundsOnMouseClick)
-							Debug.WriteLine("Calling UpdateBounds");
 							window.UpdateBounds();
 						}
 						else if (leftMiddleRight == 2)

@@ -35,7 +35,7 @@ bool IsDebug = false;
 
 std::ofstream outfile;
 std::wstring nucleusFolder;
-std::wstring logFile = L"\\debug-log.txt";
+std::wstring logFile = L"\\debug-log-startup-hook.txt";
 
 //std::wstring rawHid;
 
