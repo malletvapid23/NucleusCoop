@@ -15,6 +15,7 @@
 #include "Logging.h"
 #include "InstallHooks.h"
 #include "Globals.h"
+#include "KeyStates.h"
 
 #ifdef _DEBUG
 bool IsDebug = false;
@@ -25,9 +26,13 @@ bool IsDebug = true;
 //TODO: remove temporary hook enabled options
 bool hookSetCursorPos = true;
 bool hookGetCursorPos = true;
+bool hookGetKeyState = true;
+bool hookGetAsyncKeyState = true;
+bool hookGetKeyboardState = true;
 
 HWND hWnd = 0;
 
+//TODO: move to logging.cpp
 std::ofstream outfile;
 std::wstring nucleusFolder;
 std::wstring logFile = L"\\debug-log-hooks.txt";//Use different path to C# side or it can crash if writing at the same time
@@ -38,16 +43,13 @@ HANDLE hPipeRead;
 HANDLE hPipeWrite;
 bool pipe_closed = false;
 
+//TODO: move mouse into own file
 CRITICAL_SECTION mcs;
 int fake_x; //Delta X
 int fake_y;
 
 int absolute_x;
 int absolute_y;
-
-//UINT16 vkey_state; //Stores the mouse keys (5 of them) and the WASD keys. (1=on, 0=off)
-
-BYTE* vkeys_state = new BYTE[256 / 8]; //256 vkeys, 8 bits per byte
 
 std::ofstream& get_outfile()
 {
@@ -166,23 +168,6 @@ NTSTATUS HookInstall(LPCSTR moduleHandle, LPCSTR proc, void* callBack)
 	}
 
 	return result;
-}
-
-//TODO: move to respective file
-inline void setVkeyState(int vkey, bool down)
-{
-	if (vkey >= 0xFF) return;
-
-	auto x = (vkey / 8);
-	BYTE shift = (1 << (vkey % 8));
-	if (down)
-		vkeys_state[x] |= shift;
-	else
-		vkeys_state[x] &= (~shift);
-
-	if (vkey == VK_LSHIFT || vkey == VK_RSHIFT) setVkeyState(VK_SHIFT, down);
-	else if (vkey == VK_LMENU || vkey == VK_RMENU) setVkeyState(VK_MENU, down);
-	else if (vkey == VK_LCONTROL || vkey == VK_RCONTROL) setVkeyState(VK_CONTROL, down);
 }
 
 void startPipeListen()
@@ -359,14 +344,10 @@ void __stdcall NativeInjectionEntryPoint(REMOTE_ENTRY_INFO* inRemoteInfo)
 		"\n");
 
 	if (SetWindow)
-	{
 		install_set_window_hook();
-	}
 
 	if (HookFocus)
-	{
-		install_focus_hooks();		
-	}
+		install_focus_hooks();
 
 	if (PreventWindowDeactivation)
 	{
@@ -383,14 +364,19 @@ void __stdcall NativeInjectionEntryPoint(REMOTE_ENTRY_INFO* inRemoteInfo)
 	}
 
 	if (hookGetCursorPos)
-	{
-		install_get_cursor_hook();
-	}
+		install_get_cursor_pos_hook();
 
 	if (hookSetCursorPos)
-	{
-		install_set_cursor_hook();
-	}
+		install_set_cursor_pos_hook();
+
+	if (hookGetAsyncKeyState)
+		install_get_async_key_state_hook();
+
+	if (hookGetKeyState)
+		install_get_key_state_hook();
+
+	if (hookGetKeyboardState)
+		install_get_keyboard_state_hook();
 
 	DEBUGLOG("Hook injection complete\n");
 

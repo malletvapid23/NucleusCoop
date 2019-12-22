@@ -22,8 +22,8 @@ namespace Nucleus.Gaming.Coop.InputManagement
 		private static bool sendRawKeyboardInput = false;
 		private static bool forwardRawMouseInput = false;
 		private static bool hookGetCursorPos = true;
-		private static bool hookGetKeyState = false;
-		private static bool hookGetAsyncKeyState = false;
+		private static bool hookGetKeyState = true;
+		private static bool hookGetAsyncKeyState = true;
 		private static bool sendScrollWheel = false;
 		private static bool sendNormalMouse = true;
 
@@ -113,18 +113,15 @@ namespace Nucleus.Gaming.Coop.InputManagement
 
 				code |= 1;
 
-				if (vKey < keysDown.Length) keysDown[vKey] = keyDown;
+				if (vKey < keysDown.Length)
+					keysDown[vKey] = keyDown;
 
-				/* TODO: implement with GetKeyState/GetAsyncKeyState
-					if (Options.CurrentOptions.Hook_GetKeyState || Options.CurrentOptions.Hook_GetAsyncKeyState)
+				if ((hookGetKeyState || hookGetAsyncKeyState) && stateChangedSinceLast)
 				{
-					if (stateChangedSinceLast)
-					{
-						window.HooksCPPNamedPipe?.WriteMessage(0x02, vKey, keyDown ? 1 : 0);
-					}
-				}*/
+					window.HookPipe.WriteMessage(0x02, vKey, keyDown ? 1 : 0);
+				}
 
-				//This also makes GetKeyboardState work, as windows uses the message queue for GetKeyboardState
+				//This also (sometimes) makes GetKeyboardState work, as windows uses the message queue for GetKeyboardState
 				WinApi.PostMessageA(hWnd, keyboardMessage, (IntPtr)vKey, (UIntPtr)code);
 			}
 
@@ -198,9 +195,8 @@ namespace Nucleus.Gaming.Coop.InputManagement
 						if (oldBtnState != isButtonDown)
 							WinApi.PostMessageA(hWnd, (uint)msg, (IntPtr)wParam, (IntPtr)packedXY);
 
-						//TODO: implement
-						//if (hookGetAsyncKeyState || hookGetKeyState && (oldBtnState != isButtonDown))
-						//	window.HooksCPPNamedPipe?.WriteMessage(0x02, vKey, isButtonDown ? 1 : 0);
+						if ((hookGetAsyncKeyState || hookGetKeyState) && (oldBtnState != isButtonDown))
+							window.HookPipe.WriteMessage(0x02, vKey, isButtonDown ? 1 : 0);
 
 
 						if (leftMiddleRight == 1)

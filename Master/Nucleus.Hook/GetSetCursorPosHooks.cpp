@@ -84,14 +84,14 @@ BOOL WINAPI SetCursorPos_Hook(int X, int Y)
 	return TRUE;
 }
 
-void install_set_cursor_hook()
+void install_set_cursor_pos_hook()
 {
 	DEBUGLOG("Injecting SetCursorPos hook\n");
 	HookInstall("user32", "SetCursorPos", SetCursorPos_Hook);
 }
 
 
-void install_get_cursor_hook()
+void install_get_cursor_pos_hook()
 {
 	DEBUGLOG("Injecting GetCursorPos hook\n");
 	HookInstall("user32", "GetCursorPos", GetCursorPos_Hook);

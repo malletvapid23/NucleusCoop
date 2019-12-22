@@ -1,5 +1,4 @@
 #pragma once
-#include <ntstatus.h>
 #include <Windows.h>
 #include <easyhook.h>
 
@@ -11,6 +10,9 @@ void install_focus_hooks();
 
 void install_hide_cursor_hooks();
 
-void install_set_cursor_hook();
+void install_set_cursor_pos_hook();
+void install_get_cursor_pos_hook();
 
-void install_get_cursor_hook();
+void install_get_async_key_state_hook();
+void install_get_key_state_hook();
+void install_get_keyboard_state_hook();
