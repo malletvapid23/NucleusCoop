@@ -33,6 +33,9 @@
     <ClInclude Include="KeyStates.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="FakeMouse.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">
@@ -60,6 +63,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="KeyStates.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="FakeMouse.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="MessageFilter.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

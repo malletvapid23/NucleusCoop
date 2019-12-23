@@ -28,7 +28,7 @@ namespace Nucleus.Gaming.Coop.InputManagement
 	{
 		#region Temporary options
 		//TODO: remove HookPipe temporary options
-		private static bool useLegacyInput = false;
+		private static bool useLegacyInput = true;
 		private static bool hookGetCursorPos = true;
 		#endregion
 

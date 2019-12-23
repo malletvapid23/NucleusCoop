@@ -16,3 +16,5 @@ void install_get_cursor_pos_hook();
 void install_get_async_key_state_hook();
 void install_get_key_state_hook();
 void install_get_keyboard_state_hook();
+
+void install_message_filter_hooks();

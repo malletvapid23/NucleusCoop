@@ -1,6 +1,5 @@
 #include "pch.h"
 #include "Logging.h"
-#include "Globals.h"
 
 //(unused from USS)
 //UINT16 vkey_state; //Stores the mouse keys (5 of them) and the WASD keys. (1=on, 0=off)

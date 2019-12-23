@@ -16,6 +16,7 @@
 #include "InstallHooks.h"
 #include "Globals.h"
 #include "KeyStates.h"
+#include "FakeMouse.h"
 
 #ifdef _DEBUG
 bool IsDebug = false;
@@ -30,6 +31,13 @@ bool hookGetKeyState = true;
 bool hookGetAsyncKeyState = true;
 bool hookGetKeyboardState = true;
 
+bool filterRawInput = true;
+bool filterMouseMessages = false;
+bool enableLegacyInput = true;
+bool updateAbsoluteFlagInMouseMessage = true;
+
+bool PreventWindowDeactivation;
+
 HWND hWnd = 0;
 
 //TODO: move to logging.cpp
@@ -42,14 +50,6 @@ std::wstring _readPipeName;
 HANDLE hPipeRead;
 HANDLE hPipeWrite;
 bool pipe_closed = false;
-
-//TODO: move mouse into own file
-CRITICAL_SECTION mcs;
-int fake_x; //Delta X
-int fake_y;
-
-int absolute_x;
-int absolute_y;
 
 std::ofstream& get_outfile()
 {
@@ -74,22 +74,6 @@ std::string date_string()
 	char buffer[21];
 	strftime(buffer, 21, "%Y-%m-%d %H:%M:%S", &tinfo);
 	return "[" + std::string(buffer) + "]";
-}
-
-LRESULT CALLBACK WndProc_Hook(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
-{
-	switch (uMsg)
-	{
-		case WM_KILLFOCUS:
-		{
-			//SetFocus(hWnd);
-			return -1;
-		}
-
-		default:
-			DefWindowProc(hwnd, uMsg, wParam, lParam);
-	}
-	return 1;
 }
 
 inline int bytesToInt(BYTE* bytes)
@@ -282,6 +266,7 @@ void startPipeListen()
 		}
 		else
 		{
+			//TODO: needs to quit if failed too many times (in a row)
 			//cout << "Failed to read message\n";
 		}
 	}
@@ -310,7 +295,7 @@ void __stdcall NativeInjectionEntryPoint(REMOTE_ENTRY_INFO* inRemoteInfo)
 	//IsDebug = data[6] == 1;
 	//const bool HideCursor = data[7] == 1;
 	//const bool HookFocus = data[8] == 1;
-	bool PreventWindowDeactivation = *(_p++) == 1;
+	PreventWindowDeactivation = *(_p++) == 1;
 	bool SetWindow = *(_p++) == 1;
 	IsDebug = *(_p++) == 1;
 	bool HideCursor = *(_p++) == 1;
@@ -349,19 +334,8 @@ void __stdcall NativeInjectionEntryPoint(REMOTE_ENTRY_INFO* inRemoteInfo)
 	if (HookFocus)
 		install_focus_hooks();
 
-	if (PreventWindowDeactivation)
-	{
-		DEBUGLOG("Preventing window deactivation by blocking WM_KILLFOCUS\n");
-		//TODO: Windows can terminate hooks if they take too long or intercept too many messages. Replace with GetMessage hooks/etc.
-		WNDPROC g_OldWndProc = (WNDPROC)SetWindowLongPtr(hWnd, GWLP_WNDPROC, (LONG_PTR)WndProc_Hook);
-	}
-
 	if (HideCursor)
-	{
 		install_hide_cursor_hooks();
-
-		//WNDPROC g_OldWndProc = (WNDPROC)SetWindowLongPtr(hWnd, GWLP_WNDPROC, (LONG_PTR)WndProc_Hook);
-	}
 
 	if (hookGetCursorPos)
 		install_get_cursor_pos_hook();
@@ -378,9 +352,12 @@ void __stdcall NativeInjectionEntryPoint(REMOTE_ENTRY_INFO* inRemoteInfo)
 	if (hookGetKeyboardState)
 		install_get_keyboard_state_hook();
 
+	if (filterRawInput || filterMouseMessages || enableLegacyInput || PreventWindowDeactivation)
+	{
+		install_message_filter_hooks();
+	}
+
 	DEBUGLOG("Hook injection complete\n");
 
 	startPipeListen();
-
-	return;
 }
