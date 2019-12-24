@@ -16,7 +16,7 @@ BOOL FilterMessage(LPMSG lpMsg)
 #define BLOCK memset(lpMsg, 0, sizeof(MSG)); return -1;
 
 	//Filter raw input
-	if (Msg == WM_INPUT && filterRawInput)
+	if (Msg == WM_INPUT && options.filterRawInput)
 	{
 		lpMsg->wParam = RIM_INPUT;//While in foreground
 
@@ -41,7 +41,7 @@ BOOL FilterMessage(LPMSG lpMsg)
 	}
 
 	//Legacy input filter
-	if (enableLegacyInput)
+	if (options.legacyInput)
 	{
 		if (Msg == WM_MOUSEMOVE)
 		{
@@ -49,7 +49,7 @@ BOOL FilterMessage(LPMSG lpMsg)
 			{
 				if (use_absolute_cursor_pos == false)
 				{
-					if (updateAbsoluteFlagInMouseMessage)
+					if (options.updateAbsoluteFlagInMouseMessage)
 					{
 						int x = GET_X_LPARAM(_lParam);
 						int y = GET_Y_LPARAM(_lParam);
@@ -80,13 +80,13 @@ BOOL FilterMessage(LPMSG lpMsg)
 		}
 	}
 
-	if(Msg == WM_KILLFOCUS && PreventWindowDeactivation)
+	if(Msg == WM_KILLFOCUS && options.preventWindowDeactivation)
 	{
 		BLOCK;
 	}
 	
 	//USS signature is 1 << 7 or 0b10000000 for WM_MOUSEMOVE(0x0200). If this is detected, allow event to pass
-	if (filterMouseMessages)
+	if (options.filterMouseMessages)
 	{
 		if (Msg == WM_KILLFOCUS || (Msg == WM_ACTIVATE && _wParam == 0) || Msg == WM_CAPTURECHANGED || (Msg == WM_ACTIVATE && (int)_lParam == (int)hWnd))
 		{

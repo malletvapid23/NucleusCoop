@@ -219,7 +219,18 @@ namespace Nucleus.Inject
                 bool.TryParse(args[i++], out bool isDebug);
                 string nucleusFolderPath = args[i++];
                 bool.TryParse(args[i++], out bool setWindow);
-				bool.TryParse(args[i++], out bool preventWindowDeactivation);															 
+				bool.TryParse(args[i++], out bool preventWindowDeactivation);
+
+				bool.TryParse(args[i++], out bool setCursorPos);
+				bool.TryParse(args[i++], out bool getCursorPos);
+				bool.TryParse(args[i++], out bool getKeyState);
+				bool.TryParse(args[i++], out bool getAsyncKeyState);
+				bool.TryParse(args[i++], out bool getKeyboardState);
+				bool.TryParse(args[i++], out bool filterRawInput);
+				bool.TryParse(args[i++], out bool filterMouseMessages);
+				bool.TryParse(args[i++], out bool legacyInput);
+				bool.TryParse(args[i++], out bool updateAbsoluteFlagInMouseMessage);
+
 				string writePipeName = args[i++];
 				string readPipeName = args[i++];
 
@@ -237,35 +248,47 @@ namespace Nucleus.Inject
                 IntPtr intPtr = Marshal.AllocHGlobal(size);
                 byte[] dataToSend = new byte[size];
 
-                dataToSend[0] = (byte)(hWnd >> 24);
-                dataToSend[1] = (byte)(hWnd >> 16);
-                dataToSend[2] = (byte)(hWnd >> 8);
-                dataToSend[3] = (byte)(hWnd);
+                int index = 0;
+                dataToSend[index++] = (byte)(hWnd >> 24);
+                dataToSend[index++] = (byte)(hWnd >> 16);
+                dataToSend[index++] = (byte)(hWnd >> 8);
+                dataToSend[index++] = (byte)(hWnd);
 
-				dataToSend[4] = preventWindowDeactivation == true ? (byte)1 : (byte)0;																  
-                dataToSend[5] = setWindow == true ? (byte)1 : (byte)0;
-                dataToSend[6] = isDebug == true ? (byte)1 : (byte)0;
-                dataToSend[7] = hideCursor == true ? (byte)1 : (byte)0;
-                dataToSend[8] = hookFocus == true ? (byte)1 : (byte)0;
+                byte Bool_1_0(bool x) => x ? (byte)1 : (byte)0;
+				dataToSend[index++] = Bool_1_0(preventWindowDeactivation);
+				dataToSend[index++] = Bool_1_0(setWindow);
+				dataToSend[index++] = Bool_1_0(isDebug);
+				dataToSend[index++] = Bool_1_0(hideCursor);
+				dataToSend[index++] = Bool_1_0(hookFocus);
 
-                dataToSend[9] = (byte)(logPathLength >> 24);
-                dataToSend[10] = (byte)(logPathLength >> 16);
-                dataToSend[11] = (byte)(logPathLength >> 8);
-                dataToSend[12] = (byte)logPathLength;
+				dataToSend[index++] = Bool_1_0(setCursorPos);
+				dataToSend[index++] = Bool_1_0(getCursorPos);
+				dataToSend[index++] = Bool_1_0(getKeyState);
+				dataToSend[index++] = Bool_1_0(getAsyncKeyState);
+				dataToSend[index++] = Bool_1_0(getKeyboardState);
+				dataToSend[index++] = Bool_1_0(filterRawInput);
+				dataToSend[index++] = Bool_1_0(filterMouseMessages);
+				dataToSend[index++] = Bool_1_0(legacyInput);
+				dataToSend[index++] = Bool_1_0(updateAbsoluteFlagInMouseMessage);
 
-				dataToSend[13] = (byte)(writePipeNameLength >> 24);
-				dataToSend[14] = (byte)(writePipeNameLength >> 16);
-				dataToSend[15] = (byte)(writePipeNameLength >> 8);
-				dataToSend[16] = (byte)writePipeNameLength;
+				dataToSend[index++] = (byte)(logPathLength >> 24);
+                dataToSend[index++] = (byte)(logPathLength >> 16);
+                dataToSend[index++] = (byte)(logPathLength >> 8);
+                dataToSend[index++] = (byte)logPathLength;
 
-				dataToSend[17] = (byte)(readPipeNameLength >> 24);
-				dataToSend[18] = (byte)(readPipeNameLength >> 16);
-				dataToSend[19] = (byte)(readPipeNameLength >> 8);
-				dataToSend[20] = (byte)readPipeNameLength;
+				dataToSend[index++] = (byte)(writePipeNameLength >> 24);
+				dataToSend[index++] = (byte)(writePipeNameLength >> 16);
+				dataToSend[index++] = (byte)(writePipeNameLength >> 8);
+				dataToSend[index++] = (byte)writePipeNameLength;
 
-				Array.Copy(logPath,				0, dataToSend,	21,											logPathLength);
-				Array.Copy(writePipeNameBytes,	0, dataToSend,	21 + logPathLength,							writePipeNameLength);
-				Array.Copy(readPipeNameBytes,	0, dataToSend,	21 + logPathLength + writePipeNameLength,	readPipeNameLength);
+				dataToSend[index++] = (byte)(readPipeNameLength >> 24);
+				dataToSend[index++] = (byte)(readPipeNameLength >> 16);
+				dataToSend[index++] = (byte)(readPipeNameLength >> 8);
+				dataToSend[index++] = (byte)readPipeNameLength;
+
+				Array.Copy(logPath,				0, dataToSend, index,											logPathLength);
+				Array.Copy(writePipeNameBytes,	0, dataToSend, index + logPathLength,							writePipeNameLength);
+				Array.Copy(readPipeNameBytes,	0, dataToSend, index + logPathLength + writePipeNameLength,	readPipeNameLength);
 
 				Marshal.Copy(dataToSend, 0, intPtr, size);                
 

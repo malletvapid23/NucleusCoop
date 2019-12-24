@@ -11,7 +11,7 @@ BOOL WINAPI GetCursorPos_Hook(LPPOINT lpPoint)
 	if (lpPoint)
 	{
 		EnterCriticalSection(&mcs);
-		if ((!enableLegacyInput) || use_absolute_cursor_pos)
+		if ((!options.legacyInput) || use_absolute_cursor_pos)
 		{
 			//Absolute mouse position (always do this if legacy input is off)
 			lpPoint->x = absolute_x;
@@ -44,7 +44,7 @@ BOOL WINAPI SetCursorPos_Hook(int X, int Y)
 	origin_x = p.x;
 	origin_y = p.y;
 
-	if (!enableLegacyInput)
+	if (!options.legacyInput)
 	{
 		EnterCriticalSection(&mcs);
 		absolute_x = p.x;

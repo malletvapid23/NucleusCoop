@@ -219,6 +219,7 @@ copy $(SolutionDir)$(PlatformTarget)\$(Configuration)\$(TargetName).dll $(Soluti
     <ClInclude Include="InstallHooks.h" />
     <ClInclude Include="KeyStates.h" />
     <ClInclude Include="Logging.h" />
+    <ClInclude Include="Options.h" />
     <ClInclude Include="pch.h" />
   </ItemGroup>
   <ItemGroup>

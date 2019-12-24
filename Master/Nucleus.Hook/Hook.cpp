@@ -24,46 +24,19 @@ bool IsDebug = false;
 bool IsDebug = true;
 #endif
 
-//TODO: remove temporary hook enabled options
-bool hookSetCursorPos = true;
-bool hookGetCursorPos = true;
-bool hookGetKeyState = true;
-bool hookGetAsyncKeyState = true;
-bool hookGetKeyboardState = true;
-
-bool filterRawInput = true;
-bool filterMouseMessages = false;
-bool enableLegacyInput = true;
-bool updateAbsoluteFlagInMouseMessage = true;
-
-bool PreventWindowDeactivation;
-
-HWND hWnd = 0;
-
-//TODO: move to logging.cpp
-std::ofstream outfile;
+//Logging.h
+std::ofstream logging_outfile;
 std::wstring nucleusFolder;
-std::wstring logFile = L"\\debug-log-hooks.txt";//Use different path to C# side or it can crash if writing at the same time
+
+//Globals.h
+Options options;
+HWND hWnd = 0;
 
 std::wstring _writePipeName;
 std::wstring _readPipeName;
 HANDLE hPipeRead;
 HANDLE hPipeWrite;
 bool pipe_closed = false;
-
-std::ofstream& get_outfile()
-{
-	outfile.open(nucleusFolder + logFile, std::ios_base::app);
-	return outfile;
-}
-
-std::string ws2s(const std::wstring& wstr)
-{
-	using convert_typeX = std::codecvt_utf8<wchar_t>;
-	std::wstring_convert<convert_typeX, wchar_t> converterX;
-
-	return converterX.to_bytes(wstr);
-}
 
 std::string date_string()
 {
@@ -284,26 +257,34 @@ void __stdcall NativeInjectionEntryPoint(REMOTE_ENTRY_INFO* inRemoteInfo)
 	InitializeCriticalSection(&mcs);
 
 	BYTE* data = inRemoteInfo->UserData;
+	BYTE* _p = data;
 
-	if ((INT)hWnd == 0)
+	if (reinterpret_cast<INT>(hWnd) == 0)
 	{
-		hWnd = (HWND)bytesToInt(data);
+		hWnd = reinterpret_cast<HWND>(bytesToInt(_p));
 	}
+	_p += 4;
 
-	BYTE* _p = data + 4;
+#define NEXTBOOL *(_p++) == 1
+	options.preventWindowDeactivation = NEXTBOOL;
+	options.setWindow = NEXTBOOL;
+	IsDebug = NEXTBOOL;
+	options.hideCursor = NEXTBOOL;
+	options.hookFocus = NEXTBOOL;
+	options.setCursorPos = NEXTBOOL;
+	options.getCursorPos = NEXTBOOL;
+	options.getKeyState = NEXTBOOL;
+	options.getAsyncKeyState = NEXTBOOL;
+	options.getKeyboardState = NEXTBOOL;
+	options.filterRawInput = NEXTBOOL;
+	options.filterMouseMessages = NEXTBOOL;
+	options.legacyInput = NEXTBOOL;
+	options.updateAbsoluteFlagInMouseMessage = NEXTBOOL;
+#undef NEXTBOOL
 
-	//IsDebug = data[6] == 1;
-	//const bool HideCursor = data[7] == 1;
-	//const bool HookFocus = data[8] == 1;
-	PreventWindowDeactivation = *(_p++) == 1;
-	bool SetWindow = *(_p++) == 1;
-	IsDebug = *(_p++) == 1;
-	bool HideCursor = *(_p++) == 1;
-	bool HookFocus = *(_p++) == 1;
-
-	const size_t pathLength = (size_t)bytesToInt(_p);
-	const size_t writePipeNameLength = (size_t)bytesToInt(_p + 4);
-	const size_t readPipeNameLength = (size_t)bytesToInt(_p + 8);
+	const auto pathLength = static_cast<size_t>(bytesToInt(_p));
+	const auto writePipeNameLength = static_cast<size_t>(bytesToInt(_p + 4));
+	const auto readPipeNameLength = static_cast<size_t>(bytesToInt(_p + 8));
 	_p += 12;
 
 	//C# gives number of bytes without null termination
@@ -320,39 +301,48 @@ void __stdcall NativeInjectionEntryPoint(REMOTE_ENTRY_INFO* inRemoteInfo)
 	_p += readPipeNameLength;
 
 	DEBUGLOG("Starting hook injection," <<
-		" SetWindow: " << SetWindow << 
-		" HookFocus: " << HookFocus << 
-		" HideCursor: " << HideCursor << 
-		" PreventWindowDeactivation: " << PreventWindowDeactivation <<
 		" WritePipeName: " << std::string(_writePipeName.begin(), _writePipeName.end()) <<
 		" ReadPipeName: " << std::string(_readPipeName.begin(), _readPipeName.end()) <<
+		" preventWindowDeactivation: " << options.preventWindowDeactivation <<
+		" setCursorPos: " << options.setCursorPos <<
+		" getCursorPos: " << options.getCursorPos <<
+		" getKeyState: " << options.getKeyState <<
+		" getAsyncKeyState: " << options.getAsyncKeyState <<
+		" getKeyboardState: " << options.getKeyboardState <<
+		" filterRawInput: " << options.filterRawInput <<
+		" filterMouseMessages: " << options.filterMouseMessages <<
+		" legacyInput: " << options.legacyInput <<
+		" updateAbsoluteFlagInMouseMessage: " << options.updateAbsoluteFlagInMouseMessage <<
+		" setWindow: " << options.setWindow <<
+		" hideCursor: " << options.hideCursor <<
+		" hookFocus: " << options.hookFocus <<
 		"\n");
 
-	if (SetWindow)
+	if (options.setWindow)
 		install_set_window_hook();
 
-	if (HookFocus)
+	if (options.hookFocus)
 		install_focus_hooks();
 
-	if (HideCursor)
+	if (options.hideCursor)
 		install_hide_cursor_hooks();
 
-	if (hookGetCursorPos)
+	if (options.getCursorPos)
 		install_get_cursor_pos_hook();
 
-	if (hookSetCursorPos)
+	if (options.setCursorPos)
 		install_set_cursor_pos_hook();
 
-	if (hookGetAsyncKeyState)
+	if (options.getAsyncKeyState)
 		install_get_async_key_state_hook();
 
-	if (hookGetKeyState)
+	if (options.getKeyState)
 		install_get_key_state_hook();
 
-	if (hookGetKeyboardState)
+	if (options.getKeyboardState)
 		install_get_keyboard_state_hook();
 
-	if (filterRawInput || filterMouseMessages || enableLegacyInput || PreventWindowDeactivation)
+	if (options.filterRawInput || options.filterMouseMessages || options.legacyInput || options.preventWindowDeactivation)
 	{
 		install_message_filter_hooks();
 	}

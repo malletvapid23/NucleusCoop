@@ -2755,6 +2755,15 @@ namespace Nucleus.Gaming
 		            nucleusFolderPath, // Primarily for log output
 		            gen.SetWindowHook, // SetWindow hook (prevents window from moving)
 					gen.PreventWindowDeactivation,
+					gen.HookSetCursorPos,
+					gen.HookGetCursorPos,
+					gen.HookGetKeyState,
+					gen.HookGetAsyncKeyState,
+					gen.HookGetKeyboardState,
+					gen.HookFilterRawInput,
+					gen.HookFilterMouseMessages,
+					gen.HookUseLegacyInput,
+					!gen.HookDontUpdateLegacyInMouseMsg,
 					window.HookPipe.pipeNameWrite,
 					window.HookPipe.pipeNameRead
 				};

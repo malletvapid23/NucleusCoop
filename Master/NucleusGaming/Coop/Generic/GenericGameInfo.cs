@@ -137,6 +137,17 @@ namespace Nucleus.Gaming
         public bool UseDirectX9Wrapper;
         public string SteamStubDRMPatcherArch;
 
+		//From USS
+		public bool HookSetCursorPos;
+		public bool HookGetCursorPos;
+		public bool HookGetKeyState;
+		public bool HookGetAsyncKeyState;
+		public bool HookGetKeyboardState;
+		public bool HookFilterRawInput;
+		public bool HookFilterMouseMessages;
+		public bool HookUseLegacyInput;
+		public bool HookDontUpdateLegacyInMouseMsg;
+
         public Type HandlerType
         {
             get { return typeof(GenericGameHandler); }

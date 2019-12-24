@@ -1,10 +1,6 @@
 #pragma once
+#include "Options.h"
 
 extern HWND hWnd;
 
-//TODO: temp option
-extern bool enableLegacyInput;
-extern bool filterRawInput;
-extern bool filterMouseMessages;
-extern bool updateAbsoluteFlagInMouseMessage;
-extern bool PreventWindowDeactivation;
+extern Options options;

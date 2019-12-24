@@ -69,7 +69,6 @@ namespace Nucleus.Gaming
         [Dynamic]
         public string ForceFocusWindowName = "";
 
-
         public bool BlockMouseEvents = true;
         public bool BlockKeyboardEvents = true;
         public bool BlockInputEvents = true;

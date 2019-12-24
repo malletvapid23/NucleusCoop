@@ -22,7 +22,7 @@ int lastX, lastY;
 
 void update_absolute_cursor_check()
 {
-	if (enableLegacyInput && !use_absolute_cursor_pos)
+	if (options.legacyInput && !use_absolute_cursor_pos)
 	{
 		//We assume we're in a menu and need absolute cursor pos
 		use_absolute_cursor_pos_counter++;
