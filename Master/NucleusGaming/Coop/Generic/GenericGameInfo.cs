@@ -136,6 +136,8 @@ namespace Nucleus.Gaming
         public string[] UseProcessorsPerInstance;
         public bool UseDirectX9Wrapper;
         public string SteamStubDRMPatcherArch;
+        public bool GoldbergLobbyConnect;
+        public string[] X360ceDll;
 
         public Type HandlerType
         {

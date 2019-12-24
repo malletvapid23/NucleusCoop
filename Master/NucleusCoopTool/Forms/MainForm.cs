@@ -24,7 +24,7 @@ namespace Nucleus.Coop
     /// </summary>
     public partial class MainForm : BaseForm
     {
-        public string version = "v0.9.8.2 ALPHA";
+        public string version = "v0.9.8.3 ALPHA";
 
         private Settings settingsForm = null;
 
@@ -542,8 +542,8 @@ namespace Nucleus.Coop
             }
 
 
-            if (currentStepIndex == 0)
-            {
+            //if (currentStepIndex == 0)
+            //{
                 foreach (Control c in StepPanel.Controls)
                 {
                     if (!c.Name.Equals("scriptAuthorLbl") && !c.Name.Equals("scriptAuthorTxt"))
@@ -551,11 +551,12 @@ namespace Nucleus.Coop
                         StepPanel.Controls.Remove(c);
                     }
                 }
-            }
-            else
-            {
-                this.StepPanel.Controls.Clear();
-            }
+            //}
+            //else
+            //{
+                //this.StepPanel.Controls.Clear();
+                MessageBox.Show("remove all");
+            //}
 
         }
 

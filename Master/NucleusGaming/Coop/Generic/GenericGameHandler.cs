@@ -94,6 +94,9 @@ namespace Nucleus.Gaming
         public string exePath;
         private string instanceExeFolder;
 
+        private static string lobbyConnectArg;
+        private static bool readToEnd = false;
+
         private readonly IniFile ini = new Gaming.IniFile(Path.Combine(Directory.GetCurrentDirectory(), "Settings.ini"));
         bool isDebug;
 
@@ -508,7 +511,7 @@ namespace Nucleus.Gaming
                     Log(string.Format("Mutexes - Handle(s): ({0}), KillMutexDelay: {1}, KillMutexType: {2}, RenameNotKillMutex: {3}, PartialMutexSearch: {4}", mutexList, gen.KillMutexDelay, gen.KillMutexType, gen.RenameNotKillMutex, gen.PartialMutexSearch));
                 }
 
-                Log("NucleusCoop mod version: 0.9.8.2 ALPHA");
+                Log("NucleusCoop mod version: 0.9.8.3 ALPHA");
                 string pcSpecs = "PC Info - ";
                 var name = (from x in new ManagementObjectSearcher("SELECT Caption FROM Win32_OperatingSystem").Get().Cast<ManagementObject>()
                             select x.GetPropertyValue("Caption")).FirstOrDefault();
@@ -1591,71 +1594,101 @@ namespace Nucleus.Gaming
                     string x360exe = "";
                     string x360dll = "";
                     string utilFolder = Path.Combine(Directory.GetCurrentDirectory(), "utils\\x360ce");
-                    if (i == 0)
+
+
+                    //else
+                    //{
+                    //    Log(string.Format("ERROR - Machine type {0} not implemented", GetDllMachineType(exePath)));
+                    //}
+
+                    if (gen.X360ceDll?.Length == 0)
                     {
-                        if (gameIs64)
-                        {
-                            x360exe = "x360ce_x64.exe";
-                            x360dll = "xinput1_3_x64.dll";
-                        }
-                        else //if (Is64Bit(exePath) == false)
-                        {
-                            x360exe = "x360ce.exe";
-                            x360dll = "xinput1_3.dll";
-                        }
-                        //else
-                        //{
-                        //    Log(string.Format("ERROR - Machine type {0} not implemented", GetDllMachineType(exePath)));
-                        //}
+                        gen.X360ceDll[0] = "xinput1_3.dll";
+                    }
 
-                        if (File.Exists(Path.Combine(instanceExeFolder, x360exe)))
-                        {
-                            File.Delete(Path.Combine(instanceExeFolder, x360exe));
-                        }
-                        Log("Copying over " + x360exe);
-                        File.Copy(Path.Combine(utilFolder, x360exe), Path.Combine(instanceExeFolder, x360exe), true);
+                    foreach (string x360ceDllName in gen.X360ceDll)
+                    {
 
-                        if (File.Exists(Path.Combine(instanceExeFolder, "xinput1_3.dll")))
+                        if (i == 0)
                         {
-                            File.Delete(Path.Combine(instanceExeFolder, "xinput1_3.dll"));
-                        }
-                        if(x360dll != "xinput1_3.dll")
-                        {
-                            Log("Copying over " + x360dll + " and renaming it to xinput1_3.dll");
+
+                            if (gameIs64)
+                            {
+                                x360exe = "x360ce_x64.exe";
+                                x360dll = "xinput1_3_x64.dll";
+                            }
+                            else //if (Is64Bit(exePath) == false)
+                            {
+                                x360exe = "x360ce.exe";
+                                x360dll = "xinput1_3.dll";
+                            }
+
+                            if (x360ceDllName.ToLower().StartsWith("dinput"))
+                            {
+                                if (gameIs64)
+                                {
+                                    x360dll = "dinput8_x64.dll";
+                                }
+                                else
+                                {
+                                    x360dll = "dinput8.dll";
+                                }
+                            }
+
+                            if (File.Exists(Path.Combine(instanceExeFolder, x360exe)))
+                            {
+                                File.Delete(Path.Combine(instanceExeFolder, x360exe));
+                            }
+                            Log("Copying over " + x360exe);
+                            File.Copy(Path.Combine(utilFolder, x360exe), Path.Combine(instanceExeFolder, x360exe), true);
+
+                            if (File.Exists(Path.Combine(instanceExeFolder, x360ceDllName)))
+                            {
+                                File.Delete(Path.Combine(instanceExeFolder, x360ceDllName));
+                            }
+                            if (x360dll != x360ceDllName)
+                            {
+                                Log("Copying over " + x360dll + " and renaming it to " + x360ceDllName);
+                            }
+                            else
+                            {
+                                Log("Copying over " + x360dll);
+                            }
+                            File.Copy(Path.Combine(utilFolder, x360dll), Path.Combine(instanceExeFolder, x360ceDllName), true);
+
                         }
                         else
                         {
-                            Log("Copying over " + x360dll);
+                            Log("Carrying over " + x360ceDllName + " from Instance0");
+                            if (File.Exists(Path.Combine(instanceExeFolder, x360ceDllName)))
+                            {
+                                File.Delete(Path.Combine(instanceExeFolder, x360ceDllName));
+                            }
+                                
+                            File.Copy(Path.Combine(instanceExeFolder.Substring(0, instanceExeFolder.LastIndexOf('\\') + 1) + "Instance0", x360ceDllName), Path.Combine(instanceExeFolder, x360ceDllName), true);
                         }
-                        File.Copy(Path.Combine(utilFolder, x360dll), Path.Combine(instanceExeFolder, "xinput1_3.dll"), true);
+                    }
 
-                        Log("Starting x360ce process");
-                        ProcessStartInfo startInfo = new ProcessStartInfo();
-                        startInfo.UseShellExecute = true;
-                        startInfo.WorkingDirectory = Path.GetDirectoryName(exePath);
-                        startInfo.FileName = Path.Combine(instanceExeFolder, x360exe);
-                        //if (gen.RunAsAdmin)
-                        //{
-                        //    startInfo.Verb = "runas";
-                        //}
-                        Process util = Process.Start(startInfo);
-                        Log("Waiting until x360ce process is exited");
-                        util.WaitForExit();
-                    }
-                    else
+                    Log("Carrying over x360ce.ini from Instance0");
+                    if (File.Exists(Path.Combine(instanceExeFolder, "x360ce.ini")))
                     {
-                        if (File.Exists(Path.Combine(instanceExeFolder, "x360ce.ini")))
-                        {
-                            File.Delete(Path.Combine(instanceExeFolder, "x360ce.ini"));
-                        }
-                        if (File.Exists(Path.Combine(instanceExeFolder, "xinput1_3.dll")))
-                        {
-                            File.Delete(Path.Combine(instanceExeFolder, "xinput1_3.dll"));
-                        }
-                        Log("Carrying over xinput1_3.dll and x360ce.ini from Instance0");
-                        File.Copy(Path.Combine(instanceExeFolder.Substring(0, instanceExeFolder.LastIndexOf('\\') + 1) + "Instance0", "xinput1_3.dll"), Path.Combine(instanceExeFolder, "xinput1_3.dll"), true);
-                        File.Copy(Path.Combine(instanceExeFolder.Substring(0, instanceExeFolder.LastIndexOf('\\') + 1) + "Instance0", "x360ce.ini"), Path.Combine(instanceExeFolder, "x360ce.ini"), true);
+                        File.Delete(Path.Combine(instanceExeFolder, "x360ce.ini"));
                     }
+                    File.Copy(Path.Combine(instanceExeFolder.Substring(0, instanceExeFolder.LastIndexOf('\\') + 1) + "Instance0", "x360ce.ini"), Path.Combine(instanceExeFolder, "x360ce.ini"), true);
+
+                    Log("Starting x360ce process");
+                    ProcessStartInfo startInfo = new ProcessStartInfo();
+                    startInfo.UseShellExecute = true;
+                    startInfo.WorkingDirectory = Path.GetDirectoryName(exePath);
+                    startInfo.FileName = Path.Combine(instanceExeFolder, x360exe);
+                    //if (gen.RunAsAdmin)
+                    //{
+                    //    startInfo.Verb = "runas";
+                    //}
+                    Process util = Process.Start(startInfo);
+                    Log("Waiting until x360ce process is exited");
+                    util.WaitForExit();
+
 
                     Log("Making changes to x360ce.ini; PAD mapping to player");
                     //string[] change = new string[] {
@@ -1772,6 +1805,11 @@ namespace Nucleus.Gaming
                 gen.PrePlay(context, this, player);
 
                 string startArgs = context.StartArguments;
+                if(!string.IsNullOrEmpty(lobbyConnectArg) && i > 0)
+                {
+                    startArgs = lobbyConnectArg + " " + startArgs;
+                    Log("Goldberg Lobby Connect: Will join lobby ID " + lobbyConnectArg.Substring(15));
+                }
 
                 if (context.Hook.CustomDllEnabled)
                 {
@@ -2074,6 +2112,7 @@ namespace Nucleus.Gaming
                 }
                 else
                 {
+
                     if ((context.KillMutex?.Length > 0 || (gen.HookInit || gen.RenameNotKillMutex || gen.SetWindowHookStart || gen.BlockRawInput)) && !gen.CMDLaunch && !gen.UseForceBindIP) /*|| (gen.CMDLaunch && i==0))*/
                     {
 
@@ -2244,6 +2283,45 @@ namespace Nucleus.Gaming
                         attachedIds.Add(proc.Id);
                         //InjectDLLs(proc);
                     }
+                }
+
+                if (gen.GoldbergLobbyConnect && i == 0)
+                {
+                    MessageBox.Show("Goldberg Lobby Connect: Press OK after you are hosting a game.", "Waiting", MessageBoxButtons.OK, MessageBoxIcon.None, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly);
+
+                    ProcessStartInfo startInfo = new ProcessStartInfo();
+                    startInfo.FileName = Path.Combine(Directory.GetCurrentDirectory(), "utils\\GoldbergEmu\\lobby_connect\\lobby_connect.exe");
+
+                    startInfo.RedirectStandardOutput = true;
+                    startInfo.UseShellExecute = false;
+                    Process p = Process.Start(startInfo);
+                    p.OutputDataReceived += proc_OutputDataReceived;
+                    p.BeginOutputReadLine();
+
+                    while (readToEnd == false)
+                    {
+                        Thread.Sleep(25);
+                    }
+                    try
+                    {
+                        Thread.Sleep(2500);
+                        p.Kill();
+                    }
+                    catch (Exception ex)
+                    { MessageBox.Show(ex.Message); }
+
+
+                    if (!string.IsNullOrEmpty(lobbyConnectArg))
+                    {
+                        //MessageBox.Show(lobbyConnectArg);
+                        Log("Goldberg Lobby Connect: Setting lobby ID to " + lobbyConnectArg.Substring(15));
+                    }
+                    else
+                    {
+                        Log("Goldberg Lobby Connect: Could not find lobby ID.");
+                        MessageBox.Show("Goldberg Lobby Connect: Could not find lobby ID.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                
                 }
 
                 if (i > 0 && gen.ResetWindows && prevProcessData != null)
@@ -2609,6 +2687,34 @@ namespace Nucleus.Gaming
             }
 
             return string.Empty;
+        }
+
+        public static void proc_OutputDataReceived(object sender, DataReceivedEventArgs e)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(e.Data))
+                {
+                    readToEnd = true;
+                    return;
+                }
+
+                if (e.Data.Contains("+connect_lobby") && string.IsNullOrEmpty(lobbyConnectArg))
+                {
+                    string toFind1 = "+connect_lobby ";
+                    int start = e.Data.IndexOf(toFind1);
+                    string string2 = e.Data.Substring(start);
+                    lobbyConnectArg = string2;
+                    readToEnd = true;
+                    return;
+                }
+
+            }
+            catch(Exception ex)
+            {
+                MessageBox.Show("Goldberg Lobby Connect output data error. " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+
         }
 
         private void InjectDLLs(Process proc)
