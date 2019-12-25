@@ -1192,7 +1192,7 @@ namespace Nucleus.Gaming
                         Directory.CreateDirectory(instanceSteamSettingsFolder);
                         //Directory.CreateDirectory(instanceSteam_SettingsFolder);
 
-                        if (nameFile.EndsWith("steam_api64.dll"))
+                        if (nameFile.EndsWith("steam_api64.dll", true, null))
                         {
                             try
                             {
@@ -1224,7 +1224,7 @@ namespace Nucleus.Gaming
                             }
                         }
 
-                        if (nameFile.EndsWith("steam_api.dll"))
+                        if (nameFile.EndsWith("steam_api.dll", true, null))
                         {
                             try
                             {
