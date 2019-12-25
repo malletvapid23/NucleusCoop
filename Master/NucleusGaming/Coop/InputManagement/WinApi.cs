@@ -197,5 +197,14 @@ namespace Nucleus.Gaming.Coop.InputManagement
 
 		[DllImport("user32.dll", CharSet = CharSet.Auto)]
 		public static extern IntPtr GetDesktopWindow();
+
+		[DllImport("kernel32.dll")]
+		public static extern IntPtr WaitForSingleObject(IntPtr hHandle, int dwMilliseconds);
+
+		[DllImport("user32.dll")]
+		public static extern int FillRect(IntPtr hDC, [In] ref RECT lprc, IntPtr hbr);
+
+		[DllImport("gdi32.dll")]
+		public static extern IntPtr CreateSolidBrush(uint crColor);
 	}
 }

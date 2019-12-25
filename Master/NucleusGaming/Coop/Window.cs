@@ -58,28 +58,27 @@ namespace Nucleus.Gaming.Coop
 
 			public bool visible = true;
 
-			private int oldScreenX;
-			private int oldScreenY;
+			private int oldRelativeScreenX;
+			private int oldRelativeScreenY;
 
 			IntPtr hWnd;
 
 			System.Reflection.MethodInfo paintBkgMethod;
 
-			System.Drawing.Graphics g = null;
+			Graphics g = null;
 			IntPtr h;
 			bool hasDrawn = false;//We need to paint the entire window once at the start.
 
-			const int windowWidth = 1300;//Minimum width
-			const int windowHeight = 800;
+			const int windowWidth = 2000;//Minimum width
+			const int windowHeight = 2000;
 
-			private readonly IntPtr pointerHandle;
+			private IntPtr hbr;
 
+			const int cursorWidthHeight = 35;
 
 			public PointerForm(IntPtr hWnd, int gameWindowWidth, int gameWindowHeight, int gameWindowX, int gameWindowY) : base()
 			{
 				this.hWnd = hWnd;
-				this.pointerHandle = this.Handle;
-				//CheckForIllegalCrossThreadCalls = false;
 
 				Width = Math.Max(windowWidth, gameWindowWidth + 100);
 				Height = Math.Max(windowHeight, gameWindowHeight + 100);
@@ -89,18 +88,17 @@ namespace Nucleus.Gaming.Coop
 				StartPosition = FormStartPosition.Manual;
 				Location = new System.Drawing.Point(gameWindowX + gameWindowWidth / 2, gameWindowY + gameWindowHeight / 2);
 				TopMost = true;
-				BackColor = System.Drawing.Color.Green;
+				BackColor = Color.FromArgb(255, 0, 0, 1);
 				TransparencyKey = BackColor;
 				ShowInTaskbar = false;
 				//WinApi.SetWindowLongPtr(pointerHandle, (-8), hWnd);//Sets owner. Always draws above owner.
 
 				hicon = Cursors.Arrow.Handle;
 
+				hbr = WinApi.CreateSolidBrush(0x00010000);//0x00bbggrr
+
 				paintBkgMethod = typeof(Control).GetMethod("PaintBackground", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance, null, new Type[] { typeof(PaintEventArgs), typeof(System.Drawing.Rectangle) }, null);
 			}
-
-
-			const int cursorWidthHeight = 100;
 
 			protected override void OnPaintBackground(PaintEventArgs e)
 			{
@@ -111,22 +109,27 @@ namespace Nucleus.Gaming.Coop
 					return;
 				}
 
-				//This only wipes a small area, which reduces CPU usage.
-				paintBkgMethod.Invoke(this, new object[]{e,
-					new System.Drawing.Rectangle(oldScreenX - Location.X, oldScreenY - Location.Y, cursorWidthHeight, cursorWidthHeight) });
-
 				if (g == null)
 				{
-					//g = System.Drawing.Graphics.FromHwnd(pointerHandle);
 					g = CreateGraphics();
 					h = g.GetHdc();
 				}
 
-				if (visible)
-					WinApi.DrawIcon(h, screenX - Location.X, screenY - Location.Y, hicon);//Coordinates are relative to Location of PointerForm
+				//Wipe where the cursor was last time
+				var r = new RECT
+				{
+					Left = oldRelativeScreenX,
+					Top = oldRelativeScreenY
+				};
+				r.Bottom = r.Top + cursorWidthHeight;
+				r.Right = r.Left + cursorWidthHeight;
+				WinApi.FillRect(h, ref r, hbr);
 
-				oldScreenX = screenX;
-				oldScreenY = screenY;
+				if (visible)
+					WinApi.DrawIcon(h, screenX - Location.X, screenY - Location.Y, hicon); //Coordinates are relative to Location of PointerForm
+
+				oldRelativeScreenX = screenX - Location.X;
+				oldRelativeScreenY = screenY - Location.Y;
 
 				//Greatly reduces CPU usage, doesn't lock any input. Insignificant delay. Mouse cursor is only used in menus, not first person.
 				System.Threading.Thread.Sleep(1);
@@ -135,7 +138,6 @@ namespace Nucleus.Gaming.Coop
 			public void InvalidateMouse()
 			{
 				//Causes this region to be re-drawn
-				//Invalidate(new System.Drawing.Rectangle(oldScreenX - Location.X, oldScreenY - Location.Y, cursorWidthHeight, cursorWidthHeight)); (Seems to work inconsistently)
 				Invalidate();
 			}
 
@@ -144,7 +146,15 @@ namespace Nucleus.Gaming.Coop
 			{
 				try
 				{
-					base.OnPaintBackground(new PaintEventArgs(g, Bounds));
+					var r = new RECT
+					{
+						Left = 0,
+						Top = 0,
+						Bottom = Height,
+						Right = Width
+					};
+
+					WinApi.FillRect(h, ref r, hbr);
 				}
 				catch (Exception e)
 				{
@@ -188,11 +198,11 @@ namespace Nucleus.Gaming.Coop
 					pointerForm.screenX = p.X;
 					pointerForm.screenY = p.Y;
 
-					const int padding = 32;
+					const int padding = 35;
 					if (p.X <= pointerForm.Location.X + padding || p.Y <= pointerForm.Location.Y + padding ||
 						p.X >= pointerForm.Location.X + pointerForm.Width - padding || p.Y >= pointerForm.Location.Y + pointerForm.Height - padding)
 					{
-						pointerForm.RepaintAll();
+						//pointerForm.RepaintAll(); (unecessary waste of CPU)
 						pointerForm.Location = new System.Drawing.Point(p.X - pointerForm.Width / 2, p.Y - pointerForm.Height / 2);
 					}
 
