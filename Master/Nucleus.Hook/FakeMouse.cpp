@@ -14,7 +14,8 @@ int use_absolute_cursor_pos_counter = 0; // 0/1/2/3/... : FALSE, requiredAbsCoun
 const int required_abs_count = 40;
 int origin_x, origin_y;
 
-HANDLE allowed_mouse_handle = nullptr; //We will allow raw input from this mouse handle.
+extern HANDLE allowed_mouse_handle = HANDLE(-1); //We will allow raw input from this mouse handle.
+extern HANDLE allowed_keyboard_handle = HANDLE(-1);
 
 bool use_absolute_cursor_pos = true;
 

@@ -2769,7 +2769,9 @@ namespace Nucleus.Gaming
 					gen.SupportsMultipleKeyboardsAndMice && gen.HookUseLegacyInput,
 					!gen.HookDontUpdateLegacyInMouseMsg,
 					window.HookPipe.pipeNameWrite,
-					window.HookPipe.pipeNameRead
+					window.HookPipe.pipeNameRead,
+					window.MouseAttached.ToInt32(),
+					window.KeyboardAttached.ToInt32()
 				};
 
 	            var sbArgs = new StringBuilder();

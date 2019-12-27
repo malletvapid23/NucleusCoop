@@ -28,13 +28,23 @@ BOOL FilterMessage(LPMSG lpMsg)
 			(dwSize == sorh) &&
 			(dwSize == GetRawInputData((HRAWINPUT)lpMsg->lParam, RID_HEADER, raw, &dwSize, sorh)))
 		{
-			if ((raw->header.dwType == RIM_TYPEMOUSE))
+			if (raw->header.dwType == RIM_TYPEMOUSE)
 			{
 				if (raw->header.hDevice == allowed_mouse_handle)
 				{
 					ALLOW;
 				}
 				
+				BLOCK;
+			}
+			
+			if (raw->header.dwType == RIM_TYPEKEYBOARD)
+			{
+				if (raw->header.hDevice == allowed_keyboard_handle)
+				{
+					ALLOW;
+				}
+
 				BLOCK;
 			}
 		}

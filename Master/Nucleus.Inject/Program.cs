@@ -234,6 +234,9 @@ namespace Nucleus.Inject
 				string writePipeName = args[i++];
 				string readPipeName = args[i++];
 
+				int.TryParse(args[i++], out int allowedRawMouseHandle);
+				int.TryParse(args[i++], out int allowedRawKeyboardHandle);
+
 				var logPath = Encoding.Unicode.GetBytes(nucleusFolderPath);
                 int logPathLength = logPath.Length;
                 //int.TryParse(args[i++], out int InPassThruSize);
@@ -254,7 +257,17 @@ namespace Nucleus.Inject
                 dataToSend[index++] = (byte)(hWnd >> 8);
                 dataToSend[index++] = (byte)(hWnd);
 
-                byte Bool_1_0(bool x) => x ? (byte)1 : (byte)0;
+                dataToSend[index++] = (byte)(allowedRawMouseHandle >> 24);
+                dataToSend[index++] = (byte)(allowedRawMouseHandle >> 16);
+                dataToSend[index++] = (byte)(allowedRawMouseHandle >> 8);
+                dataToSend[index++] = (byte)(allowedRawMouseHandle);
+
+                dataToSend[index++] = (byte)(allowedRawKeyboardHandle >> 24);
+                dataToSend[index++] = (byte)(allowedRawKeyboardHandle >> 16);
+                dataToSend[index++] = (byte)(allowedRawKeyboardHandle >> 8);
+                dataToSend[index++] = (byte)(allowedRawKeyboardHandle);
+
+				byte Bool_1_0(bool x) => x ? (byte)1 : (byte)0;
 				dataToSend[index++] = Bool_1_0(preventWindowDeactivation);
 				dataToSend[index++] = Bool_1_0(setWindow);
 				dataToSend[index++] = Bool_1_0(isDebug);

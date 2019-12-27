@@ -265,6 +265,12 @@ void __stdcall NativeInjectionEntryPoint(REMOTE_ENTRY_INFO* inRemoteInfo)
 	}
 	_p += 4;
 
+	allowed_mouse_handle = reinterpret_cast<HANDLE>(bytesToInt(_p));
+	_p += 4;
+	
+	allowed_keyboard_handle = reinterpret_cast<HANDLE>(bytesToInt(_p));
+	_p += 4;
+
 #define NEXTBOOL *(_p++) == 1
 	options.preventWindowDeactivation = NEXTBOOL;
 	options.setWindow = NEXTBOOL;

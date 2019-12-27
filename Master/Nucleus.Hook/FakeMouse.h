@@ -13,6 +13,7 @@ extern int origin_x, origin_y;
 extern int lastX, lastY;
 
 extern HANDLE allowed_mouse_handle; //We will allow raw input from this mouse handle.
+extern HANDLE allowed_keyboard_handle;
 
 extern bool use_absolute_cursor_pos;
 
