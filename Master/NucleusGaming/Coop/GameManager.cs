@@ -90,7 +90,7 @@ namespace Nucleus.Gaming
 		public void UpdateCurrentGameProfile(GameProfile newProfile)
 		{
 			currentProfile = newProfile;
-			rawInputProcessor.CurrentProfile = newProfile;
+			RawInputProcessor.CurrentProfile = newProfile;
 		}
 
         /// <summary>

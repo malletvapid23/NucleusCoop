@@ -379,6 +379,8 @@ namespace Nucleus.Gaming
                 return false;
             }
 
+            RawInputProcessor.CurrentGameInfo = gen;
+
             try
             {
                 // if there's a keyboard player, re-order play list
@@ -2755,14 +2757,16 @@ namespace Nucleus.Gaming
 		            nucleusFolderPath, // Primarily for log output
 		            gen.SetWindowHook, // SetWindow hook (prevents window from moving)
 					gen.PreventWindowDeactivation,
-					gen.HookSetCursorPos,
-					gen.HookGetCursorPos,
-					gen.HookGetKeyState,
-					gen.HookGetAsyncKeyState,
-					gen.HookGetKeyboardState,
-					gen.HookFilterRawInput,
-					gen.HookFilterMouseMessages,
-					gen.HookUseLegacyInput,
+
+					//These options are enabled by default, but if the game isn't using these features the hooks are unwanted
+					gen.SupportsMultipleKeyboardsAndMice && gen.HookSetCursorPos,
+					gen.SupportsMultipleKeyboardsAndMice && gen.HookGetCursorPos,
+					gen.SupportsMultipleKeyboardsAndMice && gen.HookGetKeyState,
+					gen.SupportsMultipleKeyboardsAndMice && gen.HookGetAsyncKeyState,
+					gen.SupportsMultipleKeyboardsAndMice && gen.HookGetKeyboardState,
+					gen.SupportsMultipleKeyboardsAndMice && gen.HookFilterRawInput,
+					gen.SupportsMultipleKeyboardsAndMice && gen.HookFilterMouseMessages,
+					gen.SupportsMultipleKeyboardsAndMice && gen.HookUseLegacyInput,
 					!gen.HookDontUpdateLegacyInMouseMsg,
 					window.HookPipe.pipeNameWrite,
 					window.HookPipe.pipeNameRead

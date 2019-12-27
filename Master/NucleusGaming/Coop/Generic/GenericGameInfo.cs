@@ -137,18 +137,30 @@ namespace Nucleus.Gaming
         public bool UseDirectX9Wrapper;
         public string SteamStubDRMPatcherArch;
 
-		//From USS
-		public bool HookSetCursorPos;
-		public bool HookGetCursorPos;
-		public bool HookGetKeyState;
-		public bool HookGetAsyncKeyState;
-		public bool HookGetKeyboardState;
+		// -- From USS
+		//Effectively a switch for all of USS features
+		public bool SupportsMultipleKeyboardsAndMice;
+		
+		//Hooks
+		public bool HookSetCursorPos = true;
+		public bool HookGetCursorPos = true;
+		public bool HookGetKeyState = true;
+		public bool HookGetAsyncKeyState = true;
+		public bool HookGetKeyboardState = true;
 		public bool HookFilterRawInput;
 		public bool HookFilterMouseMessages;
 		public bool HookUseLegacyInput;
 		public bool HookDontUpdateLegacyInMouseMsg;
 
-        public Type HandlerType
+		//Not hooks
+		public bool SendNormalMouseInput = true;
+		public bool SendNormalKeyboardInput = true;
+		public bool SendScrollWheel = false;
+		public bool ForwardRawKeyboardInput = false;
+		public bool ForwardRawMouseInput = false;
+		// --
+
+		public Type HandlerType
         {
             get { return typeof(GenericGameHandler); }
         }

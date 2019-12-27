@@ -18,14 +18,11 @@ namespace Nucleus.Gaming.Coop.InputManagement
 	{
 		#region Temporary options
 		//TODO: remove temporary options
-		private static bool sendNormalKeyboardInput = true;
-		private static bool sendRawKeyboardInput = false;
-		private static bool forwardRawMouseInput = false;
-		private static bool hookGetCursorPos = true;
-		private static bool hookGetKeyState = true;
-		private static bool hookGetAsyncKeyState = true;
-		private static bool sendScrollWheel = false;
-		private static bool sendNormalMouse = true;
+		//private static bool sendNormalKeyboardInput = true;
+		//private static bool sendRawKeyboardInput = false;
+		//private static bool forwardRawMouseInput = false;
+		//private static bool sendScrollWheel = false;
+		//private static bool sendNormalMouse = true;
 
 		private static int toggleLockInputKey = 0x23;//End
 		private bool inputLocked = false;
@@ -37,7 +34,8 @@ namespace Nucleus.Gaming.Coop.InputManagement
 
 		private List<Window> Windows => RawInputManager.windows;
 
-		public GameProfile CurrentProfile { get; set; } = null;
+		public static GenericGameInfo CurrentGameInfo { get; set; } = null;
+		public static GameProfile CurrentProfile { get; set; } = null;
 		private List<PlayerInfo> PlayerInfos => CurrentProfile?.PlayerData;
 
 		//leftMiddleRight: left=1, middle=2, right=3, xbutton1=4, xbutton2=5
@@ -84,7 +82,7 @@ namespace Nucleus.Gaming.Coop.InputManagement
 				return;
 			}
 						
-			if (sendNormalKeyboardInput)
+			if (CurrentGameInfo.SendNormalKeyboardInput)
 			{
 				uint scanCode = rawBuffer.data.keyboard.MakeCode;
 				ushort vKey = rawBuffer.data.keyboard.VKey;
@@ -116,7 +114,7 @@ namespace Nucleus.Gaming.Coop.InputManagement
 				if (vKey < keysDown.Length)
 					keysDown[vKey] = keyDown;
 
-				if ((hookGetKeyState || hookGetAsyncKeyState) && stateChangedSinceLast)
+				if ((CurrentGameInfo.HookGetKeyState || CurrentGameInfo.HookGetAsyncKeyState || CurrentGameInfo.HookGetKeyboardState) && stateChangedSinceLast)
 				{
 					window.HookPipe.WriteMessage(0x02, vKey, keyDown ? 1 : 0);
 				}
@@ -126,7 +124,7 @@ namespace Nucleus.Gaming.Coop.InputManagement
 			}
 
 			//Resend raw input to application. Works for some games only
-			if (sendRawKeyboardInput)
+			if (CurrentGameInfo.ForwardRawKeyboardInput)
 			{
 				WinApi.PostMessageA(window.hWnd, (uint)MessageTypes.WM_INPUT, (IntPtr)0x0000, hRawInput);
 
@@ -141,7 +139,7 @@ namespace Nucleus.Gaming.Coop.InputManagement
 			IntPtr mouseHandle = rawBuffer.header.hDevice;
 			
 			//Resend raw input to application. Works for some games only
-			if (forwardRawMouseInput)
+			if (CurrentGameInfo.ForwardRawMouseInput)
 			{
 				WinApi.PostMessageA(window.hWnd, (uint)MessageTypes.WM_INPUT, (IntPtr)0x0000, hRawInput);
 
@@ -157,7 +155,7 @@ namespace Nucleus.Gaming.Coop.InputManagement
 			mouseVec.x = Math.Min(window.Width, Math.Max(mouseVec.x + deltaX, 0));
 			mouseVec.y = Math.Min(window.Height, Math.Max(mouseVec.y + deltaY, 0));
 
-			if (hookGetCursorPos)
+			if (CurrentGameInfo.HookGetCursorPos)
 			{
 				window.HookPipe?.SendMousePosition(deltaX, deltaY, mouseVec.x, mouseVec.y);
 			}
@@ -195,7 +193,7 @@ namespace Nucleus.Gaming.Coop.InputManagement
 						if (oldBtnState != isButtonDown)
 							WinApi.PostMessageA(hWnd, (uint)msg, (IntPtr)wParam, (IntPtr)packedXY);
 
-						if ((hookGetAsyncKeyState || hookGetKeyState) && (oldBtnState != isButtonDown))
+						if ((CurrentGameInfo.HookGetAsyncKeyState || CurrentGameInfo.HookGetKeyState || CurrentGameInfo.HookGetKeyboardState) && (oldBtnState != isButtonDown))
 							window.HookPipe.WriteMessage(0x02, vKey, isButtonDown ? 1 : 0);
 
 
@@ -226,14 +224,14 @@ namespace Nucleus.Gaming.Coop.InputManagement
 					}
 				}
 
-				if (sendScrollWheel && (f & (ushort)RawInputButtonFlags.RI_MOUSE_WHEEL) > 0)
+				if (CurrentGameInfo.SendScrollWheel && (f & (ushort)RawInputButtonFlags.RI_MOUSE_WHEEL) > 0)
 				{
 					ushort delta = mouse.usButtonData;
 					WinApi.PostMessageA(hWnd, (uint)MouseEvents.WM_MOUSEWHEEL, (IntPtr)((delta * 0x10000) + 0), (IntPtr)packedXY);
 				}
 			}
 
-			if (sendNormalMouse)
+			if (CurrentGameInfo.SendNormalMouseInput)
 			{
 				ushort mouseMoveState = 0x0000;
 				(bool l, bool m, bool r, bool x1, bool x2) = window.MouseState;
