@@ -17,6 +17,7 @@
 #include "Globals.h"
 #include "KeyStates.h"
 #include "FakeMouse.h"
+#include "Piping.h"
 
 #ifdef _DEBUG
 bool IsDebug = false;
@@ -32,12 +33,6 @@ std::wstring nucleusFolder;
 Options options;
 HWND hWnd = 0;
 
-std::wstring _writePipeName;
-std::wstring _readPipeName;
-HANDLE hPipeRead;
-HANDLE hPipeWrite;
-bool pipe_closed = false;
-
 std::string date_string()
 {
 	tm tinfo;
@@ -47,11 +42,6 @@ std::string date_string()
 	char buffer[21];
 	strftime(buffer, 21, "%Y-%m-%d %H:%M:%S", &tinfo);
 	return "[" + std::string(buffer) + "]";
-}
-
-inline int bytesToInt(BYTE* bytes)
-{
-	return (int)(bytes[0] << 24 | bytes[1] << 16 | bytes[2] << 8 | bytes[3]);
 }
 
 // Structure used to communicate data from and to enumeration procedure
@@ -127,124 +117,6 @@ NTSTATUS HookInstall(LPCSTR moduleHandle, LPCSTR proc, void* callBack)
 	return result;
 }
 
-void startPipeListen()
-{
-	//Read pipe
-	char _pipeNameChars[256];
-	sprintf_s(_pipeNameChars, "\\\\.\\pipe\\%s", std::string(_readPipeName.begin(), _readPipeName.end()).c_str());
-
-	hPipeRead = CreateFile(
-		_pipeNameChars,
-		GENERIC_READ,
-		FILE_SHARE_READ | FILE_SHARE_WRITE,
-		nullptr,
-		OPEN_EXISTING,
-		FILE_ATTRIBUTE_NORMAL,
-		nullptr
-	);
-
-	if (hPipeRead == INVALID_HANDLE_VALUE)
-	{
-		DEBUGLOG("Failed to connect to pipe (read)\n")
-		return;
-	}
-
-	DEBUGLOG("Connected to pipe (read)\n")
-
-	//Write pipe
-	char _pipeNameCharsWrite[256];
-	sprintf_s(_pipeNameCharsWrite, "\\\\.\\pipe\\%s", std::string(_writePipeName.begin(), _writePipeName.end()).c_str());
-
-	hPipeWrite = CreateFile(
-		_pipeNameCharsWrite,
-		GENERIC_WRITE,
-		FILE_SHARE_READ | FILE_SHARE_WRITE,
-		nullptr,
-		OPEN_EXISTING,
-		FILE_ATTRIBUTE_NORMAL,
-		nullptr
-	);
-
-	if (hPipeWrite == INVALID_HANDLE_VALUE)
-	{
-		DEBUGLOG("Failed to connect to pipe (write)\n")
-	}
-	else
-	{
-		DEBUGLOG("Connected to pipe (write)\n")
-	}
-
-	//Loop until pipe close message is received
-	for (;;)
-	{
-		BYTE buffer[9]; //9 bytes are sent at a time (1st is message, next 8 for 2 ints)
-		DWORD bytesRead = 0;
-
-		BOOL result = ReadFile(
-			hPipeRead,
-			buffer,
-			9 * sizeof(BYTE),
-			&bytesRead,
-			nullptr
-		);
-
-		if (result && bytesRead == 9)
-		{
-			int param1 = bytesToInt(&buffer[1]);
-
-			int param2 = bytesToInt(&buffer[5]);
-
-			//cout << "Received message. Msg=" << (int)buffer[0] << ", param1=" << param1 << ", param2=" << param2 << "\n";
-
-			switch (buffer[0])
-			{
-			case 0x01: //Add delta cursor pos
-			{
-				EnterCriticalSection(&mcs);
-				fake_x += param1;
-				fake_y += param2;
-				LeaveCriticalSection(&mcs);
-				break;
-			}
-			case 0x04: //Set absolute cursor pos
-			{
-				EnterCriticalSection(&mcs);
-				absolute_x = param1;
-				absolute_y = param2;
-				LeaveCriticalSection(&mcs);
-				break;
-			}
-			case 0x02: //Set VKey
-			{
-				setVkeyState(param1, param2 != 0);
-				break;
-			}
-			case 0x03: //Close named pipe
-			{
-				DEBUGLOG("Received pipe closed message. Closing pipe..." << "\n")
-				pipe_closed = true;
-				return;
-			}
-			case 0x05: //Focus desktop
-			{
-				//If the game brings itself to the foreground, it is the only window that can set something else as foreground (so it's required to do this in Hooks)
-				SetForegroundWindow(GetDesktopWindow());
-				break;
-			}
-			default:
-			{
-				break;
-			}
-			}
-		}
-		else
-		{
-			//TODO: needs to quit if failed too many times (in a row)
-			//cout << "Failed to read message\n";
-		}
-	}
-}
-
 // EasyHook will be looking for this export to support DLL injection. If not found then 
 // DLL injection will fail.
 extern "C" void __declspec(dllexport) __stdcall NativeInjectionEntryPoint(REMOTE_ENTRY_INFO* inRemoteInfo);
@@ -286,6 +158,7 @@ void __stdcall NativeInjectionEntryPoint(REMOTE_ENTRY_INFO* inRemoteInfo)
 	options.filterMouseMessages = NEXTBOOL;
 	options.legacyInput = NEXTBOOL;
 	options.updateAbsoluteFlagInMouseMessage = NEXTBOOL;
+	options.mouseVisibilitySendBack = NEXTBOOL;
 #undef NEXTBOOL
 
 	const auto pathLength = static_cast<size_t>(bytesToInt(_p));
@@ -300,15 +173,15 @@ void __stdcall NativeInjectionEntryPoint(REMOTE_ENTRY_INFO* inRemoteInfo)
 	nucleusFolderPath[pathLength / sizeof(WCHAR)] = '\0';//Null-terminate the string
 	nucleusFolder = nucleusFolderPath;
 
-	_writePipeName = std::wstring(reinterpret_cast<wchar_t*>(_p), writePipeNameLength/2);
+	Piping::writePipeName = std::wstring(reinterpret_cast<wchar_t*>(_p), writePipeNameLength/2);
 	_p += writePipeNameLength;
 
-	_readPipeName = std::wstring(reinterpret_cast<wchar_t*>(_p), readPipeNameLength/2);
+	Piping::readPipeName = std::wstring(reinterpret_cast<wchar_t*>(_p), readPipeNameLength/2);
 	_p += readPipeNameLength;
 
 	DEBUGLOG("Starting hook injection," <<
-		" WritePipeName: " << std::string(_writePipeName.begin(), _writePipeName.end()) <<
-		" ReadPipeName: " << std::string(_readPipeName.begin(), _readPipeName.end()) <<
+		" WritePipeName: " << std::string(Piping::writePipeName.begin(), Piping::writePipeName.end()) <<
+		" ReadPipeName: " << std::string(Piping::readPipeName.begin(), Piping::readPipeName.end()) <<
 		" preventWindowDeactivation: " << options.preventWindowDeactivation <<
 		" setCursorPos: " << options.setCursorPos <<
 		" getCursorPos: " << options.getCursorPos <<
@@ -330,7 +203,7 @@ void __stdcall NativeInjectionEntryPoint(REMOTE_ENTRY_INFO* inRemoteInfo)
 	if (options.hookFocus)
 		install_focus_hooks();
 
-	if (options.hideCursor)
+	if (options.hideCursor || options.mouseVisibilitySendBack)
 		install_hide_cursor_hooks();
 
 	if (options.getCursorPos)
@@ -355,5 +228,5 @@ void __stdcall NativeInjectionEntryPoint(REMOTE_ENTRY_INFO* inRemoteInfo)
 
 	DEBUGLOG("Hook injection complete\n");
 
-	startPipeListen();
+	Piping::startPipeListen();
 }

@@ -16,4 +16,5 @@ public:
 	bool filterMouseMessages;
 	bool legacyInput;
 	bool updateAbsoluteFlagInMouseMessage;
+	bool mouseVisibilitySendBack;//Updates C# side whenever the game changes the mouse visibility
 };

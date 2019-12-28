@@ -17,5 +17,6 @@ extern HANDLE allowed_keyboard_handle;
 
 extern bool use_absolute_cursor_pos;
 
-
 void update_absolute_cursor_check();
+
+void SetCursorVisibility(bool show);

@@ -151,6 +151,7 @@ namespace Nucleus.Gaming
 		public bool HookFilterMouseMessages;
 		public bool HookUseLegacyInput;
 		public bool HookDontUpdateLegacyInMouseMsg;
+		public bool HookMouseVisibility = true;
 
 		//Not hooks
 		public bool SendNormalMouseInput = true;

@@ -2767,6 +2767,8 @@ namespace Nucleus.Gaming
 					gen.SupportsMultipleKeyboardsAndMice && gen.HookFilterMouseMessages,
 					gen.SupportsMultipleKeyboardsAndMice && gen.HookUseLegacyInput,
 					!gen.HookDontUpdateLegacyInMouseMsg,
+					gen.SupportsMultipleKeyboardsAndMice && gen.HookMouseVisibility,
+
 					window.HookPipe?.pipeNameWrite ?? "",
 					window.HookPipe?.pipeNameRead ?? "",
 					window.MouseAttached.ToInt32(),
