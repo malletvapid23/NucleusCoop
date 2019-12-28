@@ -247,6 +247,11 @@ namespace Nucleus.Gaming
 
             LogManager.UnregisterForLogCallback(this);
 
+            foreach (var window in RawInputManager.windows)
+            {
+				window.HookPipe?.Close();
+            }
+
             Cursor.Clip = Rectangle.Empty; // guarantee were not clipping anymore
             string backupDir = GameManager.Instance.GempTempFolder(this.userGame.Game);
             ForceFinish();
@@ -2504,8 +2509,7 @@ namespace Nucleus.Gaming
 						MouseAttached = mouseHdev
 					};
 
-					//TODO: Don't always need write pipe
-					window.HookPipe = new HookPipe(hWnd, window, true);
+					window.CreateHookPipe(gen);
 
 					RawInputManager.windows.Add(window);
 				}
@@ -2671,13 +2675,8 @@ namespace Nucleus.Gaming
 
 				//Logger.WriteLine($"hWnd={hWnd}, mouse={window.MouseAttached}, kb={window.KeyboardAttached}");
 
-				//TODO: create cursor option
-				//if (Options.CurrentOptions.DrawMouse)
-				if (true)
+				if (gen.DrawFakeMouseCursor && gen.SupportsMultipleKeyboardsAndMice)
 				{
-					//Debug.WriteLine("Creating cursor...");
-					//window.CreateCursor();
-					//Debug.WriteLine("Created cursor");
 					window.NeedsCursorToBeCreatedOnMainMessageLoop = true;
 				}
 
@@ -2768,8 +2767,8 @@ namespace Nucleus.Gaming
 					gen.SupportsMultipleKeyboardsAndMice && gen.HookFilterMouseMessages,
 					gen.SupportsMultipleKeyboardsAndMice && gen.HookUseLegacyInput,
 					!gen.HookDontUpdateLegacyInMouseMsg,
-					window.HookPipe.pipeNameWrite,
-					window.HookPipe.pipeNameRead,
+					window.HookPipe?.pipeNameWrite ?? "",
+					window.HookPipe?.pipeNameRead ?? "",
 					window.MouseAttached.ToInt32(),
 					window.KeyboardAttached.ToInt32()
 				};

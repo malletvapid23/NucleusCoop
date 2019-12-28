@@ -158,6 +158,7 @@ namespace Nucleus.Gaming
 		public bool SendScrollWheel = false;
 		public bool ForwardRawKeyboardInput = false;
 		public bool ForwardRawMouseInput = false;
+		public bool DrawFakeMouseCursor = true;
 		// --
 
 		public Type HandlerType

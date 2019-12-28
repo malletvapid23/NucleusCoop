@@ -585,8 +585,8 @@ namespace Nucleus.Coop
                 }
 
 				//Raw mice/keyboards
-				//TODO: Only if the script allows it
-				playerData.AddRange(RawInputManager.GetDeviceInputInfos());
+				if(game.Game.SupportsMultipleKeyboardsAndMice)
+					playerData.AddRange(RawInputManager.GetDeviceInputInfos());
 
                 // make fake data if needed
                 if (testDinputPlayers != -1)
@@ -1639,7 +1639,7 @@ namespace Nucleus.Coop
                 g.DrawRectangle(Pens.Red, draggingScreenRec);
             }
 
-            g.DrawString("Gamepads", playerTextFont, Brushes.White, new PointF(10, 10));
+            g.DrawString(game.Game.SupportsMultipleKeyboardsAndMice ? "Input Devices" : "Gamepads", playerTextFont, Brushes.White, new PointF(10, 10));
 
             SizeF dragEachGamepadSize;
             string dragEachGamepad = "Drag each gamepad to a screen\nClick top-left corner to change layout\nRight click player to change size";

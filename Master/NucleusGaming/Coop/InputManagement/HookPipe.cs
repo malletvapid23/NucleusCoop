@@ -26,12 +26,6 @@ namespace Nucleus.Gaming.Coop.InputManagement
 	*/
 	public class HookPipe
 	{
-		#region Temporary options
-		//TODO: remove HookPipe temporary options
-		private static bool useLegacyInput = true;
-		private static bool hookGetCursorPos = true;
-		#endregion
-
 		public readonly string pipeNameRead;//Read FROM Hooks
 		public readonly string pipeNameWrite;//Written from Hooks
 
@@ -48,13 +42,22 @@ namespace Nucleus.Gaming.Coop.InputManagement
 		int toSendDeltaX, toSendDeltaY, toSendAbsX, toSendAbsY;
 		private ManualResetEvent xyResetEvent = new ManualResetEvent(false);
 
-		public HookPipe(IntPtr hWnd, Window window, bool needWritePipe)
+		private Action onClosed;
+
+		private GenericGameInfo gameInfo;
+
+		private int sequentialErrorCounter = 0;
+		private const int numSequentialErrorsBeforeAssumeDead = 10;
+
+		public HookPipe(IntPtr hWnd, Window window, bool needWritePipe, Action onClosed, GenericGameInfo gameInfo)
 		{
 			pipeNameRead = GenerateName();
 			if (needWritePipe) pipeNameWrite = GenerateName();
 
 			this.hWnd = hWnd;
 			this.window = window;
+			this.onClosed = onClosed;
+			this.gameInfo = gameInfo;
 
 			serverThread = new Thread(Start);
 			serverThread.Start();
@@ -93,9 +96,9 @@ namespace Nucleus.Gaming.Coop.InputManagement
 			// - Absolute mouse position (this is bound from 0,0 to width,height). This is used in the menus.
 			//If legacy input is disabled, Delta changes aren't used for first person camera movement (e.g. it uses raw input) so it doesn't need to be sent.
 
-			bool sendDelta = useLegacyInput;
+			bool sendDelta = gameInfo.HookUseLegacyInput;
 
-			if (sendDelta || hookGetCursorPos)
+			if (sendDelta || gameInfo.HookGetCursorPos)
 			{
 				//With this system, input messages are only sent as fast as one thread can manage.
 				while (clientConnected)
@@ -133,13 +136,22 @@ namespace Nucleus.Gaming.Coop.InputManagement
 
 			while (clientConnected)
 			{
-				byte[] buffer = new byte[9];
-				pipeServerWrite.Read(buffer, 0, 9);
-				int msg = buffer[0];
-
-				if (msg == 0x06)
+				try
 				{
-					window.CursorVisibility = (buffer[4] == 1);
+					byte[] buffer = new byte[9];
+					pipeServerWrite.Read(buffer, 0, 9);
+					int msg = buffer[0];
+
+					if (msg == 0x06)
+					{
+						window.CursorVisibility = (buffer[4] == 1);
+					}
+
+					sequentialErrorCounter = 0;
+				}
+				catch
+				{
+					CountError();
 				}
 			}
 			Console.WriteLine("ReceiveMessages END");
@@ -182,10 +194,11 @@ namespace Nucleus.Gaming.Coop.InputManagement
 					try
 					{
 						pipeServerRead?.Write(bytes, 0, 9);
+						sequentialErrorCounter = 0;
 					}
 					catch (Exception)
 					{
-						//TODO: Is game closed?
+						CountError();
 					}
 				});
 			}
@@ -208,10 +221,21 @@ namespace Nucleus.Gaming.Coop.InputManagement
 			try
 			{
 				pipeServerRead.Write(bytes, 0, 9);
+				sequentialErrorCounter = 0;
 			}
 			catch (Exception)
 			{
-				//TODO: Is game closed?
+				CountError();
+;			}
+		}
+
+		private void CountError()
+		{
+			sequentialErrorCounter++;
+			if (sequentialErrorCounter == numSequentialErrorsBeforeAssumeDead)
+			{
+				sequentialErrorCounter = 0;//Avoid stack overflow
+				Close();
 			}
 		}
 
@@ -230,6 +254,8 @@ namespace Nucleus.Gaming.Coop.InputManagement
 
 			clientConnected = false;
 			xyResetEvent.Close();
+
+			onClosed();
 		}
 
 		//https://github.com/EasyHook/EasyHook/blob/master/EasyHook/RemoteHook.cs

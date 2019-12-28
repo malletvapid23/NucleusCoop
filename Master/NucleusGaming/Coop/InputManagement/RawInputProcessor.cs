@@ -116,7 +116,7 @@ namespace Nucleus.Gaming.Coop.InputManagement
 
 				if ((CurrentGameInfo.HookGetKeyState || CurrentGameInfo.HookGetAsyncKeyState || CurrentGameInfo.HookGetKeyboardState) && stateChangedSinceLast)
 				{
-					window.HookPipe.WriteMessage(0x02, vKey, keyDown ? 1 : 0);
+					window.HookPipe?.WriteMessage(0x02, vKey, keyDown ? 1 : 0);
 				}
 
 				//This also (sometimes) makes GetKeyboardState work, as windows uses the message queue for GetKeyboardState
@@ -194,7 +194,7 @@ namespace Nucleus.Gaming.Coop.InputManagement
 							WinApi.PostMessageA(hWnd, (uint)msg, (IntPtr)wParam, (IntPtr)packedXY);
 
 						if ((CurrentGameInfo.HookGetAsyncKeyState || CurrentGameInfo.HookGetKeyState || CurrentGameInfo.HookGetKeyboardState) && (oldBtnState != isButtonDown))
-							window.HookPipe.WriteMessage(0x02, vKey, isButtonDown ? 1 : 0);
+							window.HookPipe?.WriteMessage(0x02, vKey, isButtonDown ? 1 : 0);
 
 
 						if (leftMiddleRight == 1)

@@ -243,5 +243,16 @@ namespace Nucleus.Gaming.Coop
 			WinApi.GetClientRect(hWnd, out var bounds);
 			Bounds = bounds;
 		}
+
+		public void CreateHookPipe(GenericGameInfo gameInfo)
+		{
+			//TODO: Don't always need write pipe
+			HookPipe = new HookPipe(hWnd, this, true, OnPipeClosed, gameInfo);
+		}
+
+		private void OnPipeClosed()
+		{
+			HookPipe = null;
+		}
 	}
 }
