@@ -2,4 +2,4 @@
 
 void setVkeyState(int vkey, bool down);
 
-bool is_vkey_down(int vkey);
+bool isVkeyDown(int vkey);

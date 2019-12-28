@@ -10,16 +10,16 @@ namespace Piping
 
 	HANDLE hPipeRead;
 	HANDLE hPipeWrite;
-	bool pipe_closed = false;
+	bool pipeClosed = false;
 
 	void startPipeListen()
 	{
 		//Read pipe
-		char _pipeNameChars[256];
-		sprintf_s(_pipeNameChars, R"(\\.\pipe\%s)", std::string(readPipeName.begin(), readPipeName.end()).c_str());
+		char pipeNameChars[256];
+		sprintf_s(pipeNameChars, R"(\\.\pipe\%s)", std::string(readPipeName.begin(), readPipeName.end()).c_str());
 
 		hPipeRead = CreateFile(
-			_pipeNameChars,
+			pipeNameChars,
 			GENERIC_READ,
 			FILE_SHARE_READ | FILE_SHARE_WRITE,
 			nullptr,
@@ -36,12 +36,12 @@ namespace Piping
 
 		DEBUGLOG("Connected to pipe (read)\n")
 
-			//Write pipe
-			char _pipeNameCharsWrite[256];
-		sprintf_s(_pipeNameCharsWrite, "\\\\.\\pipe\\%s", std::string(writePipeName.begin(), writePipeName.end()).c_str());
+		//Write pipe
+		char pipeNameCharsWrite[256];
+		sprintf_s(pipeNameCharsWrite, R"(\\.\pipe\%s)", std::string(writePipeName.begin(), writePipeName.end()).c_str());
 
 		hPipeWrite = CreateFile(
-			_pipeNameCharsWrite,
+			pipeNameCharsWrite,
 			GENERIC_WRITE,
 			FILE_SHARE_READ | FILE_SHARE_WRITE,
 			nullptr,
@@ -65,7 +65,7 @@ namespace Piping
 			BYTE buffer[9]; //9 bytes are sent at a time (1st is message, next 8 for 2 ints)
 			DWORD bytesRead = 0;
 
-			BOOL result = ReadFile(
+			const auto result = ReadFile(
 				hPipeRead,
 				buffer,
 				9 * sizeof(BYTE),
@@ -75,9 +75,9 @@ namespace Piping
 
 			if (result && bytesRead == 9)
 			{
-				int param1 = bytesToInt(&buffer[1]);
+				const auto param1 = bytesToInt(&buffer[1]);
 
-				int param2 = bytesToInt(&buffer[5]);
+				const auto param2 = bytesToInt(&buffer[5]);
 
 				//cout << "Received message. Msg=" << (int)buffer[0] << ", param1=" << param1 << ", param2=" << param2 << "\n";
 
@@ -86,16 +86,16 @@ namespace Piping
 				case 0x01: //Add delta cursor pos
 				{
 					EnterCriticalSection(&mcs);
-					fake_x += param1;
-					fake_y += param2;
+					fakeX += param1;
+					fakeY += param2;
 					LeaveCriticalSection(&mcs);
 					break;
 				}
 				case 0x04: //Set absolute cursor pos
 				{
 					EnterCriticalSection(&mcs);
-					absolute_x = param1;
-					absolute_y = param2;
+					absoluteX = param1;
+					absoluteY = param2;
 					LeaveCriticalSection(&mcs);
 					break;
 				}
@@ -107,7 +107,7 @@ namespace Piping
 				case 0x03: //Close named pipe
 				{
 					DEBUGLOG("Received pipe closed message. Closing pipe..." << "\n")
-						pipe_closed = true;
+						pipeClosed = true;
 					return;
 				}
 				case 0x05: //Focus desktop

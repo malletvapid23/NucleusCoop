@@ -7,8 +7,8 @@ BOOL WINAPI SetWindowPos_Hook(HWND hWnd, HWND hWndInsertAfter, int X, int Y, int
 	return true;
 }
 
-void install_set_window_hook()
+void installSetWindowHook()
 {
 	DEBUGLOG("Injecting SetWindow hook\n");
-	HookInstall("user32", "SetWindowPos", SetWindowPos_Hook);
+	installHook("user32", "SetWindowPos", SetWindowPos_Hook);
 }

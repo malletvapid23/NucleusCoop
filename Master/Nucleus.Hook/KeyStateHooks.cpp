@@ -5,12 +5,12 @@
 
 SHORT WINAPI GetAsyncKeyState_Hook(int vKey)
 {
-	return is_vkey_down(vKey) ? 0b1000000000000000 : 0;
+	return isVkeyDown(vKey) ? 0b1000000000000000 : 0;
 }
 
 SHORT WINAPI GetKeyState_Hook(int nVirtKey)
 {
-	return is_vkey_down(nVirtKey) ? 0b1000000000000000 : 0;
+	return isVkeyDown(nVirtKey) ? 0b1000000000000000 : 0;
 }
 
 BOOL WINAPI GetKeyboardState_Hook(PBYTE lpKeyState)
@@ -19,26 +19,26 @@ BOOL WINAPI GetKeyboardState_Hook(PBYTE lpKeyState)
 
 	for (int vkey = 0; vkey < 256; vkey++)
 	{
-		lpKeyState[vkey] = is_vkey_down(vkey) ? 0b10000000 : 0;
+		lpKeyState[vkey] = isVkeyDown(vkey) ? 0b10000000 : 0;
 	}
 
 	return TRUE;
 }
 
-void install_get_async_key_state_hook()
+void installGetAsyncKeyStateHook()
 {
 	DEBUGLOG("Injecting GetAsyncKeyState hook\n");
-	HookInstall(TEXT("user32"), "GetAsyncKeyState", GetAsyncKeyState_Hook);
+	installHook(TEXT("user32"), "GetAsyncKeyState", GetAsyncKeyState_Hook);
 }
 
-void install_get_key_state_hook()
+void installGetKeyStateHook()
 {
 	DEBUGLOG("Injecting GetKeyState hook\n");
-	HookInstall(TEXT("user32"), "GetKeyState", GetKeyState_Hook);
+	installHook(TEXT("user32"), "GetKeyState", GetKeyState_Hook);
 }
 
-void install_get_keyboard_state_hook()
+void installGetKeyboardStateHook()
 {
 	DEBUGLOG("Injecting GetKeyboardState hook\n");
-	HookInstall(TEXT("user32"), "GetKeyboardState", GetKeyboardState_Hook);
+	installHook(TEXT("user32"), "GetKeyboardState", GetKeyboardState_Hook);
 }

@@ -574,7 +574,7 @@ HWND FindWindowFromProcess(HANDLE hProcess) {
 	return FindWindowFromProcessId(GetProcessId(hProcess));
 }
 
-NTSTATUS HookInstall(LPCSTR moduleHandle, LPCSTR proc, void* callBack)
+NTSTATUS installHook(LPCSTR moduleHandle, LPCSTR proc, void* callBack)
 {
 	// Perform hooking
 	HOOK_TRACE_INFO hHook = { NULL }; // keep track of our hook
@@ -675,14 +675,14 @@ void installFindMutexHooks(LPCWSTR targets)
 #undef GET_NT_PROC
 
 	//Hooks
-	HookInstall("ntdll.dll", "NtCreateMutant", NtCreateMutant_Hook);
-	HookInstall("ntdll.dll", "NtOpenMutant", NtOpenMutant_Hook);
+	installHook("ntdll.dll", "NtCreateMutant", NtCreateMutant_Hook);
+	installHook("ntdll.dll", "NtOpenMutant", NtOpenMutant_Hook);
 
-	HookInstall("ntdll.dll", "NtCreateEvent", NtCreateEvent_Hook);
-	HookInstall("ntdll.dll", "NtOpenEvent", NtOpenEvent_Hook);
+	installHook("ntdll.dll", "NtCreateEvent", NtCreateEvent_Hook);
+	installHook("ntdll.dll", "NtOpenEvent", NtOpenEvent_Hook);
 
-	HookInstall("ntdll.dll", "NtCreateSemaphore", NtCreateSemaphore_Hook);
-	HookInstall("ntdll.dll", "NtOpenSemaphore", NtOpenSemaphore_Hook);
+	installHook("ntdll.dll", "NtCreateSemaphore", NtCreateSemaphore_Hook);
+	installHook("ntdll.dll", "NtOpenSemaphore", NtOpenSemaphore_Hook);
 
 	if (IsDebug)
 	{
@@ -738,7 +738,7 @@ void __stdcall NativeInjectionEntryPoint(REMOTE_ENTRY_INFO* inRemoteInfo)
 			outfile << date_string() << "SHOOK64: Injecting SetWindow hook\n";
 			outfile.close();
 		}
-		HookInstall("user32", "SetWindowPos", SetWindowPos_Hook);
+		installHook("user32", "SetWindowPos", SetWindowPos_Hook);
 		if (!HookWindow && !RenameMutex && !BlockRaw)
 		{
 			if (IsDebug)
@@ -759,11 +759,11 @@ void __stdcall NativeInjectionEntryPoint(REMOTE_ENTRY_INFO* inRemoteInfo)
 			outfile << date_string() << "SHOOK64: Injecting HookWindow hooks\n";
 			outfile.close();
 		}
-		HookInstall("user32", "FindWindowA", FindWindow_Hook);
-		HookInstall("user32", "FindWindowW", FindWindow_Hook);
-		HookInstall("user32", "FindWindowExA", FindWindowEx_Hook);
-		HookInstall("user32", "FindWindowExW", FindWindowEx_Hook);
-		HookInstall("user32", "EnumWindows", EnumWindows_Hook);
+		installHook("user32", "FindWindowA", FindWindow_Hook);
+		installHook("user32", "FindWindowW", FindWindow_Hook);
+		installHook("user32", "FindWindowExA", FindWindowEx_Hook);
+		installHook("user32", "FindWindowExW", FindWindowEx_Hook);
+		installHook("user32", "EnumWindows", EnumWindows_Hook);
 		if (!RenameMutex && !BlockRaw)
 		{
 			if (IsDebug)
@@ -788,14 +788,14 @@ void __stdcall NativeInjectionEntryPoint(REMOTE_ENTRY_INFO* inRemoteInfo)
 			outfile.close();
 		}
 
-		//HookInstall("user32", "GetMessageA", GetMessageA_Hook);
-		//HookInstall("user32", "GetMessageW", GetMessageW_Hook);
-		//HookInstall("user32", "PeekMessageA", PeekMessageA_Hook);
-		//HookInstall("user32", "PeekMessageW", PeekMessageW_Hook);
+		//installHook("user32", "GetMessageA", GetMessageA_Hook);
+		//installHook("user32", "GetMessageW", GetMessageW_Hook);
+		//installHook("user32", "PeekMessageA", PeekMessageA_Hook);
+		//installHook("user32", "PeekMessageW", PeekMessageW_Hook);
 
-		HookInstall("user32", "GetRawInputDeviceList", GetRawInputDeviceList_Hook);
-		HookInstall("user32", "GetRegisteredRawInputDevices", GetRegisteredRawInputDevices_Hook);
-		//HookInstall("user32", "RegisterRawInputDevices", RegisterRawInputDevices_Hook);
+		installHook("user32", "GetRawInputDeviceList", GetRawInputDeviceList_Hook);
+		installHook("user32", "GetRegisteredRawInputDevices", GetRegisteredRawInputDevices_Hook);
+		//installHook("user32", "RegisterRawInputDevices", RegisterRawInputDevices_Hook);
 
 		/*LONG_PTR g_OldWndProc = SetWindowLongPtr(hWnd, GWLP_WNDPROC, (LONG_PTR)WndProc_Hook);*/
 

@@ -3,34 +3,33 @@
 #include "FakeMouse.h"
 #include "InstallHooks.h"
 #include "Globals.h"
-#include "FakeMouse.h"
 #include <windowsx.h>
 
-BOOL FilterMessage(LPMSG lpMsg)
+BOOL filterMessage(const LPMSG lpMsg)
 {
-	UINT Msg = lpMsg->message;
-	WPARAM _wParam = lpMsg->wParam;
-	LPARAM _lParam = lpMsg->lParam;
+	const auto msg = lpMsg->message;
+	const auto wParam = lpMsg->wParam;
+	const auto lParam = lpMsg->lParam;
 
 #define ALLOW return 1;
 #define BLOCK memset(lpMsg, 0, sizeof(MSG)); return -1;
 
 	//Filter raw input
-	if (Msg == WM_INPUT && options.filterRawInput)
+	if (msg == WM_INPUT && options.filterRawInput)
 	{
 		lpMsg->wParam = RIM_INPUT;//While in foreground
 
 		UINT dwSize = 0;
-		const UINT sorh = sizeof(RAWINPUTHEADER);
+		const auto sorh = sizeof(RAWINPUTHEADER);
 		static RAWINPUT raw[sorh];
 
-		if ((0 == GetRawInputData((HRAWINPUT)lpMsg->lParam, RID_HEADER, nullptr, &dwSize, sorh)) &&
-			(dwSize == sorh) &&
-			(dwSize == GetRawInputData((HRAWINPUT)lpMsg->lParam, RID_HEADER, raw, &dwSize, sorh)))
+		if (0 == GetRawInputData(reinterpret_cast<HRAWINPUT>(lpMsg->lParam), RID_HEADER, nullptr, &dwSize, sorh) &&
+			dwSize == sorh &&
+			dwSize == GetRawInputData(reinterpret_cast<HRAWINPUT>(lpMsg->lParam), RID_HEADER, raw, &dwSize, sorh))
 		{
 			if (raw->header.dwType == RIM_TYPEMOUSE)
 			{
-				if (raw->header.hDevice == allowed_mouse_handle)
+				if (raw->header.hDevice == allowedMouseHandle)
 				{
 					ALLOW;
 				}
@@ -40,7 +39,7 @@ BOOL FilterMessage(LPMSG lpMsg)
 			
 			if (raw->header.dwType == RIM_TYPEKEYBOARD)
 			{
-				if (raw->header.hDevice == allowed_keyboard_handle)
+				if (raw->header.hDevice == allowedKeyboardHandle)
 				{
 					ALLOW;
 				}
@@ -53,23 +52,23 @@ BOOL FilterMessage(LPMSG lpMsg)
 	//Legacy input filter
 	if (options.legacyInput)
 	{
-		if (Msg == WM_MOUSEMOVE)
+		if (msg == WM_MOUSEMOVE)
 		{
-			if (((int)_wParam & 0b10000000) > 0) //Signature for message sent from USS (C#)
+			if ((static_cast<int>(wParam) & 0b10000000) > 0) //Signature for message sent from USS (C#)
 			{
-				if (use_absolute_cursor_pos == false)
+				if (useAbsoluteCursorPos == false)
 				{
 					if (options.updateAbsoluteFlagInMouseMessage)
 					{
-						int x = GET_X_LPARAM(_lParam);
-						int y = GET_Y_LPARAM(_lParam);
+						const int x = GET_X_LPARAM(lParam);
+						const int y = GET_Y_LPARAM(lParam);
 
 						if (!(x == 0 && y == 0) && !(x == lastX && y == lastY))
 							// - Minecraft (GLFW/LWJGL) will create a WM_MOUSEMOVE message with (0,0) AND another with (lastX, lastY) 
 							//whenever a mouse button is clicked, WITHOUT calling SetCursorPos
 							// - This would cause absoluteCursorPos to be turned on when it shouldn't.
 						{
-							update_absolute_cursor_check();
+							updateAbsoluteCursorCheck();
 						}
 
 						if (x != 0)
@@ -78,7 +77,7 @@ BOOL FilterMessage(LPMSG lpMsg)
 						if (y != 0)
 							lastY = y;
 
-						lpMsg->lParam = MAKELPARAM(fake_x, fake_y);
+						lpMsg->lParam = MAKELPARAM(fakeX, fakeY);
 						ALLOW;
 					}
 					BLOCK;
@@ -90,7 +89,7 @@ BOOL FilterMessage(LPMSG lpMsg)
 		}
 	}
 
-	if(Msg == WM_KILLFOCUS && options.preventWindowDeactivation)
+	if(msg == WM_KILLFOCUS && options.preventWindowDeactivation)
 	{
 		BLOCK;
 	}
@@ -98,23 +97,23 @@ BOOL FilterMessage(LPMSG lpMsg)
 	//USS signature is 1 << 7 or 0b10000000 for WM_MOUSEMOVE(0x0200). If this is detected, allow event to pass
 	if (options.filterMouseMessages)
 	{
-		if (Msg == WM_KILLFOCUS || (Msg == WM_ACTIVATE && _wParam == 0) || Msg == WM_CAPTURECHANGED || (Msg == WM_ACTIVATE && (int)_lParam == (int)hWnd))
+		if (msg == WM_KILLFOCUS || msg == WM_ACTIVATE && wParam == 0 || msg == WM_CAPTURECHANGED || msg == WM_ACTIVATE && static_cast<int>(lParam) == reinterpret_cast<int>(hWnd))
 		{
 			BLOCK;
 		}
 
-		if (Msg == WM_MOUSEMOVE && ((int)_wParam & 0b10000000) > 0)
+		if (msg == WM_MOUSEMOVE && (static_cast<int>(wParam) & 0b10000000) > 0)
 			ALLOW;
 
 		// || Msg == 0x00FF
-		if ((Msg >= WM_XBUTTONDOWN && Msg <= WM_XBUTTONDBLCLK) || Msg == WM_MOUSEMOVE || Msg == WM_MOUSEACTIVATE || Msg
-			== WM_MOUSEHOVER || Msg == WM_MOUSELEAVE || Msg == WM_MOUSEWHEEL || Msg == WM_SETCURSOR || Msg ==
+		if (msg >= WM_XBUTTONDOWN && msg <= WM_XBUTTONDBLCLK || msg == WM_MOUSEMOVE || msg == WM_MOUSEACTIVATE || msg
+			== WM_MOUSEHOVER || msg == WM_MOUSELEAVE || msg == WM_MOUSEWHEEL || msg == WM_SETCURSOR || msg ==
 			WM_NCMOUSELEAVE) //Other mouse events. 
 		{
 			BLOCK;
 		}
 
-		if (Msg == WM_ACTIVATE)
+		if (msg == WM_ACTIVATE)
 		{
 			lpMsg->lParam = 1;
 			lpMsg->wParam = 0;
@@ -130,38 +129,38 @@ BOOL FilterMessage(LPMSG lpMsg)
 
 BOOL WINAPI GetMessageA_Hook(LPMSG lpMsg, HWND hWnd, UINT wMsgFilterMin, UINT wMsgFilterMax)
 {
-	BOOL ret = GetMessageA(lpMsg, hWnd, wMsgFilterMin, wMsgFilterMax);
+	const auto ret = GetMessageA(lpMsg, hWnd, wMsgFilterMin, wMsgFilterMax);
 
-	return ret == -1 ? -1 : FilterMessage(lpMsg);
+	return ret == -1 ? -1 : filterMessage(lpMsg);
 }
 
 BOOL WINAPI GetMessageW_Hook(LPMSG lpMsg, HWND hWnd, UINT wMsgFilterMin, UINT wMsgFilterMax)
 {
-	BOOL ret = GetMessageW(lpMsg, hWnd, wMsgFilterMin, wMsgFilterMax);
+	const auto ret = GetMessageW(lpMsg, hWnd, wMsgFilterMin, wMsgFilterMax);
 
-	return ret == -1 ? -1 : FilterMessage(lpMsg);
+	return ret == -1 ? -1 : filterMessage(lpMsg);
 }
 
 BOOL WINAPI PeekMessageA_Hook(LPMSG lpMsg, HWND hWnd, UINT wMsgFilterMin, UINT wMsgFilterMax, UINT wRemoveMsg)
 {
-	BOOL ret = PeekMessageA(lpMsg, hWnd, wMsgFilterMin, wMsgFilterMax, wRemoveMsg);
+	const auto ret = PeekMessageA(lpMsg, hWnd, wMsgFilterMin, wMsgFilterMax, wRemoveMsg);
 
-	return ret == FALSE ? FALSE : FilterMessage(lpMsg);
+	return ret == FALSE ? FALSE : filterMessage(lpMsg);
 }
 
 BOOL WINAPI PeekMessageW_Hook(LPMSG lpMsg, HWND hWnd, UINT wMsgFilterMin, UINT wMsgFilterMax, UINT wRemoveMsg)
 {
-	BOOL ret = PeekMessageW(lpMsg, hWnd, wMsgFilterMin, wMsgFilterMax, wRemoveMsg);
+	const auto ret = PeekMessageW(lpMsg, hWnd, wMsgFilterMin, wMsgFilterMax, wRemoveMsg);
 
-	return ret == FALSE ? FALSE : FilterMessage(lpMsg);
+	return ret == FALSE ? FALSE : filterMessage(lpMsg);
 }
 
-void install_message_filter_hooks()
+void installMessageFilterHooks()
 {
 	DEBUGLOG("Injecting message filter hooks\n");
-	HookInstall(TEXT("user32"), "GetMessageA", GetMessageA_Hook);
-	HookInstall(TEXT("user32"), "GetMessageW", GetMessageW_Hook);
+	installHook(TEXT("user32"), "GetMessageA", GetMessageA_Hook);
+	installHook(TEXT("user32"), "GetMessageW", GetMessageW_Hook);
 
-	HookInstall(TEXT("user32"), "PeekMessageA", PeekMessageA_Hook);
-	HookInstall(TEXT("user32"), "PeekMessageW", PeekMessageW_Hook);
+	installHook(TEXT("user32"), "PeekMessageA", PeekMessageA_Hook);
+	installHook(TEXT("user32"), "PeekMessageW", PeekMessageW_Hook);
 }

@@ -1,22 +1,20 @@
 #pragma once
 
 extern CRITICAL_SECTION mcs;
-extern int fake_x; //Delta X
-extern int fake_y;
+extern int fakeX, fakeY; //Delta X/Y
 
-extern int absolute_x;
-extern int absolute_y;
+extern int absoluteX, absoluteY;
 
-extern int use_absolute_cursor_pos_counter; // 0/1/2/3/... : FALSE, requiredAbsCount : TRUE
-extern const int required_abs_count;
-extern int origin_x, origin_y;
+extern int useAbsoluteCursorPosCounter; // 0/1/2/3/... : FALSE, requiredAbsCount : TRUE
+extern const int REQUIRED_ABS_COUNT;
+extern int originX, originY;
 extern int lastX, lastY;
 
-extern HANDLE allowed_mouse_handle; //We will allow raw input from this mouse handle.
-extern HANDLE allowed_keyboard_handle;
+extern HANDLE allowedMouseHandle; //We will allow raw input from this mouse handle.
+extern HANDLE allowedKeyboardHandle;
 
-extern bool use_absolute_cursor_pos;
+extern bool useAbsoluteCursorPos;
 
-void update_absolute_cursor_check();
+void updateAbsoluteCursorCheck();
 
-void SetCursorVisibility(bool show);
+void setCursorVisibility(bool show);

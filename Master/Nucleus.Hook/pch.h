@@ -10,7 +10,7 @@
 // add headers that you want to pre-compile here
 #include "framework.h"
 
-inline int bytesToInt(BYTE* bytes)
+inline int bytesToInt(const BYTE* bytes)
 {
 	return static_cast<int>(bytes[0] << 24 | bytes[1] << 16 | bytes[2] << 8 | bytes[3]);
 }

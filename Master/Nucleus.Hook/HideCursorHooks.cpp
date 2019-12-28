@@ -11,9 +11,9 @@ int WINAPI ShowCursor_Hook(BOOL bShow)
 		return ShowCursor(FALSE);
 	}
 	
-	SetCursorVisibility(bShow == TRUE);
+	setCursorVisibility(bShow == TRUE);
 	if (bShow == FALSE) ShowCursor(FALSE);
-	return (bShow == TRUE) ? 0 : -1;
+	return bShow == TRUE ? 0 : -1;
 }
 
 HCURSOR WINAPI SetCursor_Hook(HCURSOR hCursor)
@@ -23,14 +23,14 @@ HCURSOR WINAPI SetCursor_Hook(HCURSOR hCursor)
 		return SetCursor(nullptr);
 	}
 
-	SetCursorVisibility(hCursor != nullptr);
+	setCursorVisibility(hCursor != nullptr);
 	if (hCursor == nullptr) SetCursor(nullptr);
 	return hCursor;
 }
 
-void install_hide_cursor_hooks()
+void installHideCursorHooks()
 {
 	DEBUGLOG("Injecting ShowCursor and SetCursor hooks\n");
-	HookInstall("user32", "ShowCursor", ShowCursor_Hook);
-	HookInstall("user32", "SetCursor", SetCursor_Hook);
+	installHook("user32", "ShowCursor", ShowCursor_Hook);
+	installHook("user32", "SetCursor", SetCursor_Hook);
 }

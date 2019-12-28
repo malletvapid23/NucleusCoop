@@ -11,23 +11,23 @@ BOOL WINAPI GetCursorPos_Hook(LPPOINT lpPoint)
 	if (lpPoint)
 	{
 		EnterCriticalSection(&mcs);
-		if ((!options.legacyInput) || use_absolute_cursor_pos)
+		if (!options.legacyInput || useAbsoluteCursorPos)
 		{
 			//Absolute mouse position (always do this if legacy input is off)
-			lpPoint->x = absolute_x;
-			lpPoint->y = absolute_y;
+			lpPoint->x = absoluteX;
+			lpPoint->y = absoluteY;
 		}
 		else
 		{
 			//Delta mouse position
-			lpPoint->x = fake_x;
-			lpPoint->y = fake_y;
+			lpPoint->x = fakeX;
+			lpPoint->y = fakeY;
 		}
 
 		LeaveCriticalSection(&mcs);
 		ClientToScreen(hWnd, lpPoint);
 
-		update_absolute_cursor_check();
+		updateAbsoluteCursorCheck();
 	}
 	return true;
 }
@@ -41,39 +41,39 @@ BOOL WINAPI SetCursorPos_Hook(int X, int Y)
 	//SetCursorPos require screen coordinates (relative to 0,0 of monitor)
 	ScreenToClient(hWnd, &p);
 
-	origin_x = p.x;
-	origin_y = p.y;
+	originX = p.x;
+	originY = p.y;
 
 	if (!options.legacyInput)
 	{
 		EnterCriticalSection(&mcs);
-		absolute_x = p.x;
-		absolute_y = p.y;
+		absoluteX = p.x;
+		absoluteY = p.y;
 		LeaveCriticalSection(&mcs);
 	}
 	else
 	{
 		EnterCriticalSection(&mcs);
-		fake_x = p.x;
-		fake_y = p.y;
+		fakeX = p.x;
+		fakeY = p.y;
 		LeaveCriticalSection(&mcs);
 
-		use_absolute_cursor_pos_counter = 0;
-		use_absolute_cursor_pos = false;
+		useAbsoluteCursorPosCounter = 0;
+		useAbsoluteCursorPos = false;
 	}
 
 	return TRUE;
 }
 
-void install_set_cursor_pos_hook()
+void installSetCursorPosHook()
 {
 	DEBUGLOG("Injecting SetCursorPos hook\n");
-	HookInstall("user32", "SetCursorPos", SetCursorPos_Hook);
+	installHook("user32", "SetCursorPos", SetCursorPos_Hook);
 }
 
 
-void install_get_cursor_pos_hook()
+void installGetCursorPosHook()
 {
 	DEBUGLOG("Injecting GetCursorPos hook\n");
-	HookInstall("user32", "GetCursorPos", GetCursorPos_Hook);
+	installHook("user32", "GetCursorPos", GetCursorPos_Hook);
 }

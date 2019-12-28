@@ -33,13 +33,13 @@ HWND WINAPI GetCapture_Hook()
 	return hWnd;
 }
 
-void install_focus_hooks()
+void installFocusHooks()
 {
 	DEBUGLOG("Injecting Focus hooks\n");
-	HookInstall("user32", "GetForegroundWindow", GetForegroundWindow_Hook);
-	HookInstall("user32", "WindowFromPoint", WindowFromPoint_Hook);
-	HookInstall("user32", "GetActiveWindow", GetActiveWindow_Hook);
-	HookInstall("user32", "IsWindowEnabled", IsWindowEnabled_Hook);
-	HookInstall("user32", "GetFocus", GetFocus_Hook);
-	HookInstall("user32", "GetCapture", GetCapture_Hook);
+	installHook("user32", "GetForegroundWindow", GetForegroundWindow_Hook);
+	installHook("user32", "WindowFromPoint", WindowFromPoint_Hook);
+	installHook("user32", "GetActiveWindow", GetActiveWindow_Hook);
+	installHook("user32", "IsWindowEnabled", IsWindowEnabled_Hook);
+	installHook("user32", "GetFocus", GetFocus_Hook);
+	installHook("user32", "GetCapture", GetCapture_Hook);
 }

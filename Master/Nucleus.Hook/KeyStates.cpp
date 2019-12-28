@@ -4,37 +4,37 @@
 //(unused from USS)
 //UINT16 vkey_state; //Stores the mouse keys (5 of them) and the WASD keys. (1=on, 0=off)
 
-const int vkeys_state_size = 256 / 8;//256 vkeys, 8 bits per byte
-BYTE* vkeys_state = new BYTE[vkeys_state_size]();
+const int VKEYS_STATE_SIZE = 256 / 8;//256 vkeys, 8 bits per byte
+BYTE* vkeysState = new BYTE[VKEYS_STATE_SIZE]();
 
-void setVkeyState(int vkey, bool down)
+void setVkeyState(const int vkey, const bool down)
 {
 	if (vkey >= 0xFF) return;
 
-	auto x = (vkey / 8);
-	BYTE shift = (1 << (vkey % 8));
+	const auto x = (vkey / 8);
+	const BYTE shift = (1 << (vkey % 8));
 	if (down)
-		vkeys_state[x] |= shift;
+		vkeysState[x] |= shift;
 	else
-		vkeys_state[x] &= (~shift);
+		vkeysState[x] &= (~shift);
 
 	if (vkey == VK_LSHIFT || vkey == VK_RSHIFT) setVkeyState(VK_SHIFT, down);
 	else if (vkey == VK_LMENU || vkey == VK_RMENU) setVkeyState(VK_MENU, down);
 	else if (vkey == VK_LCONTROL || vkey == VK_RCONTROL) setVkeyState(VK_CONTROL, down);
 }
 
-bool is_vkey_down(int vkey)
+bool isVkeyDown(const int vkey)
 {
 	if (vkey >= 0xFF) return false;
-	
-	BYTE p = vkeys_state[vkey / 8];
-	bool ret = (p & (1 << (vkey % 8))) != 0;
+
+	const BYTE p = vkeysState[vkey / 8];
+	const bool ret = (p & (1 << (vkey % 8))) != 0;
 
 	if (!ret)
 	{
-		if (vkey == VK_LSHIFT || vkey == VK_RSHIFT) return is_vkey_down(VK_SHIFT);
-		if (vkey == VK_LMENU || vkey == VK_RMENU) return is_vkey_down(VK_MENU); //alt
-		if (vkey == VK_LCONTROL || vkey == VK_RCONTROL) return is_vkey_down(VK_CONTROL);
+		if (vkey == VK_LSHIFT || vkey == VK_RSHIFT) return isVkeyDown(VK_SHIFT);
+		if (vkey == VK_LMENU || vkey == VK_RMENU) return isVkeyDown(VK_MENU); //alt
+		if (vkey == VK_LCONTROL || vkey == VK_RCONTROL) return isVkeyDown(VK_CONTROL);
 	}
 
 	return ret;

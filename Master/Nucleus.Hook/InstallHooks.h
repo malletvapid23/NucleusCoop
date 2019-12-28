@@ -2,19 +2,19 @@
 #include <Windows.h>
 #include <easyhook.h>
 
-NTSTATUS HookInstall(LPCSTR moduleHandle, LPCSTR proc, void* callBack);
+NTSTATUS installHook(LPCSTR moduleHandle, LPCSTR proc, void* callBack);
 
-void install_set_window_hook();
+void installSetWindowHook();
 
-void install_focus_hooks();
+void installFocusHooks();
 
-void install_hide_cursor_hooks();
+void installHideCursorHooks();
 
-void install_set_cursor_pos_hook();
-void install_get_cursor_pos_hook();
+void installSetCursorPosHook();
+void installGetCursorPosHook();
 
-void install_get_async_key_state_hook();
-void install_get_key_state_hook();
-void install_get_keyboard_state_hook();
+void installGetAsyncKeyStateHook();
+void installGetKeyStateHook();
+void installGetKeyboardStateHook();
 
-void install_message_filter_hooks();
+void installMessageFilterHooks();

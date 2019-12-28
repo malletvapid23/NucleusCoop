@@ -8,14 +8,11 @@
 #include <fstream>
 //#include <atlbase.h>
 #include <locale>
-#include <codecvt>
 #include <ctime>
-#include <stdio.h>
 #include <iomanip>
 #include "Logging.h"
 #include "InstallHooks.h"
 #include "Globals.h"
-#include "KeyStates.h"
 #include "FakeMouse.h"
 #include "Piping.h"
 
@@ -26,14 +23,14 @@ bool IsDebug = true;
 #endif
 
 //Logging.h
-std::ofstream logging_outfile;
+std::ofstream loggingOutfile;
 std::wstring nucleusFolder;
 
 //Globals.h
 Options options;
-HWND hWnd = 0;
+HWND hWnd = nullptr;
 
-std::string date_string()
+std::string dateString()
 {
 	tm tinfo;
 	time_t rawtime;
@@ -53,7 +50,7 @@ struct EnumData {
 // Application-defined callback for EnumWindows
 BOOL CALLBACK EnumProc(HWND hWnd, LPARAM lParam) {
 	// Retrieve storage location for communication data
-	EnumData& ed = *(EnumData*)lParam;
+	EnumData& ed = *reinterpret_cast<EnumData*>(lParam);
 	DWORD dwProcessId = 0x0;
 	// Query process ID for hWnd
 	GetWindowThreadProcessId(hWnd, &dwProcessId);
@@ -74,7 +71,7 @@ BOOL CALLBACK EnumProc(HWND hWnd, LPARAM lParam) {
 // Main entry
 HWND FindWindowFromProcessId(DWORD dwProcessId) {
 	EnumData ed = { dwProcessId };
-	if (!EnumWindows(EnumProc, (LPARAM)& ed) &&
+	if (!EnumWindows(EnumProc, reinterpret_cast<LPARAM>(&ed)) &&
 		(GetLastError() == ERROR_SUCCESS)) {
 		return ed.hWnd;
 	}
@@ -86,13 +83,13 @@ HWND FindWindowFromProcess(HANDLE hProcess) {
 	return FindWindowFromProcessId(GetProcessId(hProcess));
 }
 
-NTSTATUS HookInstall(LPCSTR moduleHandle, LPCSTR proc, void* callBack)
+NTSTATUS installHook(const LPCSTR moduleHandle, const LPCSTR proc, void* callBack)
 {
 	// Perform hooking
 	HOOK_TRACE_INFO hHook = { NULL }; // keep track of our hook
 
 	// Install the hook
-	NTSTATUS result = LhInstallHook(
+	const auto result = LhInstallHook(
 		GetProcAddress(GetModuleHandle(moduleHandle), proc),
 		callBack,
 		NULL,
@@ -123,27 +120,27 @@ extern "C" void __declspec(dllexport) __stdcall NativeInjectionEntryPoint(REMOTE
 
 void __stdcall NativeInjectionEntryPoint(REMOTE_ENTRY_INFO* inRemoteInfo)
 {
-	DWORD pid = GetCurrentProcessId();
+	const auto pid = GetCurrentProcessId();
 	hWnd = FindWindowFromProcessId(pid);
 
 	InitializeCriticalSection(&mcs);
 
 	BYTE* data = inRemoteInfo->UserData;
-	BYTE* _p = data;
+	auto p = data;
 
 	if (reinterpret_cast<INT>(hWnd) == 0)
 	{
-		hWnd = reinterpret_cast<HWND>(bytesToInt(_p));
+		hWnd = reinterpret_cast<HWND>(bytesToInt(p));
 	}
-	_p += 4;
+	p += 4;
 
-	allowed_mouse_handle = reinterpret_cast<HANDLE>(bytesToInt(_p));
-	_p += 4;
+	allowedMouseHandle = reinterpret_cast<HANDLE>(bytesToInt(p));
+	p += 4;
 	
-	allowed_keyboard_handle = reinterpret_cast<HANDLE>(bytesToInt(_p));
-	_p += 4;
+	allowedKeyboardHandle = reinterpret_cast<HANDLE>(bytesToInt(p));
+	p += 4;
 
-#define NEXTBOOL *(_p++) == 1
+#define NEXTBOOL *(p++) == 1
 	options.preventWindowDeactivation = NEXTBOOL;
 	options.setWindow = NEXTBOOL;
 	IsDebug = NEXTBOOL;
@@ -161,23 +158,23 @@ void __stdcall NativeInjectionEntryPoint(REMOTE_ENTRY_INFO* inRemoteInfo)
 	options.mouseVisibilitySendBack = NEXTBOOL;
 #undef NEXTBOOL
 
-	const auto pathLength = static_cast<size_t>(bytesToInt(_p));
-	const auto writePipeNameLength = static_cast<size_t>(bytesToInt(_p + 4));
-	const auto readPipeNameLength = static_cast<size_t>(bytesToInt(_p + 8));
-	_p += 12;
+	const auto pathLength = static_cast<size_t>(bytesToInt(p));
+	const auto writePipeNameLength = static_cast<size_t>(bytesToInt(p + 4));
+	const auto readPipeNameLength = static_cast<size_t>(bytesToInt(p + 8));
+	p += 12;
 
 	//C# gives number of bytes without null termination
-	auto nucleusFolderPath = static_cast<PWSTR>(malloc(pathLength + sizeof(WCHAR)));
-	memcpy(nucleusFolderPath, _p, pathLength);
-	_p += pathLength;
+	const auto nucleusFolderPath = static_cast<PWSTR>(malloc(pathLength + sizeof(WCHAR)));
+	memcpy(nucleusFolderPath, p, pathLength);
+	p += pathLength;
 	nucleusFolderPath[pathLength / sizeof(WCHAR)] = '\0';//Null-terminate the string
 	nucleusFolder = nucleusFolderPath;
 
-	Piping::writePipeName = std::wstring(reinterpret_cast<wchar_t*>(_p), writePipeNameLength/2);
-	_p += writePipeNameLength;
+	Piping::writePipeName = std::wstring(reinterpret_cast<wchar_t*>(p), writePipeNameLength/2);
+	p += writePipeNameLength;
 
-	Piping::readPipeName = std::wstring(reinterpret_cast<wchar_t*>(_p), readPipeNameLength/2);
-	_p += readPipeNameLength;
+	Piping::readPipeName = std::wstring(reinterpret_cast<wchar_t*>(p), readPipeNameLength/2);
+	p += readPipeNameLength;
 
 	DEBUGLOG("Starting hook injection," <<
 		" WritePipeName: " << std::string(Piping::writePipeName.begin(), Piping::writePipeName.end()) <<
@@ -198,32 +195,32 @@ void __stdcall NativeInjectionEntryPoint(REMOTE_ENTRY_INFO* inRemoteInfo)
 		"\n");
 
 	if (options.setWindow)
-		install_set_window_hook();
+		installSetWindowHook();
 
 	if (options.hookFocus)
-		install_focus_hooks();
+		installFocusHooks();
 
 	if (options.hideCursor || options.mouseVisibilitySendBack)
-		install_hide_cursor_hooks();
+		installHideCursorHooks();
 
 	if (options.getCursorPos)
-		install_get_cursor_pos_hook();
+		installGetCursorPosHook();
 
 	if (options.setCursorPos)
-		install_set_cursor_pos_hook();
+		installSetCursorPosHook();
 
 	if (options.getAsyncKeyState)
-		install_get_async_key_state_hook();
+		installGetAsyncKeyStateHook();
 
 	if (options.getKeyState)
-		install_get_key_state_hook();
+		installGetKeyStateHook();
 
 	if (options.getKeyboardState)
-		install_get_keyboard_state_hook();
+		installGetKeyboardStateHook();
 
 	if (options.filterRawInput || options.filterMouseMessages || options.legacyInput || options.preventWindowDeactivation)
 	{
-		install_message_filter_hooks();
+		installMessageFilterHooks();
 	}
 
 	DEBUGLOG("Hook injection complete\n");
