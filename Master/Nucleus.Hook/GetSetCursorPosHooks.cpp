@@ -5,8 +5,6 @@
 #include "FakeMouse.h"
 using namespace FakeMouse;
 
-//TODO: remove temporary legacy input / use abs cursor pos 
-
 BOOL WINAPI GetCursorPos_Hook(LPPOINT lpPoint)
 {
 	if (lpPoint)

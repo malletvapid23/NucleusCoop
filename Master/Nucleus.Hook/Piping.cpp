@@ -12,6 +12,8 @@ namespace Piping
 	HANDLE hPipeWrite;
 	bool pipeClosed = false;
 
+	const int SEQUENTIAL_ERRORS_BEFORE_TERMINATE = 10;
+
 	void startPipeListen()
 	{
 		//Read pipe
@@ -59,6 +61,8 @@ namespace Piping
 			DEBUGLOG("Connected to pipe (write)\n")
 		}
 
+		int sequentialErrors = 0;
+		
 		//Loop until pipe close message is received
 		for (;;)
 		{
@@ -73,17 +77,33 @@ namespace Piping
 				nullptr
 			);
 
-			if (result && bytesRead == 9)
+			if (!result || bytesRead != 9)
 			{
-				const auto param1 = bytesToInt(&buffer[1]);
-
-				const auto param2 = bytesToInt(&buffer[5]);
-
-				//cout << "Received message. Msg=" << (int)buffer[0] << ", param1=" << param1 << ", param2=" << param2 << "\n";
-
-				switch (buffer[0])
+				//Failed to read
+				
+				sequentialErrors++;
+				DEBUGLOG("Failed to read pipe (" << sequentialErrors << ")\n");
+				if (sequentialErrors == SEQUENTIAL_ERRORS_BEFORE_TERMINATE)
 				{
-				case 0x01: //Add delta cursor pos
+					DEBUGLOG("ENDING PIPE LISTEN");
+					pipeClosed = true;
+					return;
+				}
+
+				//Give it time to recover if necessary
+				Sleep(100);
+				continue;
+			}
+
+			//Read successful
+			sequentialErrors = 0;
+			
+			const auto param1 = bytesToInt(&buffer[1]);
+			const auto param2 = bytesToInt(&buffer[5]);
+
+			switch (buffer[0])
+			{
+			case 0x01: //Add delta cursor pos
 				{
 					EnterCriticalSection(&FakeMouse::fakeMouseCriticalSection);
 					FakeMouse::fakeX += param1;
@@ -91,7 +111,7 @@ namespace Piping
 					LeaveCriticalSection(&FakeMouse::fakeMouseCriticalSection);
 					break;
 				}
-				case 0x04: //Set absolute cursor pos
+			case 0x04: //Set absolute cursor pos
 				{
 					EnterCriticalSection(&FakeMouse::fakeMouseCriticalSection);
 					FakeMouse::absoluteX = param1;
@@ -99,33 +119,27 @@ namespace Piping
 					LeaveCriticalSection(&FakeMouse::fakeMouseCriticalSection);
 					break;
 				}
-				case 0x02: //Set VKey
+			case 0x02: //Set VKey
 				{
 					KeyStates::setVkeyState(param1, param2 != 0);
 					break;
 				}
-				case 0x03: //Close named pipe
+			case 0x03: //Close named pipe
 				{
 					DEBUGLOG("Received pipe closed message. Closing pipe..." << "\n")
-						pipeClosed = true;
+					pipeClosed = true;
 					return;
 				}
-				case 0x05: //Focus desktop
+			case 0x05: //Focus desktop
 				{
 					//If the game brings itself to the foreground, it is the only window that can set something else as foreground (so it's required to do this in Hooks)
 					SetForegroundWindow(GetDesktopWindow());
 					break;
 				}
-				default:
+			default:
 				{
 					break;
 				}
-				}
-			}
-			else
-			{
-				//TODO: needs to quit if failed too many times (in a row)
-				//cout << "Failed to read message\n";
 			}
 		}
 	}
