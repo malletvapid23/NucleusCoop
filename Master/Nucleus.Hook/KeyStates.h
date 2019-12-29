@@ -1,5 +1,8 @@
 #pragma once
 
-void setVkeyState(int vkey, bool down);
+namespace KeyStates
+{
+	void setVkeyState(int vkey, bool down);
 
-bool isVkeyDown(int vkey);
+	bool isVkeyDown(int vkey);
+}

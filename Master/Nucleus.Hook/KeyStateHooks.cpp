@@ -2,6 +2,7 @@
 #include "InstallHooks.h"
 #include "Logging.h"
 #include "KeyStates.h"
+using namespace KeyStates;
 
 SHORT WINAPI GetAsyncKeyState_Hook(int vKey)
 {

@@ -29,7 +29,7 @@ BOOL filterMessage(const LPMSG lpMsg)
 		{
 			if (raw->header.dwType == RIM_TYPEMOUSE)
 			{
-				if (raw->header.hDevice == allowedMouseHandle)
+				if (raw->header.hDevice == FakeMouse::allowedMouseHandle)
 				{
 					ALLOW;
 				}
@@ -39,7 +39,7 @@ BOOL filterMessage(const LPMSG lpMsg)
 			
 			if (raw->header.dwType == RIM_TYPEKEYBOARD)
 			{
-				if (raw->header.hDevice == allowedKeyboardHandle)
+				if (raw->header.hDevice == FakeMouse::allowedKeyboardHandle)
 				{
 					ALLOW;
 				}
@@ -56,28 +56,28 @@ BOOL filterMessage(const LPMSG lpMsg)
 		{
 			if ((static_cast<int>(wParam) & 0b10000000) > 0) //Signature for message sent from USS (C#)
 			{
-				if (useAbsoluteCursorPos == false)
+				if (FakeMouse::useAbsoluteCursorPos == false)
 				{
 					if (options.updateAbsoluteFlagInMouseMessage)
 					{
 						const int x = GET_X_LPARAM(lParam);
 						const int y = GET_Y_LPARAM(lParam);
 
-						if (!(x == 0 && y == 0) && !(x == lastX && y == lastY))
+						if (!(x == 0 && y == 0) && !(x == FakeMouse::lastX && y == FakeMouse::lastY))
 							// - Minecraft (GLFW/LWJGL) will create a WM_MOUSEMOVE message with (0,0) AND another with (lastX, lastY) 
 							//whenever a mouse button is clicked, WITHOUT calling SetCursorPos
 							// - This would cause absoluteCursorPos to be turned on when it shouldn't.
 						{
-							updateAbsoluteCursorCheck();
+							FakeMouse::updateAbsoluteCursorCheck();
 						}
 
 						if (x != 0)
-							lastX = x;
+							FakeMouse::lastX = x;
 
 						if (y != 0)
-							lastY = y;
+							FakeMouse::lastY = y;
 
-						lpMsg->lParam = MAKELPARAM(fakeX, fakeY);
+						lpMsg->lParam = MAKELPARAM(FakeMouse::fakeX, FakeMouse::fakeY);
 						ALLOW;
 					}
 					BLOCK;

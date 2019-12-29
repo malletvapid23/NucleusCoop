@@ -85,23 +85,23 @@ namespace Piping
 				{
 				case 0x01: //Add delta cursor pos
 				{
-					EnterCriticalSection(&mcs);
-					fakeX += param1;
-					fakeY += param2;
-					LeaveCriticalSection(&mcs);
+					EnterCriticalSection(&FakeMouse::fakeMouseCriticalSection);
+					FakeMouse::fakeX += param1;
+					FakeMouse::fakeY += param2;
+					LeaveCriticalSection(&FakeMouse::fakeMouseCriticalSection);
 					break;
 				}
 				case 0x04: //Set absolute cursor pos
 				{
-					EnterCriticalSection(&mcs);
-					absoluteX = param1;
-					absoluteY = param2;
-					LeaveCriticalSection(&mcs);
+					EnterCriticalSection(&FakeMouse::fakeMouseCriticalSection);
+					FakeMouse::absoluteX = param1;
+					FakeMouse::absoluteY = param2;
+					LeaveCriticalSection(&FakeMouse::fakeMouseCriticalSection);
 					break;
 				}
 				case 0x02: //Set VKey
 				{
-					setVkeyState(param1, param2 != 0);
+					KeyStates::setVkeyState(param1, param2 != 0);
 					break;
 				}
 				case 0x03: //Close named pipe

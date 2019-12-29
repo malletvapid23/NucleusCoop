@@ -10,8 +10,8 @@ int WINAPI ShowCursor_Hook(BOOL bShow)
 	{
 		return ShowCursor(FALSE);
 	}
-	
-	setCursorVisibility(bShow == TRUE);
+
+	FakeMouse::setCursorVisibility(bShow == TRUE);
 	if (bShow == FALSE) ShowCursor(FALSE);
 	return bShow == TRUE ? 0 : -1;
 }
@@ -23,7 +23,7 @@ HCURSOR WINAPI SetCursor_Hook(HCURSOR hCursor)
 		return SetCursor(nullptr);
 	}
 
-	setCursorVisibility(hCursor != nullptr);
+	FakeMouse::setCursorVisibility(hCursor != nullptr);
 	if (hCursor == nullptr) SetCursor(nullptr);
 	return hCursor;
 }

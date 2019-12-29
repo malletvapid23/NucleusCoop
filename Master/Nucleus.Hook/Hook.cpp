@@ -1,20 +1,14 @@
 #include "pch.h"
 #include "easyhook.h"
 #include "framework.h"
-//#include "string"
 #include "windows.h"
-//#include <sstream>
-//#include <ios>
-#include <fstream>
-//#include <atlbase.h>
 #include <locale>
-#include <ctime>
 #include <iomanip>
 #include "Logging.h"
 #include "InstallHooks.h"
 #include "Globals.h"
-#include "FakeMouse.h"
 #include "Piping.h"
+#include "FakeMouse.h"
 
 #ifdef _DEBUG
 bool IsDebug = false;
@@ -22,24 +16,9 @@ bool IsDebug = false;
 bool IsDebug = true;
 #endif
 
-//Logging.h
-std::ofstream loggingOutfile;
-std::wstring nucleusFolder;
-
 //Globals.h
 Options options;
 HWND hWnd = nullptr;
-
-std::string dateString()
-{
-	tm tinfo;
-	time_t rawtime;
-	std::time(&rawtime);
-	localtime_s(&tinfo, &rawtime);
-	char buffer[21];
-	strftime(buffer, 21, "%Y-%m-%d %H:%M:%S", &tinfo);
-	return "[" + std::string(buffer) + "]";
-}
 
 // Structure used to communicate data from and to enumeration procedure
 struct EnumData {
@@ -123,7 +102,7 @@ void __stdcall NativeInjectionEntryPoint(REMOTE_ENTRY_INFO* inRemoteInfo)
 	const auto pid = GetCurrentProcessId();
 	hWnd = FindWindowFromProcessId(pid);
 
-	InitializeCriticalSection(&mcs);
+	InitializeCriticalSection(&FakeMouse::fakeMouseCriticalSection);
 
 	BYTE* data = inRemoteInfo->UserData;
 	auto p = data;
@@ -134,10 +113,10 @@ void __stdcall NativeInjectionEntryPoint(REMOTE_ENTRY_INFO* inRemoteInfo)
 	}
 	p += 4;
 
-	allowedMouseHandle = reinterpret_cast<HANDLE>(bytesToInt(p));
+	FakeMouse::allowedMouseHandle = reinterpret_cast<HANDLE>(bytesToInt(p));
 	p += 4;
-	
-	allowedKeyboardHandle = reinterpret_cast<HANDLE>(bytesToInt(p));
+
+	FakeMouse::allowedKeyboardHandle = reinterpret_cast<HANDLE>(bytesToInt(p));
 	p += 4;
 
 #define NEXTBOOL *(p++) == 1
@@ -168,7 +147,7 @@ void __stdcall NativeInjectionEntryPoint(REMOTE_ENTRY_INFO* inRemoteInfo)
 	memcpy(nucleusFolderPath, p, pathLength);
 	p += pathLength;
 	nucleusFolderPath[pathLength / sizeof(WCHAR)] = '\0';//Null-terminate the string
-	nucleusFolder = nucleusFolderPath;
+	Logging::nucleusFolder = nucleusFolderPath;
 
 	Piping::writePipeName = std::wstring(reinterpret_cast<wchar_t*>(p), writePipeNameLength/2);
 	p += writePipeNameLength;

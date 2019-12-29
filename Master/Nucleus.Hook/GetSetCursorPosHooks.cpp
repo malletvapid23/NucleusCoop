@@ -3,6 +3,7 @@
 #include "Logging.h"
 #include "Globals.h"
 #include "FakeMouse.h"
+using namespace FakeMouse;
 
 //TODO: remove temporary legacy input / use abs cursor pos 
 
@@ -10,7 +11,7 @@ BOOL WINAPI GetCursorPos_Hook(LPPOINT lpPoint)
 {
 	if (lpPoint)
 	{
-		EnterCriticalSection(&mcs);
+		EnterCriticalSection(&fakeMouseCriticalSection);
 		if (!options.legacyInput || useAbsoluteCursorPos)
 		{
 			//Absolute mouse position (always do this if legacy input is off)
@@ -24,7 +25,7 @@ BOOL WINAPI GetCursorPos_Hook(LPPOINT lpPoint)
 			lpPoint->y = fakeY;
 		}
 
-		LeaveCriticalSection(&mcs);
+		LeaveCriticalSection(&fakeMouseCriticalSection);
 		ClientToScreen(hWnd, lpPoint);
 
 		updateAbsoluteCursorCheck();
@@ -46,17 +47,17 @@ BOOL WINAPI SetCursorPos_Hook(int X, int Y)
 
 	if (!options.legacyInput)
 	{
-		EnterCriticalSection(&mcs);
+		EnterCriticalSection(&fakeMouseCriticalSection);
 		absoluteX = p.x;
 		absoluteY = p.y;
-		LeaveCriticalSection(&mcs);
+		LeaveCriticalSection(&fakeMouseCriticalSection);
 	}
 	else
 	{
-		EnterCriticalSection(&mcs);
+		EnterCriticalSection(&fakeMouseCriticalSection);
 		fakeX = p.x;
 		fakeY = p.y;
-		LeaveCriticalSection(&mcs);
+		LeaveCriticalSection(&fakeMouseCriticalSection);
 
 		useAbsoluteCursorPosCounter = 0;
 		useAbsoluteCursorPos = false;
