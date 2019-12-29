@@ -193,8 +193,9 @@ namespace Nucleus.Gaming
             WM_ACTIVATEAPP = 0x001C,
             WM_ACTIVATE = 0x0006,
             WM_NCACTIVATE = 0x0086,
-            WM_SETFOCUS = 0x0007
-        }
+            WM_SETFOCUS = 0x0007,
+            WM_MOUSEACTIVATE = 0x0021,
+		}
 
         public virtual bool HasEnded
         {
@@ -706,7 +707,7 @@ namespace Nucleus.Gaming
                     }
                 }
 
-                if(i > 0 && (gen.HookFocus || gen.SetWindowHook || gen.HideCursor || gen.PreventWindowDeactivation || true))//TODO: remove temporary true
+                if(i > 0 && (gen.HookFocus || gen.SetWindowHook || gen.HideCursor || gen.PreventWindowDeactivation || gen.SupportsMultipleKeyboardsAndMice))
                 {
                     Log("Injecting hook DLL for previous instance");
                     PlayerInfo before = players[i - 1];
@@ -2497,14 +2498,13 @@ namespace Nucleus.Gaming
 				//Set up raw input window
 				if (player.IsRawKeyboard || player.IsRawMouse)
 				{
-					//TODO: May be zero, wait until not? (See InjectDLLs)
-					var hWnd = proc.MainWindowHandle;
+					var hWnd = WaitForProcWindowHandleNotZero(proc);
 					var mouseHdev = player.RawMouseDeviceHandle;
 					var keyboardHdev = player.RawKeyboardDeviceHandle;
 
 					var window = new Window(hWnd)
 					{
-						CursorVisibility = false,//TODO: cursor visibility
+						CursorVisibility = !gen.HideCursor && gen.DrawFakeMouseCursor,
 						KeyboardAttached = keyboardHdev,
 						MouseAttached = mouseHdev
 					};
@@ -2602,7 +2602,7 @@ namespace Nucleus.Gaming
                         }
                     }
 
-					if ((gen.HookFocus || gen.SetWindowHook || gen.HideCursor || gen.PreventWindowDeactivation || true))//TODO: remove temporary true
+					if ((gen.HookFocus || gen.SetWindowHook || gen.HideCursor || gen.PreventWindowDeactivation || gen.SupportsMultipleKeyboardsAndMice))
                     {
                         Log("Injecting hook DLL for last instance");
                         InjectDLLs(data.Process, RawInputManager.windows.Last());
@@ -2708,25 +2708,32 @@ namespace Nucleus.Gaming
 			return string.Empty;
         }
 
+		private IntPtr WaitForProcWindowHandleNotZero(Process proc)
+		{
+			if ((int)proc.MainWindowHandle == 0)
+			{
+				for (int times = 0; times < 200; times++)
+				{
+					Thread.Sleep(50);
+					if ((int)proc.MainWindowHandle > 0)
+					{
+						break;
+					}
+					if (times == 199 && (int)proc.MainWindowHandle == 0)
+					{
+						Log(string.Format("ERROR - WaitForProcWindowHandleNotZero could not find main window handle for {0} (pid {1})", proc.ProcessName, proc.Id));
+					}
+				}
+			}
+
+			return proc.MainWindowHandle;
+		}
+
         private void InjectDLLs(Process proc, Window window)
         {
-            if ((int)proc.MainWindowHandle == 0)
-            {
-                for (int times = 0; times < 200; times++)
-                {
-                    Thread.Sleep(50);
-                    if ((int)proc.MainWindowHandle > 0)
-                    {
-                        break;
-                    }
-                    if (times == 199 && (int)proc.MainWindowHandle == 0)
-                    {
-                        Log(string.Format("ERROR - InjectDLLs could not find main window handle for {0} (pid {1})", proc.ProcessName, proc.Id));
-                    }
-                }
-            }
+	        WaitForProcWindowHandleNotZero(proc);
 
-            bool is64 = EasyHook.RemoteHooking.IsX64Process(proc.Id);                 
+			bool is64 = EasyHook.RemoteHooking.IsX64Process(proc.Id);                 
             string currDir = Directory.GetCurrentDirectory();
 
 
@@ -2876,9 +2883,7 @@ namespace Nucleus.Gaming
         {
             while(true)
             {
-                //should make user defined?
-				//TODO: some games need this on a short (10ms) timer
-                Thread.Sleep(1000);
+                Thread.Sleep(gen.FakeFocusInterval);
 
                 foreach (Process proc in attached)
                 {
@@ -2886,8 +2891,8 @@ namespace Nucleus.Gaming
                     User32Interop.SendMessage(proc.MainWindowHandle, (int)FocusMessages.WM_ACTIVATE, (IntPtr)0x00000002, IntPtr.Zero);
                     User32Interop.SendMessage(proc.MainWindowHandle, (int)FocusMessages.WM_NCACTIVATE, (IntPtr)0x00000001, IntPtr.Zero);
                     User32Interop.SendMessage(proc.MainWindowHandle, (int)FocusMessages.WM_SETFOCUS, IntPtr.Zero, IntPtr.Zero);
-                }
-                
+                    User32Interop.SendMessage(proc.MainWindowHandle, (int)FocusMessages.WM_MOUSEACTIVATE, (IntPtr)proc.MainWindowHandle, (IntPtr)1);
+				}
             }
         }
 

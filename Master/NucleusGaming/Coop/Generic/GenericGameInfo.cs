@@ -50,9 +50,10 @@ namespace Nucleus.Gaming
         public string BinariesFolder;
 
         public bool FakeFocus;
+        public int FakeFocusInterval = 10;
 
 
-        public void AddOption(string name, string desc, string key, object value, object defaultValue)
+		public void AddOption(string name, string desc, string key, object value, object defaultValue)
         {
             Options.Add(new GameOption(name, desc, key, value, defaultValue));
         }
@@ -102,7 +103,6 @@ namespace Nucleus.Gaming
         public string HookFocusInstances;
         public bool KeepAspectRatio;
         public bool HideDesktop;
-        //public int FakeFocusInterval;
         public bool ResetWindows;
         public bool PartialMutexSearch;
         public bool UseGoldberg;

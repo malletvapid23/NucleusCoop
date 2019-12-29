@@ -16,18 +16,8 @@ namespace Nucleus.Gaming.Coop.InputManagement
 {
 	class RawInputProcessor
 	{
-		#region Temporary options
-		//TODO: remove temporary options
-		//private static bool sendNormalKeyboardInput = true;
-		//private static bool sendRawKeyboardInput = false;
-		//private static bool forwardRawMouseInput = false;
-		//private static bool sendScrollWheel = false;
-		//private static bool sendNormalMouse = true;
-
 		private static int toggleLockInputKey = 0x23;//End
-		private bool inputLocked = false;
-
-		#endregion
+		private bool inputLocked;
 		
 		//TODO: implement splitScreenRunning
 		readonly Ref<bool> splitScreenRunning;
@@ -71,12 +61,6 @@ namespace Nucleus.Gaming.Coop.InputManagement
 
 		private void ProcessKeyboard(IntPtr hRawInput, RAWINPUT rawBuffer, Window window, IntPtr hWnd, uint keyboardMessage, bool keyUpOrDown)
 		{
-			//TODO: implement
-			/*if (!Program.SplitScreenManager.IsRunningInSplitScreen)
-			{
-				return;
-			}*/
-
 			if (!keyUpOrDown)
 			{
 				return;
@@ -189,8 +173,7 @@ namespace Nucleus.Gaming.Coop.InputManagement
 						else if (leftMiddleRight == 5)
 							oldBtnState = state.x2;
 
-						//TODO: needs option?
-						if (oldBtnState != isButtonDown)
+						if (CurrentGameInfo.SendNormalMouseInput && oldBtnState != isButtonDown)
 							WinApi.PostMessageA(hWnd, (uint)msg, (IntPtr)wParam, (IntPtr)packedXY);
 
 						if ((CurrentGameInfo.HookGetAsyncKeyState || CurrentGameInfo.HookGetKeyState || CurrentGameInfo.HookGetKeyboardState) && (oldBtnState != isButtonDown))
@@ -259,7 +242,7 @@ namespace Nucleus.Gaming.Coop.InputManagement
 				if (type == HeaderDwType.RIM_TYPEHID)
 					return;
 
-
+				
 				//TODO: if not running split screen
 				if (PlayerInfos != null)
 				foreach (var toFlash in PlayerInfos.Where(x => x != null && (x.RawMouseDeviceHandle.Equals(hDevice) || x.RawKeyboardDeviceHandle.Equals(hDevice))))

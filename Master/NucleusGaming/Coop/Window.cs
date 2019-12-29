@@ -30,13 +30,13 @@ namespace Nucleus.Gaming.Coop
 		public IntPtr KeyboardAttached { get; set; } = new IntPtr(0);
 		public readonly BitArray keysDown = new BitArray(0xFF);
 
-		public int ControllerIndex { get; set; } = 0;//0 = none, 1234 = 1234
+		//public int ControllerIndex { get; set; } = 0;//0 = none, 1234 = 1234
 
-		public RECT Bounds { get; private set; }
+		private RECT Bounds { get; set; }
 		public int Width => Bounds.Right - Bounds.Left;
 		public int Height => Bounds.Bottom - Bounds.Top;
 
-		public HookPipe HookPipe { get; set; }
+		public HookPipe HookPipe { get; private set; }
 
 		#region Mouse Cursor
 		/* How drawing the fake mouse cursor works:
@@ -45,7 +45,6 @@ namespace Nucleus.Gaming.Coop
 		 * If the mouse moves out of bounds of PointerForm, the centre of the window is moved to the mouse position.
 		 * (Depends if Hook mouse visibility is enabled) In HooksCPP, SetCursor(NULL or not NULL) and ShowCursor(TRUE/FALSE) is monitored to show/hide cursor.
 		 * When this is detected, it sends a message via a named pipe to set CursorVisibility, which which will wipe/draw the cursor.
-		 * 
 		 */
 
 		private class PointerForm : Form
@@ -246,8 +245,7 @@ namespace Nucleus.Gaming.Coop
 
 		public void CreateHookPipe(GenericGameInfo gameInfo)
 		{
-			//TODO: Don't always need write pipe
-			HookPipe = new HookPipe(hWnd, this, true, OnPipeClosed, gameInfo);
+			HookPipe = new HookPipe(hWnd, this, gameInfo.HookMouseVisibility, OnPipeClosed, gameInfo);
 		}
 
 		private void OnPipeClosed()
