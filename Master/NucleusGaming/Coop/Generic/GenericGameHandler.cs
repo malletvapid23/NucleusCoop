@@ -2785,8 +2785,11 @@ namespace Nucleus.Gaming
 	            var sbArgs = new StringBuilder();
 	            foreach (object arg in args)
 	            {
-		            sbArgs.Append(" \"");
-		            sbArgs.Append(arg);
+		            //Converting to base64 prevents characters like " or \ breaking the arguments
+		            string arg64 = Convert.ToBase64String(Encoding.UTF8.GetBytes(arg.ToString()));
+
+					sbArgs.Append(" \"");
+		            sbArgs.Append(arg64);
 		            sbArgs.Append("\"");
 	            }
 
@@ -2798,80 +2801,6 @@ namespace Nucleus.Gaming
 	            startInfo.RedirectStandardOutput = true;
 	            Process injectProc = Process.Start(startInfo);
 	            injectProc.WaitForExit();
-
-				/**
-                 * This should be generalised, and Inject32/64 code shouldn't be duplicated here.
-                 *
-                 * if (is64)
-                {
-                    Log("x64 game detected, injecting Nucleus.Hook64.dll");
-                    try
-                    {
-                        string injectorPath = Path.Combine(currDir, "Nucleus.Inject64.exe");
-                        ProcessStartInfo startInfo = new ProcessStartInfo();
-                        startInfo.FileName = injectorPath;
-                        object[] args = new object[]
-                        {
-                            1, proc.Id, 0, 0, null, Path.Combine(currDir, "Nucleus.Hook64.dll"), proc.MainWindowHandle, gen.HookFocus, gen.HideCursor, isDebug, nucleusFolderPath, gen.SetWindowHook, gen.PreventWindowDeactivation
-                        };
-                        var sbArgs = new StringBuilder();
-                        foreach (object arg in args)
-                        {
-                            sbArgs.Append(" \"");
-                            sbArgs.Append(arg);
-                            sbArgs.Append("\"");
-                        }
-
-                        string arguments = sbArgs.ToString();
-                        startInfo.Arguments = arguments;
-                        startInfo.WindowStyle = ProcessWindowStyle.Hidden;
-                        startInfo.CreateNoWindow = true;
-                        startInfo.UseShellExecute = false;
-                        startInfo.RedirectStandardOutput = true;
-
-                        //if(gen.RunAsAdmin)
-                        //{
-                        //    startInfo.Verb = "runas";
-                        //}
-                        //startInfo.Verb = "runas";
-                        Process injectProc = Process.Start(startInfo);
-                        injectProc.WaitForExit();
-                    }
-                    catch (Exception ex)
-                    {
-                        Log("ERROR - " + ex.Message);
-                    }
-                }
-                else
-                {
-                    Log("x86 game detected, injecting Nucleus.Hook32.dll");
-                    var logPath = Encoding.Unicode.GetBytes(nucleusFolderPath);
-                    int logPathLength = logPath.Length;
-
-                    int size = 21 + logPathLength;
-                    IntPtr intPtr = Marshal.AllocHGlobal(size);
-                    byte[] dataToSend = new byte[size];
-                    dataToSend[0] = (byte)((int)proc.MainWindowHandle >> 24);
-                    dataToSend[1] = (byte)((int)proc.MainWindowHandle >> 16);
-                    dataToSend[2] = (byte)((int)proc.MainWindowHandle >> 8);
-                    dataToSend[3] = (byte)((int)proc.MainWindowHandle);
-
-                    dataToSend[4] = gen.PreventWindowDeactivation == true ? (byte)1 : (byte)0;
-                    dataToSend[5] = gen.SetWindowHook == true ? (byte)1 : (byte)0;
-                    dataToSend[6] = isDebug == true ? (byte)1 : (byte)0;
-                    dataToSend[7] = gen.HideCursor == true ? (byte)1 : (byte)0;
-                    dataToSend[8] = gen.HookFocus == true ? (byte)1 : (byte)0;
-
-                    dataToSend[9] = (byte)(logPathLength >> 24);
-                    dataToSend[10] = (byte)(logPathLength >> 16);
-                    dataToSend[11] = (byte)(logPathLength >> 8);
-                    dataToSend[12] = (byte)logPathLength;
-
-                    Array.Copy(logPath, 0, dataToSend, 13, logPathLength);
-
-                    Marshal.Copy(dataToSend, 0, intPtr, size);
-                    NativeAPI.RhInjectLibrary(proc.Id, 0, 0, Path.Combine(currDir, "Nucleus.Hook32.dll"), null, intPtr, size);
-                }*/
 			}
             catch (Exception ex)
             {
