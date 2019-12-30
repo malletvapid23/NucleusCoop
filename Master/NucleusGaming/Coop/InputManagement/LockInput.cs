@@ -19,6 +19,7 @@ namespace Nucleus.Gaming.Coop.InputManagement
 
 		private static bool isLocking = false;
 
+		public static bool IsLocked { get; private set; }
 		public static void Init()
 		{
 			initThread = new Thread(ThreadTask);
@@ -101,6 +102,7 @@ namespace Nucleus.Gaming.Coop.InputManagement
 			Debug.WriteLine("Locked input");
 			
 			isLocking = false;
+			IsLocked = true;
 		}
 
 		public static void Unlock()
@@ -124,6 +126,7 @@ namespace Nucleus.Gaming.Coop.InputManagement
 			Debug.WriteLine("Unlocked input");
 
 			isLocking = false;
+			IsLocked = false;
 		}
 	}
 }

@@ -24,6 +24,7 @@ using System.Management;
 using Nucleus.Gaming.Coop.InputManagement;
 using System.Threading.Tasks;
 using Nucleus.Gaming.Coop.BasicTypes;
+using Nucleus.Gaming.Coop.InputManagement.Logging;
 
 namespace Nucleus.Gaming
 {
@@ -233,10 +234,17 @@ namespace Nucleus.Gaming
             catch { }
         }
 
-        public void End()
+        public void End(bool fromStopButton)
         {
+	        if (fromStopButton && LockInput.IsLocked)
+	        {
+				//TODO: For some reason the Stop button is clicked during split screen. Temporary fix is to not end if input is locked.
+		        Log("IGNORING SHUTDOWN BECAUSE INPUT LOCKED");
+		        return;
+	        }
+
             Log("----------------- SHUTTING DOWN -----------------");
-            if (fakeFocus != null && fakeFocus.IsAlive)
+			if (fakeFocus != null && fakeFocus.IsAlive)
             {
                 fakeFocus.Abort();
             }
@@ -2810,20 +2818,27 @@ namespace Nucleus.Gaming
 
         private void SendFocusMsgs()
         {
-            while(true)
-            {
-                Thread.Sleep(gen.FakeFocusInterval);
+	        try
+	        {
+				while (true)
+	            {
+	                Thread.Sleep(gen.FakeFocusInterval);
 
-                foreach (Process proc in attached)
-                {
-                    User32Interop.SendMessage(proc.MainWindowHandle, (int)FocusMessages.WM_ACTIVATEAPP, (IntPtr)1, IntPtr.Zero);
-                    User32Interop.SendMessage(proc.MainWindowHandle, (int)FocusMessages.WM_ACTIVATE, (IntPtr)0x00000002, IntPtr.Zero);
-                    User32Interop.SendMessage(proc.MainWindowHandle, (int)FocusMessages.WM_NCACTIVATE, (IntPtr)0x00000001, IntPtr.Zero);
-                    User32Interop.SendMessage(proc.MainWindowHandle, (int)FocusMessages.WM_SETFOCUS, IntPtr.Zero, IntPtr.Zero);
-                    User32Interop.SendMessage(proc.MainWindowHandle, (int)FocusMessages.WM_MOUSEACTIVATE, (IntPtr)proc.MainWindowHandle, (IntPtr)1);
-				}
-            }
-        }
+	                foreach (Process proc in attached)
+	                {
+						User32Interop.SendMessage(proc.MainWindowHandle, (int)FocusMessages.WM_ACTIVATEAPP, (IntPtr)1, IntPtr.Zero);
+						User32Interop.SendMessage(proc.MainWindowHandle, (int)FocusMessages.WM_ACTIVATE, (IntPtr)0x00000002, IntPtr.Zero);
+						User32Interop.SendMessage(proc.MainWindowHandle, (int)FocusMessages.WM_NCACTIVATE, (IntPtr)0x00000001, IntPtr.Zero);
+						User32Interop.SendMessage(proc.MainWindowHandle, (int)FocusMessages.WM_SETFOCUS, IntPtr.Zero, IntPtr.Zero);
+						User32Interop.SendMessage(proc.MainWindowHandle, (int)FocusMessages.WM_MOUSEACTIVATE, (IntPtr)proc.MainWindowHandle, (IntPtr)1);
+					}
+	            }
+	        }
+	        catch (ThreadAbortException e)
+	        {
+		        Logger.WriteLine($"ThreadAbortException in FakeFocus. Exiting. Error: {e}");
+	        }
+		}
 
         struct TickThread
         {
@@ -3177,7 +3192,7 @@ namespace Nucleus.Gaming
                 if (!hasEnded)
                 {
                     Log("Update method calling Handler End function");
-                    End();
+                    End(false);
                 }
             }
         }

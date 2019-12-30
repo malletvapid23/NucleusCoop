@@ -627,7 +627,7 @@ namespace Nucleus.Coop
             if (handler != null)
             {
                 Log("OnFormClosed method calling Handler End function");
-                handler.End();
+                handler.End(false);
             }
             User32Util.ShowTaskBar();
         }
@@ -636,16 +636,17 @@ namespace Nucleus.Coop
         {
             if (btn_Play.Text == "S T O P")
             {
-                try
+	            try
                 {
-                    if (handler.FakeFocus != null)
-                    {
-                        handler.FakeFocus.Abort();
-                    }
-                    if (handler != null)
+					//Redundant, already in GenericGameHandler.End()
+					//if (handler.FakeFocus != null)
+	                //{
+		            //    handler.FakeFocus.Abort();
+	                //}
+					if (handler != null)
                     {
                         Log("Stop button clicked, calling Handler End function");
-                        handler.End();
+                        handler.End(true);
                     }
 
                     foreach (Form openForm in Application.OpenForms)
