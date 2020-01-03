@@ -50,7 +50,7 @@ namespace Nucleus.Gaming
         public string BinariesFolder;
 
         public bool FakeFocus;
-        public int FakeFocusInterval = 10;
+        public int FakeFocusInterval = 1000;//TODO: high CPU usage with low value?
 
 
 		public void AddOption(string name, string desc, string key, object value, object defaultValue)

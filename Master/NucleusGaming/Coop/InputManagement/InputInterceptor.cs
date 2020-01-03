@@ -2,14 +2,17 @@
 using Nucleus.Gaming.Coop.InputManagement.Structs;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Nucleus.Gaming.Coop.InputManagement
 {
-	static class InputInterceptor
+	public class InputInterceptor
 	{
 		public static bool InterceptEnabled = false;
 
@@ -22,6 +25,8 @@ namespace Nucleus.Gaming.Coop.InputManagement
 		private const int WH_MOUSE_LL = 14;
 		private const int WH_KEYBOARD_LL = 13;
 
+		private static readonly System.Drawing.Point ZeroPoint = new System.Drawing.Point(0, 0);
+
 		private static readonly ushort[] bannedVkeysList = {
 			0x03,//VK_CANCEL
 			0x5B,//VK_LWIN
@@ -29,10 +34,15 @@ namespace Nucleus.Gaming.Coop.InputManagement
 			0x5D,//VK_APPS
 		};
 
-		static InputInterceptor()
+		public InputInterceptor()
 		{
 			Array.Sort(bannedVkeysList);
 
+			InstallHooks();
+		}
+
+		private static void InstallHooks()
+		{
 			mouseHookID = SetHook(mouseProc, WH_MOUSE_LL);
 			keyboardHookID = SetHook(keyboardProc, WH_KEYBOARD_LL);
 			Logger.WriteLine("InputInterceptor keyboard and mouse hooked");
@@ -40,12 +50,28 @@ namespace Nucleus.Gaming.Coop.InputManagement
 
 		private static IntPtr SetHook(WinApi.GetMsgProc proc, int hookID)
 		{
-			return WinApi.SetWindowsHookEx(hookID, proc, Marshal.GetHINSTANCE(typeof(InputInterceptor).Module), 0);
+			var r = WinApi.SetWindowsHookEx(hookID, proc, WinApi.LoadLibrary("user32.dll"), 0);
+#if DEBUG
+			Debug.WriteLine($"SetHook: r={r}, GetLastErr = 0x{Marshal.GetLastWin32Error():x}");
+#endif
+			return r;
 		}
 
 		private static IntPtr MouseHookCallback(int nCode, IntPtr wParam, IntPtr lParam)
 		{
-			return InterceptEnabled ? (IntPtr)1 : WinApi.CallNextHookEx(IntPtr.Zero, nCode, wParam, lParam);
+			if (!InterceptEnabled) return WinApi.CallNextHookEx(IntPtr.Zero, nCode, wParam, lParam);
+
+			//Never called
+			/*if (ZeroPoint != System.Windows.Forms.Cursor.Position)
+			{
+				System.Windows.Forms.Cursor.Position = new System.Drawing.Point(0, 0);
+				System.Windows.Forms.Cursor.Clip = new System.Drawing.Rectangle(0, 0, 1, 1);
+#if DEBUG
+				Debug.WriteLine("Reclipping mouse cursor");
+#endif
+			}*/
+
+			return (IntPtr)1;
 		}
 
 		private static IntPtr KeyboardHookCallback(int nCode, IntPtr wParam, IntPtr lParam)

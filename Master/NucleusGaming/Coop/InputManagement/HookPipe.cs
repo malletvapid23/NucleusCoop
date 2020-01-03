@@ -111,6 +111,7 @@ namespace Nucleus.Gaming.Coop.InputManagement
 						toSendDeltaY = 0;
 					}
 					WriteMessageNow(0x04, toSendAbsX, toSendAbsY);
+					//TODO: can error when closed
 					xyResetEvent.Reset();//Reset the event (or WaitOne passes immediately)
 				}
 			}

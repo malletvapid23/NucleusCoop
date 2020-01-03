@@ -36,6 +36,7 @@ namespace Nucleus.Gaming
 		private GameProfile currentProfile;
 
 		private RawInputProcessor rawInputProcessor;
+		private InputInterceptor inputInterceptor;
 
 		/// object instance so we can thread-safe save the user profile
 		private object saving = new object();
@@ -72,6 +73,8 @@ namespace Nucleus.Gaming
 
             string gameJs = GetJsScriptsPath();
             Directory.CreateDirectory(gameJs);
+
+            inputInterceptor = new InputInterceptor();
 
 			//Subscribe to raw input
 			//TODO: update isRunningSplitScreen
@@ -616,7 +619,7 @@ namespace Nucleus.Gaming
 
         private void play(object state)
         {
-#if RELEASE
+#if RELEASE || true
             try
             {
                 error = ((IGameHandler)state).Play();

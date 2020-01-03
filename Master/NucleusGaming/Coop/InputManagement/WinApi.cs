@@ -116,7 +116,7 @@ namespace Nucleus.Gaming.Coop.InputManagement
 		[return: MarshalAs(UnmanagedType.Bool)]
 		public static extern bool SetForegroundWindow(IntPtr hWnd);
 
-		[DllImport("user32.dll")]
+		[DllImport("user32.dll", SetLastError = true)]
 		public static extern bool BlockInput(bool fBlockIt);
 
 		[DllImport("user32.dll", CharSet = CharSet.Auto, ExactSpelling = true)]
@@ -206,5 +206,15 @@ namespace Nucleus.Gaming.Coop.InputManagement
 
 		[DllImport("gdi32.dll")]
 		public static extern IntPtr CreateSolidBrush(uint crColor);
+
+		[DllImport("kernel32.dll")]
+		public static extern int SuspendThread(IntPtr hThread);
+
+		[DllImport("kernel32.dll")]
+		public static extern IntPtr GetCurrentThread();
+
+		[DllImport("kernel32", SetLastError = true, CharSet = CharSet.Ansi)]
+		public static extern IntPtr LoadLibrary([MarshalAs(UnmanagedType.LPStr)]string lpFileName);
+
 	}
 }

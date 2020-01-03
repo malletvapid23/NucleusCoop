@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -12,15 +13,18 @@ namespace Nucleus.Gaming.Coop.InputManagement
 {
 	static class LockInput
 	{
-		private static AutoHotkeyEngine ahk;
-		public static bool IsAutoHotKeyNull => ahk == null;
-		private static bool IsInitialised = false;
-		private static Thread initThread = null;
+		//private static AutoHotkeyEngine ahk;
+		
+		//public static bool IsAutoHotKeyNull => ahk == null;
+		//private static bool IsInitialised = false;
+		//private static Thread initThread = null;
 
 		private static bool isLocking = false;
 
 		public static bool IsLocked { get; private set; }
-		public static void Init()
+
+		//AHK not needed with new InputInterceptor
+		/*public static void Init()
 		{
 			initThread = new Thread(ThreadTask);
 			initThread.Start();
@@ -58,7 +62,7 @@ namespace Nucleus.Gaming.Coop.InputManagement
 			{
 				Logger.WriteLine("Could not load LockInput");
 			}
-		}
+		}*/
 
 		public static void Lock()
 		{
@@ -66,38 +70,41 @@ namespace Nucleus.Gaming.Coop.InputManagement
 				return;
 			else isLocking = true;
 
-			//System.Windows.Forms.Cursor.Position = new System.Drawing.Point(0, 0);
-
-			if (!IsInitialised)
+			/*if (!IsInitialised)
 			{
 				if (initThread == null)
 					Init();
 
 				initThread.Join();
-			}
+			}*/
 
-			//TODO: only works second time, so run it twice. Better workaround?
-			for (int j = 0; j < 2; j++)
+			//ThreadTask();
+			//ahk?.UnSuspend();
+
+			InputInterceptor.InterceptEnabled = true;
+
+			
+
+			System.Windows.Forms.Cursor.Hide();
+
+			//No need to hide the cursor
+			/*int i = 0;
+			while (WinApi.ShowCursor(false) >= 0 && i++ < 30) ;
+
+			WinApi.SetCursor(IntPtr.Zero);*/
+
+			//Only works on admin. When it does, it prevents raw input
+			/*for (int k = 0; k < 5; k++)
 			{
-
-				ahk?.UnSuspend();
-
-				System.Windows.Forms.Cursor.Hide();
-
-				int i = 0;
-				while (WinApi.ShowCursor(false) >= 0 && i++ < 30) ;
-
-				WinApi.SetCursor(IntPtr.Zero);
-
 				WinApi.BlockInput(true);
+				var er = Marshal.GetLastWin32Error();
+				Debug.WriteLine($"BlockInput GetLastErr = {er}");
+			}*/
 
-				InputInterceptor.InterceptEnabled = true;
+			System.Windows.Forms.Cursor.Position = new System.Drawing.Point(0, 0);
+			System.Windows.Forms.Cursor.Clip = new System.Drawing.Rectangle(0, 0, 1, 1);
 
-				System.Windows.Forms.Cursor.Position = new System.Drawing.Point(0, 0);
-				System.Windows.Forms.Cursor.Clip = new System.Drawing.Rectangle(0, 0, 1, 1);
-
-				WinApi.SetForegroundWindow(WinApi.GetDesktopWindow());
-			}
+			WinApi.SetForegroundWindow(WinApi.GetDesktopWindow());
 			
 			Debug.WriteLine("Locked input");
 			
@@ -111,15 +118,15 @@ namespace Nucleus.Gaming.Coop.InputManagement
 				return;
 			else isLocking = true;
 
-			if (ahk != null)
+			/*if (ahk != null)
 			{
 				ahk.Suspend();
-			}
+			}*/
 
 			System.Windows.Forms.Cursor.Show();
 			System.Windows.Forms.Cursor.Clip = new System.Drawing.Rectangle();
 
-			WinApi.BlockInput(false);
+			//WinApi.BlockInput(false);
 
 			InputInterceptor.InterceptEnabled = false;
 

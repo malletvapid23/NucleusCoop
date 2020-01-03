@@ -478,7 +478,7 @@ namespace Nucleus.Gaming
 
         private static string internalGetRelativePath(DirectoryInfo dirInfo, DirectoryInfo rootInfo, string str)
         {
-            if (dirInfo.FullName == rootInfo.FullName || dirInfo == null)
+            if (dirInfo == null || dirInfo.FullName == rootInfo.FullName)
             {
                 return str;
             }
