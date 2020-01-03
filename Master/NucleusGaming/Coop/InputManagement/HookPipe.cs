@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.IO.Pipes;
+using System.Linq.Expressions;
 using System.Security.Cryptography;
 using System.Threading;
 using Nucleus.Gaming.Coop.InputManagement.Logging;
@@ -40,6 +41,8 @@ namespace Nucleus.Gaming.Coop.InputManagement
 		Window window;
 
 		int toSendDeltaX, toSendDeltaY, toSendAbsX, toSendAbsY;
+		private bool haveMousePosToSend = false;
+		private bool loopThreadWaitingForMousePosToSend = false;
 		private ManualResetEvent xyResetEvent = new ManualResetEvent(false);
 
 		private Action onClosed;
@@ -103,7 +106,12 @@ namespace Nucleus.Gaming.Coop.InputManagement
 				//With this system, input messages are only sent as fast as one thread can manage.
 				while (clientConnected)
 				{
-					xyResetEvent.WaitOne();//Wait for an mouse input message to have altered toSendDeltaX/Y
+					if (!haveMousePosToSend)
+					{
+						loopThreadWaitingForMousePosToSend = true;
+						xyResetEvent.WaitOne(); //Wait for an mouse input message to have altered toSendDeltaX/Y
+					}
+
 					if (sendDelta)
 					{
 						WriteMessageNow(0x01, toSendDeltaX, toSendDeltaY);
@@ -112,7 +120,14 @@ namespace Nucleus.Gaming.Coop.InputManagement
 					}
 					WriteMessageNow(0x04, toSendAbsX, toSendAbsY);
 					//TODO: can error when closed
-					xyResetEvent.Reset();//Reset the event (or WaitOne passes immediately)
+
+					haveMousePosToSend = false;
+
+					if (loopThreadWaitingForMousePosToSend)
+					{
+						loopThreadWaitingForMousePosToSend = false;
+						xyResetEvent.Reset(); //Reset the event (or WaitOne passes immediately)
+					}
 				}
 			}
 		}
@@ -172,7 +187,11 @@ namespace Nucleus.Gaming.Coop.InputManagement
 			toSendDeltaY += deltaY;
 			toSendAbsX = absoluteX;
 			toSendAbsY = absoluteY;
-			xyResetEvent.Set();
+
+			haveMousePosToSend = true;
+
+			if (loopThreadWaitingForMousePosToSend)
+				xyResetEvent.Set();
 		}
 
 		/// <summary>
