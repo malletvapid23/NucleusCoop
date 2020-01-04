@@ -4,6 +4,7 @@ using Nucleus.Gaming.Coop.InputManagement.Structs;
 using System;
 using System.Runtime.InteropServices;
 using System.Text;
+using Microsoft.Win32.SafeHandles;
 
 namespace Nucleus.Gaming.Coop.InputManagement
 {
@@ -216,5 +217,16 @@ namespace Nucleus.Gaming.Coop.InputManagement
 		[DllImport("kernel32", SetLastError = true, CharSet = CharSet.Ansi)]
 		public static extern IntPtr LoadLibrary([MarshalAs(UnmanagedType.LPStr)]string lpFileName);
 
+		[DllImport("kernel32.dll")]
+		public static extern unsafe int WriteFile(
+			IntPtr handle,
+			byte* bytes,
+			int numBytesToWrite,
+			out int numBytesWritten,
+			IntPtr mustBeZero);
+
+		[DllImport("user32.dll")]
+		[return: MarshalAs(UnmanagedType.Bool)]
+		public static extern bool IsWindow(IntPtr hWnd);
 	}
 }

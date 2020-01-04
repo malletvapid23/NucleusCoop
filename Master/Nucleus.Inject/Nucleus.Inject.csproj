@@ -85,7 +85,7 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>copy $(TargetPath) $(SolutionDir)NucleusCoopTool\bin\$(ConfigurationName)\Nucleus.IJ$(PlatformName)$(TargetExt)
-copy $(TargetPath) $(SolutionDir)NucleusCoopTool\bin\$(ConfigurationName)\Nucleus.IJ$(PlatformName)$(TargetExt)</PostBuildEvent>
+    <PostBuildEvent>copy $(TargetPath) $(SolutionDir)NucleusCoopTool\bin\x64\$(ConfigurationName)\Nucleus.IJ$(PlatformName)$(TargetExt)
+copy $(TargetPath) $(SolutionDir)NucleusCoopTool\bin\x86\$(ConfigurationName)\Nucleus.IJ$(PlatformName)$(TargetExt)</PostBuildEvent>
   </PropertyGroup>
 </Project>

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -36,14 +37,16 @@ namespace Nucleus.Gaming.Coop.InputManagement
 		NamedPipeServerStream pipeServerRead;//Read FROM Hooks
 		NamedPipeServerStream pipeServerWrite;//Written from Hooks
 
+		private IntPtr pipeServerReadHandle = (IntPtr) (-1);
+
 		bool clientConnected = false;
 		IntPtr hWnd;
 		Window window;
 
 		int toSendDeltaX, toSendDeltaY, toSendAbsX, toSendAbsY;
-		private bool haveMousePosToSend = false;
-		private bool loopThreadWaitingForMousePosToSend = false;
-		private ManualResetEvent xyResetEvent = new ManualResetEvent(false);
+		private bool haveMousePosToSend;
+		private bool loopThreadWaitingForMousePosToSend;
+		private ManualResetEventSlim xyResetEvent = new ManualResetEventSlim(false);
 
 		private Action onClosed;
 
@@ -82,6 +85,7 @@ namespace Nucleus.Gaming.Coop.InputManagement
 			try
 			{
 				pipeServerRead.WaitForConnection();
+				pipeServerReadHandle = pipeServerRead.SafePipeHandle.DangerousGetHandle();
 			}
 			catch (Exception e)
 			{
@@ -106,10 +110,11 @@ namespace Nucleus.Gaming.Coop.InputManagement
 				//With this system, input messages are only sent as fast as one thread can manage.
 				while (clientConnected)
 				{
+					//SpinWait.SpinUntil(() => haveMousePosToSend);
 					if (!haveMousePosToSend)
 					{
 						loopThreadWaitingForMousePosToSend = true;
-						xyResetEvent.WaitOne(); //Wait for an mouse input message to have altered toSendDeltaX/Y
+						xyResetEvent.Wait(); //Wait for an mouse input message to have altered toSendDeltaX/Y
 					}
 
 					if (sendDelta)
@@ -240,7 +245,13 @@ namespace Nucleus.Gaming.Coop.InputManagement
 
 			try
 			{
-				pipeServerRead.Write(bytes, 0, 9);
+				//pipeServerRead.Write(bytes, 0, 9);
+				unsafe
+				{
+					fixed (byte* numPtr = bytes)
+						WinApi.WriteFile(pipeServerReadHandle, numPtr, 9, out int numBytesWritten, IntPtr.Zero);
+				}
+
 				sequentialErrorCounter = 0;
 			}
 			catch (Exception)
@@ -273,7 +284,7 @@ namespace Nucleus.Gaming.Coop.InputManagement
 			pipeServerWrite = null;
 
 			clientConnected = false;
-			xyResetEvent.Close();
+			xyResetEvent.Dispose();
 
 			onClosed();
 		}

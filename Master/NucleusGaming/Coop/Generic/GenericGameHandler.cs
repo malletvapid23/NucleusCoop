@@ -381,7 +381,7 @@ namespace Nucleus.Gaming
 #if DEBUG
 			isDebug = true;
 #else
-			isDebug = false
+	        isDebug = false;
 #endif
 
 			List<PlayerInfo> players = profile.PlayerData;
@@ -2712,6 +2712,8 @@ namespace Nucleus.Gaming
 					WinApi.EnumWindows(WindowEnum, thread.Id);
 				}
 			}
+
+			RawInputProcessor.Start();
 
 			return string.Empty;
         }

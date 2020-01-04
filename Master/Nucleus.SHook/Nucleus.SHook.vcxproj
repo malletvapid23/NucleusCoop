@@ -121,8 +121,10 @@
       <AdditionalLibraryDirectories>$(SolutionDir)ThirdParty\easyhook;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
-      <Command>mkdir $(SolutionDir)NucleusCoopTool\bin\$(Configuration)
-copy $(SolutionDir)$(PlatformTarget)\$(Configuration)\$(TargetName).dll $(SolutionDir)NucleusCoopTool\bin\$(Configuration)</Command>
+      <Command>mkdir $(SolutionDir)NucleusCoopTool\bin\x86\$(Configuration)
+mkdir $(SolutionDir)NucleusCoopTool\bin\x64\$(Configuration)
+copy $(SolutionDir)$(PlatformTarget)\$(Configuration)\$(TargetName).dll $(SolutionDir)NucleusCoopTool\bin\x86\$(Configuration)
+copy $(SolutionDir)$(PlatformTarget)\$(Configuration)\$(TargetName).dll $(SolutionDir)NucleusCoopTool\bin\x64\$(Configuration)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -145,8 +147,10 @@ copy $(SolutionDir)$(PlatformTarget)\$(Configuration)\$(TargetName).dll $(Soluti
       <AdditionalDependencies>EasyHook32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>mkdir $(SolutionDir)NucleusCoopTool\bin\$(Configuration)
-copy $(SolutionDir)$(PlatformTarget)\$(Configuration)\$(TargetName).dll $(SolutionDir)NucleusCoopTool\bin\$(Configuration)</Command>
+      <Command>mkdir $(SolutionDir)NucleusCoopTool\bin\x86\$(Configuration)
+mkdir $(SolutionDir)NucleusCoopTool\bin\x64\$(Configuration)
+copy $(SolutionDir)$(PlatformTarget)\$(Configuration)\$(TargetName).dll $(SolutionDir)NucleusCoopTool\bin\x86\$(Configuration)
+copy $(SolutionDir)$(PlatformTarget)\$(Configuration)\$(TargetName).dll $(SolutionDir)NucleusCoopTool\bin\x64\$(Configuration)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -169,8 +173,10 @@ copy $(SolutionDir)$(PlatformTarget)\$(Configuration)\$(TargetName).dll $(Soluti
       <AdditionalDependencies>EasyHook64.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>mkdir $(SolutionDir)NucleusCoopTool\bin\$(Configuration)
-copy $(SolutionDir)$(PlatformTarget)\$(Configuration)\$(TargetName).dll $(SolutionDir)NucleusCoopTool\bin\$(Configuration)</Command>
+      <Command>mkdir $(SolutionDir)NucleusCoopTool\bin\x86\$(Configuration)
+mkdir $(SolutionDir)NucleusCoopTool\bin\x64\$(Configuration)
+copy $(SolutionDir)$(PlatformTarget)\$(Configuration)\$(TargetName).dll $(SolutionDir)NucleusCoopTool\bin\x86\$(Configuration)
+copy $(SolutionDir)$(PlatformTarget)\$(Configuration)\$(TargetName).dll $(SolutionDir)NucleusCoopTool\bin\x64\$(Configuration)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -198,8 +204,10 @@ copy $(SolutionDir)$(PlatformTarget)\$(Configuration)\$(TargetName).dll $(Soluti
       <AdditionalLibraryDirectories>$(SolutionDir)ThirdParty\easyhook;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
-      <Command>mkdir $(SolutionDir)NucleusCoopTool\bin\$(Configuration)
-copy $(SolutionDir)$(PlatformTarget)\$(Configuration)\$(TargetName).dll $(SolutionDir)NucleusCoopTool\bin\$(Configuration)</Command>
+      <Command>mkdir $(SolutionDir)NucleusCoopTool\bin\x86\$(Configuration)
+mkdir $(SolutionDir)NucleusCoopTool\bin\x64\$(Configuration)
+copy $(SolutionDir)$(PlatformTarget)\$(Configuration)\$(TargetName).dll $(SolutionDir)NucleusCoopTool\bin\x86\$(Configuration)
+copy $(SolutionDir)$(PlatformTarget)\$(Configuration)\$(TargetName).dll $(SolutionDir)NucleusCoopTool\bin\x64\$(Configuration)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>

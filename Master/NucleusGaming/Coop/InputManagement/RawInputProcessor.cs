@@ -4,23 +4,26 @@ using Nucleus.Gaming.Coop.InputManagement.Enums;
 using Nucleus.Gaming.Coop.InputManagement.Logging;
 using Nucleus.Gaming.Coop.InputManagement.Structs;
 using System;
+using System.CodeDom;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading;
 using System.Windows.Forms;
 
 namespace Nucleus.Gaming.Coop.InputManagement
 {
 	class RawInputProcessor
 	{
+		private static RawInputProcessor rawInputProcessor = null;
+
 		private static int toggleLockInputKey = 0x23;//End
 		private bool inputLocked;
 		
-		//TODO: implement splitScreenRunning
-		readonly Ref<bool> splitScreenRunning;
+		readonly Func<bool> splitScreenRunning;
 
 		private List<Window> Windows => RawInputManager.windows;
 
@@ -47,9 +50,33 @@ namespace Nucleus.Gaming.Coop.InputManagement
 			{ RawInputButtonFlags.RI_MOUSE_BUTTON_5_UP,         (MouseEvents.WM_XBUTTONUP,      0,          5, false,   0x06) }
 		};
 
-		public RawInputProcessor(Ref<bool> splitScreenRunning)
+		private class MouseMoveSender
+		{
+			public Thread thread;
+			public bool needsSending = true;
+			public IntPtr packedXY;
+
+			public MouseMoveSender(Thread thread, IntPtr packedXY)
+			{
+				this.thread = thread;
+				this.packedXY = packedXY;
+			}
+		}
+		private readonly Dictionary<IntPtr, MouseMoveSender> mouseMoveMessageSenders = new Dictionary<IntPtr, MouseMoveSender>();
+
+		private readonly Dictionary<IntPtr, Window> mouseHandleWindows = new Dictionary<IntPtr, Window>();
+		private readonly Dictionary<IntPtr, Window> keyboardHandleWindows = new Dictionary<IntPtr, Window>();
+
+		private readonly int rawInputHeaderSize = Marshal.SizeOf(typeof(RAWINPUTHEADER));
+
+		public RawInputProcessor(Func<bool> splitScreenRunning)
 		{
 			this.splitScreenRunning = splitScreenRunning;
+
+			if (rawInputProcessor != null)
+				Debug.WriteLine("Warning: rawInputProcessor is being reassigned");
+
+			rawInputProcessor = this;
 		}
 
 		public void WndProc(Message msg)
@@ -57,6 +84,23 @@ namespace Nucleus.Gaming.Coop.InputManagement
 			IntPtr hRawInput = msg.LParam;
 
 			Process(hRawInput);
+		}
+
+		//Initialises things to reduce CPU usage at runtime
+		public static void Start()
+		{
+			rawInputProcessor.StartInternal();
+		}
+		private void StartInternal()
+		{
+			mouseHandleWindows.Clear();
+			keyboardHandleWindows.Clear();
+
+			foreach (Window window in Windows)
+			{
+				if (window.MouseAttached != (IntPtr)(-1))		mouseHandleWindows[window.MouseAttached] = window;
+				if (window.KeyboardAttached != (IntPtr) (-1))	keyboardHandleWindows[window.KeyboardAttached] = window;
+			}
 		}
 
 		private void ProcessKeyboard(IntPtr hRawInput, RAWINPUT rawBuffer, Window window, IntPtr hWnd, uint keyboardMessage, bool keyUpOrDown)
@@ -144,7 +188,7 @@ namespace Nucleus.Gaming.Coop.InputManagement
 				window.HookPipe?.SendMousePosition(deltaX, deltaY, mouseVec.x, mouseVec.y);
 			}
 
-			long packedXY = mouseVec.y * 0x10000 + mouseVec.x;
+			IntPtr packedXY = (IntPtr)(mouseVec.y * 0x10000 + mouseVec.x);
 
 			window.UpdateCursorPosition();
 
@@ -174,7 +218,7 @@ namespace Nucleus.Gaming.Coop.InputManagement
 							oldBtnState = state.x2;
 
 						if (CurrentGameInfo.SendNormalMouseInput && oldBtnState != isButtonDown)
-							WinApi.PostMessageA(hWnd, (uint)msg, (IntPtr)wParam, (IntPtr)packedXY);
+							WinApi.PostMessageA(hWnd, (uint)msg, (IntPtr)wParam, packedXY);
 
 						if ((CurrentGameInfo.HookGetAsyncKeyState || CurrentGameInfo.HookGetKeyState || CurrentGameInfo.HookGetKeyboardState) && (oldBtnState != isButtonDown))
 							window.HookPipe?.WriteMessage(0x02, vKey, isButtonDown ? 1 : 0);
@@ -210,7 +254,7 @@ namespace Nucleus.Gaming.Coop.InputManagement
 				if (CurrentGameInfo.SendScrollWheel && (f & (ushort)RawInputButtonFlags.RI_MOUSE_WHEEL) > 0)
 				{
 					ushort delta = mouse.usButtonData;
-					WinApi.PostMessageA(hWnd, (uint)MouseEvents.WM_MOUSEWHEEL, (IntPtr)((delta * 0x10000) + 0), (IntPtr)packedXY);
+					WinApi.PostMessageA(hWnd, (uint)MouseEvents.WM_MOUSEWHEEL, (IntPtr)((delta * 0x10000) + 0), packedXY);
 				}
 			}
 
@@ -223,8 +267,69 @@ namespace Nucleus.Gaming.Coop.InputManagement
 				if (r) mouseMoveState |= (ushort)WM_MOUSEMOVE_wParam.MK_RBUTTON;
 				if (x1) mouseMoveState |= (ushort)WM_MOUSEMOVE_wParam.MK_XBUTTON1;
 				if (x2) mouseMoveState |= (ushort)WM_MOUSEMOVE_wParam.MK_XBUTTON2;
-				mouseMoveState |= 0b10000000;//Signature for USS 
-				WinApi.PostMessageA(hWnd, (uint)MouseEvents.WM_MOUSEMOVE, (IntPtr)mouseMoveState, (IntPtr)packedXY);
+
+				if (mouseMoveState != 0)
+				{
+					mouseMoveState |= 0b10000000; //Signature for USS 
+					WinApi.PostMessageA(hWnd, (uint) MouseEvents.WM_MOUSEMOVE, (IntPtr) mouseMoveState, packedXY);
+					return;
+				}
+
+				if (!mouseMoveMessageSenders.ContainsKey(hWnd))
+				{
+					var thread = new Thread(MouseMoveMessageSendLoop);
+					thread.Start(hWnd);
+					mouseMoveMessageSenders[hWnd] = new MouseMoveSender(thread, packedXY);
+				}
+				else
+				{
+					MouseMoveSender sender = mouseMoveMessageSenders[hWnd];
+					sender.needsSending = true;
+					sender.packedXY = packedXY;
+				}
+			}
+		}
+
+		private void MouseMoveMessageSendLoop(object ohWnd)
+		{
+			var hWnd = (IntPtr) ohWnd;
+			MouseMoveSender sender = mouseMoveMessageSenders[hWnd];
+			var mouseMoveState = (IntPtr) 0b10000000;//Signature
+			const int shortWait = 10;
+			const int longWait = 20;
+			const int longWaitsBeforeCheckWindowExists = 100;
+			const int sequentialPostErrorsBeforeExit = 15;
+
+			try
+			{
+				int k = 0;
+				int s = 0;
+				while (true)
+				{
+					if (sender.needsSending)
+					{
+						if (WinApi.PostMessageA(hWnd, (uint) MouseEvents.WM_MOUSEMOVE, mouseMoveState, sender.packedXY))
+							s = 0;
+						else if (s++ == sequentialPostErrorsBeforeExit)
+							return;
+
+						sender.needsSending = false;
+						Thread.Sleep(shortWait);
+					}
+					else
+					{
+						if (k++ == longWaitsBeforeCheckWindowExists)
+						{
+							k = 0;
+							if (!WinApi.IsWindow(hWnd))
+								return;
+						}
+						Thread.Sleep(longWait);
+					}
+				}
+			}
+			catch (ThreadAbortException)
+			{
 			}
 		}
 
@@ -232,9 +337,9 @@ namespace Nucleus.Gaming.Coop.InputManagement
 		{
 			uint pbDataSize = 0;
 			
-			int ret = WinApi.GetRawInputData(hRawInput, DataCommand.RID_INPUT, IntPtr.Zero, ref pbDataSize, Marshal.SizeOf(typeof(RAWINPUTHEADER)));
+			int ret = WinApi.GetRawInputData(hRawInput, DataCommand.RID_INPUT, IntPtr.Zero, ref pbDataSize, rawInputHeaderSize);
 
-			if (ret == 0 && pbDataSize == WinApi.GetRawInputData(hRawInput, DataCommand.RID_INPUT, out RAWINPUT rawBuffer, ref pbDataSize, Marshal.SizeOf(typeof(RAWINPUTHEADER))))
+			if (ret == 0 && pbDataSize == WinApi.GetRawInputData(hRawInput, DataCommand.RID_INPUT, out RAWINPUT rawBuffer, ref pbDataSize, rawInputHeaderSize))
 			{
 				var type = (HeaderDwType)rawBuffer.header.dwType;
 				var hDevice = rawBuffer.header.hDevice;
@@ -242,15 +347,11 @@ namespace Nucleus.Gaming.Coop.InputManagement
 				if (type == HeaderDwType.RIM_TYPEHID)
 					return;
 
-				
-				//TODO: if not running split screen
-				if (PlayerInfos != null)
-				foreach (var toFlash in PlayerInfos.Where(x => x != null && (x.RawMouseDeviceHandle.Equals(hDevice) || x.RawKeyboardDeviceHandle.Equals(hDevice))))
-				{
-					toFlash.FlashIcon();
-				}
-
-
+				if (splitScreenRunning() && PlayerInfos != null)
+					foreach (var toFlash in PlayerInfos.Where(x => x != null && (x.RawMouseDeviceHandle.Equals(hDevice) || x.RawKeyboardDeviceHandle.Equals(hDevice))))
+					{
+						toFlash.FlashIcon();
+					}
 
 				if (type == HeaderDwType.RIM_TYPEKEYBOARD)
 				{
@@ -267,14 +368,16 @@ namespace Nucleus.Gaming.Coop.InputManagement
 							LockInput.Unlock();
 					}
 
-					foreach (var window in Windows.Where(x => x.KeyboardAttached == hDevice))
+					//foreach (var window in Windows.Where(x => x.KeyboardAttached == hDevice))
+					if (keyboardHandleWindows.TryGetValue(hDevice, out Window window))
 					{
 						ProcessKeyboard(hRawInput, rawBuffer, window, window.hWnd, keyboardMessage, keyUpOrDown);
 					}
 				}
 				else if (type == HeaderDwType.RIM_TYPEMOUSE)
 				{
-					foreach (var window in Windows.Where(x => x.MouseAttached == hDevice))
+					//foreach (var window in Windows.Where(x => x.MouseAttached == hDevice))
+					if (mouseHandleWindows.TryGetValue(hDevice, out Window window))
 					{
 						if (window.NeedsCursorToBeCreatedOnMainMessageLoop)
 						{
