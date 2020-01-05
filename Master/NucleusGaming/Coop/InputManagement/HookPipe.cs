@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
+using System.IO.MemoryMappedFiles;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -37,6 +39,11 @@ namespace Nucleus.Gaming.Coop.InputManagement
 		NamedPipeServerStream pipeServerRead;//Read FROM Hooks
 		NamedPipeServerStream pipeServerWrite;//Written from Hooks
 
+		MemoryMappedFile sharedMem;
+		MemoryMappedViewAccessor sharedMemView;
+		readonly string sharedMemName;
+		const long sharedMemSize = 4 * 4;
+
 		private IntPtr pipeServerReadHandle = (IntPtr) (-1);
 
 		bool clientConnected = false;
@@ -59,6 +66,7 @@ namespace Nucleus.Gaming.Coop.InputManagement
 		{
 			pipeNameRead = GenerateName();
 			if (needWritePipe) pipeNameWrite = GenerateName();
+			sharedMemName = pipeNameRead + "_mem";
 
 			this.hWnd = hWnd;
 			this.window = window;
@@ -74,6 +82,8 @@ namespace Nucleus.Gaming.Coop.InputManagement
 				receiveThread.IsBackground = true;
 				receiveThread.Start();
 			}
+
+			StartSharedMemory();
 		}
 
 		private void Start()
@@ -103,7 +113,7 @@ namespace Nucleus.Gaming.Coop.InputManagement
 			// - Absolute mouse position (this is bound from 0,0 to width,height). This is used in the menus.
 			//If legacy input is disabled, Delta changes aren't used for first person camera movement (e.g. it uses raw input) so it doesn't need to be sent.
 
-			bool sendDelta = gameInfo.HookUseLegacyInput;
+			/*bool sendDelta = gameInfo.HookUseLegacyInput;
 
 			if (sendDelta || gameInfo.HookGetCursorPos)
 			{
@@ -134,7 +144,7 @@ namespace Nucleus.Gaming.Coop.InputManagement
 						xyResetEvent.Reset(); //Reset the event (or WaitOne passes immediately)
 					}
 				}
-			}
+			}*/
 		}
 
 		private void ReceiveMessages()
@@ -178,6 +188,20 @@ namespace Nucleus.Gaming.Coop.InputManagement
 			Console.WriteLine("ReceiveMessages END");
 		}
 
+		private void StartSharedMemory()
+		{
+			sharedMem = MemoryMappedFile.CreateNew(
+				sharedMemName,
+				sharedMemSize,
+				MemoryMappedFileAccess.ReadWrite,
+				MemoryMappedFileOptions.None,
+				HandleInheritability.None);
+
+			Logger.WriteLine($"Created shared memory, name=\"{sharedMemName}\", size={sharedMemSize}");
+
+			sharedMemView = sharedMem.CreateViewAccessor();
+		}
+
 		/// <summary>
 		/// Updates the mouse position to send, and makes the loop know there is data to be sent.
 		/// (Doesn't immediately send a message)
@@ -188,7 +212,7 @@ namespace Nucleus.Gaming.Coop.InputManagement
 		/// <param name="absoluteY"></param>
 		public void SendMousePosition(int deltaX, int deltaY, int absoluteX, int absoluteY)
 		{
-			toSendDeltaX += deltaX;
+			/*toSendDeltaX += deltaX;
 			toSendDeltaY += deltaY;
 			toSendAbsX = absoluteX;
 			toSendAbsY = absoluteY;
@@ -196,7 +220,17 @@ namespace Nucleus.Gaming.Coop.InputManagement
 			haveMousePosToSend = true;
 
 			if (loopThreadWaitingForMousePosToSend)
-				xyResetEvent.Set();
+				xyResetEvent.Set();*/
+
+			//Data packed as absX; absY; deltaX; deltaY
+			//CPP side will set deltas to zero when read
+
+			//TODO: use underlying calls for optimisation
+			int prevDeltaX = sharedMemView.ReadInt32(8);
+			int prevDeltaY = sharedMemView.ReadInt32(12);
+
+			int[] newData = { absoluteX, absoluteY, prevDeltaX + deltaX, prevDeltaY + deltaY };
+			sharedMemView.WriteArray(0, newData, 0, 4);
 		}
 
 		/// <summary>

@@ -69,6 +69,9 @@ namespace Nucleus.Gaming.Coop.InputManagement
 
 		private readonly int rawInputHeaderSize = Marshal.SizeOf(typeof(RAWINPUTHEADER));
 
+		private RAWINPUT rawBuffer;
+		private uint rawBufferSize = (uint)Marshal.SizeOf(typeof(RAWINPUT));//40
+
 		public RawInputProcessor(Func<bool> splitScreenRunning)
 		{
 			this.splitScreenRunning = splitScreenRunning;
@@ -77,13 +80,6 @@ namespace Nucleus.Gaming.Coop.InputManagement
 				Debug.WriteLine("Warning: rawInputProcessor is being reassigned");
 
 			rawInputProcessor = this;
-		}
-
-		public void WndProc(Message msg)
-		{
-			IntPtr hRawInput = msg.LParam;
-
-			Process(hRawInput);
 		}
 
 		//Initialises things to reduce CPU usage at runtime
@@ -103,7 +99,7 @@ namespace Nucleus.Gaming.Coop.InputManagement
 			}
 		}
 
-		private void ProcessKeyboard(IntPtr hRawInput, RAWINPUT rawBuffer, Window window, IntPtr hWnd, uint keyboardMessage, bool keyUpOrDown)
+		private void ProcessKeyboard(IntPtr hRawInput, Window window, IntPtr hWnd, uint keyboardMessage, bool keyUpOrDown)
 		{
 			if (!keyUpOrDown)
 			{
@@ -161,7 +157,7 @@ namespace Nucleus.Gaming.Coop.InputManagement
 			}
 		}
 
-		private void ProcessMouse(IntPtr hRawInput, RAWINPUT rawBuffer, Window window, IntPtr hWnd)
+		private void ProcessMouse(IntPtr hRawInput, Window window, IntPtr hWnd)
 		{
 			RAWMOUSE mouse = rawBuffer.data.mouse;
 			IntPtr mouseHandle = rawBuffer.header.hDevice;
@@ -333,63 +329,62 @@ namespace Nucleus.Gaming.Coop.InputManagement
 			}
 		}
 
-		private void Process(IntPtr hRawInput)
+		public void Process(IntPtr hRawInput)
 		{
-			uint pbDataSize = 0;
-			
-			int ret = WinApi.GetRawInputData(hRawInput, DataCommand.RID_INPUT, IntPtr.Zero, ref pbDataSize, rawInputHeaderSize);
-
-			if (ret == 0 && pbDataSize == WinApi.GetRawInputData(hRawInput, DataCommand.RID_INPUT, out RAWINPUT rawBuffer, ref pbDataSize, rawInputHeaderSize))
+			if (-1 == WinApi.GetRawInputData(hRawInput, DataCommand.RID_INPUT, out rawBuffer, ref rawBufferSize, rawInputHeaderSize))
 			{
-				var type = (HeaderDwType)rawBuffer.header.dwType;
-				var hDevice = rawBuffer.header.hDevice;
-
-				if (type == HeaderDwType.RIM_TYPEHID)
-					return;
-
-				if (splitScreenRunning() && PlayerInfos != null)
-					foreach (var toFlash in PlayerInfos.Where(x => x != null && (x.RawMouseDeviceHandle.Equals(hDevice) || x.RawKeyboardDeviceHandle.Equals(hDevice))))
-					{
-						toFlash.FlashIcon();
-					}
-
-				if (type == HeaderDwType.RIM_TYPEKEYBOARD)
-				{
-					uint keyboardMessage = rawBuffer.data.keyboard.Message;
-					bool keyUpOrDown = keyboardMessage == (uint)KeyboardEvents.WM_KEYDOWN || keyboardMessage == (uint)KeyboardEvents.WM_KEYUP;
-
-					if (keyboardMessage == (uint)KeyboardEvents.WM_KEYUP && (rawBuffer.data.keyboard.Flags | 1) != 0 && rawBuffer.data.keyboard.VKey == toggleLockInputKey)
-					{
-						Debug.WriteLine("Lock input key pressed");
-						inputLocked = !inputLocked;
-						if (inputLocked)
-							LockInput.Lock();
-						else
-							LockInput.Unlock();
-					}
-
-					//foreach (var window in Windows.Where(x => x.KeyboardAttached == hDevice))
-					if (keyboardHandleWindows.TryGetValue(hDevice, out Window window))
-					{
-						ProcessKeyboard(hRawInput, rawBuffer, window, window.hWnd, keyboardMessage, keyUpOrDown);
-					}
-				}
-				else if (type == HeaderDwType.RIM_TYPEMOUSE)
-				{
-					//foreach (var window in Windows.Where(x => x.MouseAttached == hDevice))
-					if (mouseHandleWindows.TryGetValue(hDevice, out Window window))
-					{
-						if (window.NeedsCursorToBeCreatedOnMainMessageLoop)
-						{
-							//Cursor needs to be created on the MainForm message loop so it can be accessed in the loop.
-							window.NeedsCursorToBeCreatedOnMainMessageLoop = false;
-							window.CreateCursor();
-						}
-
-						ProcessMouse(hRawInput, rawBuffer, window, window.hWnd);
-					}
-				}
+				Debug.WriteLine("GetRawInput fail");
+				return;
 			}
+
+			var type = (HeaderDwType)rawBuffer.header.dwType;
+		    IntPtr hDevice = rawBuffer.header.hDevice;
+
+		    if (type == HeaderDwType.RIM_TYPEHID)
+			    return;
+
+		    if (!splitScreenRunning() && PlayerInfos != null)
+			    foreach (var toFlash in PlayerInfos.Where(x => x != null && (x.RawMouseDeviceHandle.Equals(hDevice) || x.RawKeyboardDeviceHandle.Equals(hDevice))))
+			    {
+				    toFlash.FlashIcon();
+			    }
+
+		    if (type == HeaderDwType.RIM_TYPEKEYBOARD)
+		    {
+			    uint keyboardMessage = rawBuffer.data.keyboard.Message;
+			    bool keyUpOrDown = keyboardMessage == (uint)KeyboardEvents.WM_KEYDOWN || keyboardMessage == (uint)KeyboardEvents.WM_KEYUP;
+
+			    if (keyboardMessage == (uint)KeyboardEvents.WM_KEYUP && (rawBuffer.data.keyboard.Flags | 1) != 0 && rawBuffer.data.keyboard.VKey == toggleLockInputKey)
+			    {
+				    Debug.WriteLine("Lock input key pressed");
+				    inputLocked = !inputLocked;
+				    if (inputLocked)
+					    LockInput.Lock();
+				    else
+					    LockInput.Unlock();
+			    }
+
+			    //foreach (var window in Windows.Where(x => x.KeyboardAttached == hDevice))
+			    if (keyboardHandleWindows.TryGetValue(hDevice, out Window window))
+			    {
+				    ProcessKeyboard(hRawInput, window, window.hWnd, keyboardMessage, keyUpOrDown);
+			    }
+		    }
+		    else if (type == HeaderDwType.RIM_TYPEMOUSE)
+		    {
+			    //foreach (var window in Windows.Where(x => x.MouseAttached == hDevice))
+			    if (mouseHandleWindows.TryGetValue(hDevice, out Window window))
+			    {
+				    if (window.NeedsCursorToBeCreatedOnMainMessageLoop)
+				    {
+					    //Cursor needs to be created on the MainForm message loop so it can be accessed in the loop.
+					    window.NeedsCursorToBeCreatedOnMainMessageLoop = false;
+					    window.CreateCursor();
+				    }
+
+				    ProcessMouse(hRawInput, window, window.hWnd);
+			    }
+		    }
 		}
 	}
 }

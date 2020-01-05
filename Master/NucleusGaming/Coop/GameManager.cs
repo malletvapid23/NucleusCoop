@@ -79,8 +79,8 @@ namespace Nucleus.Gaming
 			//Subscribe to raw input
 			//TODO: update isRunningSplitScreen
 			Debug.WriteLine("Registering raw input");
-			rawInputProcessor = new RawInputProcessor(() => mainForm.WindowState != FormWindowState.Minimized);
-			Action<Message> rawInputAction = rawInputProcessor.WndProc;
+			rawInputProcessor = new RawInputProcessor(() => LockInput.IsLocked);//TODO: needs more robust method
+			Action<IntPtr> rawInputAction = rawInputProcessor.Process;
 			GameManager.mainForm.GetType().GetProperty("RawInputAction").SetValue(GameManager.mainForm, rawInputAction, new object[] { });
 			IntPtr rawInputHwnd = GameManager.mainFormHandle;
 

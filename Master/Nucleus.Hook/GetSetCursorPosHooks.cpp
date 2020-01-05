@@ -3,27 +3,26 @@
 #include "Logging.h"
 #include "Globals.h"
 #include "FakeMouse.h"
+#include "Piping.h"
 using namespace FakeMouse;
 
 BOOL WINAPI GetCursorPos_Hook(LPPOINT lpPoint)
 {
 	if (lpPoint)
 	{
-		EnterCriticalSection(&fakeMouseCriticalSection);
 		if (!options.legacyInput || useAbsoluteCursorPos)
 		{
 			//Absolute mouse position (always do this if legacy input is off)
-			lpPoint->x = absoluteX;
-			lpPoint->y = absoluteY;
+			lpPoint->x = *(Piping::memBuf);
+			lpPoint->y = *(Piping::memBuf + 1);
 		}
 		else
 		{
 			//Delta mouse position
-			lpPoint->x = fakeX;
-			lpPoint->y = fakeY;
+			lpPoint->x = getAndUpdateFakeX();
+			lpPoint->y = getAndUpdateFakeY();
 		}
 
-		LeaveCriticalSection(&fakeMouseCriticalSection);
 		ClientToScreen(hWnd, lpPoint);
 
 		updateAbsoluteCursorCheck();
@@ -45,17 +44,15 @@ BOOL WINAPI SetCursorPos_Hook(int X, int Y)
 
 	if (!options.legacyInput)
 	{
-		EnterCriticalSection(&fakeMouseCriticalSection);
-		absoluteX = p.x;
-		absoluteY = p.y;
-		LeaveCriticalSection(&fakeMouseCriticalSection);
+		*(Piping::memBuf) = p.x;
+		*(Piping::memBuf + 1) = p.y;
 	}
 	else
 	{
-		EnterCriticalSection(&fakeMouseCriticalSection);
 		fakeX = p.x;
 		fakeY = p.y;
-		LeaveCriticalSection(&fakeMouseCriticalSection);
+		//*(Piping::memBuf + 2) = p.x;
+		//*(Piping::memBuf + 3) = p.y;
 
 		useAbsoluteCursorPosCounter = 0;
 		useAbsoluteCursorPos = false;

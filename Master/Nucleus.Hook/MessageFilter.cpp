@@ -4,6 +4,7 @@
 #include "InstallHooks.h"
 #include "Globals.h"
 #include <windowsx.h>
+#include "Piping.h"
 
 BOOL filterMessage(const LPMSG lpMsg)
 {
@@ -63,6 +64,7 @@ BOOL filterMessage(const LPMSG lpMsg)
 						const int x = GET_X_LPARAM(lParam);
 						const int y = GET_Y_LPARAM(lParam);
 
+						//TODO: this is inside USS signature, is it actually used??
 						if (!(x == 0 && y == 0) && !(x == FakeMouse::lastX && y == FakeMouse::lastY))
 							// - Minecraft (GLFW/LWJGL) will create a WM_MOUSEMOVE message with (0,0) AND another with (lastX, lastY) 
 							//whenever a mouse button is clicked, WITHOUT calling SetCursorPos
@@ -77,7 +79,7 @@ BOOL filterMessage(const LPMSG lpMsg)
 						if (y != 0)
 							FakeMouse::lastY = y;
 
-						lpMsg->lParam = MAKELPARAM(FakeMouse::fakeX, FakeMouse::fakeY);
+						lpMsg->lParam = MAKELPARAM(FakeMouse::getAndUpdateFakeX(), FakeMouse::getAndUpdateFakeY());
 						ALLOW;
 					}
 					BLOCK;
@@ -103,10 +105,16 @@ BOOL filterMessage(const LPMSG lpMsg)
 		}
 
 		if (msg == WM_MOUSEMOVE && (static_cast<int>(wParam) & 0b10000000) > 0)
+		{
+			if (!options.legacyInput)
+			{
+				lpMsg->lParam = MAKELPARAM(*(Piping::memBuf), *(Piping::memBuf + 1));
+			}
 			ALLOW;
+		}
 
 		// || Msg == 0x00FF
-		if (msg >= WM_XBUTTONDOWN && msg <= WM_XBUTTONDBLCLK || msg == WM_MOUSEMOVE || msg == WM_MOUSEACTIVATE || msg
+		if ((msg >= WM_XBUTTONDOWN && msg <= WM_XBUTTONDBLCLK) || msg == WM_MOUSEMOVE || msg == WM_MOUSEACTIVATE || msg
 			== WM_MOUSEHOVER || msg == WM_MOUSELEAVE || msg == WM_MOUSEWHEEL || msg == WM_SETCURSOR || msg ==
 			WM_NCMOUSELEAVE) //Other mouse events. 
 		{
@@ -117,8 +125,8 @@ BOOL filterMessage(const LPMSG lpMsg)
 		{
 			lpMsg->lParam = 1;
 			lpMsg->wParam = 0;
+			ALLOW;
 		}
-		ALLOW;
 	}
 
 	ALLOW;

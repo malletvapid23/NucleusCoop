@@ -6,12 +6,10 @@
 
 namespace FakeMouse
 {
-	CRITICAL_SECTION fakeMouseCriticalSection;
-	int fakeX; //Delta X
-	int fakeY;
+	int fakeX, fakeY; //Delta X/Y
 
-	int absoluteX;
-	int absoluteY;
+	//int absoluteX;
+	//int absoluteY;
 
 	int useAbsoluteCursorPosCounter = 0; // 0/1/2/3/... : FALSE, requiredAbsCount : TRUE
 	const int REQUIRED_ABS_COUNT = 40;
@@ -26,16 +24,30 @@ namespace FakeMouse
 
 	bool sentVisibility = true;//The visibility last sent to the C# side
 
+	int getAndUpdateFakeX()
+	{
+		const int deltaX = *(Piping::memBuf + 2);
+		if (deltaX  != 0) *(Piping::memBuf + 2) = 0;
+
+		fakeX += deltaX;
+		return fakeX;
+	}
+
+	int getAndUpdateFakeY()
+	{
+		const int deltaY = *(Piping::memBuf + 3);
+		if (deltaY != 0) *(Piping::memBuf + 3) = 0;
+
+		fakeY += deltaY;
+		return fakeY;
+	}
+	
 	void updateAbsoluteCursorCheck()
 	{
-		if (options.legacyInput && !useAbsoluteCursorPos)
+		if (options.legacyInput && !useAbsoluteCursorPos && ++useAbsoluteCursorPosCounter == REQUIRED_ABS_COUNT)
 		{
 			//We assume we're in a menu and need absolute cursor pos
-			useAbsoluteCursorPosCounter++;
-			if (useAbsoluteCursorPosCounter == REQUIRED_ABS_COUNT)
-			{
-				useAbsoluteCursorPos = true;
-			}
+			useAbsoluteCursorPos = true;
 		}
 	}
 

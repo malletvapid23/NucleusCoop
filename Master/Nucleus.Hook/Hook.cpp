@@ -101,9 +101,7 @@ void __stdcall NativeInjectionEntryPoint(REMOTE_ENTRY_INFO* inRemoteInfo)
 {
 	const auto pid = GetCurrentProcessId();
 	hWnd = FindWindowFromProcessId(pid);
-
-	InitializeCriticalSection(&FakeMouse::fakeMouseCriticalSection);
-
+	
 	BYTE* data = inRemoteInfo->UserData;
 	auto p = data;
 
@@ -153,7 +151,11 @@ void __stdcall NativeInjectionEntryPoint(REMOTE_ENTRY_INFO* inRemoteInfo)
 	p += writePipeNameLength;
 
 	Piping::readPipeName = std::wstring(reinterpret_cast<wchar_t*>(p), readPipeNameLength/2);
+	Piping::sharedMemName = Piping::readPipeName + L"_mem";
 	p += readPipeNameLength;
+
+	//Should be before hooks start to avoid errors
+	Piping::startSharedMem();
 
 	DEBUGLOG("Starting hook injection," <<
 		" WritePipeName: " << std::string(Piping::writePipeName.begin(), Piping::writePipeName.end()) <<

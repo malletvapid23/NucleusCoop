@@ -7,15 +7,53 @@ namespace Piping
 {
 	std::wstring writePipeName;
 	std::wstring readPipeName;
+	std::wstring sharedMemName;
 
 	HANDLE hPipeRead;
 	HANDLE hPipeWrite;
 	bool pipeClosed = false;
 
+	HANDLE hMem;
+	int* memBuf;
+	const SIZE_T MEM_SIZE = 4 * 4;
+
 	const int SEQUENTIAL_ERRORS_BEFORE_TERMINATE = 10;
 
-	void startPipeListen()
+	void startSharedMem()
 	{
+		//Open memory
+		hMem = OpenFileMappingW(
+			FILE_MAP_READ | FILE_MAP_WRITE,
+			FALSE,
+			sharedMemName.c_str());
+
+		if (hMem == NULL)
+		{
+			DEBUGLOG("Failed to open shared memory. Error=" << GetLastError() << "\n");
+			return;
+		}
+
+		//Get pointer
+		memBuf = static_cast<int*>(
+			MapViewOfFile(
+				hMem,
+		         FILE_MAP_READ | FILE_MAP_WRITE,
+		         0,
+		         0,
+		         MEM_SIZE));
+
+		if (memBuf == NULL)
+		{
+			DEBUGLOG("Failed to open shared memory buffer. Error=" << GetLastError() << "\n");
+			CloseHandle(hMem);
+			return;
+		}
+
+		DEBUGLOG("Successfully connected to shared memory");
+	}
+	
+	void startPipeListen()
+	{		
 		//Read pipe
 		char pipeNameChars[256];
 		sprintf_s(pipeNameChars, R"(\\.\pipe\%s)", std::string(readPipeName.begin(), readPipeName.end()).c_str());
@@ -105,18 +143,20 @@ namespace Piping
 			{
 			case 0x01: //Add delta cursor pos
 				{
-					EnterCriticalSection(&FakeMouse::fakeMouseCriticalSection);
-					FakeMouse::fakeX += param1;
-					FakeMouse::fakeY += param2;
-					LeaveCriticalSection(&FakeMouse::fakeMouseCriticalSection);
+					DEBUGLOG("Received set delta cursor pos message. This should not happen.")
+					//EnterCriticalSection(&FakeMouse::fakeMouseCriticalSection);
+					//FakeMouse::fakeX += param1;
+					//FakeMouse::fakeY += param2;
+					//LeaveCriticalSection(&FakeMouse::fakeMouseCriticalSection);
 					break;
 				}
 			case 0x04: //Set absolute cursor pos
 				{
-					EnterCriticalSection(&FakeMouse::fakeMouseCriticalSection);
-					FakeMouse::absoluteX = param1;
-					FakeMouse::absoluteY = param2;
-					LeaveCriticalSection(&FakeMouse::fakeMouseCriticalSection);
+					DEBUGLOG("Received set abs cursor pos message. This should not happen.")
+					//EnterCriticalSection(&FakeMouse::fakeMouseCriticalSection);
+					//FakeMouse::absoluteX = param1;
+					//FakeMouse::absoluteY = param2;
+					//LeaveCriticalSection(&FakeMouse::fakeMouseCriticalSection);
 					break;
 				}
 			case 0x02: //Set VKey

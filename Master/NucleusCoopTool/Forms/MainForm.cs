@@ -60,7 +60,7 @@ namespace Nucleus.Coop
 
         private bool TopMostToggle = true;
 
-		public Action<Message> RawInputAction { get; set; }
+		public Action<IntPtr> RawInputAction { get; set; }
 
         public enum MachineType : ushort
         {
@@ -263,7 +263,7 @@ namespace Nucleus.Coop
             //LogManager.Log(msg.ToString());
 			if(m.Msg == 0x00FF)//WM_INPUT
 			{
-				RawInputAction(m);
+				RawInputAction(m.LParam);
 			}
             else if (m.Msg == 0x0312 && m.WParam.ToInt32() == KillProcess_HotkeyID)
             {

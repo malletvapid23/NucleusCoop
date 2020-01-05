@@ -2,10 +2,9 @@
 
 namespace FakeMouse
 {
-	extern CRITICAL_SECTION fakeMouseCriticalSection;
 	extern int fakeX, fakeY; //Delta X/Y
 
-	extern int absoluteX, absoluteY;
+	//extern int absoluteX, absoluteY;
 
 	extern int useAbsoluteCursorPosCounter; // 0/1/2/3/... : FALSE, requiredAbsCount : TRUE
 	extern const int REQUIRED_ABS_COUNT;
@@ -20,4 +19,7 @@ namespace FakeMouse
 	void updateAbsoluteCursorCheck();
 
 	void setCursorVisibility(bool show);
+
+	int getAndUpdateFakeX();
+	int getAndUpdateFakeY();
 }
