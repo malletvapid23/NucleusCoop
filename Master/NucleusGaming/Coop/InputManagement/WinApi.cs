@@ -27,7 +27,7 @@ namespace Nucleus.Gaming.Coop.InputManagement
 		/// <returns></returns>
 		[DllImport("user32.dll")]
 		public static extern int GetRawInputData(IntPtr hRawInput, DataCommand uiCommand, [Out] IntPtr pData, ref uint pcbSize, int cbSizeHeader);
-		[DllImport("user32.dll")]
+		[DllImport("user32.dll", SetLastError = false)]
 		public static extern int GetRawInputData(IntPtr hRawInput, DataCommand uiCommand, out RAWINPUT pData, ref uint pcbSize, int cbSizeHeader);
 
 		[DllImport("user32.dll")]
@@ -228,5 +228,47 @@ namespace Nucleus.Gaming.Coop.InputManagement
 		[DllImport("user32.dll")]
 		[return: MarshalAs(UnmanagedType.Bool)]
 		public static extern bool IsWindow(IntPtr hWnd);
+
+		[DllImport("user32.dll", SetLastError = true, EntryPoint = "CreateWindowEx")]
+		public static extern IntPtr CreateWindowEx(
+			int dwExStyle,
+			UInt16 regResult,
+			string lpWindowName,
+			UInt32 dwStyle,
+			int x,
+			int y,
+			int nWidth,
+			int nHeight,
+			IntPtr hWndParent,
+			IntPtr hMenu,
+			IntPtr hInstance,
+			IntPtr lpParam);
+
+		[DllImport("user32.dll")]
+		public static extern IntPtr LoadCursor(IntPtr hInstance, int lpCursorName);
+
+		[DllImport("user32.dll", SetLastError = true, EntryPoint = "RegisterClassEx")]
+		public static extern UInt16 RegisterClassEx([In] ref WNDCLASSEX lpWndClass);
+
+		public delegate IntPtr WndProc(IntPtr hWnd, uint msg, IntPtr wParam, IntPtr lParam);
+
+		[DllImport("user32.dll")]
+		public static extern IntPtr DefWindowProc(IntPtr hWnd, uint uMsg, IntPtr wParam, IntPtr lParam);
+
+		[DllImport("user32.dll")]
+		public static extern bool UpdateWindow(IntPtr hWnd);
+
+		[DllImport("user32.dll")]
+		[return: MarshalAs(UnmanagedType.Bool)]
+		public static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
+
+		[DllImport("user32.dll")]
+		public static extern int GetMessage(out MSG lpMsg, IntPtr hWnd, uint wMsgFilterMin, uint wMsgFilterMax);
+
+		[DllImport("user32.dll")]
+		public static extern bool TranslateMessage([In] ref MSG lpMsg);
+
+		[DllImport("user32.dll")]
+		public static extern IntPtr DispatchMessage([In] ref MSG lpmsg);
 	}
 }
