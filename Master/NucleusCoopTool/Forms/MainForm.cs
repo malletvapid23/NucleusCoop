@@ -259,6 +259,8 @@ namespace Nucleus.Coop
 
         protected override void WndProc(ref Message m)
         {
+			//TODO: if close message, kill application not just window
+
             //int msg = m.Msg;
             //LogManager.Log(msg.ToString());
 			if(m.Msg == 0x00FF)//WM_INPUT

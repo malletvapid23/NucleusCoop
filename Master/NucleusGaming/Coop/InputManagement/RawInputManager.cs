@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Threading;
 
 namespace Nucleus.Gaming.Coop.InputManagement
 {
@@ -12,7 +13,27 @@ namespace Nucleus.Gaming.Coop.InputManagement
 	{
 		public static readonly List<Window> windows = new List<Window>();
 
-		public static void RegisterRawInput(IntPtr windowHandle)
+		private static RawInputWindow rawInputWindow;
+
+		public static void RegisterRawInput(RawInputProcessor rawInputProcessor)
+		{
+			var windowThread = new Thread(WindowThread)
+			{
+				Priority = ThreadPriority.AboveNormal,
+				IsBackground = true
+			};
+			windowThread.Start(rawInputProcessor);
+		}
+
+		private static void WindowThread(object rawInputProcessor)
+		{
+			rawInputWindow = new RawInputWindow();
+			IntPtr hWnd = rawInputWindow.hWnd;
+			RegisterRawInputInternal(hWnd);
+			rawInputWindow.StartMessageLoop((RawInputProcessor)rawInputProcessor);
+		}
+
+		private static void RegisterRawInputInternal(IntPtr windowHandle)
 		{
 			//GetDeviceList();
 			Logger.WriteLine($"Attempting to RegisterRawInputDevices for window handle {windowHandle}");

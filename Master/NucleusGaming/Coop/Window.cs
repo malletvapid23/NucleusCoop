@@ -96,6 +96,8 @@ namespace Nucleus.Gaming.Coop
 
 				hbr = WinApi.CreateSolidBrush(0x00010000);//0x00bbggrr
 
+				Parent = null;
+
 				paintBkgMethod = typeof(Control).GetMethod("PaintBackground", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance, null, new Type[] { typeof(PaintEventArgs), typeof(System.Drawing.Rectangle) }, null);
 			}
 
