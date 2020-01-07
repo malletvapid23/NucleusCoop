@@ -555,7 +555,6 @@ namespace Nucleus.Coop
             //else
             //{
                 //this.StepPanel.Controls.Clear();
-                MessageBox.Show("remove all");
             //}
 
         }

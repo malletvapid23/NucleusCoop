@@ -804,7 +804,7 @@ namespace Nucleus.Gaming
 
                     if (i == 0)
                     {
-                        for (int p = 0; p < players.Count; ++p)
+                        for (int p = 0; p < players.Count; p++)
                         {
                             string path = Path.Combine(tempDir, "Instance" + p);
                             if (!Directory.Exists(path) || Directory.Exists(path) && !Directory.EnumerateFileSystemEntries(path).Any<string>())
@@ -2158,7 +2158,7 @@ namespace Nucleus.Gaming
 
                             if(gen.CMDLaunch)
                             {
-                                string cmdLine = cmdOps[i] + " \"" + exePath + "\" " + startArgs;
+                                string cmdLine = cmdOps[i] + " \"" + exePath + " " + startArgs + "\"";
                                 Log(string.Format("Launching game via command prompt with the following line: {0}", cmdLine));
                                 cmd.StandardInput.WriteLine(cmdLine);
                             }
