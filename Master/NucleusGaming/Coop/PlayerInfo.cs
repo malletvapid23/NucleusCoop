@@ -4,9 +4,12 @@ using System.Linq;
 using System.Text;
 using System.Drawing;
 using System.Diagnostics;
+using System.Threading;
+using System.Threading.Tasks;
 using SlimDX.DirectInput;
 using Nucleus.Gaming.Coop;
-using System.Threading;
+using Nucleus.Coop;
+using Nucleus.Gaming.Coop.InputManagement.Logging;
 
 namespace Nucleus.Gaming.Coop
 {
@@ -107,8 +110,41 @@ namespace Nucleus.Gaming.Coop
             set { processData = value; }
         }
 
+		#region Flash
+		public bool ShouldFlash;
+
 		private Stopwatch flashStopwatch = new Stopwatch();
-		public bool ShouldFlash => flashStopwatch.IsRunning && flashStopwatch.ElapsedMilliseconds < 450;
-        public void FlashIcon() => flashStopwatch.Restart();
-    }
+		private Task flashTask = null;
+		public void FlashIcon()
+		{
+			if (ShouldFlash && flashStopwatch != null && flashStopwatch.IsRunning && flashStopwatch.ElapsedMilliseconds <= 250) return;
+
+			if (!ShouldFlash)
+			{
+				ShouldFlash = true;
+				PositionsControl.InvalidateFlash();
+			}
+
+			flashStopwatch.Restart();
+
+			if (flashTask == null)
+			{
+				flashTask = new Task(delegate
+				{
+					while (flashStopwatch.ElapsedMilliseconds <= 500)
+					{
+						Thread.Sleep(501 - (int)flashStopwatch.ElapsedMilliseconds);
+					}
+					
+					flashTask = null;
+
+					ShouldFlash = false;
+					PositionsControl.InvalidateFlash();
+				});
+
+				flashTask.Start();
+			}
+		}
+		#endregion
+	}
 }
