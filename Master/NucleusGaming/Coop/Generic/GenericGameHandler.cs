@@ -635,6 +635,7 @@ namespace Nucleus.Gaming
 			//    }
 			//}
 
+			RawInputProcessor.ToggleLockInputKey = gen.LockInputToggleKey;
 
 			RawInputManager.windows.Clear();
 
@@ -2714,6 +2715,11 @@ namespace Nucleus.Gaming
 			}
 
 			RawInputProcessor.Start();
+
+			if (gen.SupportsMultipleKeyboardsAndMice && gen.LockInputAtStart)
+			{
+				LockInput.Lock();
+			}
 
 			return string.Empty;
         }

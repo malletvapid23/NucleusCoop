@@ -20,8 +20,7 @@ namespace Nucleus.Gaming.Coop.InputManagement
 	{
 		private static RawInputProcessor rawInputProcessor = null;
 
-		private static int toggleLockInputKey = 0x23;//End
-		private bool inputLocked;
+		public static int ToggleLockInputKey { get; set; } = 0x23;//End
 		
 		readonly Func<bool> splitScreenRunning;
 
@@ -354,11 +353,10 @@ namespace Nucleus.Gaming.Coop.InputManagement
 			    uint keyboardMessage = rawBuffer.data.keyboard.Message;
 			    bool keyUpOrDown = keyboardMessage == (uint)KeyboardEvents.WM_KEYDOWN || keyboardMessage == (uint)KeyboardEvents.WM_KEYUP;
 
-			    if (keyboardMessage == (uint)KeyboardEvents.WM_KEYUP && (rawBuffer.data.keyboard.Flags | 1) != 0 && rawBuffer.data.keyboard.VKey == toggleLockInputKey)
+			    if (keyboardMessage == (uint)KeyboardEvents.WM_KEYUP && (rawBuffer.data.keyboard.Flags | 1) != 0 && rawBuffer.data.keyboard.VKey == ToggleLockInputKey)
 			    {
 				    Debug.WriteLine("Lock input key pressed");
-				    inputLocked = !inputLocked;
-				    if (inputLocked)
+				    if (!LockInput.IsLocked)
 					    LockInput.Lock();
 				    else
 					    LockInput.Unlock();

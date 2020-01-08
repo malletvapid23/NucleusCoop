@@ -62,8 +62,6 @@ namespace Nucleus.Gaming.Coop
 
 			IntPtr hWnd;
 
-			System.Reflection.MethodInfo paintBkgMethod;
-
 			Graphics g = null;
 			IntPtr h;
 			bool hasDrawn = false;//We need to paint the entire window once at the start.
@@ -95,10 +93,6 @@ namespace Nucleus.Gaming.Coop
 				hicon = Cursors.Arrow.Handle;
 
 				hbr = WinApi.CreateSolidBrush(0x00010000);//0x00bbggrr
-
-				Parent = null;
-
-				paintBkgMethod = typeof(Control).GetMethod("PaintBackground", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance, null, new Type[] { typeof(PaintEventArgs), typeof(System.Drawing.Rectangle) }, null);
 			}
 
 			protected override void OnPaintBackground(PaintEventArgs e)
@@ -133,7 +127,7 @@ namespace Nucleus.Gaming.Coop
 				oldRelativeScreenY = screenY - Location.Y;
 
 				//Greatly reduces CPU usage, doesn't lock any input. Insignificant delay. Mouse cursor is only used in menus, not first person.
-				System.Threading.Thread.Sleep(1);
+				System.Threading.Thread.Sleep(5);
 			}
 
 			public void InvalidateMouse()
@@ -188,7 +182,7 @@ namespace Nucleus.Gaming.Coop
 
 		public void UpdateCursorPosition()
 		{
-			if (pointerForm != null)//If Draw Mouse is selected
+			if (pointerForm != null && !pointerForm.IsDisposed)//If Draw Mouse is selected
 			{
 				if (pointerForm.visible)
 				{
