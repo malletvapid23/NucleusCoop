@@ -1361,7 +1361,7 @@ namespace Nucleus.Coop
             g.DrawString(game.Game.SupportsMultipleKeyboardsAndMice ? "Input Devices" : "Gamepads", playerTextFont, Brushes.White, new PointF(10, 10));
 
             SizeF dragEachGamepadSize;
-            string dragEachGamepad = "Drag each gamepad to a screen\nClick top-left corner to change layout\nRight click player to change size";
+            string dragEachGamepad = $"Drag each {((game.Game.SupportsMultipleKeyboardsAndMice || game.Game.SupportsKeyboard) ? "input device" : "gamepad")} to a screen\nClick top-left corner to change layout\nRight click player to change size";
             dragEachGamepad = StringUtil.WrapString(Width /** 0.3f*/, dragEachGamepad, g, extraSmallTextFont, out dragEachGamepadSize);
             g.DrawString(dragEachGamepad, extraSmallTextFont, Brushes.White, new PointF(Width - dragEachGamepadSize.Width, 4/*playersArea.Y - 50*/));
 
