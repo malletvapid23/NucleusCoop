@@ -73,6 +73,8 @@ namespace Nucleus.Gaming.Coop
 
 			const int cursorWidthHeight = 35;
 
+			public bool hasBroughtToTop = false;
+
 			public PointerForm(IntPtr hWnd, int gameWindowWidth, int gameWindowHeight, int gameWindowX, int gameWindowY) : base()
 			{
 				this.hWnd = hWnd;
@@ -201,8 +203,17 @@ namespace Nucleus.Gaming.Coop
 						pointerForm.Location = new System.Drawing.Point(p.X - pointerForm.Width / 2, p.Y - pointerForm.Height / 2);
 					}
 
-					//NucleusCoop brings the game window the the top, this brings the mouse top of top
-					WinApi.BringWindowToTop(pointerForm.Handle);
+					//NucleusCoop brings the game window the the top, this brings the mouse top of top.
+					//Must only be run once because if two pointers try and both do this, CPU usage is massive.
+					if (!pointerForm.hasBroughtToTop)
+					{
+						pointerForm.hasBroughtToTop = true;
+
+						for (int j = 0; j < 10; j++)
+						{
+							WinApi.BringWindowToTop(pointerForm.Handle);
+						}
+					}
 
 					pointerForm.InvalidateMouse();
 				}
