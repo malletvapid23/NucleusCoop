@@ -273,6 +273,8 @@ namespace Nucleus.Gaming
 
             int tempIndex = 0;
 
+			RawInputManager.EndSplitScreen();
+
 #if RELEASE
             if (gen.KeepSymLinkOnExit == false)
             {
@@ -2842,7 +2844,7 @@ namespace Nucleus.Gaming
 					}
 	            }
 	        }
-	        catch (ThreadAbortException e)
+	        catch (Exception e)
 	        {
 		        Logger.WriteLine($"ThreadAbortException in FakeFocus. Exiting. Error: {e}");
 	        }

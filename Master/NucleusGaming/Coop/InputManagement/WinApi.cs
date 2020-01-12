@@ -170,6 +170,17 @@ namespace Nucleus.Gaming.Coop.InputManagement
 		[DllImport("user32.dll", EntryPoint = "SetWindowLongPtr")]
 		private static extern IntPtr SetWindowLongPtr64(IntPtr hWnd, int nIndex, IntPtr dwNewLong);
 
+		public static IntPtr GetWindowLongPtr(IntPtr hWnd, int nIndex)
+		{
+			return IntPtr.Size == 8 ? GetWindowLongPtr64(hWnd, nIndex) : GetWindowLongPtr32(hWnd, nIndex);
+		}
+
+		[DllImport("user32.dll", EntryPoint = "GetWindowLong")]
+		private static extern IntPtr GetWindowLongPtr32(IntPtr hWnd, int nIndex);
+
+		[DllImport("user32.dll", EntryPoint = "GetWindowLongPtr")]
+		private static extern IntPtr GetWindowLongPtr64(IntPtr hWnd, int nIndex);
+
 		[DllImport("user32.dll", SetLastError = true)]
 		public static extern bool BringWindowToTop(IntPtr hWnd);
 
@@ -270,5 +281,8 @@ namespace Nucleus.Gaming.Coop.InputManagement
 
 		[DllImport("user32.dll")]
 		public static extern IntPtr DispatchMessage([In] ref MSG lpmsg);
+
+		[DllImport("user32.dll")]
+		public static extern bool SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int X, int Y, int cx, int cy, UInt32 uFlags);
 	}
 }

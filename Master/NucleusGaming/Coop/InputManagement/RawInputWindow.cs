@@ -96,6 +96,15 @@ namespace Nucleus.Gaming.Coop.InputManagement
 					sqErr = 0;
 					rawInputProcessor.Process(msg.lParam);
 				}
+				else if (msg.message == 0x0400)
+				{
+					//End split screen message.
+					Logger.WriteLine($"RawInputWindow received split screen end");
+					foreach (var window in RawInputManager.windows)
+					{
+						window.End();
+					}
+				}
 				else
 				{
 					sqErr = 0;

@@ -25,6 +25,11 @@ namespace Nucleus.Gaming.Coop.InputManagement
 			windowThread.Start(rawInputProcessor);
 		}
 
+		public static void EndSplitScreen()
+		{
+			WinApi.PostMessageA(rawInputWindow.hWnd, 0x0400, IntPtr.Zero, IntPtr.Zero);
+		}
+
 		private static void WindowThread(object rawInputProcessor)
 		{
 			rawInputWindow = new RawInputWindow();

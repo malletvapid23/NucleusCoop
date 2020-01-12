@@ -73,7 +73,9 @@ namespace Nucleus.Gaming.Coop
 
 			const int cursorWidthHeight = 35;
 
-			public bool hasBroughtToTop = false;
+			public int hasBroughtToTopCounter = 0;
+
+			private bool disabledAltTab = false;
 
 			public PointerForm(IntPtr hWnd, int gameWindowWidth, int gameWindowHeight, int gameWindowX, int gameWindowY) : base()
 			{
@@ -134,6 +136,15 @@ namespace Nucleus.Gaming.Coop
 
 			public void InvalidateMouse()
 			{
+				if (!disabledAltTab)
+				{
+					//TODO: GET EXISTING STYLE AND APPEND 0x80
+					var x = (long)WinApi.GetWindowLongPtr(Handle, (-20));
+					x |= 0x00000080L;
+					WinApi.SetWindowLongPtr(Handle, (-20), (IntPtr)x);
+					disabledAltTab = true;
+				}
+
 				//Causes this region to be re-drawn
 				Invalidate();
 			}
@@ -164,12 +175,16 @@ namespace Nucleus.Gaming.Coop
 		private PointerForm pointerForm = null;
 		public bool CursorVisibility
 		{
-			get => pointerForm.visible;
+			get => pointerForm != null && pointerForm.visible;
 			set
 			{
 				if (pointerForm != null)
 				{
 					pointerForm.visible = value;
+					if (value)
+						pointerForm.Show();
+					else 
+						pointerForm.Hide();
 				}
 			}
 		}
@@ -205,15 +220,13 @@ namespace Nucleus.Gaming.Coop
 
 					//NucleusCoop brings the game window the the top, this brings the mouse top of top.
 					//Must only be run once because if two pointers try and both do this, CPU usage is massive.
-					if (!pointerForm.hasBroughtToTop)
+					if (pointerForm.hasBroughtToTopCounter++ == 1000)
 					{
-						pointerForm.hasBroughtToTop = true;
+						pointerForm.hasBroughtToTopCounter = 0;
 
-						for (int j = 0; j < 10; j++)
-						{
-							WinApi.BringWindowToTop(pointerForm.Handle);
-						}
+						WinApi.SetWindowPos(pointerForm.Handle, (IntPtr)(-1), 0, 0, 0, 0, 0x0002 | 0x0008 | 0x0001);
 					}
+
 
 					pointerForm.InvalidateMouse();
 				}
@@ -226,7 +239,7 @@ namespace Nucleus.Gaming.Coop
 			}
 		}
 
-		public void KillCursor()
+		private void KillCursor()
 		{
 			pointerForm?.Hide();
 			pointerForm?.Dispose();
@@ -246,7 +259,12 @@ namespace Nucleus.Gaming.Coop
 		public void UpdateBounds()
 		{
 			//TODO: on another thread?
-			WinApi.GetClientRect(hWnd, out var bounds);
+
+			//Hide the cursor if window is gone
+			bool ret = WinApi.GetClientRect(hWnd, out var bounds);
+			if (CursorVisibility && !ret)
+				CursorVisibility = false;
+
 			Bounds = bounds;
 		}
 
@@ -258,6 +276,11 @@ namespace Nucleus.Gaming.Coop
 		private void OnPipeClosed()
 		{
 			HookPipe = null;
+		}
+
+		public void End()
+		{
+			KillCursor();
 		}
 	}
 }
