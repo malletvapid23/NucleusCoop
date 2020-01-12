@@ -2298,7 +2298,26 @@ namespace Nucleus.Gaming
                     }
                 }
 
-                if (i > 0 && gen.ResetWindows && prevProcessData != null)
+                //Set up raw input window
+                if (player.IsRawKeyboard || player.IsRawMouse)
+                {
+	                var hWnd = WaitForProcWindowHandleNotZero(proc);
+	                var mouseHdev = player.RawMouseDeviceHandle;
+	                var keyboardHdev = player.RawKeyboardDeviceHandle;
+
+	                var window = new Window(hWnd)
+	                {
+		                CursorVisibility = !gen.HideCursor && gen.DrawFakeMouseCursor,
+		                KeyboardAttached = keyboardHdev,
+		                MouseAttached = mouseHdev
+	                };
+
+	                window.CreateHookPipe(gen);
+
+	                RawInputManager.windows.Add(window);
+                }
+
+				if (i > 0 && gen.ResetWindows && prevProcessData != null)
                 {
                     Log("Attempting to repoisition, resize and strip borders for instance " + (i - 1));
                     //MessageBox.Show("Going to attempt to reposition and resize instance " + (i - 1));
@@ -2505,25 +2524,6 @@ namespace Nucleus.Gaming
                     Log(string.Format("Pausing for {0} seconds", gen.PauseBetweenStarts));
                     Thread.Sleep(TimeSpan.FromSeconds(gen.PauseBetweenStarts));
                 }
-
-				//Set up raw input window
-				if (player.IsRawKeyboard || player.IsRawMouse)
-				{
-					var hWnd = WaitForProcWindowHandleNotZero(proc);
-					var mouseHdev = player.RawMouseDeviceHandle;
-					var keyboardHdev = player.RawKeyboardDeviceHandle;
-
-					var window = new Window(hWnd)
-					{
-						CursorVisibility = !gen.HideCursor && gen.DrawFakeMouseCursor,
-						KeyboardAttached = keyboardHdev,
-						MouseAttached = mouseHdev
-					};
-
-					window.CreateHookPipe(gen);
-
-					RawInputManager.windows.Add(window);
-				}
 
 				if (i == (players.Count - 1)) // all instances accounted for
                 {
@@ -2732,7 +2732,7 @@ namespace Nucleus.Gaming
 			{
 				for (int times = 0; times < 200; times++)
 				{
-					Thread.Sleep(50);
+					Thread.Sleep(500);
 					if ((int)proc.MainWindowHandle > 0)
 					{
 						break;
