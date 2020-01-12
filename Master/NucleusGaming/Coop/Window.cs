@@ -66,23 +66,27 @@ namespace Nucleus.Gaming.Coop
 			IntPtr h;
 			bool hasDrawn = false;//We need to paint the entire window once at the start.
 
-			const int windowWidth = 2000;//Minimum width
-			const int windowHeight = 2000;
+			const int WINDOW_WIDTH = 2000;//Minimum width
+			const int WINDOW_HEIGHT = 2000;
 
 			private IntPtr hbr;
 
-			const int cursorWidthHeight = 35;
+			const int CURSOR_WIDTH_HEIGHT = 35;
 
-			public int hasBroughtToTopCounter = 0;
+			public int hasBroughtToTopCounter;
 
-			private bool disabledAltTab = false;
+			private bool disabledAltTab;
+
+			private readonly Timer lastDrawnTimer = new Timer();
+			public bool readyToDraw;
+			private const int MILLISECONDS_BETWEEN_DRAW = 5;
 
 			public PointerForm(IntPtr hWnd, int gameWindowWidth, int gameWindowHeight, int gameWindowX, int gameWindowY) : base()
 			{
 				this.hWnd = hWnd;
 
-				Width = Math.Max(windowWidth, gameWindowWidth + 100);
-				Height = Math.Max(windowHeight, gameWindowHeight + 100);
+				Width = Math.Max(WINDOW_WIDTH, gameWindowWidth + 100);
+				Height = Math.Max(WINDOW_HEIGHT, gameWindowHeight + 100);
 				Logger.WriteLine($"Cursor window width,height = {Width},{Height}");
 				FormBorderStyle = FormBorderStyle.None;
 				Text = "";
@@ -97,6 +101,11 @@ namespace Nucleus.Gaming.Coop
 				hicon = Cursors.Arrow.Handle;
 
 				hbr = WinApi.CreateSolidBrush(0x00010000);//0x00bbggrr
+
+				//lastDrawnStopwatch.Start();
+				lastDrawnTimer.Start();
+				lastDrawnTimer.Interval = MILLISECONDS_BETWEEN_DRAW;
+				lastDrawnTimer.Tick += (o, e) => { readyToDraw = true; };
 			}
 
 			protected override void OnPaintBackground(PaintEventArgs e)
@@ -120,8 +129,8 @@ namespace Nucleus.Gaming.Coop
 					Left = oldRelativeScreenX,
 					Top = oldRelativeScreenY
 				};
-				r.Bottom = r.Top + cursorWidthHeight;
-				r.Right = r.Left + cursorWidthHeight;
+				r.Bottom = r.Top + CURSOR_WIDTH_HEIGHT;
+				r.Right = r.Left + CURSOR_WIDTH_HEIGHT;
 				WinApi.FillRect(h, ref r, hbr);
 
 				if (visible)
@@ -131,14 +140,16 @@ namespace Nucleus.Gaming.Coop
 				oldRelativeScreenY = screenY - Location.Y;
 
 				//Greatly reduces CPU usage, doesn't lock any input. Insignificant delay. Mouse cursor is only used in menus, not first person.
-				System.Threading.Thread.Sleep(5);
+				//Problem: all pointers are drawn on the same thread. After resuming, a high polling rate pointer is always the most likely to draw first
+				// hence throttles other cursors if moving at the same time.
+				//Solution: measure time in UpdateCursorPosition and ignore if drawn too recently.
+				//System.Threading.Thread.Sleep(5);
 			}
 
 			public void InvalidateMouse()
 			{
 				if (!disabledAltTab)
 				{
-					//TODO: GET EXISTING STYLE AND APPEND 0x80
 					var x = (long)WinApi.GetWindowLongPtr(Handle, (-20));
 					x |= 0x00000080L;
 					WinApi.SetWindowLongPtr(Handle, (-20), (IntPtr)x);
@@ -203,19 +214,25 @@ namespace Nucleus.Gaming.Coop
 			{
 				if (pointerForm.visible)
 				{
+					//Prevent the cursor being drawn too often (wastes CPU with high polling rate mice)
+					if (!pointerForm.readyToDraw) return;
+					pointerForm.readyToDraw = false;
+
 					hasRepaintedSinceLastInvisible = false;
-					var p = new System.Drawing.Point(MousePosition.x, MousePosition.y);
-					WinApi.ClientToScreen(hWnd, ref p);//p is screen coords
+					var p = new System.Drawing.Point(MousePosition.x + Bounds.Left, MousePosition.y + Bounds.Top);
+					//WinApi.ClientToScreen(hWnd, ref p); //p is screen coords
 
 					pointerForm.screenX = p.X;
 					pointerForm.screenY = p.Y;
 
 					const int padding = 35;
 					if (p.X <= pointerForm.Location.X + padding || p.Y <= pointerForm.Location.Y + padding ||
-						p.X >= pointerForm.Location.X + pointerForm.Width - padding || p.Y >= pointerForm.Location.Y + pointerForm.Height - padding)
+					    p.X >= pointerForm.Location.X + pointerForm.Width - padding ||
+					    p.Y >= pointerForm.Location.Y + pointerForm.Height - padding)
 					{
 						//pointerForm.RepaintAll(); (unecessary waste of CPU)
-						pointerForm.Location = new System.Drawing.Point(p.X - pointerForm.Width / 2, p.Y - pointerForm.Height / 2);
+						pointerForm.Location = new System.Drawing.Point(p.X - pointerForm.Width / 2,
+							p.Y - pointerForm.Height / 2);
 					}
 
 					//NucleusCoop brings the game window the the top, this brings the mouse top of top.
@@ -224,7 +241,8 @@ namespace Nucleus.Gaming.Coop
 					{
 						pointerForm.hasBroughtToTopCounter = 0;
 
-						WinApi.SetWindowPos(pointerForm.Handle, (IntPtr)(-1), 0, 0, 0, 0, 0x0002 | 0x0008 | 0x0001);
+						WinApi.SetWindowPos(pointerForm.Handle, (IntPtr) (-1), 0, 0, 0, 0,
+							0x0002 | 0x0008 | 0x0001);
 					}
 
 
@@ -260,8 +278,16 @@ namespace Nucleus.Gaming.Coop
 		{
 			//TODO: on another thread?
 
+			//Bring to top
+			if (pointerForm != null)
+			{
+				WinApi.SetWindowPos(pointerForm.Handle, (IntPtr) (-1), 0, 0, 0, 0,
+					0x0002 | 0x0008 | 0x0001);
+				WinApi.BringWindowToTop(pointerForm.Handle);
+			}
+
 			//Hide the cursor if window is gone
-			bool ret = WinApi.GetClientRect(hWnd, out var bounds);
+			bool ret = WinApi.GetWindowRect(hWnd, out var bounds);
 			if (CursorVisibility && !ret)
 				CursorVisibility = false;
 
