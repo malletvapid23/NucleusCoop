@@ -24,6 +24,7 @@ namespace Nucleus.Gaming
         public string[] DirSymlinkExclusions;
         public string[] FileSymlinkExclusions;
         public string[] FileSymlinkCopyInstead;
+        public string[] DirExclusions;
         public bool KeepSymLinkOnExit;
 
         public double HandlerInterval;
@@ -138,6 +139,12 @@ namespace Nucleus.Gaming
         public string SteamStubDRMPatcherArch;
         public bool GoldbergLobbyConnect;
         public string[] X360ceDll;
+        public string[] CMDBatchBefore;
+        public string[] CMDBatchAfter;
+        public bool GoldbergNoLocalSave;
+        public bool UseNucleusEnvironment;
+        public bool ThirdPartyLaunch;
+        public bool ForceProcessPick;
 
         public Type HandlerType
         {

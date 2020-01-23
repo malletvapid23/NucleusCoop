@@ -2,14 +2,11 @@
 using Nucleus.Gaming.Coop;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
 using System.IO;
 using System.Linq;
-using System.Text;
+using System.Security.Principal;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace Nucleus.Coop
@@ -73,6 +70,14 @@ namespace Nucleus.Coop
             base.OnFormClosing(e);
 
             closed = true;
+        }
+
+        private bool IsElevated
+        {
+            get
+            {
+                return new WindowsPrincipal(WindowsIdentity.GetCurrent()).IsInRole(WindowsBuiltInRole.Administrator);
+            }
         }
 
         private void btnSearch_Click(object sender, EventArgs e)
@@ -224,6 +229,7 @@ namespace Nucleus.Coop
 
         private void SearchDrive(object state)
         {
+            var watch = System.Diagnostics.Stopwatch.StartNew();
             try
             {
                 for (int i = 0; i < pathsToSearch.Count; i++)
@@ -238,7 +244,20 @@ namespace Nucleus.Coop
                     UpdateProgress(thirdDiskPc);
 
                     List<string> result = new List<string>();
+                    //if(IsElevated)
+                    //{
+                    //result = Directory.EnumerateFiles(currentPath, "*.exe", SearchOption.AllDirectories).ToList();
+                    //result = Directory.GetFiles(currentPath, "*.exe", SearchOption.AllDirectories).ToList();
+                    //}
+                    //else
+                    //{
+                    //result = GetFiles(currentPath).ToList();
+                    //}
+
+
+                    //result = GetFiles(currentPath, "*.exe").ToList();
                     result = GetFiles(currentPath).ToList();
+
 
                     float increment = thirdDiskPc / result.Count;
 
@@ -305,13 +324,18 @@ namespace Nucleus.Coop
                 searching = false;
                 btnSearch.Text = "Search";
 
+
+                watch.Stop();
+
+                var elapsedMs = watch.ElapsedMilliseconds / 1000;
+
                 if (checkboxFoundGames.Items.Count == 0)
                 {
                     btn_customPath.Enabled = true;
                     btn_delPath.Enabled = true;
                     disksBox.Enabled = true;
 
-                    MessageBox.Show("No new games found.");
+                    MessageBox.Show("Operation completed in " + elapsedMs + "s. No new games found.");
                     progressBar1.Value = 0;
                     return;
                 }
@@ -329,11 +353,12 @@ namespace Nucleus.Coop
                 txt_Path.Text = "";
                 Refresh();
                 Invalidate();
-                MessageBox.Show("Search has completed. Select the games you wish to add from the right-hand side.", "Search finished");
+                MessageBox.Show("Search has completed, operation took " + elapsedMs + "s. Select the games you wish to add from the right-hand side.", "Search finished");
             }
             catch (Exception ex)
             {
                 Console.Error.WriteLine(ex);
+                MessageBox.Show(ex.Message);
             }
         }
 

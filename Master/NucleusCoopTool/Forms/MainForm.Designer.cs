@@ -57,6 +57,7 @@
             this.scriptAuthorLbl = new System.Windows.Forms.Label();
             this.scriptAuthorTxt = new System.Windows.Forms.TextBox();
             this.lblVersion = new System.Windows.Forms.Label();
+            this.deleteContentFolderToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.gameContextMenuStrip.SuspendLayout();
             this.StepPanel.SuspendLayout();
             this.SuspendLayout();
@@ -88,21 +89,22 @@
             this.openOrigExePathToolStripMenuItem,
             this.toolStripMenuItem2,
             this.changeIconToolStripMenuItem,
+            this.deleteContentFolderToolStripMenuItem,
             this.deleteToolStripMenuItem});
             this.gameContextMenuStrip.Name = "gameContextMenuStrip";
-            this.gameContextMenuStrip.Size = new System.Drawing.Size(186, 192);
+            this.gameContextMenuStrip.Size = new System.Drawing.Size(190, 236);
             this.gameContextMenuStrip.Opening += new System.ComponentModel.CancelEventHandler(this.GameContextMenuStrip_Opening);
             // 
             // nullToolStripMenuItem
             // 
             this.nullToolStripMenuItem.Name = "nullToolStripMenuItem";
-            this.nullToolStripMenuItem.Size = new System.Drawing.Size(185, 22);
+            this.nullToolStripMenuItem.Size = new System.Drawing.Size(189, 22);
             this.nullToolStripMenuItem.Text = "null";
             // 
             // scriptNotesToolStripMenuItem
             // 
             this.scriptNotesToolStripMenuItem.Name = "scriptNotesToolStripMenuItem";
-            this.scriptNotesToolStripMenuItem.Size = new System.Drawing.Size(185, 22);
+            this.scriptNotesToolStripMenuItem.Size = new System.Drawing.Size(189, 22);
             this.scriptNotesToolStripMenuItem.Text = "Script Author Notes";
             this.scriptNotesToolStripMenuItem.Visible = false;
             this.scriptNotesToolStripMenuItem.Click += new System.EventHandler(this.ScriptNotesToolStripMenuItem_Click);
@@ -110,52 +112,52 @@
             // toolStripMenuItem1
             // 
             this.toolStripMenuItem1.Name = "toolStripMenuItem1";
-            this.toolStripMenuItem1.Size = new System.Drawing.Size(182, 6);
+            this.toolStripMenuItem1.Size = new System.Drawing.Size(186, 6);
             // 
             // detailsToolStripMenuItem
             // 
             this.detailsToolStripMenuItem.Name = "detailsToolStripMenuItem";
-            this.detailsToolStripMenuItem.Size = new System.Drawing.Size(185, 22);
+            this.detailsToolStripMenuItem.Size = new System.Drawing.Size(189, 22);
             this.detailsToolStripMenuItem.Text = "Details";
             this.detailsToolStripMenuItem.Click += new System.EventHandler(this.DetailsToolStripMenuItem_Click);
             // 
             // openScriptToolStripMenuItem
             // 
             this.openScriptToolStripMenuItem.Name = "openScriptToolStripMenuItem";
-            this.openScriptToolStripMenuItem.Size = new System.Drawing.Size(185, 22);
+            this.openScriptToolStripMenuItem.Size = new System.Drawing.Size(189, 22);
             this.openScriptToolStripMenuItem.Text = "Open Script";
             this.openScriptToolStripMenuItem.Click += new System.EventHandler(this.OpenScriptToolStripMenuItem_Click);
             // 
             // openDataFolderToolStripMenuItem
             // 
             this.openDataFolderToolStripMenuItem.Name = "openDataFolderToolStripMenuItem";
-            this.openDataFolderToolStripMenuItem.Size = new System.Drawing.Size(185, 22);
+            this.openDataFolderToolStripMenuItem.Size = new System.Drawing.Size(189, 22);
             this.openDataFolderToolStripMenuItem.Text = "Open Content Folder";
             this.openDataFolderToolStripMenuItem.Click += new System.EventHandler(this.OpenDataFolderToolStripMenuItem_Click);
             // 
             // openOrigExePathToolStripMenuItem
             // 
             this.openOrigExePathToolStripMenuItem.Name = "openOrigExePathToolStripMenuItem";
-            this.openOrigExePathToolStripMenuItem.Size = new System.Drawing.Size(185, 22);
+            this.openOrigExePathToolStripMenuItem.Size = new System.Drawing.Size(189, 22);
             this.openOrigExePathToolStripMenuItem.Text = "Open Orig Exe Path";
             this.openOrigExePathToolStripMenuItem.Click += new System.EventHandler(this.OpenOrigExePathToolStripMenuItem_Click);
             // 
             // toolStripMenuItem2
             // 
             this.toolStripMenuItem2.Name = "toolStripMenuItem2";
-            this.toolStripMenuItem2.Size = new System.Drawing.Size(182, 6);
+            this.toolStripMenuItem2.Size = new System.Drawing.Size(186, 6);
             // 
             // changeIconToolStripMenuItem
             // 
             this.changeIconToolStripMenuItem.Name = "changeIconToolStripMenuItem";
-            this.changeIconToolStripMenuItem.Size = new System.Drawing.Size(185, 22);
+            this.changeIconToolStripMenuItem.Size = new System.Drawing.Size(189, 22);
             this.changeIconToolStripMenuItem.Text = "Change Icon";
             this.changeIconToolStripMenuItem.Click += new System.EventHandler(this.ChangeIconToolStripMenuItem_Click);
             // 
             // deleteToolStripMenuItem
             // 
             this.deleteToolStripMenuItem.Name = "deleteToolStripMenuItem";
-            this.deleteToolStripMenuItem.Size = new System.Drawing.Size(185, 22);
+            this.deleteToolStripMenuItem.Size = new System.Drawing.Size(189, 22);
             this.deleteToolStripMenuItem.Text = "Delete";
             this.deleteToolStripMenuItem.Click += new System.EventHandler(this.DeleteToolStripMenuItem_Click);
             // 
@@ -337,6 +339,13 @@
             this.lblVersion.TabIndex = 12;
             this.lblVersion.Text = "ALPHA 8";
             // 
+            // deleteContentFolderToolStripMenuItem
+            // 
+            this.deleteContentFolderToolStripMenuItem.Name = "deleteContentFolderToolStripMenuItem";
+            this.deleteContentFolderToolStripMenuItem.Size = new System.Drawing.Size(189, 22);
+            this.deleteContentFolderToolStripMenuItem.Text = "Delete Content Folder";
+            this.deleteContentFolderToolStripMenuItem.Click += new System.EventHandler(this.deleteContentFolderToolStripMenuItem_Click);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
@@ -396,5 +405,6 @@
         private System.Windows.Forms.Label scriptAuthorLbl;
         private System.Windows.Forms.TextBox scriptAuthorTxt;
         private System.Windows.Forms.ToolStripMenuItem openOrigExePathToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem deleteContentFolderToolStripMenuItem;
     }
 }

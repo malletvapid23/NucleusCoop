@@ -1,9 +1,9 @@
 ﻿using System;
+using System.Collections;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
-using EasyHook;
 using Nucleus.Gaming;
 
 namespace Nucleus.Inject
@@ -28,6 +28,7 @@ namespace Nucleus.Inject
 				[MarshalAs(UnmanagedType.LPWStr)] string InEXEPath,
 				[MarshalAs(UnmanagedType.LPWStr)] string InCommandLine,
 				uint InProcessCreationFlags,
+				IntPtr InEnvironment,
 				uint InInjectionOptions,
 				[MarshalAs(UnmanagedType.LPWStr)] string InLibraryPath_x86,
 				[MarshalAs(UnmanagedType.LPWStr)] string InLibraryPath_x64,
@@ -55,6 +56,7 @@ namespace Nucleus.Inject
 				[MarshalAs(UnmanagedType.LPWStr)] string InEXEPath,
 				[MarshalAs(UnmanagedType.LPWStr)] string InCommandLine,
 				uint InProcessCreationFlags,
+				IntPtr InEnvironment,
 				uint InInjectionOptions,
 				[MarshalAs(UnmanagedType.LPWStr)] string InLibraryPath_x86,
 				[MarshalAs(UnmanagedType.LPWStr)] string InLibraryPath_x64,
@@ -99,6 +101,50 @@ namespace Nucleus.Inject
 				bool.TryParse(args[i++], out bool isDebug);
 				string nucleusFolderPath = args[i++];
 				bool.TryParse(args[i++], out bool blockRaw);
+				bool.TryParse(args[i++], out bool cusEnv);
+				string playerNick = args[i++];
+
+				IntPtr envPtr = IntPtr.Zero;
+
+				if (cusEnv)
+				{
+					Log("Setting up Nucleus environment");
+					
+					IDictionary envVars = Environment.GetEnvironmentVariables();
+					var sb = new StringBuilder();
+					var username = Environment.UserName;
+					envVars["USERPROFILE"] = $@"C:\Users\{username}\NucleusCoop\{playerNick}";
+					envVars["HOMEPATH"] = $@"\Users\{username}\NucleusCoop\{playerNick}";
+					envVars["APPDATA"] = $@"C:\Users\{username}\NucleusCoop\{playerNick}\AppData\Roaming";
+					envVars["LOCALAPPDATA"] = $@"C:\Users\{username}\NucleusCoop\{playerNick}\AppData\Local";
+
+					//Some games will crash if the directories don't exist
+					Directory.CreateDirectory(envVars["USERPROFILE"].ToString());
+					Directory.CreateDirectory(Path.Combine(envVars["USERPROFILE"].ToString(), "Documents"));
+					Directory.CreateDirectory(envVars["APPDATA"].ToString());
+					Directory.CreateDirectory(envVars["LOCALAPPDATA"].ToString());
+
+					foreach (object envVarKey in envVars.Keys)
+					{
+						if (envVarKey != null)
+						{
+							string key = envVarKey.ToString();
+							string value = envVars[envVarKey].ToString();
+
+							sb.Append(key);
+							sb.Append("=");
+							sb.Append(value);
+							sb.Append("\0");
+						}
+					}
+
+					sb.Append("\0");
+
+					byte[] envBytes = Encoding.Unicode.GetBytes(sb.ToString());
+					envPtr = Marshal.AllocHGlobal(envBytes.Length);
+					Marshal.Copy(envBytes, 0, envPtr, envBytes.Length);
+
+				}
 
 				//IntPtr InPassThruBuffer = Marshal.StringToHGlobalUni(args[i++]);
 				//uint.TryParse(args[i++], out uint InPassThruSize);
@@ -138,6 +184,7 @@ namespace Nucleus.Inject
 
 				IntPtr pid = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(int)));
 
+				bool isFailed = false;
 				try
 				{
 					int result = -1;
@@ -145,20 +192,54 @@ namespace Nucleus.Inject
 
 					while (result != 0)
 					{
-						if (is64)
-							result = Injector64.RhCreateAndInject(InEXEPath, InCommandLine, InProcessCreationFlags, InInjectionOptions, "", InLibraryPath_x64, ptr, (uint)size, pid);
-						else
-							result = Injector32.RhCreateAndInject(InEXEPath, InCommandLine, InProcessCreationFlags, InInjectionOptions, InLibraryPath_x86, "", ptr, (uint)size, pid);
-						
+						//if (procid > 0)
+						//{
+						//	string currDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+						//	if (is64)
+						//		result = Injector64.RhInjectLibrary(procid, 0, 0, null, Path.Combine(currDir, "Nucleus.SHook64.dll"), ptr, (uint)size);
+						//	else
+						//		result = Injector32.RhInjectLibrary(procid, 0, 0, Path.Combine(currDir, "Nucleus.SHook32.dll"), null, ptr, (uint)size);
+						//	if (result != 0)
+						//	{
+						//		Log("Attempt " + (attempts + 1) + "/5 Failed to inject start up hook dll. Result code: " + result);
+						//	}
+						//}
+						//else
+						//{
+
+							if (is64)
+								result = Injector64.RhCreateAndInject(InEXEPath, InCommandLine, InProcessCreationFlags, envPtr, InInjectionOptions, "", InLibraryPath_x64, ptr, (uint)size, pid);
+							else
+								result = Injector32.RhCreateAndInject(InEXEPath, InCommandLine, InProcessCreationFlags, envPtr, InInjectionOptions, InLibraryPath_x86, "", ptr, (uint)size, pid);
+							if (result != 0)
+							{
+								Log("Attempt " + (attempts + 1) + "/5 Failed to create process and inject start up hook dll. Result code: " + result);
+							}
+						//}
+
 						Thread.Sleep(1000);
+						
+						if (attempts == 4)
+						{
+							isFailed = true;
+							break;
+						}
 						attempts++;
 
-						if (attempts == 4)
-							break;
 					}
 					Marshal.FreeHGlobal(pid);
 
-					Console.WriteLine(Marshal.ReadInt32(pid).ToString());
+					if(isFailed)
+					{
+						Console.WriteLine("injectfailed");
+					}
+					else
+					{
+						//if (procid == 0)
+							Console.WriteLine((uint)Marshal.ReadInt32(pid));
+						//else
+							//Console.WriteLine(procid);
+					}
 				}
 				catch (Exception ex)
 				{

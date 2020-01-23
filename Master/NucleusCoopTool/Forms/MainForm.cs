@@ -24,7 +24,7 @@ namespace Nucleus.Coop
     /// </summary>
     public partial class MainForm : BaseForm
     {
-        public string version = "v0.9.8.3 ALPHA";
+        public string version = "v0.9.9";
 
         private Settings settingsForm = null;
 
@@ -1153,6 +1153,23 @@ namespace Nucleus.Coop
             else
             {
                 MessageBox.Show("Unable to open original executable path for this game.", "Not found", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void deleteContentFolderToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            string path = Path.Combine(gameManager.GetAppContentPath(), currentGameInfo.Game.GUID);
+            if (Directory.Exists(path))
+            {
+                DialogResult dialogResult = MessageBox.Show("Are you sure you want to delete '" + path + "' and all its contents?", "Confirm deletion", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+                if (dialogResult == DialogResult.Yes)
+                {
+                    Directory.Delete(path, true);
+                }
+            }
+            else
+            {
+                MessageBox.Show("No data in content folder to delete.");
             }
         }
     }
