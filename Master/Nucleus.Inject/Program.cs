@@ -1,15 +1,15 @@
 ﻿using System;
+using System.Collections;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
-using EasyHook;
 using Nucleus.Gaming;
 
 namespace Nucleus.Inject
 {
-    class Program
-    {
+	class Program
+	{
 		class Injector32
 		{
 			[DllImport("EasyHook32.dll", CharSet = CharSet.Ansi)]
@@ -21,20 +21,21 @@ namespace Nucleus.Inject
 				[MarshalAs(UnmanagedType.LPWStr)] string InLibraryPath_x64,
 				IntPtr InPassThruBuffer,
 				uint InPassThruSize
-				);
+			);
 
 			[DllImport("EasyHook32.dll", CharSet = CharSet.Ansi)]
 			public static extern int RhCreateAndInject(
 				[MarshalAs(UnmanagedType.LPWStr)] string InEXEPath,
 				[MarshalAs(UnmanagedType.LPWStr)] string InCommandLine,
 				uint InProcessCreationFlags,
+				IntPtr InEnvironment,
 				uint InInjectionOptions,
 				[MarshalAs(UnmanagedType.LPWStr)] string InLibraryPath_x86,
 				[MarshalAs(UnmanagedType.LPWStr)] string InLibraryPath_x64,
 				IntPtr InPassThruBuffer,
 				uint InPassThruSize,
 				IntPtr OutProcessId //Pointer to a UINT (the PID of the new process)
-				);
+			);
 		}
 
 		class Injector64
@@ -48,60 +49,63 @@ namespace Nucleus.Inject
 				[MarshalAs(UnmanagedType.LPWStr)] string InLibraryPath_x64,
 				IntPtr InPassThruBuffer,
 				uint InPassThruSize
-				);
+			);
 
 			[DllImport("EasyHook64.dll", CharSet = CharSet.Ansi)]
 			public static extern int RhCreateAndInject(
 				[MarshalAs(UnmanagedType.LPWStr)] string InEXEPath,
 				[MarshalAs(UnmanagedType.LPWStr)] string InCommandLine,
 				uint InProcessCreationFlags,
+				IntPtr InEnvironment,
 				uint InInjectionOptions,
 				[MarshalAs(UnmanagedType.LPWStr)] string InLibraryPath_x86,
 				[MarshalAs(UnmanagedType.LPWStr)] string InLibraryPath_x64,
 				IntPtr InPassThruBuffer,
 				uint InPassThruSize,
 				IntPtr OutProcessId //Pointer to a UINT (the PID of the new process)
-				);
+			);
 		}
 
-		private static readonly IniFile ini = new IniFile(Path.Combine(Directory.GetCurrentDirectory(), "Settings.ini"));
-        private static void Log(string logMessage)
-        {
-            if (ini.IniReadValue("Misc", "DebugLog") == "True")
-            {
-                using (StreamWriter writer = new StreamWriter("debug-log.txt", true))
-                {
-                    writer.WriteLine($"[{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}]INJECT: {logMessage}");
-                    writer.Close();
-                }
-            }
-        }
+		private static readonly IniFile
+			ini = new IniFile(Path.Combine(Directory.GetCurrentDirectory(), "Settings.ini"));
 
-        static void Main(string[] args)
-        {
-	        bool is64 = Environment.Is64BitProcess;
+		private static void Log(string logMessage)
+		{
+			if (ini.IniReadValue("Misc", "DebugLog") == "True")
+			{
+				using (StreamWriter writer = new StreamWriter("debug-log.txt", true))
+				{
+					writer.WriteLine($"[{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}]INJECT: {logMessage}");
+					writer.Close();
+				}
+			}
+		}
 
-	        var argsDecoded = new string[args.Length];
-	        for (int j = 0; j < args.Length; j++)
-	        {
+		static void Main(string[] args)
+		{
+			bool is64 = Environment.Is64BitProcess;
+
+			var argsDecoded = new string[args.Length];
+			for (int j = 0; j < args.Length; j++)
+			{
 				argsDecoded[j] = Encoding.UTF8.GetString(Convert.FromBase64String(args[j]));
-	        }
+			}
 
-	        int i = 0;
-            int.TryParse(argsDecoded[i++], out int tier);
+			int i = 0;
+			int.TryParse(argsDecoded[i++], out int tier);
 
-            if (tier == 0)
-            {
-	            StartupHook(argsDecoded, i, is64);
-            }
-            else if (tier == 1)
-            {
-	            RuntimeHook(argsDecoded, i, is64);
-            }
-        }
+			if (tier == 0)
+			{
+				StartupHook(argsDecoded, i, is64);
+			}
+			else if (tier == 1)
+			{
+				RuntimeHook(argsDecoded, i, is64);
+			}
+		}
 
-        private static void StartupHook(string[] args, int i, bool is64)
-        {
+		private static void StartupHook(string[] args, int i, bool is64)
+		{
 			string InEXEPath = args[i++];
 			string InCommandLine = args[i++];
 			uint.TryParse(args[i++], out uint InProcessCreationFlags);
@@ -115,9 +119,53 @@ namespace Nucleus.Inject
 			bool.TryParse(args[i++], out bool isDebug);
 			string nucleusFolderPath = args[i++];
 			bool.TryParse(args[i++], out bool blockRaw);
+			bool.TryParse(args[i++], out bool useCustomEnvironment);
+			string playerNick = args[i++];
 
 			//IntPtr InPassThruBuffer = Marshal.StringToHGlobalUni(args[i++]);
 			//uint.TryParse(args[i++], out uint InPassThruSize);
+
+			IntPtr envPtr = IntPtr.Zero;
+
+			if (useCustomEnvironment)
+			{
+				Log("Setting up Nucleus environment");
+
+				IDictionary envVars = Environment.GetEnvironmentVariables();
+				var sb = new StringBuilder();
+				var username = Environment.UserName;
+				envVars["USERPROFILE"] = $@"C:\Users\{username}\NucleusCoop\{playerNick}";
+				envVars["HOMEPATH"] = $@"\Users\{username}\NucleusCoop\{playerNick}";
+				envVars["APPDATA"] = $@"C:\Users\{username}\NucleusCoop\{playerNick}\AppData\Roaming";
+				envVars["LOCALAPPDATA"] = $@"C:\Users\{username}\NucleusCoop\{playerNick}\AppData\Local";
+
+				//Some games will crash if the directories don't exist
+				Directory.CreateDirectory(envVars["USERPROFILE"].ToString());
+				Directory.CreateDirectory(Path.Combine(envVars["USERPROFILE"].ToString(), "Documents"));
+				Directory.CreateDirectory(envVars["APPDATA"].ToString());
+				Directory.CreateDirectory(envVars["LOCALAPPDATA"].ToString());
+
+				foreach (object envVarKey in envVars.Keys)
+				{
+					if (envVarKey != null)
+					{
+						string key = envVarKey.ToString();
+						string value = envVars[envVarKey].ToString();
+
+						sb.Append(key);
+						sb.Append("=");
+						sb.Append(value);
+						sb.Append("\0");
+					}
+				}
+
+				sb.Append("\0");
+
+				byte[] envBytes = Encoding.Unicode.GetBytes(sb.ToString());
+				envPtr = Marshal.AllocHGlobal(envBytes.Length);
+				Marshal.Copy(envBytes, 0, envPtr, envBytes.Length);
+
+			}
 
 			var logPath = Encoding.Unicode.GetBytes(nucleusFolderPath);
 			int logPathLength = logPath.Length;
@@ -127,21 +175,21 @@ namespace Nucleus.Inject
 
 			int size = 27 + logPathLength + targetsBytesLength;
 			var data = new byte[size];
-			data[0] = hookWindow == true ? (byte)1 : (byte)0;
-			data[1] = renameMutex == true ? (byte)1 : (byte)0;
-			data[2] = setWindow == true ? (byte)1 : (byte)0;
-			data[3] = isDebug == true ? (byte)1 : (byte)0;
-			data[4] = blockRaw == true ? (byte)1 : (byte)0;
+			data[0] = hookWindow == true ? (byte) 1 : (byte) 0;
+			data[1] = renameMutex == true ? (byte) 1 : (byte) 0;
+			data[2] = setWindow == true ? (byte) 1 : (byte) 0;
+			data[3] = isDebug == true ? (byte) 1 : (byte) 0;
+			data[4] = blockRaw == true ? (byte) 1 : (byte) 0;
 
-			data[10] = (byte)(logPathLength >> 24);
-			data[11] = (byte)(logPathLength >> 16);
-			data[12] = (byte)(logPathLength >> 8);
-			data[13] = (byte)logPathLength;
+			data[10] = (byte) (logPathLength >> 24);
+			data[11] = (byte) (logPathLength >> 16);
+			data[12] = (byte) (logPathLength >> 8);
+			data[13] = (byte) logPathLength;
 
-			data[14] = (byte)(targetsBytesLength >> 24);
-			data[15] = (byte)(targetsBytesLength >> 16);
-			data[16] = (byte)(targetsBytesLength >> 8);
-			data[17] = (byte)targetsBytesLength;
+			data[14] = (byte) (targetsBytesLength >> 24);
+			data[15] = (byte) (targetsBytesLength >> 16);
+			data[16] = (byte) (targetsBytesLength >> 8);
+			data[17] = (byte) targetsBytesLength;
 
 			Array.Copy(logPath, 0, data, 18, logPathLength);
 
@@ -154,35 +202,79 @@ namespace Nucleus.Inject
 
 			IntPtr pid = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(int)));
 
+			bool isFailed = false;
 			try
 			{
 				int result = -1;
 				int attempts = 0; // 5 attempts to inject
+				const int maxAttempts = 5;
 
 				while (result != 0)
 				{
-					if (is64)
-						result = Injector64.RhCreateAndInject(InEXEPath, InCommandLine, InProcessCreationFlags, InInjectionOptions, "", InLibraryPath_x64, ptr, (uint)size, pid);
-					else
-						result = Injector32.RhCreateAndInject(InEXEPath, InCommandLine, InProcessCreationFlags, InInjectionOptions, InLibraryPath_x86, "", ptr, (uint)size, pid);
-					
-					Thread.Sleep(1000);
-					attempts++;
+					//if (procid > 0)
+					//{
+					//	string currDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+					//	if (is64)
+					//		result = Injector64.RhInjectLibrary(procid, 0, 0, null, Path.Combine(currDir, "Nucleus.SHook64.dll"), ptr, (uint)size);
+					//	else
+					//		result = Injector32.RhInjectLibrary(procid, 0, 0, Path.Combine(currDir, "Nucleus.SHook32.dll"), null, ptr, (uint)size);
+					//	if (result != 0)
+					//	{
+					//		Log("Attempt " + (attempts + 1) + "/5 Failed to inject start up hook dll. Result code: " + result);
+					//	}
+					//}
+					//else
+					//{
 
-					if (attempts == 4)
+					if (is64)
+						result = Injector64.RhCreateAndInject(InEXEPath, InCommandLine, InProcessCreationFlags, envPtr,
+							InInjectionOptions, "", InLibraryPath_x64, ptr, (uint) size, pid);
+					else
+						result = Injector32.RhCreateAndInject(InEXEPath, InCommandLine, InProcessCreationFlags, envPtr,
+							InInjectionOptions, InLibraryPath_x86, "", ptr, (uint) size, pid);
+					if (result != 0)
+					{
+						Log("Attempt " + (attempts + 1) +
+						    "/5 Failed to create process and inject start up hook dll. Result code: " + result);
+					}
+					//}
+
+					Thread.Sleep(1000);
+
+					if (++attempts == maxAttempts)
+					{
+						isFailed = true;
 						break;
+					}
 				}
+
 				Marshal.FreeHGlobal(pid);
 
-				Console.WriteLine(Marshal.ReadInt32(pid).ToString());
+				if (isFailed)
+				{
+					Console.WriteLine("injectfailed");
+				}
+				else
+				{
+					//if (procid == 0)
+					Console.WriteLine((uint) Marshal.ReadInt32(pid));
+					//else
+					//Console.WriteLine(procid);
+				}
 			}
 			catch (Exception ex)
 			{
 				Log(string.Format("ERROR - {0}", ex.Message));
 			}
-        }
-        private static void RuntimeHook(string[] args, int i, bool is64)
-        {
+
+			Marshal.FreeHGlobal(pid);
+
+			Console.WriteLine(Marshal.ReadInt32(pid).ToString());
+		}
+
+
+		private static void RuntimeHook(string[] args, int i, bool is64)
+		{
 			int.TryParse(args[i++], out int InTargetPID);
 			int.TryParse(args[i++], out int InWakeUpTID);
 			int.TryParse(args[i++], out int InInjectionOptions);
@@ -229,22 +321,22 @@ namespace Nucleus.Inject
 			byte[] dataToSend = new byte[size];
 
 			int index = 0;
-			dataToSend[index++] = (byte)(hWnd >> 24);
-			dataToSend[index++] = (byte)(hWnd >> 16);
-			dataToSend[index++] = (byte)(hWnd >> 8);
-			dataToSend[index++] = (byte)(hWnd);
+			dataToSend[index++] = (byte) (hWnd >> 24);
+			dataToSend[index++] = (byte) (hWnd >> 16);
+			dataToSend[index++] = (byte) (hWnd >> 8);
+			dataToSend[index++] = (byte) (hWnd);
 
-			dataToSend[index++] = (byte)(allowedRawMouseHandle >> 24);
-			dataToSend[index++] = (byte)(allowedRawMouseHandle >> 16);
-			dataToSend[index++] = (byte)(allowedRawMouseHandle >> 8);
-			dataToSend[index++] = (byte)(allowedRawMouseHandle);
+			dataToSend[index++] = (byte) (allowedRawMouseHandle >> 24);
+			dataToSend[index++] = (byte) (allowedRawMouseHandle >> 16);
+			dataToSend[index++] = (byte) (allowedRawMouseHandle >> 8);
+			dataToSend[index++] = (byte) (allowedRawMouseHandle);
 
-			dataToSend[index++] = (byte)(allowedRawKeyboardHandle >> 24);
-			dataToSend[index++] = (byte)(allowedRawKeyboardHandle >> 16);
-			dataToSend[index++] = (byte)(allowedRawKeyboardHandle >> 8);
-			dataToSend[index++] = (byte)(allowedRawKeyboardHandle);
+			dataToSend[index++] = (byte) (allowedRawKeyboardHandle >> 24);
+			dataToSend[index++] = (byte) (allowedRawKeyboardHandle >> 16);
+			dataToSend[index++] = (byte) (allowedRawKeyboardHandle >> 8);
+			dataToSend[index++] = (byte) (allowedRawKeyboardHandle);
 
-			byte Bool_1_0(bool x) => x ? (byte)1 : (byte)0;
+			byte Bool_1_0(bool x) => x ? (byte) 1 : (byte) 0;
 			dataToSend[index++] = Bool_1_0(preventWindowDeactivation);
 			dataToSend[index++] = Bool_1_0(setWindow);
 			dataToSend[index++] = Bool_1_0(isDebug);
@@ -262,24 +354,25 @@ namespace Nucleus.Inject
 			dataToSend[index++] = Bool_1_0(updateAbsoluteFlagInMouseMessage);
 			dataToSend[index++] = Bool_1_0(mouseVisibilitySendBack);
 
-			dataToSend[index++] = (byte)(logPathLength >> 24);
-			dataToSend[index++] = (byte)(logPathLength >> 16);
-			dataToSend[index++] = (byte)(logPathLength >> 8);
-			dataToSend[index++] = (byte)logPathLength;
+			dataToSend[index++] = (byte) (logPathLength >> 24);
+			dataToSend[index++] = (byte) (logPathLength >> 16);
+			dataToSend[index++] = (byte) (logPathLength >> 8);
+			dataToSend[index++] = (byte) logPathLength;
 
-			dataToSend[index++] = (byte)(writePipeNameLength >> 24);
-			dataToSend[index++] = (byte)(writePipeNameLength >> 16);
-			dataToSend[index++] = (byte)(writePipeNameLength >> 8);
-			dataToSend[index++] = (byte)writePipeNameLength;
+			dataToSend[index++] = (byte) (writePipeNameLength >> 24);
+			dataToSend[index++] = (byte) (writePipeNameLength >> 16);
+			dataToSend[index++] = (byte) (writePipeNameLength >> 8);
+			dataToSend[index++] = (byte) writePipeNameLength;
 
-			dataToSend[index++] = (byte)(readPipeNameLength >> 24);
-			dataToSend[index++] = (byte)(readPipeNameLength >> 16);
-			dataToSend[index++] = (byte)(readPipeNameLength >> 8);
-			dataToSend[index++] = (byte)readPipeNameLength;
+			dataToSend[index++] = (byte) (readPipeNameLength >> 24);
+			dataToSend[index++] = (byte) (readPipeNameLength >> 16);
+			dataToSend[index++] = (byte) (readPipeNameLength >> 8);
+			dataToSend[index++] = (byte) readPipeNameLength;
 
 			Array.Copy(logPath, 0, dataToSend, index, logPathLength);
 			Array.Copy(writePipeNameBytes, 0, dataToSend, index + logPathLength, writePipeNameLength);
-			Array.Copy(readPipeNameBytes, 0, dataToSend, index + logPathLength + writePipeNameLength, readPipeNameLength);
+			Array.Copy(readPipeNameBytes, 0, dataToSend, index + logPathLength + writePipeNameLength,
+				readPipeNameLength);
 
 			Marshal.Copy(dataToSend, 0, intPtr, size);
 
@@ -287,11 +380,13 @@ namespace Nucleus.Inject
 			{
 				if (is64)
 				{
-					Injector64.RhInjectLibrary((uint)InTargetPID, (uint)InWakeUpTID, (uint)InInjectionOptions, "", InLibraryPath_x64, intPtr, (uint)size);
+					Injector64.RhInjectLibrary((uint) InTargetPID, (uint) InWakeUpTID, (uint) InInjectionOptions, "",
+						InLibraryPath_x64, intPtr, (uint) size);
 				}
 				else
 				{
-					Injector32.RhInjectLibrary((uint)InTargetPID, (uint)InWakeUpTID, (uint)InInjectionOptions, InLibraryPath_x86, "", intPtr, (uint)size);
+					Injector32.RhInjectLibrary((uint) InTargetPID, (uint) InWakeUpTID, (uint) InInjectionOptions,
+						InLibraryPath_x86, "", intPtr, (uint) size);
 				}
 			}
 			catch (Exception ex)

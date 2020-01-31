@@ -45,9 +45,9 @@ namespace Nucleus.Coop
 
             mainForm = mf as MainForm;
             positionsControl = pc;
-            
+
             //Hotkeys
-            if(ini.IniReadValue("Hotkeys", "Close").Contains('+'))
+            if (ini.IniReadValue("Hotkeys", "Close").Contains('+'))
             {
                 string[] closeHk = ini.IniReadValue("Hotkeys", "Close").Split('+');
                 if((closeHk[0] == "Ctrl" || closeHk[0] == "Alt" || closeHk[0] == "Shift") && closeHk[1].Length == 1 && Regex.IsMatch(closeHk[1], @"^[a-zA-Z0-9]+$"))

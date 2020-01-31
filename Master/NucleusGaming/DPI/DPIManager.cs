@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Windows.Forms;
 using System.Drawing;
 using System.IO;
+using System.Runtime.InteropServices;
 
 namespace Nucleus.Gaming
 {
@@ -15,6 +16,32 @@ namespace Nucleus.Gaming
         private static readonly IniFile ini = new Gaming.IniFile(Path.Combine(Directory.GetCurrentDirectory(), "Settings.ini"));
 
         public static Font Font;
+
+        [DllImport("user32.dll")]
+        public static extern int ReleaseDC(IntPtr hWnd, IntPtr hDC);
+
+        [DllImport("user32.dll")]
+        public static extern IntPtr GetDC(IntPtr hwnd);
+
+        [DllImport("gdi32.dll")]
+        static extern int GetDeviceCaps(IntPtr hdc, int nIndex);
+
+        private static float GetDpi()
+        {
+            IntPtr desktopWnd = IntPtr.Zero;
+            IntPtr dc = GetDC(desktopWnd);
+            var dpi = 100f;
+            const int LOGPIXELSX = 88;
+            try
+            {
+                dpi = GetDeviceCaps(dc, LOGPIXELSX);
+            }
+            finally
+            {
+                ReleaseDC(desktopWnd, dc);
+            }
+            return dpi; /// 96f;
+        }
 
         public static void PreInitialize()
         {
@@ -65,7 +92,9 @@ namespace Nucleus.Gaming
         {
             Form form = (Form)sender;
             //uint val = Convert.ToUInt32(User32Util.GetDPIScalingFactor() * 96.0f); //User32Util.GetDpiForWindow(form.Handle);
-            uint val = User32Util.GetDpiForWindow(form.Handle);
+            //uint val = User32Util.GetDpiForWindow(form.Handle);
+            uint val = Convert.ToUInt32(GetDpi());
+
             //uint val = 96;
             float newScale = val / 96.0f;
             if (ini.IniReadValue("Advanced", "Scale") != "")

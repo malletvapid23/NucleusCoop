@@ -716,6 +716,11 @@ void __stdcall NativeInjectionEntryPoint(REMOTE_ENTRY_INFO* inRemoteInfo)
 
 	nucleusFolder = nucleusFolderPath;
 
+	const size_t targetsLength = (data[14] << 24) + (data[15] << 16) + (data[16] << 8) + data[17];
+	auto targets = static_cast<PWSTR>(malloc(targetsLength + sizeof(WCHAR)));
+	memcpy(targets, &data[19 + pathLength], targetsLength);
+	targets[targetsLength / sizeof(WCHAR)] = '\0';
+
 	//const size_t hidLength = (data[18] << 24) + (data[19] << 16) + (data[20] << 8) + data[21];
 	//auto hidName = static_cast<PWSTR>(malloc(hidLength + sizeof(WCHAR)));
 	//memcpy(hidName, &data[23 + pathLength], hidLength);
@@ -730,6 +735,7 @@ void __stdcall NativeInjectionEntryPoint(REMOTE_ENTRY_INFO* inRemoteInfo)
 		outfile.close();
 	}
 
+	
 	if (SetWindow)
 	{
 		if (IsDebug)
@@ -820,10 +826,6 @@ void __stdcall NativeInjectionEntryPoint(REMOTE_ENTRY_INFO* inRemoteInfo)
 			outfile << date_string() << "SHOOK64: Injecting RenameMutex hooks\n";
 			outfile.close();
 		}
-		const size_t targetsLength = (data[14] << 24) + (data[15] << 16) + (data[16] << 8) + data[17];
-		auto targets = static_cast<PWSTR>(malloc(targetsLength + sizeof(WCHAR)));
-		memcpy(targets, &data[19 + pathLength], targetsLength);
-		targets[targetsLength / sizeof(WCHAR)] = '\0';
 		installFindMutexHooks(targets);
 	}
 
