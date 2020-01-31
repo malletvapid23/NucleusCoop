@@ -1,5 +1,4 @@
-﻿using AutoHotkey.Interop;
-using Nucleus.Gaming.Coop.InputManagement.Logging;
+﻿using Nucleus.Gaming.Coop.InputManagement.Logging;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;

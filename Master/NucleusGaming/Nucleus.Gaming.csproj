@@ -328,10 +328,6 @@
     <None Include="Resources\vertical.png" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\ThirdParty\AutoHotkey.Interop\AutoHotkey.Interop.csproj">
-      <Project>{2869dbfe-7762-4930-95ea-2b0c111cf353}</Project>
-      <Name>AutoHotkey.Interop</Name>
-    </ProjectReference>
     <ProjectReference Include="..\ThirdParty\WindowScrape\WindowScrape.csproj">
       <Project>{d9716550-921d-44e8-a289-c297950db1f7}</Project>
       <Name>WindowScrape</Name>

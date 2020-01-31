@@ -3386,8 +3386,8 @@ namespace Nucleus.Gaming
 
         }
 
-        private void InjectDLLs(Process proc)
-        {
+		private void InjectDLLs(Process proc, Window window)
+		{
 	        WaitForProcWindowHandleNotZero(proc);
 
 			bool is64 = EasyHook.RemoteHooking.IsX64Process(proc.Id);                 
