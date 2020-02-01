@@ -656,6 +656,7 @@ namespace Nucleus.Gaming
 				{
 					players.Remove(x);
 				}
+
 				players.Add(firstInGroup);
 			}
 
@@ -2378,16 +2379,18 @@ namespace Nucleus.Gaming
                                     if (gen.UseNucleusEnvironment)
                                     {
                                         Log("Setting up Nucleus environment");
-                                        cmd.StandardInput.WriteLine($@"set APPDATA=C:\Users\{Environment.UserName}\NucleusCoop\{player.Nickname}\AppData\Roaming");
-                                        cmd.StandardInput.WriteLine($@"set LOCALAPPDATA=C:\Users\{Environment.UserName}\NucleusCoop\{player.Nickname}\AppData\Local");
-                                        cmd.StandardInput.WriteLine($@"set USERPROFILE=C:\Users\{Environment.UserName}\NucleusCoop\{player.Nickname}");
-                                        cmd.StandardInput.WriteLine($@"set HOMEPATH=\Users\{Environment.UserName}\NucleusCoop\{player.Nickname}");
+                                        var username = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile).Replace(@"C:\Users\", "");
+										cmd.StandardInput.WriteLine($@"set APPDATA=C:\Users\{username}\NucleusCoop\{player.Nickname}\AppData\Roaming");
+                                        cmd.StandardInput.WriteLine($@"set LOCALAPPDATA=C:\Users\{username}\NucleusCoop\{player.Nickname}\AppData\Local");
+                                        cmd.StandardInput.WriteLine($@"set USERPROFILE=C:\Users\{username}\NucleusCoop\{player.Nickname}");
+                                        cmd.StandardInput.WriteLine($@"set HOMEPATH=\Users\{username}\NucleusCoop\{player.Nickname}");
 
-                                        //Some games will crash if the directories don't exist
-                                        Directory.CreateDirectory($@"C:\Users\{Environment.UserName}\NucleusCoop\{player.Nickname}\AppData\Roaming");
-                                        Directory.CreateDirectory($@"C:\Users\{Environment.UserName}\NucleusCoop\{player.Nickname}\AppData\Local");
-                                        Directory.CreateDirectory($@"C:\Users\{Environment.UserName}\NucleusCoop\{player.Nickname}");
-                                        Directory.CreateDirectory($@"\Users\{Environment.UserName}\NucleusCoop\{player.Nickname}");
+										//Some games will crash if the directories don't exist
+										Directory.CreateDirectory($@"C:\Users\{username}\NucleusCoop");
+										Directory.CreateDirectory($@"C:\Users\{username}\NucleusCoop\{player.Nickname}\AppData\Roaming");
+                                        Directory.CreateDirectory($@"C:\Users\{username}\NucleusCoop\{player.Nickname}\AppData\Local");
+                                        Directory.CreateDirectory($@"C:\Users\{username}\NucleusCoop\{player.Nickname}");
+                                        Directory.CreateDirectory($@"\Users\{username}\NucleusCoop\{player.Nickname}");
                                     }
 
                                     if (gen.CMDBatchBefore?.Length > 0 || gen.CMDBatchAfter?.Length > 0)
@@ -2464,16 +2467,18 @@ namespace Nucleus.Gaming
                                     if (gen.UseNucleusEnvironment)
                                     {
                                         Log("Setting up Nucleus environment");
-                                        cmd.StandardInput.WriteLine($@"set APPDATA=C:\Users\{Environment.UserName}\NucleusCoop\{player.Nickname}\AppData\Roaming");
-                                        cmd.StandardInput.WriteLine($@"set LOCALAPPDATA=C:\Users\{Environment.UserName}\NucleusCoop\{player.Nickname}\AppData\Local");
-                                        cmd.StandardInput.WriteLine($@"set USERPROFILE=C:\Users\{Environment.UserName}\NucleusCoop\{player.Nickname}");
-                                        cmd.StandardInput.WriteLine($@"set HOMEPATH=\Users\{Environment.UserName}\NucleusCoop\{player.Nickname}");
+                                        var username = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile).Replace(@"C:\Users\", "");
+										cmd.StandardInput.WriteLine($@"set APPDATA=C:\Users\{username}\NucleusCoop\{player.Nickname}\AppData\Roaming");
+                                        cmd.StandardInput.WriteLine($@"set LOCALAPPDATA=C:\Users\{username}\NucleusCoop\{player.Nickname}\AppData\Local");
+                                        cmd.StandardInput.WriteLine($@"set USERPROFILE=C:\Users\{username}\NucleusCoop\{player.Nickname}");
+                                        cmd.StandardInput.WriteLine($@"set HOMEPATH=\Users\{username}\NucleusCoop\{player.Nickname}");
 
-                                        //Some games will crash if the directories don't exist
-                                        Directory.CreateDirectory($@"C:\Users\{Environment.UserName}\NucleusCoop\{player.Nickname}\AppData\Roaming");
-                                        Directory.CreateDirectory($@"C:\Users\{Environment.UserName}\NucleusCoop\{player.Nickname}\AppData\Local");
-                                        Directory.CreateDirectory($@"C:\Users\{Environment.UserName}\NucleusCoop\{player.Nickname}");
-                                        Directory.CreateDirectory($@"\Users\{Environment.UserName}\NucleusCoop\{player.Nickname}");
+										//Some games will crash if the directories don't exist
+										Directory.CreateDirectory($@"C:\Users\{username}\NucleusCoop");
+										Directory.CreateDirectory($@"C:\Users\{username}\NucleusCoop\{player.Nickname}\AppData\Roaming");
+                                        Directory.CreateDirectory($@"C:\Users\{username}\NucleusCoop\{player.Nickname}\AppData\Local");
+                                        Directory.CreateDirectory($@"C:\Users\{username}\NucleusCoop\{player.Nickname}");
+                                        Directory.CreateDirectory($@"\Users\{username}\NucleusCoop\{player.Nickname}");
                                     }
 
                                     if (gen.CMDBatchBefore?.Length > 0 || gen.CMDBatchAfter?.Length > 0)
@@ -2553,14 +2558,15 @@ namespace Nucleus.Gaming
                                     Log("Setting up Nucleus environment");
                                     var sb = new StringBuilder();
                                     IDictionary envVars = Environment.GetEnvironmentVariables();
-                                    var username = Environment.UserName;
-                                    envVars["USERPROFILE"] = $@"C:\Users\{username}\NucleusCoop\{player.Nickname}";
+									var username = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile).Replace(@"C:\Users\", "");
+									envVars["USERPROFILE"] = $@"C:\Users\{username}\NucleusCoop\{player.Nickname}";
                                     envVars["HOMEPATH"] = $@"\Users\{username}\NucleusCoop\{player.Nickname}";
                                     envVars["APPDATA"] = $@"C:\Users\{username}\NucleusCoop\{player.Nickname}\AppData\Roaming";
                                     envVars["LOCALAPPDATA"] = $@"C:\Users\{username}\NucleusCoop\{player.Nickname}\AppData\Local";
 
-                                    //Some games will crash if the directories don't exist
-                                    Directory.CreateDirectory(envVars["USERPROFILE"].ToString());
+									//Some games will crash if the directories don't exist
+									Directory.CreateDirectory($@"C:\Users\{username}\NucleusCoop");
+									Directory.CreateDirectory(envVars["USERPROFILE"].ToString());
                                     Directory.CreateDirectory(Path.Combine(envVars["USERPROFILE"].ToString(), "Documents"));
                                     Directory.CreateDirectory(envVars["APPDATA"].ToString());
                                     Directory.CreateDirectory(envVars["LOCALAPPDATA"].ToString());
@@ -3259,23 +3265,34 @@ namespace Nucleus.Gaming
 
 		private IntPtr WaitForProcWindowHandleNotZero(Process proc)
 		{
-			if ((int)proc.MainWindowHandle == 0)
+			try
 			{
-				for (int times = 0; times < 200; times++)
+				if ((int) proc.MainWindowHandle == 0)
 				{
-					Thread.Sleep(500);
-					if ((int)proc.MainWindowHandle > 0)
+					for (int times = 0; times < 200; times++)
 					{
-						break;
-					}
-					if (times == 199 && (int)proc.MainWindowHandle == 0)
-					{
-						Log(string.Format("ERROR - WaitForProcWindowHandleNotZero could not find main window handle for {0} (pid {1})", proc.ProcessName, proc.Id));
+						Thread.Sleep(500);
+						if ((int) proc.MainWindowHandle > 0)
+						{
+							break;
+						}
+
+						if (times == 199 && (int) proc.MainWindowHandle == 0)
+						{
+							Log(string.Format(
+								"ERROR - WaitForProcWindowHandleNotZero could not find main window handle for {0} (pid {1})",
+								proc.ProcessName, proc.Id));
+						}
 					}
 				}
-			}
 
-			return proc.MainWindowHandle;
+				return proc.MainWindowHandle;
+			}
+			catch
+			{
+				Log("ERROR - WaitForProcWindowHandleNotZero encountered an exception");
+				return (IntPtr) (-1);
+			}
 		}
 
         private void SelBtn_Click(object sender, EventArgs e)

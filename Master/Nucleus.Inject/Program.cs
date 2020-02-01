@@ -133,13 +133,14 @@ namespace Nucleus.Inject
 
 				IDictionary envVars = Environment.GetEnvironmentVariables();
 				var sb = new StringBuilder();
-				var username = Environment.UserName;
+				var username = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile).Replace(@"C:\Users\", "");
 				envVars["USERPROFILE"] = $@"C:\Users\{username}\NucleusCoop\{playerNick}";
 				envVars["HOMEPATH"] = $@"\Users\{username}\NucleusCoop\{playerNick}";
 				envVars["APPDATA"] = $@"C:\Users\{username}\NucleusCoop\{playerNick}\AppData\Roaming";
 				envVars["LOCALAPPDATA"] = $@"C:\Users\{username}\NucleusCoop\{playerNick}\AppData\Local";
 
 				//Some games will crash if the directories don't exist
+				Directory.CreateDirectory($@"C:\Users\{username}\NucleusCoop");
 				Directory.CreateDirectory(envVars["USERPROFILE"].ToString());
 				Directory.CreateDirectory(Path.Combine(envVars["USERPROFILE"].ToString(), "Documents"));
 				Directory.CreateDirectory(envVars["APPDATA"].ToString());
