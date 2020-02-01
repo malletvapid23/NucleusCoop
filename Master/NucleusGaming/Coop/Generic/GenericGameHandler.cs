@@ -714,6 +714,7 @@ namespace Nucleus.Gaming
 			RawInputProcessor.ToggleLockInputKey = gen.LockInputToggleKey;
 
 			RawInputManager.windows.Clear();
+			Window nextWindowToInject = null;
 
 			Log(string.Format("Number of players: {0}",players.Count));
 
@@ -820,7 +821,7 @@ namespace Nucleus.Gaming
                     PlayerInfo before = players[i - 1];
                     Thread.Sleep(1000);
                     ProcessData pdata = before.ProcessData;
-                    InjectDLLs(pdata.Process, RawInputManager.windows.Last());
+                    InjectDLLs(pdata.Process, nextWindowToInject);
                 }
 
                 Rectangle playerBounds = player.MonitorBounds;
@@ -3060,6 +3061,12 @@ namespace Nucleus.Gaming
 	                window.CreateHookPipe(gen);
 
 	                RawInputManager.windows.Add(window);
+
+	                nextWindowToInject = window;
+                }
+                else
+                {
+	                nextWindowToInject = null;
                 }
 
 				if (i == (players.Count - 1)) // all instances accounted for
@@ -3153,7 +3160,7 @@ namespace Nucleus.Gaming
 					if ((gen.HookFocus || gen.SetWindowHook || gen.HideCursor || gen.PreventWindowDeactivation || gen.SupportsMultipleKeyboardsAndMice))
                     {
                         Log("Injecting hook DLL for last instance");
-                        InjectDLLs(data.Process, RawInputManager.windows.Last());
+                        InjectDLLs(data.Process, nextWindowToInject);
                     }
                     //if (gen.HookFocus || gen.SetWindowHook || gen.HideCursor)
                     //{
@@ -3410,6 +3417,7 @@ namespace Nucleus.Gaming
 			bool is64 = EasyHook.RemoteHooking.IsX64Process(proc.Id);                 
             string currDir = Directory.GetCurrentDirectory();
 
+            bool windowNull = window == null;
 
             //using (StreamWriter writer = new StreamWriter("important.txt", true))
             //{
@@ -3450,10 +3458,10 @@ namespace Nucleus.Gaming
 					!gen.HookDontUpdateLegacyInMouseMsg,
 					gen.SupportsMultipleKeyboardsAndMice && gen.HookMouseVisibility,
 
-					window.HookPipe?.pipeNameWrite ?? "",
-					window.HookPipe?.pipeNameRead ?? "",
-					window.MouseAttached.ToInt32(),
-					window.KeyboardAttached.ToInt32()
+					windowNull ? "" : (window.HookPipe?.pipeNameWrite ?? ""),
+					windowNull ? "" : (window.HookPipe?.pipeNameRead ?? ""),
+					windowNull ? -1 : window.MouseAttached.ToInt32(),
+					windowNull ? -1 : window.KeyboardAttached.ToInt32()
 				};
 
 	            var sbArgs = new StringBuilder();
