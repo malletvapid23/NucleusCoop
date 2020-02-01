@@ -303,7 +303,7 @@ namespace Nucleus.Inject
 
 			string writePipeName = args[i++];
 			string readPipeName = args[i++];
-
+			
 			int.TryParse(args[i++], out int allowedRawMouseHandle);
 			int.TryParse(args[i++], out int allowedRawKeyboardHandle);
 

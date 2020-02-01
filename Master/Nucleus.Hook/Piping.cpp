@@ -49,7 +49,7 @@ namespace Piping
 			return;
 		}
 
-		DEBUGLOG("Successfully connected to shared memory");
+		DEBUGLOG("Successfully connected to shared memory\n");
 	}
 	
 	void startPipeListen()

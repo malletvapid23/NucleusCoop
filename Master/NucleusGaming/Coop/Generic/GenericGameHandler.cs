@@ -3045,15 +3045,15 @@ namespace Nucleus.Gaming
                 }
 
                 //Set up raw input window
-                if (player.IsRawKeyboard || player.IsRawMouse)
+                //if (player.IsRawKeyboard || player.IsRawMouse)
                 {
 	                var hWnd = WaitForProcWindowHandleNotZero(proc);
-	                var mouseHdev = player.RawMouseDeviceHandle;
-	                var keyboardHdev = player.RawKeyboardDeviceHandle;
+	                var mouseHdev = player.IsRawKeyboard ? player.RawMouseDeviceHandle : (IntPtr) (-1);
+	                var keyboardHdev = player.IsRawMouse ? player.RawKeyboardDeviceHandle : (IntPtr)(-1);
 
 	                var window = new Window(hWnd)
 	                {
-		                CursorVisibility = !gen.HideCursor && gen.DrawFakeMouseCursor,
+		                CursorVisibility = player.IsRawMouse && !gen.HideCursor && gen.DrawFakeMouseCursor,
 		                KeyboardAttached = keyboardHdev,
 		                MouseAttached = mouseHdev
 	                };
@@ -3064,10 +3064,10 @@ namespace Nucleus.Gaming
 
 	                nextWindowToInject = window;
                 }
-                else
-                {
-	                nextWindowToInject = null;
-                }
+                //else
+                //{
+	            //    nextWindowToInject = null;
+                //}
 
 				if (i == (players.Count - 1)) // all instances accounted for
                 {
@@ -3417,7 +3417,7 @@ namespace Nucleus.Gaming
 			bool is64 = EasyHook.RemoteHooking.IsX64Process(proc.Id);                 
             string currDir = Directory.GetCurrentDirectory();
 
-            bool windowNull = window == null;
+            bool windowNull = (window == null);
 
             //using (StreamWriter writer = new StreamWriter("important.txt", true))
             //{
