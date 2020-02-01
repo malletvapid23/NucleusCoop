@@ -74,6 +74,7 @@ namespace Nucleus.Gaming.Coop.InputManagement
 			this.gameInfo = gameInfo;
 
 			serverThread = new Thread(Start);
+			serverThread.IsBackground = true;
 			serverThread.Start();
 
 			if (needWritePipe)

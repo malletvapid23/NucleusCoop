@@ -273,6 +273,7 @@ namespace Nucleus.Gaming.Coop.InputManagement
 				if (!mouseMoveMessageSenders.ContainsKey(hWnd))
 				{
 					var thread = new Thread(MouseMoveMessageSendLoop);
+					thread.IsBackground = true;
 					thread.Start(hWnd);
 					mouseMoveMessageSenders[hWnd] = new MouseMoveSender(thread, packedXY);
 				}
