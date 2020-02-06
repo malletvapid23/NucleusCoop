@@ -145,6 +145,22 @@ namespace Nucleus.Gaming
         public bool UseNucleusEnvironment;
         public bool ThirdPartyLaunch;
         public bool ForceProcessPick;
+        public bool KeepMonitorAspectRatio;
+        public string PostHookInstances;
+        public string StartHookInstances;
+        public string[] KillMutexLauncher;
+        public string KillMutexTypeLauncher = "Mutant";
+        public int KillMutexDelayLauncher;
+        public bool PartialMutexSearchLauncher;
+        public string FakeFocusInstances;
+        public bool KeyboardPlayerSkipFakeFocus;
+        public string UserProfileConfigPath;
+        public string UserProfileSavePath;
+        public string[] PlayerSteamIDs;
+        public string[] HexEditExeAddress;
+        public string[] HexEditFileAddress;
+        public bool ForceUserProfileConfigCopy;
+        public bool ForceUserProfileSaveCopy;
 
         public Type HandlerType
         {

@@ -197,7 +197,7 @@ namespace Nucleus.Coop
 
                 for(int i =0; i < controllerGuids.Length; i++)
                 {
-                    if (!string.IsNullOrEmpty(controllerGuids[i].Text) && !string.IsNullOrEmpty(controllerNicks[i].Text))
+                    if (!string.IsNullOrEmpty(controllerGuids[i].Text)) //&& !string.IsNullOrEmpty(controllerNicks[i].Text))
                     {
                         ini.IniWriteValue("ControllerMapping", controllerGuids[i].Text, controllerNicks[i].Text);
                     }

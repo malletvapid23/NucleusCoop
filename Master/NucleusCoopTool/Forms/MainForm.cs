@@ -24,7 +24,7 @@ namespace Nucleus.Coop
     /// </summary>
     public partial class MainForm : BaseForm
     {
-        public string version = "v0.9.9";
+        public string version = "v0.9.9.1";
 
         private Settings settingsForm = null;
 
@@ -53,6 +53,8 @@ namespace Nucleus.Coop
         private int KillProcess_HotkeyID = 1;
         private int TopMost_HotkeyID = 2;
         private int StopSession_HotkeyID = 3;
+
+        private List<string> profilePaths = new List<string>();
 
         private readonly IniFile ini = new Gaming.IniFile(Path.Combine(Directory.GetCurrentDirectory(), "Settings.ini"));
 
@@ -936,6 +938,8 @@ namespace Nucleus.Coop
 
         private void GameContextMenuStrip_Opening(object sender, System.ComponentModel.CancelEventArgs e)
         {
+
+
             Control selectedControl = FindControlAtCursor(this);
 
             if (selectedControl.GetType() == typeof(Label) || selectedControl.GetType() == typeof(PictureBox))
@@ -961,6 +965,7 @@ namespace Nucleus.Coop
 
             if (selectedControl.GetType() == typeof(GameControl) || selectedControl.GetType() == typeof(Button))
             {
+
                 bool btnClick = false;
                 if (selectedControl.GetType() == typeof(GameControl))
                 {
@@ -976,6 +981,11 @@ namespace Nucleus.Coop
                 }
 
                 gameContextMenuStrip.Items[1].Visible = false;
+                gameContextMenuStrip.Items[7].Visible = false;
+                gameContextMenuStrip.Items[8].Visible = false;
+                gameContextMenuStrip.Items[9].Visible = false;
+                gameContextMenuStrip.Items[10].Visible = false;
+                gameContextMenuStrip.Items[11].Visible = false;
 
                 if (string.IsNullOrEmpty(currentGameInfo.GameGuid) || currentGameInfo == null)
                 {
@@ -988,13 +998,128 @@ namespace Nucleus.Coop
                 else
                 {
                     gameContextMenuStrip.Items[0].Text = currentGameInfo.Game.GameName;
+
+                    bool configPathExists = false;
+                    bool savePathExists = false;
+
                     for (int i = 1; i < gameContextMenuStrip.Items.Count; i++)
                     {
                         //if(i > 1 || (i == 1 && currentGameInfo.Game.Description?.Length > 0))
                         //{
                         //    gameContextMenuStrip.Items[i].Visible = true;
                         //}
+
+                        
                         gameContextMenuStrip.Items[i].Visible = true;
+                        
+
+                        if(string.IsNullOrEmpty(currentGameInfo.Game.UserProfileConfigPath) && string.IsNullOrEmpty(currentGameInfo.Game.UserProfileSavePath))
+                        {
+                            if(i == 7)
+                            {
+                                gameContextMenuStrip.Items[i].Visible = false;
+                            }
+                        }
+                        else if (i == 1)
+                        {
+                            profilePaths.Clear();
+                            profilePaths.Add(Environment.GetEnvironmentVariable("userprofile"));
+                            if (currentGameInfo.Game.UseNucleusEnvironment)
+                            {
+                                string targetDirectory = $@"C:\Users\{Environment.UserName}\NucleusCoop\";
+
+                                if (Directory.Exists(targetDirectory))
+                                {
+                                    string[] subdirectoryEntries = Directory.GetDirectories(targetDirectory, "*", SearchOption.TopDirectoryOnly);
+                                    foreach (string subdirectory in subdirectoryEntries)
+                                    {
+                                        profilePaths.Add(subdirectory);
+                                    }
+                                }
+                            }
+                        }
+
+                        if (i == 9)
+                        {
+                            (gameContextMenuStrip.Items[8] as ToolStripMenuItem).DropDownItems.Clear();
+                            (gameContextMenuStrip.Items[9] as ToolStripMenuItem).DropDownItems.Clear();
+                            if (currentGameInfo.Game.UserProfileConfigPath?.Length > 0)
+                            {
+                                if (profilePaths.Count > 0)
+                                {
+                                    foreach (string profilePath in profilePaths)
+                                    {
+                                        string currPath = Path.Combine(profilePath, currentGameInfo.Game.UserProfileConfigPath);
+                                        if (Directory.Exists(currPath))
+                                        {
+                                            if (!configPathExists)
+                                            {
+                                                configPathExists = true;
+                                            }
+
+                                            string nucPrefix = "";
+                                            if (Directory.GetParent(profilePath).Name == "NucleusCoop")
+                                            {
+                                                nucPrefix = "Nucleus: ";
+                                            }
+
+                                            (gameContextMenuStrip.Items[8] as ToolStripMenuItem).DropDownItems.Add(nucPrefix + Path.GetFileName(profilePath.TrimEnd('\\')), null, new EventHandler(UserProfileOpenSubmenuItem_Click));
+                                            (gameContextMenuStrip.Items[9] as ToolStripMenuItem).DropDownItems.Add(nucPrefix + Path.GetFileName(profilePath.TrimEnd('\\')), null, new EventHandler(UserProfileDeleteSubmenuItem_Click));
+                                        }
+                                    }
+                                }
+                            }
+
+                            if(!configPathExists)
+                            {
+                                gameContextMenuStrip.Items[8].Visible = false;
+                                gameContextMenuStrip.Items[9].Visible = false;
+                            }
+                        }
+
+                        if (i == 11)
+                        {
+                            (gameContextMenuStrip.Items[10] as ToolStripMenuItem).DropDownItems.Clear();
+                            (gameContextMenuStrip.Items[11] as ToolStripMenuItem).DropDownItems.Clear();
+                            if (currentGameInfo.Game.UserProfileSavePath?.Length > 0)
+                            {
+                                if (profilePaths.Count > 0)
+                                {
+                                    foreach (string profilePath in profilePaths)
+                                    {
+                                        string currPath = Path.Combine(profilePath, currentGameInfo.Game.UserProfileSavePath);
+                                        if (Directory.Exists(currPath))
+                                        {
+                                            if (!savePathExists)
+                                            {
+                                                savePathExists = true;
+                                            }
+
+                                            string nucPrefix = "";
+                                            if (Directory.GetParent(profilePath).Name == "NucleusCoop")
+                                            {
+                                                nucPrefix = "Nucleus: ";
+                                            }
+
+                                            (gameContextMenuStrip.Items[10] as ToolStripMenuItem).DropDownItems.Add(nucPrefix + Path.GetFileName(profilePath.TrimEnd('\\')), null, new EventHandler(UserProfileOpenSubmenuItem_Click));
+                                            (gameContextMenuStrip.Items[11] as ToolStripMenuItem).DropDownItems.Add(nucPrefix + Path.GetFileName(profilePath.TrimEnd('\\')), null, new EventHandler(UserProfileDeleteSubmenuItem_Click));
+                                        }
+                                    }
+                                }
+                            }
+
+                            if (!savePathExists)
+                            {
+                                gameContextMenuStrip.Items[10].Visible = false;
+                                gameContextMenuStrip.Items[11].Visible = false;
+                            }
+                        }
+
+                        if(i == 12 && !configPathExists && !savePathExists)
+                        {
+                            gameContextMenuStrip.Items[7].Visible = false;
+                        }
+
                         if (i == 1 && currentGameInfo.Game.Description == null)
                         {
                             gameContextMenuStrip.Items[i].Visible = false;
@@ -1013,6 +1138,73 @@ namespace Nucleus.Coop
                 for (int i = 1; i < gameContextMenuStrip.Items.Count; i++)
                 {
                     gameContextMenuStrip.Items[i].Visible = false;
+                }
+            }
+        }
+
+        private void UserProfileOpenSubmenuItem_Click(object sender, EventArgs e)
+        {
+            ToolStripMenuItem item = sender as ToolStripMenuItem;
+            var parent = item.OwnerItem;
+
+            string pathSuffix;
+            if (parent.Text.Contains("Config"))
+            {
+                pathSuffix = currentGameInfo.Game.UserProfileConfigPath;
+            }
+            else
+            {
+                pathSuffix = currentGameInfo.Game.UserProfileSavePath;
+            }
+
+            string path;
+            if (item.Text.StartsWith("Nucleus: "))
+            {
+                path = Path.Combine($@"C:\Users\{Environment.UserName}\NucleusCoop\{item.Text.Substring("Nucleus: ".Length)}\", pathSuffix);
+            }
+            else
+            {
+                path = Path.Combine(Environment.GetEnvironmentVariable("userprofile"), pathSuffix);
+            }
+
+            if (Directory.Exists(path))
+            {
+                Process.Start(path);
+            }
+        }
+
+        private void UserProfileDeleteSubmenuItem_Click(object sender, EventArgs e)
+        {
+            ToolStripMenuItem item = sender as ToolStripMenuItem;
+            var parent = item.OwnerItem;
+
+            string pathSuffix;
+            if (parent.Text.Contains("Config"))
+            {
+                pathSuffix = currentGameInfo.Game.UserProfileConfigPath;
+            }
+            else
+            {
+                pathSuffix = currentGameInfo.Game.UserProfileSavePath;
+            }
+
+            string path;
+            if (item.Text.StartsWith("Nucleus: "))
+            {
+                path = Path.Combine($@"C:\Users\{Environment.UserName}\NucleusCoop\{item.Text.Substring("Nucleus: ".Length)}\", pathSuffix);
+            }
+            else
+            {
+                path = Path.Combine(Environment.GetEnvironmentVariable("userprofile"), pathSuffix);
+            }
+
+            
+            if (Directory.Exists(path))
+            {
+                DialogResult dialogResult = MessageBox.Show("Are you sure you want to delete '" + path + "' and all its contents?", "Confirm deletion", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+                if (dialogResult == DialogResult.Yes)
+                {
+                    Directory.Delete(path, true);
                 }
             }
         }
@@ -1135,7 +1327,7 @@ namespace Nucleus.Coop
             MessageBox.Show(currentGameInfo.Game.Description, "Script Author Notes", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
-        private void Button1_Click(object sender, EventArgs e)
+        private void GameOptions_Click(object sender, EventArgs e)
         {
             Button btnSender = (Button)sender;
             Point ptLowerLeft = new Point(0, btnSender.Height);
