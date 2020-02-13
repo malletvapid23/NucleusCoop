@@ -10,6 +10,7 @@ using System.Threading;
 using System.Runtime.InteropServices;
 using System.Collections;
 using System.Linq;
+using System.Windows.Forms;
 
 namespace StartGame
 {
@@ -40,6 +41,7 @@ namespace StartGame
         private static string playerNick;
         private static bool useNucleusEnvironment;
         private static bool injectFailed;
+        private static bool useStartupHooks = true;
 
         //private static bool gameIs64 = false;
 
@@ -294,7 +296,7 @@ namespace StartGame
                 STARTUPINFO startup = new STARTUPINFO();
                 startup.cb = Marshal.SizeOf(startup);
 
-                if (isHook || renameMutex || setWindow || blockRaw)
+                if (useStartupHooks && (isHook || renameMutex || setWindow || blockRaw))
                 {
                     Log("Starting game and injecting start up hooks via Nucleus.Inject");
 
@@ -527,6 +529,7 @@ namespace StartGame
                              && !skey.Contains("blockraw")
                              && !skey.Contains("nucenv")
                              && !skey.Contains("playernick")
+                             && !skey.Contains("starthks")
                              && !skey.Contains("root")
                              && !skey.Contains("destination")
                              && !skey.Contains("direxclusions")
@@ -555,8 +558,10 @@ namespace StartGame
                     //Log("Extra arguments:" + argument);
                     ConsoleU.WriteLine("Extra arguments:" + argument, Palette.Feedback);
 
+
                     string[] splited = (arg + argument).Split(new string[] { "|::|" }, StringSplitOptions.None);
                     string key = splited[0].ToLower();
+                    //Log("key " + key);
 
                     if (key.Contains("monitors"))
                     {
@@ -605,6 +610,10 @@ namespace StartGame
                     else if (key.Contains("playernick"))
                     {
                         playerNick = splited[1];
+                    }
+                    else if (key.Contains("starthks"))
+                    {
+                        useStartupHooks = Boolean.Parse(splited[1]);
                     }
                     else if (key.Contains("root"))
                     {

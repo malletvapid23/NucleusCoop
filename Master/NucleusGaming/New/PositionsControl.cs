@@ -387,10 +387,12 @@ namespace Nucleus.Coop
                     }
                 }
 
+                int cOffset = 0;
                 for (int i = 0; i < 4; i++)
                 {
                     Controller c = xinputControllers[i];
                     bool already = false;
+                    
 
                     if (c.IsConnected)
                     {
@@ -421,12 +423,12 @@ namespace Nucleus.Coop
                         changed = true;
 
                         PlayerInfo player = new PlayerInfo();
-                        IList<DeviceInstance> devices = dinput.GetDevices(SlimDX.DirectInput.DeviceType.Gamepad, DeviceEnumerationFlags.AttachedOnly);
+                        IList<DeviceInstance> devices = dinput.GetDevices(SlimDX.DirectInput.DeviceType.Gamepad /*DeviceClass.GameController*/, DeviceEnumerationFlags.AttachedOnly);
                         for (int x = 0; x < devices.Count; x++)
                         {
                             DeviceInstance device = devices[x];
                             //if(!instanceIds.Contains(device.InstanceGuid.ToString()))
-                            if(x == i)
+                            if((x+cOffset) == i)
                             {
                                 //instanceIds.Add(device.InstanceGuid.ToString());
                                 player.GamepadGuid = device.InstanceGuid;
@@ -446,13 +448,21 @@ namespace Nucleus.Coop
 
                                 break;
                             }
-                            
+                            else
+                            {
+                                
+                            }
                         }
 
                         // new gamepad
                         player.IsXInput = true;
                         player.GamepadId = i;
                         data.Add(player);
+                        
+                    }
+                    else
+                    {
+                        cOffset++;
                     }
                 }
             }
@@ -1264,6 +1274,7 @@ namespace Nucleus.Coop
                 {
                     
                     PlayerInfo info = players[i];
+
                     //MessageBox.Show("Game name: " + ggi.GameName + "\nDInputEnabled: " + ggi.Hook.DInputEnabled + "\nDInputForceDisable: " + ggi.Hook.DInputForceDisable + "\nXInputReroute: " + ggi.Hook.XInputReroute + "\nPlayers count: " + players.Count + "\n\nController Name: " + info.GamepadName + "\nHID Device ID: " + info.HIDDeviceID + "\nInstance GUID: " + info.GamepadGuid + "\nSlot: " + i + "\nIsXInput: " + info.IsXInput + "\nIsDInput: " + info.IsDInput + "\nIsKeyboardPlayer: " + info.IsKeyboardPlayer + "\nRaw hid: " + info.DInputJoystick.Properties.InterfacePath);
                     Rectangle s = info.EditBounds;
                     g.ResetClip();
@@ -1287,9 +1298,10 @@ namespace Nucleus.Coop
                         GamepadButtonFlags flags = (GamepadButtonFlags)info.GamepadMask;
                         //g.DrawString(flags.ToString(), smallTextFont, Brushes.White, new PointF(loc.X, loc.Y + gamepadRect.Height * 0.01f));
 
-                        if(ini.IniReadValue("ControllerMapping",info.HIDDeviceID) != "")
+                        if /*(!string.IsNullOrEmpty(info.Nickname)) */ (ini.IniReadValue("ControllerMapping",info.HIDDeviceID) != "")
                         {
                             str = ini.IniReadValue("ControllerMapping", info.HIDDeviceID);
+                            //str = info.Nickname;
                             size = g.MeasureString(str, playerCustomFont);
                             loc = RectangleUtil.Center(size, s);
                             loc.Y -= 10;
@@ -1321,9 +1333,10 @@ namespace Nucleus.Coop
 					else
                     {
                         loc.Y -= gamepadRect.Height * 0.2f;
-                        if (ini.IniReadValue("ControllerMapping", info.HIDDeviceID) != "")
+                        if /*(!string.IsNullOrEmpty(info.Nickname))*/ (ini.IniReadValue("ControllerMapping", info.HIDDeviceID) != "")
                         {
                             str = ini.IniReadValue("ControllerMapping", info.HIDDeviceID);
+                            //str = info.Nickname;
                             size = g.MeasureString(str, playerCustomFont);
                             loc = RectangleUtil.Center(size, s);
                             loc.Y -= 10;

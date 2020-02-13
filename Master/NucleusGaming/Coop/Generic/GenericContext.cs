@@ -4,6 +4,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
+using System.Net.Sockets;
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -203,6 +205,60 @@ namespace Nucleus.Gaming
             {
                 return pInfo.Nickname;
             }
+        }
+
+        public string LocalIP
+        {
+            get
+            {
+                var host = Dns.GetHostEntry(Dns.GetHostName());
+                foreach (var ip in host.AddressList)
+                {
+                    if (ip.AddressFamily == AddressFamily.InterNetwork)
+                    {
+                        return ip.ToString();
+                    }
+                }
+                return "ERROR";
+            }
+        }
+
+        public string EnvironmentPlayer
+        {
+            get
+            {
+                return $@"C:\Users\{System.Environment.UserName}\NucleusCoop\{Nickname}\";
+            }
+        }
+
+        public string EnvironmentRoot
+        {
+            get
+            {
+                return $@"C:\Users\{System.Environment.UserName}\NucleusCoop\";
+            }
+        }
+
+        public string UserProfileConfigPath
+        {
+            //get
+            //{
+            //    //return parent.UserProfileConfigPath;
+            //}
+            //set { }
+
+            get; set;
+        }
+
+        public string UserProfileSavePath
+        {
+            //get
+            //{
+            //    //return parent.UserProfileSavePath;
+            //}
+            //set { }
+
+            get; set;
         }
 
         public void WriteTextFile(string path, string[] lines)

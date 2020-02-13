@@ -135,7 +135,7 @@ namespace Nucleus.Gaming
 
 
 
-        public static void ExecuteCommand(string workingDirectory, out int exitCode, string command)
+        public static void ExecuteCommand(string workingDirectory, out int exitCode, string command, bool runAsAdmin = true)
         {
             ProcessStartInfo processInfo;
 
@@ -148,7 +148,10 @@ namespace Nucleus.Gaming
             processInfo.WindowStyle = ProcessWindowStyle.Hidden;
 
             processInfo.UseShellExecute = true;
-            processInfo.Verb = "runas";
+            if (runAsAdmin)
+            {
+                processInfo.Verb = "runas";
+            }
 
             Process process = new Process();
             process.StartInfo = processInfo;
