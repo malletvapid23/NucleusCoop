@@ -1350,6 +1350,7 @@ namespace Nucleus.Coop
                 var players = profile.PlayerData;
 
                 PlayerInfo player = players[draggingIndex];
+                
                 Rectangle p = player.EditBounds;
                 if (draggingScreen == -1)
                 {

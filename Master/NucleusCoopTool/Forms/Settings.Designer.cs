@@ -30,6 +30,8 @@
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Settings));
             this.groupBox4 = new System.Windows.Forms.GroupBox();
+            this.cmb_Network = new System.Windows.Forms.ComboBox();
+            this.label32 = new System.Windows.Forms.Label();
             this.debugLogCheck = new System.Windows.Forms.CheckBox();
             this.useNicksCheck = new System.Windows.Forms.CheckBox();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
@@ -116,6 +118,7 @@
             this.settingsCloseHKTxt = new System.Windows.Forms.TextBox();
             this.settingsCloseBtn = new System.Windows.Forms.Button();
             this.settingsSaveBtn = new System.Windows.Forms.Button();
+            this.label33 = new System.Windows.Forms.Label();
             this.groupBox4.SuspendLayout();
             this.groupBox3.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numMaxPlyrs)).BeginInit();
@@ -130,6 +133,8 @@
             // 
             // groupBox4
             // 
+            this.groupBox4.Controls.Add(this.cmb_Network);
+            this.groupBox4.Controls.Add(this.label32);
             this.groupBox4.Controls.Add(this.debugLogCheck);
             this.groupBox4.Controls.Add(this.useNicksCheck);
             this.groupBox4.ForeColor = System.Drawing.Color.White;
@@ -139,6 +144,30 @@
             this.groupBox4.TabIndex = 23;
             this.groupBox4.TabStop = false;
             this.groupBox4.Text = "Miscellaneous";
+            // 
+            // cmb_Network
+            // 
+            this.cmb_Network.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cmb_Network.FormattingEnabled = true;
+            this.cmb_Network.Items.AddRange(new object[] {
+            "Automatic"});
+            this.cmb_Network.Location = new System.Drawing.Point(94, 124);
+            this.cmb_Network.MaxDropDownItems = 10;
+            this.cmb_Network.Name = "cmb_Network";
+            this.cmb_Network.Size = new System.Drawing.Size(287, 29);
+            this.cmb_Network.TabIndex = 62;
+            this.cmb_Network.DropDown += new System.EventHandler(this.cmb_Network_DropDown);
+            this.cmb_Network.DropDownClosed += new System.EventHandler(this.cmb_Network_DropDownClosed);
+            // 
+            // label32
+            // 
+            this.label32.AutoSize = true;
+            this.label32.Location = new System.Drawing.Point(15, 127);
+            this.label32.Name = "label32";
+            this.label32.Size = new System.Drawing.Size(73, 21);
+            this.label32.TabIndex = 61;
+            this.label32.Text = "Network:";
+            this.label32.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             // 
             // debugLogCheck
             // 
@@ -292,7 +321,7 @@
             this.btn_credits.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.btn_credits.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btn_credits.ForeColor = System.Drawing.Color.White;
-            this.btn_credits.Location = new System.Drawing.Point(358, 675);
+            this.btn_credits.Location = new System.Drawing.Point(358, 694);
             this.btn_credits.Name = "btn_credits";
             this.btn_credits.Size = new System.Drawing.Size(120, 35);
             this.btn_credits.TabIndex = 21;
@@ -1066,7 +1095,7 @@
             this.settingsCloseBtn.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.settingsCloseBtn.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.settingsCloseBtn.ForeColor = System.Drawing.Color.White;
-            this.settingsCloseBtn.Location = new System.Drawing.Point(499, 675);
+            this.settingsCloseBtn.Location = new System.Drawing.Point(499, 694);
             this.settingsCloseBtn.Name = "settingsCloseBtn";
             this.settingsCloseBtn.Size = new System.Drawing.Size(120, 35);
             this.settingsCloseBtn.TabIndex = 9;
@@ -1079,7 +1108,7 @@
             this.settingsSaveBtn.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.settingsSaveBtn.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.settingsSaveBtn.ForeColor = System.Drawing.Color.White;
-            this.settingsSaveBtn.Location = new System.Drawing.Point(217, 675);
+            this.settingsSaveBtn.Location = new System.Drawing.Point(217, 694);
             this.settingsSaveBtn.Name = "settingsSaveBtn";
             this.settingsSaveBtn.Size = new System.Drawing.Size(120, 35);
             this.settingsSaveBtn.TabIndex = 8;
@@ -1087,12 +1116,23 @@
             this.settingsSaveBtn.UseVisualStyleBackColor = true;
             this.settingsSaveBtn.Click += new System.EventHandler(this.SettingsSaveBtn_Click);
             // 
+            // label33
+            // 
+            this.label33.Font = new System.Drawing.Font("Segoe UI", 10F);
+            this.label33.Location = new System.Drawing.Point(213, 658);
+            this.label33.Name = "label33";
+            this.label33.Size = new System.Drawing.Size(406, 33);
+            this.label33.TabIndex = 62;
+            this.label33.Text = "Must save settings in order for them to take effect.";
+            this.label33.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            // 
             // Settings
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(50)))), ((int)(((byte)(50)))), ((int)(((byte)(50)))));
-            this.ClientSize = new System.Drawing.Size(839, 722);
+            this.ClientSize = new System.Drawing.Size(839, 741);
+            this.Controls.Add(this.label33);
             this.Controls.Add(this.groupBox4);
             this.Controls.Add(this.groupBox3);
             this.Controls.Add(this.btn_credits);
@@ -1215,5 +1255,8 @@
         private System.Windows.Forms.CheckBox debugLogCheck;
         private System.Windows.Forms.TextBox keyboardNick;
         private System.Windows.Forms.Label label31;
+        private System.Windows.Forms.ComboBox cmb_Network;
+        private System.Windows.Forms.Label label32;
+        private System.Windows.Forms.Label label33;
     }
 }
