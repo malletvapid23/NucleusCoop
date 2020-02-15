@@ -3353,6 +3353,7 @@ namespace Nucleus.Gaming
         private void SendFocusMsgs()
         {
             List<Process> fakeFocusProcs = new List<Process>();
+            var windows = RawInputManager.windows;
             string ffPIDs = "";
 
             if (gen.FakeFocusInstances?.Length > 0)
@@ -3400,6 +3401,14 @@ namespace Nucleus.Gaming
 						User32Interop.SendMessage(proc.MainWindowHandle, (int)FocusMessages.WM_NCACTIVATE, (IntPtr)0x00000001, IntPtr.Zero);
 						User32Interop.SendMessage(proc.MainWindowHandle, (int)FocusMessages.WM_SETFOCUS, IntPtr.Zero, IntPtr.Zero);
 						User32Interop.SendMessage(proc.MainWindowHandle, (int)FocusMessages.WM_MOUSEACTIVATE, (IntPtr)proc.MainWindowHandle, (IntPtr)1);
+					}
+
+					if (gen.PreventGameFocus)
+					{
+						foreach (var window in windows)
+						{
+							window.HookPipe.SendPreventForegroundWindow();
+						}
 					}
 				}
 			}

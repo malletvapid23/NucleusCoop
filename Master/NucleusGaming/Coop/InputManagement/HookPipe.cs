@@ -235,6 +235,15 @@ namespace Nucleus.Gaming.Coop.InputManagement
 		}
 
 		/// <summary>
+		/// When an process has the focus, another process (Nucleus) cannot set the foreground window.
+		/// This sends a message to the hooks to set the focus to the desktop.
+		/// </summary>
+		public void SendPreventForegroundWindow()
+		{
+			WriteMessage(0x05, 0,0);
+		}
+
+		/// <summary>
 		/// Queues a send message via the ThreadPool.
 		/// </summary>
 		/// <param name="message"></param>
