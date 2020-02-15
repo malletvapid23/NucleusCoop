@@ -24,7 +24,7 @@ namespace Nucleus.Coop
     /// </summary>
     public partial class MainForm : BaseForm
     {
-        public string version = "v0.9.9.1";
+        public string version = "v0.9.9.2";
 
         private Settings settingsForm = null;
 
@@ -653,7 +653,7 @@ namespace Nucleus.Coop
                         handler.End(true);
                     }
 
-                    foreach (Form openForm in Application.OpenForms)
+                    foreach (System.Windows.Forms.Form openForm in Application.OpenForms)
                     {
                         if (openForm.Name == "Hide Desktop")
                             openForm.Close();
@@ -1373,6 +1373,12 @@ namespace Nucleus.Coop
             {
                 MessageBox.Show("No data in content folder to delete.");
             }
+        }
+
+        private void btn_Download_Click(object sender, EventArgs e)
+        {
+            Forms.ScriptDownloader scriptDownloader = new Forms.ScriptDownloader();
+            scriptDownloader.ShowDialog();
         }
     }
 }

@@ -80,6 +80,9 @@
     <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="DotNetZip, Version=1.13.5.0, Culture=neutral, PublicKeyToken=6583c7c814667745, processorArchitecture=MSIL">
+      <HintPath>..\packages\DotNetZip.1.13.5\lib\net40\DotNetZip.dll</HintPath>
+    </Reference>
     <Reference Include="Newtonsoft.Json, Version=10.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\Newtonsoft.Json.10.0.3\lib\net40\Newtonsoft.Json.dll</HintPath>
     </Reference>
@@ -105,17 +108,36 @@
     <Compile Include="Forms\BaseForm.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="Forms\DownloadPrompt.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\DownloadPrompt.Designer.cs">
+      <DependentUpon>DownloadPrompt.cs</DependentUpon>
+    </Compile>
     <Compile Include="Forms\GameList.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="Forms\GameList.Designer.cs">
       <DependentUpon>GameList.cs</DependentUpon>
     </Compile>
+    <Compile Include="Forms\Handler.cs" />
+    <Compile Include="Forms\HandlerInfo.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\HandlerInfo.Designer.cs">
+      <DependentUpon>HandlerInfo.cs</DependentUpon>
+    </Compile>
     <Compile Include="Forms\MainForm.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="Forms\MainForm.Designer.cs">
       <DependentUpon>MainForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\ScriptDownloader.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\ScriptDownloader.Designer.cs">
+      <DependentUpon>ScriptDownloader.cs</DependentUpon>
     </Compile>
     <Compile Include="Forms\SearchDisksForm.cs">
       <SubType>Form</SubType>
@@ -134,11 +156,20 @@
     <EmbeddedResource Include="Forms\BaseForm.resx">
       <DependentUpon>BaseForm.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="Forms\DownloadPrompt.resx">
+      <DependentUpon>DownloadPrompt.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Forms\GameList.resx">
       <DependentUpon>GameList.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="Forms\HandlerInfo.resx">
+      <DependentUpon>HandlerInfo.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Forms\MainForm.resx">
       <DependentUpon>MainForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\ScriptDownloader.resx">
+      <DependentUpon>ScriptDownloader.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\SearchDisksForm.resx">
       <DependentUpon>SearchDisksForm.cs</DependentUpon>

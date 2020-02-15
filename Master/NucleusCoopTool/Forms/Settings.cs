@@ -12,6 +12,8 @@ using Nucleus.Gaming;
 using System.Text.RegularExpressions;
 using SlimDX.DirectInput;
 using System.Runtime.InteropServices;
+using System.Net.NetworkInformation;
+using System.Net.Sockets;
 
 namespace Nucleus.Coop
 {
@@ -45,6 +47,16 @@ namespace Nucleus.Coop
 
             mainForm = mf as MainForm;
             positionsControl = pc;
+
+            RefreshCmbNetwork();
+            if (ini.IniReadValue("Misc", "Network") != "")
+            {
+                cmb_Network.Text = ini.IniReadValue("Misc", "Network");
+            }
+            else
+            {
+                cmb_Network.SelectedIndex = 0;
+            }
 
             //Hotkeys
             if (ini.IniReadValue("Hotkeys", "Close").Contains('+'))
@@ -214,11 +226,14 @@ namespace Nucleus.Coop
 
                 ini.IniWriteValue("Misc", "UseNicksInGame", useNicksCheck.Checked.ToString());
                 ini.IniWriteValue("Misc", "DebugLog", debugLogCheck.Checked.ToString());
+                ini.IniWriteValue("Misc", "Network", cmb_Network.SelectedItem.ToString());
 
                 //ini.IniWriteValue("CustomLayout", "Enabled", enableCustomCheckbox.Checked.ToString());
                 ini.IniWriteValue("CustomLayout", "HorizontalLines", numHorDiv.Value.ToString());
                 ini.IniWriteValue("CustomLayout", "VerticalLines", numVerDiv.Value.ToString());
                 ini.IniWriteValue("CustomLayout", "MaxPlayers", numMaxPlyrs.Value.ToString());
+
+                
 
                 //ini.IniWriteValue("Misc", "VibrateOpen", check_Vibrate.Checked.ToString());
 
@@ -388,6 +403,41 @@ namespace Nucleus.Coop
 
             p.Dispose();
             gs.Dispose();
+        }
+
+        private void cmb_Network_DropDown(object sender, EventArgs e)
+        {
+            RefreshCmbNetwork();
+        }
+
+        private void RefreshCmbNetwork()
+        {
+            cmb_Network.Items.Clear();
+
+            cmb_Network.Items.Add("Automatic");
+
+            var ni = NetworkInterface.GetAllNetworkInterfaces();
+            foreach (NetworkInterface item in ni)
+            {
+                if (item.OperationalStatus == OperationalStatus.Up)
+                {
+                    foreach (UnicastIPAddressInformation ip in item.GetIPProperties().UnicastAddresses)
+                    {
+                        if (ip.Address.AddressFamily == AddressFamily.InterNetwork)
+                        {
+                            cmb_Network.Items.Add(item.Name);
+                        }
+                    }
+                }
+            }
+        }
+
+        private void cmb_Network_DropDownClosed(object sender, EventArgs e)
+        {
+            if(cmb_Network.SelectedItem == null)
+            {
+                cmb_Network.SelectedIndex = 0;
+            }
         }
     }
 }

@@ -63,6 +63,7 @@
             this.scriptAuthorLbl = new System.Windows.Forms.Label();
             this.scriptAuthorTxt = new System.Windows.Forms.TextBox();
             this.lblVersion = new System.Windows.Forms.Label();
+            this.btn_Download = new System.Windows.Forms.Button();
             this.gameContextMenuStrip.SuspendLayout();
             this.StepPanel.SuspendLayout();
             this.SuspendLayout();
@@ -332,7 +333,7 @@
             this.list_Games.Location = new System.Drawing.Point(12, 12);
             this.list_Games.Name = "list_Games";
             this.list_Games.Offset = new System.Drawing.Size(0, 2);
-            this.list_Games.Size = new System.Drawing.Size(262, 636);
+            this.list_Games.Size = new System.Drawing.Size(262, 595);
             this.list_Games.TabIndex = 2;
             this.list_Games.SelectedChanged += new System.Action<object, System.Windows.Forms.Control>(this.list_Games_SelectedChanged);
             // 
@@ -390,11 +391,24 @@
             this.lblVersion.TabIndex = 12;
             this.lblVersion.Text = "ALPHA 8";
             // 
+            // btn_Download
+            // 
+            this.btn_Download.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.btn_Download.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btn_Download.Location = new System.Drawing.Point(12, 613);
+            this.btn_Download.Name = "btn_Download";
+            this.btn_Download.Size = new System.Drawing.Size(262, 35);
+            this.btn_Download.TabIndex = 22;
+            this.btn_Download.Text = "Download Game Scripts";
+            this.btn_Download.UseVisualStyleBackColor = true;
+            this.btn_Download.Click += new System.EventHandler(this.btn_Download_Click);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
             this.ClientSize = new System.Drawing.Size(1058, 701);
+            this.Controls.Add(this.btn_Download);
             this.Controls.Add(this.btn_gameOptions);
             this.Controls.Add(this.settingsBtn);
             this.Controls.Add(this.sideInfoLbl);
@@ -455,5 +469,6 @@
         private System.Windows.Forms.ToolStripMenuItem openUserProfileSavePathToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem deleteUserProfileSavePathToolStripMenuItem;
         private System.Windows.Forms.ToolStripSeparator toolStripMenuItem3;
+        private System.Windows.Forms.Button btn_Download;
     }
 }

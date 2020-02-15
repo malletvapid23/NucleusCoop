@@ -275,7 +275,6 @@
     <Compile Include="Util\CmdUtil.cs" />
     <Compile Include="Util\Palette.cs" />
     <Compile Include="Util\ConsoleU.cs" />
-    <Compile Include="Util\Extensions\DirectoryInfoExtensions.cs" />
     <Compile Include="Util\FileUtil.cs" />
     <Compile Include="Util\FormUtil.cs" />
     <Compile Include="Util\MathUtil.cs" />
@@ -313,6 +312,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="New\Utils\" />
+    <Folder Include="Util\Extensions\" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\4players.png" />

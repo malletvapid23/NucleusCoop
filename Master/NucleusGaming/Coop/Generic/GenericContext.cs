@@ -211,15 +211,29 @@ namespace Nucleus.Gaming
         {
             get
             {
-                var host = Dns.GetHostEntry(Dns.GetHostName());
-                foreach (var ip in host.AddressList)
+                //var host = Dns.GetHostEntry(Dns.GetHostName());
+                //foreach (var ip in host.AddressList)
+                //{
+                //    if (ip.AddressFamily == AddressFamily.InterNetwork)
+                //    {
+                //        return ip.ToString();
+                //    }
+                //}
+                //return "ERROR";
+
+                //return Dns.GetHostEntry(Dns.GetHostName())
+                //    .AddressList.FirstOrDefault(ip => ip.AddressFamily == AddressFamily.InterNetwork)
+                //    .ToString();
+
+                string localIP;
+                using (Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, 0))
                 {
-                    if (ip.AddressFamily == AddressFamily.InterNetwork)
-                    {
-                        return ip.ToString();
-                    }
+                    socket.Connect("8.8.8.8", 65530);
+                    IPEndPoint endPoint = socket.LocalEndPoint as IPEndPoint;
+                    localIP = endPoint.Address.ToString();
                 }
-                return "ERROR";
+
+                return localIP;
             }
         }
 

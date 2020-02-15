@@ -161,6 +161,19 @@ namespace Nucleus.Gaming
         public string[] HexEditFileAddress;
         public bool ForceUserProfileConfigCopy;
         public bool ForceUserProfileSaveCopy;
+        public bool PromptBeforeProcessGrab;
+        public bool ProcessChangesAtEnd;
+        public bool PromptProcessChangesAtEnd;
+        public string[] DeleteFilesInConfigPath;
+        public string[] DeleteFilesInSavePath;
+        public bool PromptBetweenInstancesEnd;
+        public bool IgnoreDeleteFilesPrompt;
+        public bool ChangeIPPerInstance;
+        //public string NetworkInterface = null;
+        public string FlawlessWidescreen;
+        public string[] RenameAndOrMoveFiles;
+        public string[] DeleteFiles;
+        public bool GoldbergExperimentalRename;
 
 		// -- From USS
 		//Effectively a switch for all of USS features
@@ -199,13 +212,29 @@ namespace Nucleus.Gaming
             JsFileName = fileName;
             Folder = folderPath;
 
-            StreamReader reader = new StreamReader(str);
-            js = reader.ReadToEnd();
+            //StreamReader reader = new StreamReader(str);
+            //js = reader.ReadToEnd();
+            js = "";
+            using (StreamReader sr = new StreamReader(str))
+            {
+                while (!sr.EndOfStream)
+                {
+                    string line = sr.ReadLine();
+                    if (line.StartsWith("Hub."))
+                    {
+                        continue;
+                    }
+                    else
+                    {
+                        js += "\r\n" + line + "\r\n";
+                    }
+                }
+            }
 
             Assembly assembly = typeof(GameOption).Assembly;
 
             engine = new Engine(cfg => cfg.AllowClr(assembly));
-            
+
             engine.SetValue("Game", this);
             engine.Execute("var Nucleus = importNamespace('Nucleus.Gaming');");
             engine.Execute(js);
