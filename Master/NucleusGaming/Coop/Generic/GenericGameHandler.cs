@@ -2260,20 +2260,7 @@ namespace Nucleus.Gaming
 				//Set up raw input window
 				//if (player.IsRawKeyboard || player.IsRawMouse)
 				{
-					var hWnd = WaitForProcWindowHandleNotZero(proc);
-					var mouseHdev = player.IsRawKeyboard ? player.RawMouseDeviceHandle : (IntPtr)(-1);
-					var keyboardHdev = player.IsRawMouse ? player.RawKeyboardDeviceHandle : (IntPtr)(-1);
-
-					var window = new Window(hWnd)
-					{
-						CursorVisibility = player.IsRawMouse && !gen.HideCursor && gen.DrawFakeMouseCursor,
-						KeyboardAttached = keyboardHdev,
-						MouseAttached = mouseHdev
-					};
-
-					window.CreateHookPipe(gen);
-
-					RawInputManager.windows.Add(window);
+					var window = CreateRawInputWindow(proc, player);
 
 					nextWindowToInject = window;
 				}
@@ -2379,7 +2366,7 @@ namespace Nucleus.Gaming
                                 {
                                     Log("Injecting hook DLL for last instance");
                                     User32Interop.SetForegroundWindow(data.Process.MainWindowHandle);
-                                    InjectDLLs(data.Process);
+                                    InjectDLLs(data.Process, nextWindowToInject);
                                 }
                             }
                         }
@@ -2453,7 +2440,26 @@ namespace Nucleus.Gaming
             return string.Empty;
         }
 
-		private void DeleteFiles(string linkFolder, int i)
+        private Window CreateRawInputWindow(Process proc, PlayerInfo player)
+        {
+	        var hWnd = WaitForProcWindowHandleNotZero(proc);
+	        var mouseHdev = player.IsRawKeyboard ? player.RawMouseDeviceHandle : (IntPtr) (-1);
+	        var keyboardHdev = player.IsRawMouse ? player.RawKeyboardDeviceHandle : (IntPtr) (-1);
+
+	        var window = new Window(hWnd)
+	        {
+		        CursorVisibility = player.IsRawMouse && !gen.HideCursor && gen.DrawFakeMouseCursor,
+		        KeyboardAttached = keyboardHdev,
+		        MouseAttached = mouseHdev
+	        };
+
+	        window.CreateHookPipe(gen);
+
+	        RawInputManager.windows.Add(window);
+	        return window;
+        }
+
+        private void DeleteFiles(string linkFolder, int i)
 		{
 			foreach (string deleteLine in gen.DeleteFiles)
 			{
@@ -2911,24 +2917,26 @@ namespace Nucleus.Gaming
             attached.Add(proc);
             attachedIds.Add(proc.Id);
 
-            Log("Removing game window border for this process");
+            var hwnd = WaitForProcWindowHandleNotZero(proc);
+
+			Log("Removing game window border for this process");
             Point loc = new Point(players[playerIndex].MonitorBounds.X, players[playerIndex].MonitorBounds.Y);
             Size size = new Size(players[playerIndex].MonitorBounds.Width, players[playerIndex].MonitorBounds.Height);
-            uint lStyle = User32Interop.GetWindowLong(proc.MainWindowHandle, User32_WS.GWL_STYLE);
+            uint lStyle = User32Interop.GetWindowLong(hwnd, User32_WS.GWL_STYLE);
             lStyle = lStyle & ~User32_WS.WS_CAPTION;
             lStyle = lStyle & ~User32_WS.WS_THICKFRAME;
             lStyle = lStyle & ~User32_WS.WS_MINIMIZE;
             lStyle = lStyle & ~User32_WS.WS_MAXIMIZE;
             lStyle = lStyle & ~User32_WS.WS_SYSMENU;
             lStyle = lStyle & User32_WS.WS_DISABLED;
-            User32Interop.SetWindowLong(proc.MainWindowHandle, User32_WS.GWL_STYLE, lStyle);
+            User32Interop.SetWindowLong(hwnd, User32_WS.GWL_STYLE, lStyle);
 
-            lStyle = User32Interop.GetWindowLong(proc.MainWindowHandle, User32_WS.GWL_EXSTYLE);
+            lStyle = User32Interop.GetWindowLong(hwnd, User32_WS.GWL_EXSTYLE);
             lStyle = lStyle & ~User32_WS.WS_EX_DLGMODALFRAME;
             lStyle = lStyle & ~User32_WS.WS_EX_CLIENTEDGE;
             lStyle = lStyle & ~User32_WS.WS_EX_STATICEDGE;
-            User32Interop.SetWindowLong(proc.MainWindowHandle, User32_WS.GWL_EXSTYLE, lStyle);
-            User32Interop.SetWindowPos(proc.MainWindowHandle, IntPtr.Zero, 0, 0, 0, 0, (uint)(PositioningFlags.SWP_FRAMECHANGED | PositioningFlags.SWP_NOMOVE | PositioningFlags.SWP_NOSIZE | PositioningFlags.SWP_NOZORDER | PositioningFlags.SWP_NOOWNERZORDER));
+            User32Interop.SetWindowLong(hwnd, User32_WS.GWL_EXSTYLE, lStyle);
+            User32Interop.SetWindowPos(hwnd, IntPtr.Zero, 0, 0, 0, 0, (uint)(PositioningFlags.SWP_FRAMECHANGED | PositioningFlags.SWP_NOMOVE | PositioningFlags.SWP_NOSIZE | PositioningFlags.SWP_NOZORDER | PositioningFlags.SWP_NOOWNERZORDER));
 
             if (gen.KeepAspectRatio || gen.KeepMonitorAspectRatio)
             {
@@ -2939,7 +2947,7 @@ namespace Nucleus.Gaming
                 }
                 else
                 {
-                    if (GetWindowRect(proc.MainWindowHandle, out RECT Rect))
+                    if (GetWindowRect(hwnd, out RECT Rect))
                     {
                         origWidth = Rect.Right - Rect.Left;
                         origHeight = Rect.Bottom - Rect.Top;
@@ -2969,19 +2977,22 @@ namespace Nucleus.Gaming
             }
 
             Log(string.Format("Resizing this game window and keeping aspect ratio. Values: width:{0}, height:{1}, aspectratio:{2}, origwidth:{3}, origheight:{4}, plyrboundwidth:{5}, plyrboundheight:{6}", size.Width, size.Height, origRatio, origWidth, origHeight, playerBoundsWidth, playerBoundsHeight));
-            WindowScrape.Static.HwndInterface.SetHwndSize(proc.MainWindowHandle, size.Width, size.Height);
+            WindowScrape.Static.HwndInterface.SetHwndSize(hwnd, size.Width, size.Height);
 
             Log(string.Format("Repostioning this game window to coords x:{0},y:{1}", loc.X, loc.Y));
-            WindowScrape.Static.HwndInterface.SetHwndPos(proc.MainWindowHandle, loc.X, loc.Y);
+            WindowScrape.Static.HwndInterface.SetHwndPos(hwnd, loc.X, loc.Y);
 
             //User32Util.HideTaskbar();
             Log("Setting this game window to top most");
-            WindowScrape.Static.HwndInterface.MakeTopMost(proc.MainWindowHandle);
+            WindowScrape.Static.HwndInterface.MakeTopMost(hwnd);
 
-            if (gen.HookFocus || gen.SetWindowHook || gen.HideCursor || gen.PreventWindowDeactivation)
+			//Set up raw input window.
+			var window = CreateRawInputWindow(proc, players[playerIndex]);
+
+            if (gen.HookFocus || gen.SetWindowHook || gen.HideCursor || gen.PreventWindowDeactivation || gen.SupportsMultipleKeyboardsAndMice)
             {
                 Log("Injecting post-launch hooks for this process");
-                InjectDLLs(proc);
+                InjectDLLs(proc, window);
                 Thread.Sleep(1000);
             }
         }
