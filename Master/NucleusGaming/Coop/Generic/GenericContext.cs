@@ -857,5 +857,11 @@ namespace Nucleus.Gaming
 			foreach (var p in System.Diagnostics.Process.GetProcesses().Where(x => x.MainWindowTitle.ToLower().Contains(name.ToLower())).ToArray())
 				p.Kill();
         }
-    }
+
+        public void KillProcessesMatchingProcessName(string name)
+        {
+	        foreach (var p in System.Diagnostics.Process.GetProcesses().Where(x => x.ProcessName.ToLower().Contains(name.ToLower())).ToArray())
+		        p.Kill();
+        }
+	}
 }
