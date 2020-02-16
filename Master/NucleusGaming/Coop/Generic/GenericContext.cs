@@ -851,5 +851,11 @@ namespace Nucleus.Gaming
                 }
             }
         }
+
+        public void KillProcessesMatchingWindowName(string name)
+        {
+			foreach (var p in System.Diagnostics.Process.GetProcesses().Where(x => x.MainWindowTitle.ToLower().Contains(name.ToLower())).ToArray())
+				p.Kill();
+        }
     }
 }
