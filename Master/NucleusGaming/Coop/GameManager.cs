@@ -584,8 +584,8 @@ namespace Nucleus.Gaming
             for (int i = 0; i < files.Length; i++)
             {
                 FileInfo f = files[i];
-                //try
-                //{
+                try
+                {
                     using (Stream str = f.OpenRead())
                     {
                         string ext = Path.GetFileNameWithoutExtension(f.Name);
@@ -598,12 +598,12 @@ namespace Nucleus.Gaming
                         //breaks anything? idk
                         gameInfos.Add(info.GUID, info);
                     }
-                //}
-                //catch
-                //{
-                //    MessageBox.Show(string.Format("There is an error in the game script {0}. The game this script is for will not appear in the list. If the issue has been fixed, please try re-adding the game.\n\nCommon errors include:\n- A syntax error (such as a \',\' \';\' or \']\' missing)\n- Another script has this GUID (must be unique!)\n- Code is not in the right place or format (for example: methods using Context must be within the Game.Play function)", f.Name), "Error in script", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                //}
-                
+                }
+                catch
+                {
+                    MessageBox.Show(string.Format("There is an error in the game script {0}. The game this script is for will not appear in the list. If the issue has been fixed, please try re-adding the game.\n\nCommon errors include:\n- A syntax error (such as a \',\' \';\' or \']\' missing)\n- Another script has this GUID (must be unique!)\n- Code is not in the right place or format (for example: methods using Context must be within the Game.Play function)", f.Name), "Error in script", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+                    
             }
 
         }
