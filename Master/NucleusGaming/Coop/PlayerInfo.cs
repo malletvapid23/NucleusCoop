@@ -4,8 +4,12 @@ using System.Linq;
 using System.Text;
 using System.Drawing;
 using System.Diagnostics;
+using System.Threading;
+using System.Threading.Tasks;
 using SlimDX.DirectInput;
 using Nucleus.Gaming.Coop;
+using Nucleus.Coop;
+using Nucleus.Gaming.Coop.InputManagement.Logging;
 
 namespace Nucleus.Gaming.Coop
 {
@@ -32,7 +36,13 @@ namespace Nucleus.Gaming.Coop
         public bool IsDInput;
         public bool IsFake;
 
-        public Guid GamepadProductGuid;
+		public bool IsRawMouse;
+		public bool IsRawKeyboard;
+		//public IntPtr RawDeviceHandle = (IntPtr)(-1);
+		public IntPtr RawMouseDeviceHandle = (IntPtr)(-1);
+		public IntPtr RawKeyboardDeviceHandle = (IntPtr)(-1);
+
+		public Guid GamepadProductGuid;
         public Guid GamepadGuid;
         public int GamepadId;
         public string GamepadName;
@@ -100,8 +110,41 @@ namespace Nucleus.Gaming.Coop
             set { processData = value; }
         }
 
-        
+		#region Flash
+		public bool ShouldFlash;
 
-        
-    }
+		private Stopwatch flashStopwatch = new Stopwatch();
+		private Task flashTask = null;
+		public void FlashIcon()
+		{
+			if (ShouldFlash && flashStopwatch != null && flashStopwatch.IsRunning && flashStopwatch.ElapsedMilliseconds <= 250) return;
+
+			if (!ShouldFlash)
+			{
+				ShouldFlash = true;
+				PositionsControl.InvalidateFlash();
+			}
+
+			flashStopwatch.Restart();
+
+			if (flashTask == null)
+			{
+				flashTask = new Task(delegate
+				{
+					while (flashStopwatch.ElapsedMilliseconds <= 500)
+					{
+						Thread.Sleep(501 - (int)flashStopwatch.ElapsedMilliseconds);
+					}
+					
+					flashTask = null;
+
+					ShouldFlash = false;
+					PositionsControl.InvalidateFlash();
+				});
+
+				flashTask.Start();
+			}
+		}
+		#endregion
+	}
 }

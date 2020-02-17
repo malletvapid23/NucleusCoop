@@ -1,115 +1,24 @@
 #include "pch.h"
 #include "easyhook.h"
 #include "framework.h"
-//#include "string"
 #include "windows.h"
-//#include <sstream>
-//#include <ios>
-#include <fstream>
-//#include <atlbase.h>
 #include <locale>
-#include <codecvt>
-#include <ctime>
-#include <stdio.h>
 #include <iomanip>
-using namespace std;
+#include "Logging.h"
+#include "InstallHooks.h"
+#include "Globals.h"
+#include "Piping.h"
+#include "FakeMouse.h"
 
-HWND hWnd = 0;
-
-#ifdef DEBUG
+#ifdef _DEBUG
 bool IsDebug = false;
 #else
 bool IsDebug = true;
 #endif
 
-std::ofstream outfile;
-std::wstring nucleusFolder;
-std::wstring logFile = L"\\debug-log.txt";
-
-std::string ws2s(const std::wstring& wstr)
-{
-	using convert_typeX = std::codecvt_utf8<wchar_t>;
-	std::wstring_convert<convert_typeX, wchar_t> converterX;
-
-	return converterX.to_bytes(wstr);
-}
-
-inline std::string date_string()
-{
-	tm tinfo;
-	time_t rawtime;
-	std::time(&rawtime);
-	localtime_s(&tinfo, &rawtime);
-	char buffer[21];
-	strftime(buffer, 21, "%Y-%m-%d %H:%M:%S", &tinfo);
-	return "[" + std::string(buffer) + "]";
-}
-
-LRESULT CALLBACK WndProc_Hook(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
-{
-	switch (uMsg)
-	{
-		case WM_KILLFOCUS:
-		{
-			//SetFocus(hWnd);
-			return -1;
-		}
-
-		default:
-			DefWindowProc(hwnd, uMsg, wParam, lParam);
-	}
-	return 1;
-}
-
-BOOL WINAPI SetWindowPos_Hook(HWND hWnd, HWND hWndInsertAfter, int X, int Y, int cx, int cy, UINT uFlags)
-{
-	return true;
-}
-
-HWND WINAPI GetForegroundWindow_Hook()
-{
-	return hWnd;
-}
-
-HWND WINAPI WindowFromPoint_Hook(POINT Point)
-{
-	return hWnd;
-}
-
-HWND WINAPI GetActiveWindow_Hook()
-{
-	return hWnd;
-}
-
-BOOL WINAPI IsWindowEnabled_Hook(HWND hWnd)
-{
-	return TRUE;
-}
-
-HWND WINAPI GetFocus_Hook()
-{
-	return hWnd;
-}
-
-HWND WINAPI GetCapture_Hook()
-{
-	return hWnd;
-}
-
-int WINAPI ShowCursor_Hook(BOOL bShow)
-{
-	return ShowCursor(FALSE);
-}
-
-HCURSOR WINAPI SetCursor_Hook(HCURSOR hCursor)
-{
-	return SetCursor(nullptr);
-}
-
-inline int bytesToInt(BYTE* bytes)
-{
-	return (int)(bytes[0] << 24 | bytes[1] << 16 | bytes[2] << 8 | bytes[3]);
-}
+//Globals.h
+Options options;
+HWND hWnd = nullptr;
 
 // Structure used to communicate data from and to enumeration procedure
 struct EnumData {
@@ -120,7 +29,7 @@ struct EnumData {
 // Application-defined callback for EnumWindows
 BOOL CALLBACK EnumProc(HWND hWnd, LPARAM lParam) {
 	// Retrieve storage location for communication data
-	EnumData& ed = *(EnumData*)lParam;
+	EnumData& ed = *reinterpret_cast<EnumData*>(lParam);
 	DWORD dwProcessId = 0x0;
 	// Query process ID for hWnd
 	GetWindowThreadProcessId(hWnd, &dwProcessId);
@@ -141,7 +50,7 @@ BOOL CALLBACK EnumProc(HWND hWnd, LPARAM lParam) {
 // Main entry
 HWND FindWindowFromProcessId(DWORD dwProcessId) {
 	EnumData ed = { dwProcessId };
-	if (!EnumWindows(EnumProc, (LPARAM)& ed) &&
+	if (!EnumWindows(EnumProc, reinterpret_cast<LPARAM>(&ed)) &&
 		(GetLastError() == ERROR_SUCCESS)) {
 		return ed.hWnd;
 	}
@@ -153,13 +62,13 @@ HWND FindWindowFromProcess(HANDLE hProcess) {
 	return FindWindowFromProcessId(GetProcessId(hProcess));
 }
 
-NTSTATUS HookInstall(LPCSTR moduleHandle, LPCSTR proc, void* callBack)
+NTSTATUS installHook(const LPCSTR moduleHandle, const LPCSTR proc, void* callBack)
 {
 	// Perform hooking
 	HOOK_TRACE_INFO hHook = { NULL }; // keep track of our hook
 
 	// Install the hook
-	NTSTATUS result = LhInstallHook(
+	const auto result = LhInstallHook(
 		GetProcAddress(GetModuleHandle(moduleHandle), proc),
 		callBack,
 		NULL,
@@ -167,11 +76,7 @@ NTSTATUS HookInstall(LPCSTR moduleHandle, LPCSTR proc, void* callBack)
 	
 	if (FAILED(result))
 	{
-		if (IsDebug)
-		{
-			outfile.open(nucleusFolder + logFile, std::ios_base::app);
-			outfile << date_string() << "HOOK64: Error installing " << proc << " hook, error msg: " << RtlGetLastErrorString() << "\n";
-		}
+		DEBUGLOG("Error installing " << proc << " hook, error msg: " << RtlGetLastErrorString() << "\n")
 	}
 	else
 	{
@@ -182,14 +87,9 @@ NTSTATUS HookInstall(LPCSTR moduleHandle, LPCSTR proc, void* callBack)
 		// Disable the hook for the provided threadIds, enable for all others
 		LhSetExclusiveACL(ACLEntries, 1, &hHook);
 
-		if (IsDebug)
-		{
-			outfile.open(nucleusFolder + logFile, std::ios_base::app);
-			outfile << date_string() << "HOOK64: Successfully installed " << proc << " hook, in module: " << moduleHandle << ", result: " << result << "\n";
-		}
+		DEBUGLOG("Successfully installed " << proc << " hook, in module: " << moduleHandle << ", result: " << result << "\n")
 	}
-	outfile.flush();
-	outfile.close();
+
 	return result;
 }
 
@@ -199,106 +99,112 @@ extern "C" void __declspec(dllexport) __stdcall NativeInjectionEntryPoint(REMOTE
 
 void __stdcall NativeInjectionEntryPoint(REMOTE_ENTRY_INFO* inRemoteInfo)
 {
-	DWORD pid = GetCurrentProcessId();
+	const auto pid = GetCurrentProcessId();
 	hWnd = FindWindowFromProcessId(pid);
-
+	
 	BYTE* data = inRemoteInfo->UserData;
+	auto p = data;
 
-	if ((INT)hWnd == 0)
+	if (reinterpret_cast<INT>(hWnd) == 0)
 	{
-		hWnd = (HWND)bytesToInt(data);
+		hWnd = reinterpret_cast<HWND>(bytesToInt(p));
+	}
+	p += 4;
+
+	FakeMouse::allowedMouseHandle = reinterpret_cast<HANDLE>(bytesToInt(p));
+	p += 4;
+
+	FakeMouse::allowedKeyboardHandle = reinterpret_cast<HANDLE>(bytesToInt(p));
+	p += 4;
+
+#define NEXTBOOL *(p++) == 1
+	options.preventWindowDeactivation = NEXTBOOL;
+	options.setWindow = NEXTBOOL;
+	IsDebug = NEXTBOOL;
+	options.hideCursor = NEXTBOOL;
+	options.hookFocus = NEXTBOOL;
+	options.setCursorPos = NEXTBOOL;
+	options.getCursorPos = NEXTBOOL;
+	options.getKeyState = NEXTBOOL;
+	options.getAsyncKeyState = NEXTBOOL;
+	options.getKeyboardState = NEXTBOOL;
+	options.filterRawInput = NEXTBOOL;
+	options.filterMouseMessages = NEXTBOOL;
+	options.legacyInput = NEXTBOOL;
+	options.updateAbsoluteFlagInMouseMessage = NEXTBOOL;
+	options.mouseVisibilitySendBack = NEXTBOOL;
+#undef NEXTBOOL
+
+	const auto pathLength = static_cast<size_t>(bytesToInt(p));
+	const auto writePipeNameLength = static_cast<size_t>(bytesToInt(p + 4));
+	const auto readPipeNameLength = static_cast<size_t>(bytesToInt(p + 8));
+	p += 12;
+
+	//C# gives number of bytes without null termination
+	const auto nucleusFolderPath = static_cast<PWSTR>(malloc(pathLength + sizeof(WCHAR)));
+	memcpy(nucleusFolderPath, p, pathLength);
+	p += pathLength;
+	nucleusFolderPath[pathLength / sizeof(WCHAR)] = '\0';//Null-terminate the string
+	Logging::nucleusFolder = nucleusFolderPath;
+
+	Piping::writePipeName = std::wstring(reinterpret_cast<wchar_t*>(p), writePipeNameLength/2);
+	p += writePipeNameLength;
+
+	Piping::readPipeName = std::wstring(reinterpret_cast<wchar_t*>(p), readPipeNameLength/2);
+	Piping::sharedMemName = Piping::readPipeName + L"_mem";
+	p += readPipeNameLength;
+
+	//Should be before hooks start to avoid errors
+	Piping::startSharedMem();
+
+	DEBUGLOG("Starting hook injection," <<
+		" WritePipeName: " << std::string(Piping::writePipeName.begin(), Piping::writePipeName.end()) <<
+		" ReadPipeName: " << std::string(Piping::readPipeName.begin(), Piping::readPipeName.end()) <<
+		" preventWindowDeactivation: " << options.preventWindowDeactivation <<
+		" setCursorPos: " << options.setCursorPos <<
+		" getCursorPos: " << options.getCursorPos <<
+		" getKeyState: " << options.getKeyState <<
+		" getAsyncKeyState: " << options.getAsyncKeyState <<
+		" getKeyboardState: " << options.getKeyboardState <<
+		" filterRawInput: " << options.filterRawInput <<
+		" filterMouseMessages: " << options.filterMouseMessages <<
+		" legacyInput: " << options.legacyInput <<
+		" updateAbsoluteFlagInMouseMessage: " << options.updateAbsoluteFlagInMouseMessage <<
+		" setWindow: " << options.setWindow <<
+		" hideCursor: " << options.hideCursor <<
+		" hookFocus: " << options.hookFocus <<
+		"\n");
+
+	if (options.setWindow)
+		installSetWindowHook();
+
+	if (options.hookFocus)
+		installFocusHooks();
+
+	if (options.hideCursor || options.mouseVisibilitySendBack)
+		installHideCursorHooks();
+
+	if (options.getCursorPos)
+		installGetCursorPosHook();
+
+	if (options.setCursorPos)
+		installSetCursorPosHook();
+
+	if (options.getAsyncKeyState)
+		installGetAsyncKeyStateHook();
+
+	if (options.getKeyState)
+		installGetKeyStateHook();
+
+	if (options.getKeyboardState)
+		installGetKeyboardStateHook();
+
+	if (options.filterRawInput || options.filterMouseMessages || options.legacyInput || options.preventWindowDeactivation)
+	{
+		installMessageFilterHooks();
 	}
 
-	BYTE* _p = data + 4;
+	DEBUGLOG("Hook injection complete\n");
 
-	//IsDebug = data[6] == 1;
-	//const bool HideCursor = data[7] == 1;
-	//const bool HookFocus = data[8] == 1;
-	bool PreventWindowDeactivation = *(_p++) == 1;
-	bool SetWindow = *(_p++) == 1;
-	IsDebug = *(_p++) == 1;
-	bool HideCursor = *(_p++) == 1;
-	bool HookFocus = *(_p++) == 1;
-
-	const size_t pathLength = (data[9] << 24) + (data[10] << 16) + (data[11] << 8) + data[12];
-	auto nucleusFolderPath = static_cast<PWSTR>(malloc(pathLength + sizeof(WCHAR)));
-	memcpy(nucleusFolderPath, &data[13], pathLength);
-	nucleusFolderPath[pathLength / sizeof(WCHAR)] = '\0';
-
-	nucleusFolder = nucleusFolderPath;
-
-	if (IsDebug)
-	{
-		outfile.open(nucleusFolder + logFile, std::ios_base::app);
-		outfile << date_string() << "HOOK64: Starting hook injection, SetWindow: " << SetWindow << " HookFocus: " << HookFocus << " HideCursor: " << HideCursor << " PreventWindowDeactivation: " << PreventWindowDeactivation << "\n";
-		outfile.flush();
-		outfile.close();
-	}
-
-	if (SetWindow)
-	{
-		if (IsDebug)
-		{
-			outfile.open(nucleusFolder + logFile, std::ios_base::app);
-			outfile << date_string() << "HOOK64: Injecting SetWindow hook\n";
-			outfile.flush();
-			outfile.close();
-		}
-		HookInstall("user32", "SetWindowPos", SetWindowPos_Hook);
-	}
-
-	if (HookFocus)
-	{
-		if (IsDebug)
-		{
-			outfile.open(nucleusFolder + logFile, std::ios_base::app);
-			outfile << date_string() << "HOOK64: Injecting HookFocus hooks\n";
-			outfile.flush();
-			outfile.close();
-		}
-		HookInstall("user32", "GetForegroundWindow", GetForegroundWindow_Hook);
-		HookInstall("user32", "WindowFromPoint", WindowFromPoint_Hook);
-		HookInstall("user32", "GetActiveWindow", GetActiveWindow_Hook);
-		HookInstall("user32", "IsWindowEnabled", IsWindowEnabled_Hook);
-		HookInstall("user32", "GetFocus", GetFocus_Hook);
-		HookInstall("user32", "GetCapture", GetCapture_Hook);
-	}
-
-	if (PreventWindowDeactivation)
-	{
-		if (IsDebug)
-		{
-			outfile.open(nucleusFolder + logFile, std::ios_base::app);
-			outfile << date_string() << "HOOK64: Preventing window deactivation by blocking WM_KILLFOCUS\n";
-			outfile.flush();
-			outfile.close();
-		}
-
-		WNDPROC g_OldWndProc = (WNDPROC)SetWindowLongPtr(hWnd, GWLP_WNDPROC, (LONG_PTR)WndProc_Hook);
-	}
-
-	if (HideCursor)
-	{
-		if (IsDebug)
-		{
-			outfile.open(nucleusFolder + logFile, std::ios_base::app);
-			outfile << date_string() << "HOOK64: Injecting HideCursor hooks\n";
-			outfile.flush();
-			outfile.close();
-		}
-		HookInstall("user32", "ShowCursor", ShowCursor_Hook);
-		HookInstall("user32", "SetCursor", SetCursor_Hook);
-
-		//WNDPROC g_OldWndProc = (WNDPROC)SetWindowLongPtr(hWnd, GWLP_WNDPROC, (LONG_PTR)WndProc_Hook);
-	}
-
-	if (IsDebug)
-	{
-		outfile.open(nucleusFolder + logFile, std::ios_base::app);
-		outfile << date_string() << "HOOK64: Hook injection complete\n";
-		outfile.flush();
-		outfile.close();
-	}
-
-	return;
+	Piping::startPipeListen();
 }

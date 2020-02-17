@@ -51,9 +51,10 @@ namespace Nucleus.Gaming
         public string BinariesFolder;
 
         public bool FakeFocus;
+        public int FakeFocusInterval = 1000;//TODO: high CPU usage with low value?
 
 
-        public void AddOption(string name, string desc, string key, object value, object defaultValue)
+		public void AddOption(string name, string desc, string key, object value, object defaultValue)
         {
             Options.Add(new GameOption(name, desc, key, value, defaultValue));
         }
@@ -103,7 +104,6 @@ namespace Nucleus.Gaming
         public string HookFocusInstances;
         public bool KeepAspectRatio;
         public bool HideDesktop;
-        //public int FakeFocusInterval;
         public bool ResetWindows;
         public bool PartialMutexSearch;
         public bool UseGoldberg;
@@ -175,7 +175,35 @@ namespace Nucleus.Gaming
         public string[] DeleteFiles;
         public bool GoldbergExperimentalRename;
 
-        public Type HandlerType
+		// -- From USS
+		//Effectively a switch for all of USS features
+		public bool SupportsMultipleKeyboardsAndMice;
+		
+		//Hooks
+		public bool HookSetCursorPos = true;
+		public bool HookGetCursorPos = true;
+		public bool HookGetKeyState = true;
+		public bool HookGetAsyncKeyState = true;
+		public bool HookGetKeyboardState = true;
+		public bool HookFilterRawInput;
+		public bool HookFilterMouseMessages;
+		public bool HookUseLegacyInput;
+		public bool HookDontUpdateLegacyInMouseMsg;
+		public bool HookMouseVisibility = true;
+
+		//Not hooks
+		public bool SendNormalMouseInput = true;
+		public bool SendNormalKeyboardInput = true;
+		public bool SendScrollWheel = false;
+		public bool ForwardRawKeyboardInput = false;
+		public bool ForwardRawMouseInput = false;
+		public bool DrawFakeMouseCursor = true;
+		public bool LockInputAtStart = false;
+		public bool PreventGameFocus = false;
+		public int LockInputToggleKey = 0x23;//End by default. Keys: https://docs.microsoft.com/en-us/windows/win32/inputdev/virtual-key-codes
+		// --
+
+		public Type HandlerType
         {
             get { return typeof(GenericGameHandler); }
         }

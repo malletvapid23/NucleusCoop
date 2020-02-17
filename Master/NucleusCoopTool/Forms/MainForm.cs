@@ -62,6 +62,8 @@ namespace Nucleus.Coop
 
         private bool TopMostToggle = true;
 
+		public Action<IntPtr> RawInputAction { get; set; }
+
         public enum MachineType : ushort
         {
             IMAGE_FILE_MACHINE_UNKNOWN = 0x0,
@@ -164,7 +166,7 @@ namespace Nucleus.Coop
             settingsForm.RegHotkeys(this);
 
             controls = new Dictionary<UserGameInfo, GameControl>();
-            gameManager = new GameManager();
+            gameManager = new GameManager(this);
 
             optionsControl = new PlayerOptionsControl();
             jsControl = new JSUserInputControl();
@@ -259,9 +261,15 @@ namespace Nucleus.Coop
 
         protected override void WndProc(ref Message m)
         {
+			//TODO: if close message, kill application not just window
+
             //int msg = m.Msg;
             //LogManager.Log(msg.ToString());
-            if (m.Msg == 0x0312 && m.WParam.ToInt32() == KillProcess_HotkeyID)
+			if(m.Msg == 0x00FF)//WM_INPUT
+			{
+				RawInputAction(m.LParam);
+			}
+            else if (m.Msg == 0x0312 && m.WParam.ToInt32() == KillProcess_HotkeyID)
             {
                 //System.Diagnostics.Process.GetCurrentProcess().Kill();
                 User32Util.ShowTaskBar();
@@ -462,6 +470,7 @@ namespace Nucleus.Coop
 
             currentProfile = new GameProfile();
             currentProfile.InitializeDefault(currentGame);
+			gameManager.UpdateCurrentGameProfile(currentProfile);
 
             gameNameControl.GameInfo = currentGameInfo;
 
@@ -622,7 +631,7 @@ namespace Nucleus.Coop
             if (handler != null)
             {
                 Log("OnFormClosed method calling Handler End function");
-                handler.End();
+                handler.End(false);
             }
             User32Util.ShowTaskBar();
         }
@@ -631,16 +640,17 @@ namespace Nucleus.Coop
         {
             if (btn_Play.Text == "S T O P")
             {
-                try
+	            try
                 {
-                    if (handler.FakeFocus != null)
-                    {
-                        handler.FakeFocus.Abort();
-                    }
-                    if (handler != null)
+					//Redundant, already in GenericGameHandler.End()
+					//if (handler.FakeFocus != null)
+	                //{
+		            //    handler.FakeFocus.Abort();
+	                //}
+					if (handler != null)
                     {
                         Log("Stop button clicked, calling Handler End function");
-                        handler.End();
+                        handler.End(true);
                     }
 
                     foreach (System.Windows.Forms.Form openForm in Application.OpenForms)
@@ -896,7 +906,7 @@ namespace Nucleus.Coop
                         {
                             arch = "Unknown";
                         }
-                        MessageBox.Show(string.Format("Game Name: {0}\nArchitecture: {1}\nSteam ID: {2}\n\nScript Filename: {3}\nNucleus Game Content Path: {4}\nOrig Exe Path: {5}\n\nMax Players: {6}\nSupports XInput: {7}\nSupports DInput: {8}\nSupports Keyboard: {9}", currentGameInfo.Game.GameName, arch, currentGameInfo.Game.SteamID, currentGameInfo.Game.JsFileName, Path.Combine(gameManager.GetAppContentPath(), gameGuid), exePath, currentGameInfo.Game.MaxPlayers, currentGameInfo.Game.Hook.XInputEnabled, currentGameInfo.Game.Hook.DInputEnabled, currentGameInfo.Game.SupportsKeyboard), "Game Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        MessageBox.Show(string.Format("Game Name: {0}\nArchitecture: {1}\nSteam ID: {2}\n\nScript Filename: {3}\nNucleus Game Content Path: {4}\nOrig Exe Path: {5}\n\nMax Players: {6}\nSupports XInput: {7}\nSupports DInput: {8}\nSupports Keyboard: {9}\nSupports multiple keyboards and mice: {10}", currentGameInfo.Game.GameName, arch, currentGameInfo.Game.SteamID, currentGameInfo.Game.JsFileName, Path.Combine(gameManager.GetAppContentPath(), gameGuid), exePath, currentGameInfo.Game.MaxPlayers, currentGameInfo.Game.Hook.XInputEnabled, currentGameInfo.Game.Hook.DInputEnabled, currentGameInfo.Game.SupportsKeyboard, currentGameInfo.Game.SupportsMultipleKeyboardsAndMice), "Game Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     }
                 }
             }

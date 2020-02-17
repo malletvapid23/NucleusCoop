@@ -21,6 +21,10 @@ using System.Text;
 using System.Linq;
 using Microsoft.Win32;
 using System.Management;
+using Nucleus.Gaming.Coop.InputManagement;
+using System.Threading.Tasks;
+using Nucleus.Gaming.Coop.BasicTypes;
+using Nucleus.Gaming.Coop.InputManagement.Logging;
 using System.Collections;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
@@ -149,6 +153,10 @@ namespace Nucleus.Gaming
         private GenericGameInfo gen;
         private Dictionary<string, string> jsData;
         private GenericContext context;
+
+		//private RawInputProcessor rawInputProcessor;
+
+		//private List<Window> gameWindows;
 
         private double timer;
         private int exited;
@@ -292,8 +300,9 @@ namespace Nucleus.Gaming
             WM_ACTIVATEAPP = 0x001C,
             WM_ACTIVATE = 0x0006,
             WM_NCACTIVATE = 0x0086,
-            WM_SETFOCUS = 0x0007
-        }
+            WM_SETFOCUS = 0x0007,
+            WM_MOUSEACTIVATE = 0x0021,
+		}
 
         public virtual bool HasEnded
         {
@@ -331,10 +340,17 @@ namespace Nucleus.Gaming
             catch { }
         }
 
-        public void End()
+        public void End(bool fromStopButton)
         {
+	        if (fromStopButton && LockInput.IsLocked)
+	        {
+				//TODO: For some reason the Stop button is clicked during split screen. Temporary fix is to not end if input is locked.
+		        Log("IGNORING SHUTDOWN BECAUSE INPUT LOCKED");
+		        return;
+	        }
+
             Log("----------------- SHUTTING DOWN -----------------");
-            if (fakeFocus != null && fakeFocus.IsAlive)
+			if (fakeFocus != null && fakeFocus.IsAlive)
             {
                 fakeFocus.Abort();
             }
@@ -378,6 +394,11 @@ namespace Nucleus.Gaming
 
             LogManager.UnregisterForLogCallback(this);
 
+            foreach (var window in RawInputManager.windows)
+            {
+				window.HookPipe?.Close();
+            }
+
             Cursor.Clip = Rectangle.Empty; // guarantee were not clipping anymore
             string backupDir = GameManager.Instance.GempTempFolder(this.userGame.Game);
             ForceFinish();
@@ -389,6 +410,8 @@ namespace Nucleus.Gaming
             // delete symlink folder
 
             int tempIndex = 0;
+
+			RawInputManager.EndSplitScreen();
 
 #if RELEASE
             if (!gen.SymlinkGame && !gen.HardlinkGame && !gen.HardcopyGame)
@@ -504,11 +527,16 @@ namespace Nucleus.Gaming
         {
             this.userGame = game;
             this.profile = profile;
-            isDebug = Boolean.Parse(ini.IniReadValue("Misc", "DebugLog"));
+#if DEBUG
+			isDebug = true;
+#else
+	        isDebug = false;
+#endif
 
             iniNetworkInterface = ini.IniReadValue("Misc", "Network");
 
             List<PlayerInfo> players = profile.PlayerData;
+
             gen = game.Game as GenericGameInfo;
             // see if we have any save game to backup
             if (gen == null)
@@ -516,6 +544,8 @@ namespace Nucleus.Gaming
                 // you fucked up
                 return false;
             }
+
+            RawInputProcessor.CurrentGameInfo = gen;
 
             try
             {
@@ -600,7 +630,7 @@ namespace Nucleus.Gaming
 
         private static string internalGetRelativePath(DirectoryInfo dirInfo, DirectoryInfo rootInfo, string str)
         {
-            if (dirInfo.FullName == rootInfo.FullName || dirInfo == null)
+            if (dirInfo == null || dirInfo.FullName == rootInfo.FullName)
             {
                 return str;
             }
@@ -691,6 +721,26 @@ namespace Nucleus.Gaming
 
             List<PlayerInfo> players = profile.PlayerData;
 
+			//Merge raw keyboard/mouse players into one
+			var groupWindows = players.Where(x => x.IsRawKeyboard || x.IsRawMouse).GroupBy(x => x.MonitorBounds).ToList();
+			foreach(var group in groupWindows)
+			{
+				var firstInGroup = group.First();
+				firstInGroup.IsRawKeyboard = group.Count(x => x.IsRawKeyboard) > 0;
+				firstInGroup.IsRawMouse = group.Count(x => x.IsRawMouse) > 0;
+
+				if (firstInGroup.IsRawKeyboard) firstInGroup.RawKeyboardDeviceHandle = group.First(x => x.RawKeyboardDeviceHandle != (IntPtr)(-1)).RawKeyboardDeviceHandle;
+				if (firstInGroup.IsRawMouse) firstInGroup.RawMouseDeviceHandle = group.First(x => x.RawMouseDeviceHandle != (IntPtr)(-1)).RawMouseDeviceHandle;
+
+				foreach(var x in group)
+				{
+					players.Remove(x);
+				}
+
+				players.Add(firstInGroup);
+			}
+
+
             for (int i = 0; i < players.Count; i++)
             {
                 players[i].PlayerID = i;
@@ -722,30 +772,12 @@ namespace Nucleus.Gaming
 
             bool first = true;
             bool keyboard = false;
-            //if (gen.SupportsKeyboard)
-            //{
-            //    // make sure the keyboard player is the last to be started,
-            //    // so it will get the focus by default
-            //    KeyboardPlayer player = (KeyboardPlayer)profile.Options["KeyboardPlayer"];
-            //    if (player.Value != -1)
-            //    {
-            //        keyboard = true;
-            //        List<PlayerInfo> newPlayers = new List<PlayerInfo>();
 
-            //        for (int i = 0; i < players.Count; i++)
-            //        {
-            //            PlayerInfo p = players[i];
-            //            if (i == player.Value)
-            //            {
-            //                continue;
-            //            }
+			RawInputProcessor.ToggleLockInputKey = gen.LockInputToggleKey;
 
-            //            newPlayers.Add(p);
-            //        }
-            //        newPlayers.Add(players[player.Value]);
-            //        players = newPlayers;
-            //    }
-            //}
+			RawInputManager.windows.Clear();
+			Window nextWindowToInject = null;
+
             numPlayers = players.Count;
             Log(string.Format("Number of players: {0}", numPlayers));
 
@@ -789,19 +821,19 @@ namespace Nucleus.Gaming
                 ProcessData procData = player.ProcessData;
                 bool hasSetted = procData != null && procData.Setted;
 
-                //if (ini.IniReadValue("Misc", "VibrateOpen") == "True")
-                //{
-                //    SlimDX.XInput.Controller gamePad = new SlimDX.XInput.Controller((SlimDX.XInput.UserIndex)i);
-                //    SlimDX.XInput.Vibration vib = new SlimDX.XInput.Vibration();
+				//if (ini.IniReadValue("Misc", "VibrateOpen") == "True")
+				//{
+				//    SlimDX.XInput.Controller gamePad = new SlimDX.XInput.Controller((SlimDX.XInput.UserIndex)i);
+				//    SlimDX.XInput.Vibration vib = new SlimDX.XInput.Vibration();
 
-                //    vib.LeftMotorSpeed = 32000;
-                //    vib.RightMotorSpeed = 16000;
-                //    gamePad.SetVibration(vib);
-                //}
+				//    vib.LeftMotorSpeed = 32000;
+				//    vib.RightMotorSpeed = 16000;
+				//    gamePad.SetVibration(vib);
+				//}
 
-                //SlimDX.DirectInput.Get
-                //SlimDX.DirectInput.Joystick device = new SlimDX.DirectInput.Joystick()
-
+				//SlimDX.DirectInput.Get
+				//SlimDX.DirectInput.Joystick device = new SlimDX.DirectInput.Joystick()
+				
                 if (i > 0 && (gen.KillMutexLauncher?.Length > 0))
                 {
                     for (; ; )
@@ -907,7 +939,7 @@ namespace Nucleus.Gaming
                     }
                 }
 
-                if (i > 0 && (gen.HookFocus || gen.SetWindowHook || gen.HideCursor || gen.PreventWindowDeactivation))
+                if (i > 0 && (gen.HookFocus || gen.SetWindowHook || gen.HideCursor || gen.PreventWindowDeactivation || gen.SupportsMultipleKeyboardsAndMice))
                 {
                     if (gen.PostHookInstances?.Length > 0)
                     {
@@ -921,9 +953,9 @@ namespace Nucleus.Gaming
                                 Thread.Sleep(1000);
                                 ProcessData pdata = before.ProcessData;
                                 User32Interop.SetForegroundWindow(pdata.Process.MainWindowHandle);
-                                InjectDLLs(pdata.Process);
-                            }
-                        }
+                                InjectDLLs(pdata.Process, nextWindowToInject);
+							}
+						}
                     }
                     else
                     {
@@ -932,11 +964,11 @@ namespace Nucleus.Gaming
                         Thread.Sleep(1000);
                         ProcessData pdata = before.ProcessData;
                         User32Interop.SetForegroundWindow(pdata.Process.MainWindowHandle);
-                        InjectDLLs(pdata.Process);
-                    }
-                }
+                        InjectDLLs(pdata.Process, nextWindowToInject);
+					}
+				}
 
-                Rectangle playerBounds = player.MonitorBounds;
+				Rectangle playerBounds = player.MonitorBounds;
                 owner = player.Owner;
 
                 int width = playerBounds.Width;
@@ -2225,7 +2257,15 @@ namespace Nucleus.Gaming
                     Thread.Sleep(TimeSpan.FromSeconds(gen.PauseBetweenStarts));
                 }
 
-                if (i == (players.Count - 1)) // all instances accounted for
+				//Set up raw input window
+				//if (player.IsRawKeyboard || player.IsRawMouse)
+				{
+					var window = CreateRawInputWindow(proc, player);
+
+					nextWindowToInject = window;
+				}
+
+				if (i == (players.Count - 1)) // all instances accounted for
                 {
                     if (gen.ResetWindows)
                     {
@@ -2315,7 +2355,7 @@ namespace Nucleus.Gaming
                         }
                     }
 
-                    if ((i > 0 || players.Count == 1) && (gen.HookFocus || gen.SetWindowHook || gen.HideCursor || gen.PreventWindowDeactivation))
+					if ((i > 0 || players.Count == 1) && (gen.HookFocus || gen.SetWindowHook || gen.HideCursor || gen.PreventWindowDeactivation || gen.SupportsMultipleKeyboardsAndMice))
                     {
                         if (gen.PostHookInstances?.Length > 0)
                         {
@@ -2326,7 +2366,7 @@ namespace Nucleus.Gaming
                                 {
                                     Log("Injecting hook DLL for last instance");
                                     User32Interop.SetForegroundWindow(data.Process.MainWindowHandle);
-                                    InjectDLLs(data.Process);
+                                    InjectDLLs(data.Process, nextWindowToInject);
                                 }
                             }
                         }
@@ -2334,54 +2374,9 @@ namespace Nucleus.Gaming
                         {
                             Log("Injecting hook DLL for last instance");
                             User32Interop.SetForegroundWindow(data.Process.MainWindowHandle);
-                            InjectDLLs(data.Process);
-                        }
-                    }
-                    //if (gen.HookFocus || gen.SetWindowHook || gen.HideCursor)
-                    //{
-                    //    if (!data.Setted)
-                    //    {
-                    //        for (int times = 0; times < 200; times++)
-                    //        {
-                    //            Thread.Sleep(50);
-                    //            if (data.Setted)
-                    //            {
-                    //                break;
-                    //            }
-                    //        }
-                    //    }
-
-                    //    List<int> piresult = new List<int>();
-                    //    int pi = 0;
-                    //    if (gen.HookFocusInstances?.Length > 0)
-                    //    {
-                    //        piresult = gen.HookFocusInstances.Split(',').Select(Int32.Parse).ToList();
-                    //    }
-                    //    foreach (Process aproc in attached)
-                    //    {
-                    //        if (gen.HookFocusInstances?.Length > 0)
-                    //        {
-                    //            if (piresult.Contains(pi))
-                    //            {
-                    //                InjectDLLs(aproc);
-                    //            }
-
-                    //            pi++;
-                    //        }
-                    //        else
-                    //        {
-                    //            InjectDLLs(aproc);
-                    //        }
-                    //        //using (StreamWriter writer = new StreamWriter("error-log.txt", true))
-                    //        //{
-                    //        //    writer.WriteLine("InjectDLLs: Entered for loop, going to inject process: {0} (pid:{1}), main window title: {2}", aproc.ProcessName, aproc.Id, aproc.MainWindowTitle);
-                    //        //}
-                    //        //aproc.Refresh();
-                    //        //if (aproc == null || aproc.HasExited || aproc.MainWindowTitle.ToLower() == gen.LauncherTitle.ToLower() || aproc.MainModule.FileName == gen.LauncherExe)
-                    //        //    continue;
-
-                    //    }
-                    //}
+                            InjectDLLs(data.Process, nextWindowToInject);
+						}
+					}
 
                     if (gen.SetForegroundWindowElsewhere)
                     {
@@ -2395,33 +2390,96 @@ namespace Nucleus.Gaming
                         }
                     }
 
-                }
+					//Window setup
+					foreach (var window in RawInputManager.windows)
+					{
+						var hWnd = window.hWnd;
+
+						//Logger.WriteLine($"hWnd={hWnd}, mouse={window.MouseAttached}, kb={window.KeyboardAttached}");
+
+						if (gen.DrawFakeMouseCursor && gen.SupportsMultipleKeyboardsAndMice)
+						{
+							window.NeedsCursorToBeCreatedOnMainMessageLoop = true;
+						}
+
+						//Borderlands 2 (and some other games) requires WM_INPUT to be sent to a window named DIEmWin, not the main hWnd.
+						foreach (ProcessThread thread in Process.GetProcessById(window.pid).Threads)
+						{
+
+							int WindowEnum(IntPtr _hWnd, int lParam)
+							{
+								var threadId = WinApi.GetWindowThreadProcessId(_hWnd, out int pid);
+								if (threadId == lParam)
+								{
+									string windowText = WinApi.GetWindowText(_hWnd);
+									//Logger.WriteLine($" - thread id=0x{threadId:x}, _hWnd=0x{_hWnd:x}, window text={windowText}");
+
+									if (windowText != null && windowText.ToLower().Contains("DIEmWin".ToLower()))
+									{
+										window.DIEmWin_hWnd = _hWnd;
+									}
+								}
+
+								return 1;
+							}
+
+							WinApi.EnumWindows(WindowEnum, thread.Id);
+						}
+					}
+
+					RawInputProcessor.Start();
+
+					if (gen.SupportsMultipleKeyboardsAndMice && gen.LockInputAtStart)
+					{
+						LockInput.Lock();
+					}
+
+				}
             }
 
             return string.Empty;
         }
 
-        private void DeleteFiles(string linkFolder, int i)
+        private Window CreateRawInputWindow(Process proc, PlayerInfo player)
         {
-            foreach (string deleteLine in gen.DeleteFiles)
-            {
-                string[] deleteSplit = deleteLine.Split('|');
-                int indexOffset = 1;
-                if (deleteSplit.Length == 2)
-                {
-                    if (int.Parse(deleteSplit[0]) != (i + 1))
-                    {
-                        continue;
-                    }
-                    indexOffset = 0;
-                }
-                //else if (deleteSplit.Length <= 1)
-                //{
-                //    Log("Invalid # of parameters provided for: " + deleteLine + ", skipping");
-                //    continue;
-                //}
+	        var hWnd = WaitForProcWindowHandleNotZero(proc);
+	        var mouseHdev = player.IsRawKeyboard ? player.RawMouseDeviceHandle : (IntPtr) (-1);
+	        var keyboardHdev = player.IsRawMouse ? player.RawKeyboardDeviceHandle : (IntPtr) (-1);
 
-                string fullFilePath = Path.Combine(linkFolder, deleteSplit[1 - indexOffset]);
+	        var window = new Window(hWnd)
+	        {
+		        CursorVisibility = player.IsRawMouse && !gen.HideCursor && gen.DrawFakeMouseCursor,
+		        KeyboardAttached = keyboardHdev,
+		        MouseAttached = mouseHdev
+	        };
+
+	        window.CreateHookPipe(gen);
+
+	        RawInputManager.windows.Add(window);
+	        return window;
+        }
+
+        private void DeleteFiles(string linkFolder, int i)
+		{
+			foreach (string deleteLine in gen.DeleteFiles)
+			{
+				string[] deleteSplit = deleteLine.Split('|');
+				int indexOffset = 1;
+				if (deleteSplit.Length == 2)
+				{
+					if (int.Parse(deleteSplit[0]) != (i + 1))
+					{
+						continue;
+					}
+					indexOffset = 0;
+				}
+				//else if (deleteSplit.Length <= 1)
+				//{
+				//    Log("Invalid # of parameters provided for: " + deleteLine + ", skipping");
+				//    continue;
+				//}
+
+				string fullFilePath = Path.Combine(linkFolder, deleteSplit[1 - indexOffset]);
                 //FileInfo pathInfo = new FileInfo(fullFilePath);
                 //if (pathInfo.Attributes.HasFlag(FileAttributes.ReparsePoint))
                 //{
@@ -2859,24 +2917,26 @@ namespace Nucleus.Gaming
             attached.Add(proc);
             attachedIds.Add(proc.Id);
 
-            Log("Removing game window border for this process");
+            var hwnd = WaitForProcWindowHandleNotZero(proc);
+
+			Log("Removing game window border for this process");
             Point loc = new Point(players[playerIndex].MonitorBounds.X, players[playerIndex].MonitorBounds.Y);
             Size size = new Size(players[playerIndex].MonitorBounds.Width, players[playerIndex].MonitorBounds.Height);
-            uint lStyle = User32Interop.GetWindowLong(proc.MainWindowHandle, User32_WS.GWL_STYLE);
+            uint lStyle = User32Interop.GetWindowLong(hwnd, User32_WS.GWL_STYLE);
             lStyle = lStyle & ~User32_WS.WS_CAPTION;
             lStyle = lStyle & ~User32_WS.WS_THICKFRAME;
             lStyle = lStyle & ~User32_WS.WS_MINIMIZE;
             lStyle = lStyle & ~User32_WS.WS_MAXIMIZE;
             lStyle = lStyle & ~User32_WS.WS_SYSMENU;
             lStyle = lStyle & User32_WS.WS_DISABLED;
-            User32Interop.SetWindowLong(proc.MainWindowHandle, User32_WS.GWL_STYLE, lStyle);
+            User32Interop.SetWindowLong(hwnd, User32_WS.GWL_STYLE, lStyle);
 
-            lStyle = User32Interop.GetWindowLong(proc.MainWindowHandle, User32_WS.GWL_EXSTYLE);
+            lStyle = User32Interop.GetWindowLong(hwnd, User32_WS.GWL_EXSTYLE);
             lStyle = lStyle & ~User32_WS.WS_EX_DLGMODALFRAME;
             lStyle = lStyle & ~User32_WS.WS_EX_CLIENTEDGE;
             lStyle = lStyle & ~User32_WS.WS_EX_STATICEDGE;
-            User32Interop.SetWindowLong(proc.MainWindowHandle, User32_WS.GWL_EXSTYLE, lStyle);
-            User32Interop.SetWindowPos(proc.MainWindowHandle, IntPtr.Zero, 0, 0, 0, 0, (uint)(PositioningFlags.SWP_FRAMECHANGED | PositioningFlags.SWP_NOMOVE | PositioningFlags.SWP_NOSIZE | PositioningFlags.SWP_NOZORDER | PositioningFlags.SWP_NOOWNERZORDER));
+            User32Interop.SetWindowLong(hwnd, User32_WS.GWL_EXSTYLE, lStyle);
+            User32Interop.SetWindowPos(hwnd, IntPtr.Zero, 0, 0, 0, 0, (uint)(PositioningFlags.SWP_FRAMECHANGED | PositioningFlags.SWP_NOMOVE | PositioningFlags.SWP_NOSIZE | PositioningFlags.SWP_NOZORDER | PositioningFlags.SWP_NOOWNERZORDER));
 
             if (gen.KeepAspectRatio || gen.KeepMonitorAspectRatio)
             {
@@ -2887,7 +2947,7 @@ namespace Nucleus.Gaming
                 }
                 else
                 {
-                    if (GetWindowRect(proc.MainWindowHandle, out RECT Rect))
+                    if (GetWindowRect(hwnd, out RECT Rect))
                     {
                         origWidth = Rect.Right - Rect.Left;
                         origHeight = Rect.Bottom - Rect.Top;
@@ -2917,19 +2977,22 @@ namespace Nucleus.Gaming
             }
 
             Log(string.Format("Resizing this game window and keeping aspect ratio. Values: width:{0}, height:{1}, aspectratio:{2}, origwidth:{3}, origheight:{4}, plyrboundwidth:{5}, plyrboundheight:{6}", size.Width, size.Height, origRatio, origWidth, origHeight, playerBoundsWidth, playerBoundsHeight));
-            WindowScrape.Static.HwndInterface.SetHwndSize(proc.MainWindowHandle, size.Width, size.Height);
+            WindowScrape.Static.HwndInterface.SetHwndSize(hwnd, size.Width, size.Height);
 
             Log(string.Format("Repostioning this game window to coords x:{0},y:{1}", loc.X, loc.Y));
-            WindowScrape.Static.HwndInterface.SetHwndPos(proc.MainWindowHandle, loc.X, loc.Y);
+            WindowScrape.Static.HwndInterface.SetHwndPos(hwnd, loc.X, loc.Y);
 
             //User32Util.HideTaskbar();
             Log("Setting this game window to top most");
-            WindowScrape.Static.HwndInterface.MakeTopMost(proc.MainWindowHandle);
+            WindowScrape.Static.HwndInterface.MakeTopMost(hwnd);
 
-            if (gen.HookFocus || gen.SetWindowHook || gen.HideCursor || gen.PreventWindowDeactivation)
+			//Set up raw input window.
+			var window = CreateRawInputWindow(proc, players[playerIndex]);
+
+            if (gen.HookFocus || gen.SetWindowHook || gen.HideCursor || gen.PreventWindowDeactivation || gen.SupportsMultipleKeyboardsAndMice)
             {
                 Log("Injecting post-launch hooks for this process");
-                InjectDLLs(proc);
+                InjectDLLs(proc, window);
                 Thread.Sleep(1000);
             }
         }
@@ -3205,27 +3268,16 @@ namespace Nucleus.Gaming
 
         }
 
-        private void InjectDLLs(Process proc)
-        {
-            if ((int)proc.MainWindowHandle == 0)
-            {
-                for (int times = 0; times < 200; times++)
-                {
-                    Thread.Sleep(50);
-                    if ((int)proc.MainWindowHandle > 0)
-                    {
-                        break;
-                    }
-                    if (times == 199 && (int)proc.MainWindowHandle == 0)
-                    {
-                        Log(string.Format("ERROR - InjectDLLs could not find main window handle for {0} (pid {1})", proc.ProcessName, proc.Id));
-                    }
-                }
-            }
+		//private void InjectDLLs(Process proc)
+		//{
+		private void InjectDLLs(Process proc, Window window)
+		{
+			WaitForProcWindowHandleNotZero(proc);
 
-            bool is64 = EasyHook.RemoteHooking.IsX64Process(proc.Id);
-            string currDir = Directory.GetCurrentDirectory();
+			bool is64 = EasyHook.RemoteHooking.IsX64Process(proc.Id);
+			string currDir = Directory.GetCurrentDirectory();
 
+			bool windowNull = (window == null);
 
             //using (StreamWriter writer = new StreamWriter("important.txt", true))
             //{
@@ -3238,9 +3290,9 @@ namespace Nucleus.Gaming
                 ProcessStartInfo startInfo = new ProcessStartInfo();
                 startInfo.FileName = injectorPath;
 
-                object[] args = new object[]
-                {
-                    1, // Tier. 0 == start up hook, 1 == runtime hook
+				object[] args = new object[]
+				{
+					1, // Tier. 0 == start up hook, 1 == runtime hook
 		            proc.Id, // Target PID
 		            0, // WakeUp Thread ID
 		            0, // InInjectionOptions (EasyHook)
@@ -3249,105 +3301,51 @@ namespace Nucleus.Gaming
 		            proc.MainWindowHandle, // Game hWnd
 		            gen.HookFocus, // Hook GetForegroundWindow/etc
 		            gen.HideCursor,
-                    isDebug,
-                    nucleusFolderPath, // Primarily for log output
+					isDebug,
+					nucleusFolderPath, // Primarily for log output
 		            gen.SetWindowHook, // SetWindow hook (prevents window from moving)
-					gen.PreventWindowDeactivation
-                };
+					gen.PreventWindowDeactivation,
 
-                var sbArgs = new StringBuilder();
-                foreach (object arg in args)
-                {
-                    sbArgs.Append(" \"");
-                    sbArgs.Append(arg);
-                    sbArgs.Append("\"");
-                }
+					//These options are enabled by default, but if the game isn't using these features the hooks are unwanted
+					gen.SupportsMultipleKeyboardsAndMice && gen.HookSetCursorPos,
+					gen.SupportsMultipleKeyboardsAndMice && gen.HookGetCursorPos,
+					gen.SupportsMultipleKeyboardsAndMice && gen.HookGetKeyState,
+					gen.SupportsMultipleKeyboardsAndMice && gen.HookGetAsyncKeyState,
+					gen.SupportsMultipleKeyboardsAndMice && gen.HookGetKeyboardState,
+					gen.SupportsMultipleKeyboardsAndMice && gen.HookFilterRawInput,
+					gen.SupportsMultipleKeyboardsAndMice && gen.HookFilterMouseMessages,
+					gen.SupportsMultipleKeyboardsAndMice && gen.HookUseLegacyInput,
+					!gen.HookDontUpdateLegacyInMouseMsg,
+					gen.SupportsMultipleKeyboardsAndMice && gen.HookMouseVisibility,
 
-                string arguments = sbArgs.ToString();
-                startInfo.Arguments = arguments;
-                startInfo.WindowStyle = ProcessWindowStyle.Hidden;
-                startInfo.CreateNoWindow = true;
-                startInfo.UseShellExecute = false;
-                startInfo.RedirectStandardOutput = true;
-                Process injectProc = Process.Start(startInfo);
-                injectProc.WaitForExit();
+					windowNull ? "" : (window.HookPipe?.pipeNameWrite ?? ""),
+					windowNull ? "" : (window.HookPipe?.pipeNameRead ?? ""),
+					windowNull ? -1 : window.MouseAttached.ToInt32(),
+					windowNull ? -1 : window.KeyboardAttached.ToInt32()
+				};
 
-                /**
-                 * This should be generalised, and Inject32/64 code shouldn't be duplicated here.
-                 *
-                 * if (is64)
-                {
-                    Log("x64 game detected, injecting Nucleus.Hook64.dll");
-                    try
-                    {
-                        string injectorPath = Path.Combine(currDir, "Nucleus.Inject64.exe");
-                        ProcessStartInfo startInfo = new ProcessStartInfo();
-                        startInfo.FileName = injectorPath;
-                        object[] args = new object[]
-                        {
-                            1, proc.Id, 0, 0, null, Path.Combine(currDir, "Nucleus.Hook64.dll"), proc.MainWindowHandle, gen.HookFocus, gen.HideCursor, isDebug, nucleusFolderPath, gen.SetWindowHook, gen.PreventWindowDeactivation
-                        };
-                        var sbArgs = new StringBuilder();
-                        foreach (object arg in args)
-                        {
-                            sbArgs.Append(" \"");
-                            sbArgs.Append(arg);
-                            sbArgs.Append("\"");
-                        }
+				var sbArgs = new StringBuilder();
+				foreach (object arg in args)
+				{
+					//Converting to base64 prevents characters like " or \ breaking the arguments
+					string arg64 = Convert.ToBase64String(Encoding.UTF8.GetBytes(arg.ToString()));
 
-                        string arguments = sbArgs.ToString();
-                        startInfo.Arguments = arguments;
-                        startInfo.WindowStyle = ProcessWindowStyle.Hidden;
-                        startInfo.CreateNoWindow = true;
-                        startInfo.UseShellExecute = false;
-                        startInfo.RedirectStandardOutput = true;
+					sbArgs.Append(" \"");
+					sbArgs.Append(arg64);
+					sbArgs.Append("\"");
+				}
 
-                        //if(gen.RunAsAdmin)
-                        //{
-                        //    startInfo.Verb = "runas";
-                        //}
-                        //startInfo.Verb = "runas";
-                        Process injectProc = Process.Start(startInfo);
-                        injectProc.WaitForExit();
-                    }
-                    catch (Exception ex)
-                    {
-                        Log("ERROR - " + ex.Message);
-                    }
-                }
-                else
-                {
-                    Log("x86 game detected, injecting Nucleus.Hook32.dll");
-                    var logPath = Encoding.Unicode.GetBytes(nucleusFolderPath);
-                    int logPathLength = logPath.Length;
-
-                    int size = 21 + logPathLength;
-                    IntPtr intPtr = Marshal.AllocHGlobal(size);
-                    byte[] dataToSend = new byte[size];
-                    dataToSend[0] = (byte)((int)proc.MainWindowHandle >> 24);
-                    dataToSend[1] = (byte)((int)proc.MainWindowHandle >> 16);
-                    dataToSend[2] = (byte)((int)proc.MainWindowHandle >> 8);
-                    dataToSend[3] = (byte)((int)proc.MainWindowHandle);
-
-                    dataToSend[4] = gen.PreventWindowDeactivation == true ? (byte)1 : (byte)0;
-                    dataToSend[5] = gen.SetWindowHook == true ? (byte)1 : (byte)0;
-                    dataToSend[6] = isDebug == true ? (byte)1 : (byte)0;
-                    dataToSend[7] = gen.HideCursor == true ? (byte)1 : (byte)0;
-                    dataToSend[8] = gen.HookFocus == true ? (byte)1 : (byte)0;
-
-                    dataToSend[9] = (byte)(logPathLength >> 24);
-                    dataToSend[10] = (byte)(logPathLength >> 16);
-                    dataToSend[11] = (byte)(logPathLength >> 8);
-                    dataToSend[12] = (byte)logPathLength;
-
-                    Array.Copy(logPath, 0, dataToSend, 13, logPathLength);
-
-                    Marshal.Copy(dataToSend, 0, intPtr, size);
-                    NativeAPI.RhInjectLibrary(proc.Id, 0, 0, Path.Combine(currDir, "Nucleus.Hook32.dll"), null, intPtr, size);
-                }*/
-            }
-            catch (Exception ex)
-            {
+				string arguments = sbArgs.ToString();
+				startInfo.Arguments = arguments;
+				startInfo.WindowStyle = ProcessWindowStyle.Hidden;
+				startInfo.CreateNoWindow = true;
+				startInfo.UseShellExecute = false;
+				startInfo.RedirectStandardOutput = true;
+				Process injectProc = Process.Start(startInfo);
+				injectProc.WaitForExit();
+			}
+			catch (Exception ex)
+			{
                 Log(string.Format("ERROR - {0}", ex.Message));
             }
         }
@@ -3355,6 +3353,7 @@ namespace Nucleus.Gaming
         private void SendFocusMsgs()
         {
             List<Process> fakeFocusProcs = new List<Process>();
+            var windows = RawInputManager.windows;
             string ffPIDs = "";
 
             if (gen.FakeFocusInstances?.Length > 0)
@@ -3388,24 +3387,36 @@ namespace Nucleus.Gaming
             {
                 ffPIDs = ffPIDs + p.Id + " ";
             }
-            
 
-            while (true)
-            {
-                //should make user defined?
-                Thread.Sleep(1000);
-                //Log("Sending fake messages for processes with the following IDs: " + ffPIDs);
-                foreach (Process proc in fakeFocusProcs)
-                {
-                    Log(proc.Id.ToString());
-                    User32Interop.SendMessage(proc.MainWindowHandle, (int)FocusMessages.WM_ACTIVATEAPP, (IntPtr)1, IntPtr.Zero);
-                    User32Interop.SendMessage(proc.MainWindowHandle, (int)FocusMessages.WM_ACTIVATE, (IntPtr)0x00000002, IntPtr.Zero);
-                    User32Interop.SendMessage(proc.MainWindowHandle, (int)FocusMessages.WM_NCACTIVATE, (IntPtr)0x00000001, IntPtr.Zero);
-                    User32Interop.SendMessage(proc.MainWindowHandle, (int)FocusMessages.WM_SETFOCUS, IntPtr.Zero, IntPtr.Zero);
-                }
+			try
+			{
+				while (true)
+				{
+					Thread.Sleep(gen.FakeFocusInterval);
 
-            }
-        }
+					foreach (Process proc in attached)
+					{
+						User32Interop.SendMessage(proc.MainWindowHandle, (int)FocusMessages.WM_ACTIVATEAPP, (IntPtr)1, IntPtr.Zero);
+						User32Interop.SendMessage(proc.MainWindowHandle, (int)FocusMessages.WM_ACTIVATE, (IntPtr)0x00000002, IntPtr.Zero);
+						User32Interop.SendMessage(proc.MainWindowHandle, (int)FocusMessages.WM_NCACTIVATE, (IntPtr)0x00000001, IntPtr.Zero);
+						User32Interop.SendMessage(proc.MainWindowHandle, (int)FocusMessages.WM_SETFOCUS, IntPtr.Zero, IntPtr.Zero);
+						User32Interop.SendMessage(proc.MainWindowHandle, (int)FocusMessages.WM_MOUSEACTIVATE, (IntPtr)proc.MainWindowHandle, (IntPtr)1);
+					}
+
+					if (gen.PreventGameFocus)
+					{
+						foreach (var window in windows)
+						{
+							window.HookPipe.SendPreventForegroundWindow();
+						}
+					}
+				}
+			}
+			catch (Exception e)
+			{
+				Logger.WriteLine($"ThreadAbortException in FakeFocus. Exiting. Error: {e}");
+			}
+		}
 
         struct TickThread
         {
@@ -3825,11 +3836,10 @@ namespace Nucleus.Gaming
 
             if (exited == players.Count)
             {
-
                 if (!hasEnded)
                 {
                     Log("Update method calling Handler End function");
-                    End();
+                    End(false);
                 }
             }
         }
@@ -3854,7 +3864,39 @@ namespace Nucleus.Gaming
             catch { }
         }
 
-        string CheckFor45PlusVersion(int releaseKey)
+		private IntPtr WaitForProcWindowHandleNotZero(Process proc)
+		{
+			try
+			{
+				if ((int)proc.MainWindowHandle == 0)
+				{
+					for (int times = 0; times < 200; times++)
+					{
+						Thread.Sleep(500);
+						if ((int)proc.MainWindowHandle > 0)
+						{
+							break;
+						}
+
+						if (times == 199 && (int)proc.MainWindowHandle == 0)
+						{
+							Log(string.Format(
+								"ERROR - WaitForProcWindowHandleNotZero could not find main window handle for {0} (pid {1})",
+								proc.ProcessName, proc.Id));
+						}
+					}
+				}
+
+				return proc.MainWindowHandle;
+			}
+			catch
+			{
+				Log("ERROR - WaitForProcWindowHandleNotZero encountered an exception");
+				return (IntPtr)(-1);
+			}
+		}
+
+		string CheckFor45PlusVersion(int releaseKey)
         {
             if (releaseKey >= 528040)
                 return "4.8 or later";

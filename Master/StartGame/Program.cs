@@ -16,7 +16,7 @@ namespace StartGame
 {
     class Program
     {
-        private static int tries = 5;
+        private const int tries = 5;
         private static int tri = 0;
         private static Process proc;
         private static string mt;
@@ -234,9 +234,6 @@ namespace StartGame
                 path = Path.Combine(root, path);
             }
 
-            
-
-
             try
             {
                 //proc = Process.Start(startInfo);
@@ -250,7 +247,6 @@ namespace StartGame
                 //{
                 //    gameIs64 = true;
                 //}
-
                 //bool is64 = EasyHook.RemoteHooking.IsX64Process((int)pi.dwProcessId);
 
                 IntPtr envPtr = IntPtr.Zero;
@@ -333,34 +329,37 @@ namespace StartGame
 
                         //Thread.Sleep(1000);
 
-                        string injectorPath = Path.Combine(currDir, $"Nucleus.IJ{(is64 ? "x64" : "x86")}.exe");
+						string injectorPath = Path.Combine(currDir, $"Nucleus.IJ{(is64 ? "x64" : "x86")}.exe");
 						ProcessStartInfo injstartInfo = new ProcessStartInfo();
 						injstartInfo.FileName = injectorPath;
-                        object[] injargs = new object[]
-                        {
-                                0, // Tier 0 : start up hook
-								path, // EXE path
-								args, // Command line arguments. TODO: these args should be converted to base64 to prevent any special characters e.g. " breaking the injargs
-								pCreationFlags, // Process creation flags
-								0, // InInjectionOptions (EasyHook)
-								Path.Combine(currDir, "Nucleus.SHook32.dll"), // lib path 32
-								Path.Combine(currDir, "Nucleus.SHook64.dll"), // lib path 64
-								isHook, // Window hooks
-								renameMutex, // Renames mutexes/semaphores/events hook
-								mutexToRename,
-                                setWindow, // Set window hook
-								isDebug,
-                                nucleusFolderPath,
-                                blockRaw,
-                                useNucleusEnvironment,
-                                playerNick
-                        };
+						object[] injargs = new object[]
+						{
+							0, // Tier 0 : start up hook
+							path, // EXE path
+							args, // Command line arguments. TODO: these args should be converted to base64 to prevent any special characters e.g. " breaking the injargs
+							pCreationFlags, // Process creation flags
+							0, // InInjectionOptions (EasyHook)
+							Path.Combine(currDir, "Nucleus.SHook32.dll"), // lib path 32
+							Path.Combine(currDir, "Nucleus.SHook64.dll"), // lib path 64
+							isHook, // Window hooks
+							renameMutex, // Renames mutexes/semaphores/events hook
+							mutexToRename,
+							setWindow, // Set window hook
+							isDebug,
+							nucleusFolderPath,
+							blockRaw,
+							useNucleusEnvironment,
+							playerNick
+						};
 
 						var sbArgs = new StringBuilder();
 						foreach (object arg in injargs)
 						{
+							//Converting to base64 prevents characters like " or \ breaking the arguments
+							string arg64 = Convert.ToBase64String(Encoding.UTF8.GetBytes(arg.ToString()));
+
 							sbArgs.Append(" \"");
-							sbArgs.Append(arg);
+							sbArgs.Append(arg64);
 							sbArgs.Append("\"");
 						}
 
@@ -370,14 +369,12 @@ namespace StartGame
 						//injstartInfo.CreateNoWindow = true;
 						injstartInfo.UseShellExecute = false;
 						injstartInfo.RedirectStandardOutput = true;
-                        injstartInfo.RedirectStandardInput = true;
+						injstartInfo.RedirectStandardInput = true;
 
 						Process injectProc = Process.Start(injstartInfo);
-
-                        injectProc.OutputDataReceived += proc_OutputDataReceived;
+						injectProc.OutputDataReceived += proc_OutputDataReceived;
 						injectProc.BeginOutputReadLine();
 						injectProc.WaitForExit();
-
                     }
 					catch (Exception ex)
 					{
@@ -398,6 +395,7 @@ namespace StartGame
                 else // regular method (no hooks)
                 {
                     Log("Starting game via regular process start method (no start up hooks enabled)");
+
 
                     bool success = CreateProcess(null, path + " " + args, IntPtr.Zero, IntPtr.Zero, false, (uint)ProcessCreationFlags.CREATE_UNICODE_ENVIRONMENT, envPtr, Path.GetDirectoryName(path), ref startup, out PROCESS_INFORMATION processInformation);
                     if (!success)

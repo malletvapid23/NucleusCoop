@@ -26,7 +26,7 @@ namespace Nucleus.Gaming.Coop
         string Play();
         void Update(double delayMS);
 
-        void End();
+        void End(bool fromStopButton);
 
         bool HasEnded { get; }
         event Action Ended;
