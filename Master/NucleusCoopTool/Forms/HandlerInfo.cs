@@ -18,8 +18,9 @@ namespace Nucleus.Coop.Forms
         protected string api = "https://hub.splitscreen.me/api/v1/";
 
         private readonly Handler Handler;
+        private MainForm mainForm;
 
-        public HandlerInfo(Handler handler)
+        public HandlerInfo(Handler handler, MainForm mf)
         {
             InitializeComponent();
 
@@ -99,7 +100,7 @@ namespace Nucleus.Coop.Forms
 
         private void btn_Download_Click(object sender, EventArgs e)
         {
-            DownloadPrompt downloadPrompt = new DownloadPrompt(Handler);
+            DownloadPrompt downloadPrompt = new DownloadPrompt(Handler, mainForm);
             downloadPrompt.ShowDialog();
         }
     }

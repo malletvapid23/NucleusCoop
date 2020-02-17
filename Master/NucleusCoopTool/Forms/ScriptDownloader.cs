@@ -21,9 +21,13 @@ namespace Nucleus.Coop.Forms
 
         private readonly List<Handler> searchHandlers = new List<Handler>();
 
-        public ScriptDownloader()
+        private MainForm mainForm;
+
+        public ScriptDownloader(MainForm mf)
         {
             InitializeComponent();
+
+            mainForm = mf;
 
             list_Games.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent);
             list_Games.AutoResizeColumns(ColumnHeaderAutoResizeStyle.HeaderSize);
@@ -162,7 +166,7 @@ namespace Nucleus.Coop.Forms
             if(list_Games.SelectedItems.Count == 1)
             {
                 int index = list_Games.Items.IndexOf(list_Games.SelectedItems[0]);
-                HandlerInfo handlerInfo = new HandlerInfo(searchHandlers[index]);
+                HandlerInfo handlerInfo = new HandlerInfo(searchHandlers[index], mainForm);
                 handlerInfo.ShowDialog();
             }
         }
@@ -185,7 +189,7 @@ namespace Nucleus.Coop.Forms
                     }
                 }
 
-                DownloadPrompt downloadPrompt = new DownloadPrompt(handler);
+                DownloadPrompt downloadPrompt = new DownloadPrompt(handler, mainForm);
                 downloadPrompt.ShowDialog();
             }
         }

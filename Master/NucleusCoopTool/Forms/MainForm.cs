@@ -776,9 +776,25 @@ namespace Nucleus.Coop
 
         private void btnSearch_Click(object sender, EventArgs e)
         {
+            SearchGame();
+        }
+
+        public void SearchGame(string exeName = null)
+        {
             using (OpenFileDialog open = new OpenFileDialog())
             {
-                open.Filter = "Game Executable Files|*.exe";
+                
+                if(string.IsNullOrEmpty(exeName))
+                {
+                    open.Title = "Select a game executable to add to Nucleus";
+                    open.Filter = "Game Executable Files|*.exe";
+                }
+                else
+                {
+                    open.Title = string.Format("Select {0} to add the game to Nucleus", exeName);
+                    open.Filter = "Game Exe|" + exeName;
+                }
+                
                 if (open.ShowDialog() == DialogResult.OK)
                 {
                     string path = open.FileName;
@@ -792,7 +808,7 @@ namespace Nucleus.Coop
 
                         if (list.ShowDialog() == DialogResult.OK)
                         {
-                            UserGameInfo game = gameManager.TryAddGame(path, list.Selected);
+                            UserGameInfo game = GameManager.Instance.TryAddGame(path, list.Selected);
 
                             //if (game == null)
                             //{
@@ -808,7 +824,7 @@ namespace Nucleus.Coop
                             //    {
                             if (game != null)
                             {
-                                MessageBox.Show("Game accepted as " + game.Game.GameName);
+                                MessageBox.Show(string.Format("The game {0} has been added!", game.Game.GameName), "Nucleus - Game added");
                                 RefreshGames();
                             }
 
@@ -819,8 +835,8 @@ namespace Nucleus.Coop
                     }
                     else if (info.Count == 1)
                     {
-                        UserGameInfo game = gameManager.TryAddGame(path, info[0]);
-                        MessageBox.Show("Game accepted as " + game.Game.GameName);
+                        UserGameInfo game = GameManager.Instance.TryAddGame(path, info[0]);
+                        MessageBox.Show(string.Format("The game {0} has been added!", game.Game.GameName), "Nucleus - Game added");
                         RefreshGames();
                     }
                     else
@@ -919,7 +935,7 @@ namespace Nucleus.Coop
             if (File.Exists(userProfile))
             {
                 string jsonString = File.ReadAllText(userProfile);
-                JObject jObject = Newtonsoft.Json.JsonConvert.DeserializeObject(jsonString) as JObject;
+                JObject jObject = JsonConvert.DeserializeObject(jsonString) as JObject;
 
                 JArray games = jObject["Games"] as JArray;
                 for (int i = 0; i < games.Count; i++)
@@ -948,8 +964,6 @@ namespace Nucleus.Coop
 
         private void GameContextMenuStrip_Opening(object sender, System.ComponentModel.CancelEventArgs e)
         {
-
-
             Control selectedControl = FindControlAtCursor(this);
 
             if (selectedControl.GetType() == typeof(Label) || selectedControl.GetType() == typeof(PictureBox))
@@ -1377,7 +1391,7 @@ namespace Nucleus.Coop
 
         private void btn_Download_Click(object sender, EventArgs e)
         {
-            Forms.ScriptDownloader scriptDownloader = new Forms.ScriptDownloader();
+            Forms.ScriptDownloader scriptDownloader = new Forms.ScriptDownloader(this);
             scriptDownloader.ShowDialog();
         }
     }

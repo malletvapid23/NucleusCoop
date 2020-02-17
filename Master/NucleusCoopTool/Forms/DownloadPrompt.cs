@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
@@ -19,11 +20,15 @@ namespace Nucleus.Coop.Forms
         private int numEntries;
         private int entriesDone = 0;
 
-        public DownloadPrompt(Handler handler)
+        private MainForm mainForm;
+
+        public DownloadPrompt(Handler handler, MainForm mf)
         {
             InitializeComponent();
 
             Handler = handler;
+            mainForm = mf;
+
             zipFile = string.Format("handler-{0}-v{1}.nc", Handler.Id, Handler.CurrentVersion);
             lbl_Handler.Text = zipFile;
 
@@ -145,7 +150,23 @@ namespace Nucleus.Coop.Forms
 
             File.Delete(Path.Combine(scriptFolder, zipFile));
 
-            MessageBox.Show("Downloading and extraction of " + Handler.Title + " script is complete!", "Finished", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            string exeName = null;
+            DialogResult dialogResult = MessageBox.Show("Downloading and extraction of " + Handler.GameName + " script is complete. Would you like to add this game to Nucleus now? You will need to select the game executable to add it.", "Download finished! Add to Nucleus?", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+            if (dialogResult == DialogResult.Yes)
+            {
+                foreach (var line in File.ReadAllLines(Path.Combine(scriptFolder, frmHandleTitle + ".js")))
+                {
+                    if(line.ToLower().StartsWith("game.executablename"))
+                    {
+                        int start = line.IndexOf("\"");
+                        int end = line.LastIndexOf("\"");
+                        exeName = line.Substring(start + 1, (end - start) - 1);
+                    }
+                }
+
+                mainForm.SearchGame(exeName);
+            }
+
             Close();
         }
 
