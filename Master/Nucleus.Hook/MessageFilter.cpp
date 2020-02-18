@@ -135,6 +135,22 @@ BOOL filterMessage(const LPMSG lpMsg)
 #undef BLOCK
 }
 
+LRESULT CALLBACK WndProc_Hook(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+{
+	switch (uMsg)
+	{
+		case WM_KILLFOCUS:
+		{
+			//SetFocus(hWnd);
+			return -1;
+		}
+		default:
+			DefWindowProc(hwnd, uMsg, wParam, lParam);
+	}
+	return 1;
+}
+
+
 BOOL WINAPI GetMessageA_Hook(LPMSG lpMsg, HWND hWnd, UINT wMsgFilterMin, UINT wMsgFilterMax)
 {
 	const auto ret = GetMessageA(lpMsg, hWnd, wMsgFilterMin, wMsgFilterMax);
@@ -171,4 +187,12 @@ void installMessageFilterHooks()
 
 	installHook(TEXT("user32"), "PeekMessageA", PeekMessageA_Hook);
 	installHook(TEXT("user32"), "PeekMessageW", PeekMessageW_Hook);
+
+	//TODO: filterMessage doesn't work for PreventWindowDeactivation?
+	//Using original method instead:
+	if (options.preventWindowDeactivation)
+	{
+		DEBUGLOG("Injecting WndProc message filter for PreventWindowDeactivation\n");
+		SetWindowLongPtr(hWnd, GWLP_WNDPROC, (LONG_PTR)WndProc_Hook);
+	}
 }
