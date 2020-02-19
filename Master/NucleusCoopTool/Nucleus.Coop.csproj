@@ -201,6 +201,40 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
     <None Include="SplitKey.snk" />
+    <None Include="copyoutput\utils\devreorder\devreorder.ini" />
+    <None Include="copyoutput\utils\GoldbergEmu\experimental_steamclient\ColdClientLoader.ini" />
+    <None Include="copyoutput\utils\GoldbergEmu\job_id" />
+    <None Include="copyoutput\utils\GoldbergEmu\linux\lobby_connect\lobby_connect_x64" />
+    <None Include="copyoutput\utils\GoldbergEmu\linux\lobby_connect\lobby_connect_x86" />
+    <None Include="copyoutput\utils\GoldbergEmu\linux\tools\find_interfaces.sh" />
+    <None Include="copyoutput\utils\GoldbergEmu\linux\tools\steamclient_loader.sh" />
+    <None Include="copyoutput\utils\GoldbergEmu\linux\x86\libsteam_api.so" />
+    <None Include="copyoutput\utils\GoldbergEmu\linux\x86\steamclient.so" />
+    <None Include="copyoutput\utils\GoldbergEmu\linux\x86_64\libsteam_api.so" />
+    <None Include="copyoutput\utils\GoldbergEmu\linux\x86_64\steamclient.so" />
+    <None Include="copyoutput\utils\GoldbergEmu\source_code\source_code.bundle" />
+    <None Include="copyoutput\utils\GoldbergEmu\steam_settings.EXAMPLE\achievements_EXAMPLE.json" />
+    <None Include="copyoutput\utils\GoldbergEmu\steam_settings.EXAMPLE\default_items.EXAMPLE.json" />
+    <None Include="copyoutput\utils\GoldbergEmu\steam_settings.EXAMPLE\items.EXAMPLE.json" />
+    <None Include="copyoutput\utils\GoldbergEmu\steam_settings.EXAMPLE\mods.EXAMPLE\12345\mod_file1" />
+    <None Include="copyoutput\utils\GoldbergEmu\steam_settings.EXAMPLE\mods.EXAMPLE\12345\mod_file2" />
+    <None Include="copyoutput\utils\GoldbergEmu\steam_settings.EXAMPLE\mods.EXAMPLE\12345\random_mod_file" />
+    <None Include="copyoutput\utils\SmartSteamEmu\SmartSteamEmu.ini" />
+    <None Include="copyoutput\utils\SmartSteamEmu\SmartSteamEmu\Common\218620\inventory.bin" />
+    <None Include="copyoutput\utils\SmartSteamEmu\SmartSteamEmu\Common\218620\item_schema.bin" />
+    <None Include="copyoutput\utils\SmartSteamEmu\SmartSteamEmu\Common\620\items.bin" />
+    <None Include="copyoutput\utils\SmartSteamEmu\SmartSteamEmu\Common\730\items.bin" />
+    <None Include="copyoutput\utils\SmartSteamEmu\SmartSteamEmu\Plugins\SSEFirewall.ini" />
+    <None Include="copyoutput\utils\SmartSteamEmu\SmartSteamEmu\Plugins\SSEOverlay\Language.ini" />
+    <None Include="copyoutput\utils\x360ce\x360ce.ini" />
+    <None Include="copyoutput\utils\XInputPlus\x64\Dinput.dl_" />
+    <None Include="copyoutput\utils\XInputPlus\x64\Dinput8.dl_" />
+    <None Include="copyoutput\utils\XInputPlus\x64\xinput1_3.dl_" />
+    <None Include="copyoutput\utils\XInputPlus\x86\Dinput.dl_" />
+    <None Include="copyoutput\utils\XInputPlus\x86\Dinput8.dl_" />
+    <None Include="copyoutput\utils\XInputPlus\x86\xinput1_3.dl_" />
+    <None Include="copyoutput\utils\XInputPlus\XInputPlus.ini" />
+    <None Include="copyoutput\utils\XInputPlus\XInputPlus_Default.ini" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
@@ -296,11 +330,118 @@
     <None Include="Resources\not_found_white.png" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="copyoutput\utils\Credits.txt" />
+    <Content Include="copyoutput\utils\Custom utils go in User folder.txt" />
+    <Content Include="copyoutput\utils\devreorder\DeviceLister.exe" />
+    <Content Include="copyoutput\utils\devreorder\x64\dinput8.dll" />
+    <Content Include="copyoutput\utils\devreorder\x86\dinput8.dll" />
+    <Content Include="copyoutput\utils\DirectXWrapper\d3d9.dll" />
+    <Content Include="copyoutput\utils\Do NOT change file or folder names.txt" />
+    <Content Include="copyoutput\utils\ForceBindIP\BindIP.dll" />
+    <Content Include="copyoutput\utils\ForceBindIP\BindIP64.dll" />
+    <Content Include="copyoutput\utils\ForceBindIP\ForceBindIP.exe" />
+    <Content Include="copyoutput\utils\ForceBindIP\ForceBindIP64.exe" />
+    <Content Include="copyoutput\utils\GoldbergEmu\debug_experimental\Readme.txt" />
+    <Content Include="copyoutput\utils\GoldbergEmu\debug_experimental\steam_api.dll" />
+    <Content Include="copyoutput\utils\GoldbergEmu\debug_experimental\steam_api64.dll" />
+    <Content Include="copyoutput\utils\GoldbergEmu\debug_experimental_steamclient\steamclient.dll" />
+    <Content Include="copyoutput\utils\GoldbergEmu\debug_experimental_steamclient\steamclient64.dll" />
+    <Content Include="copyoutput\utils\GoldbergEmu\experimental\Readme.txt" />
+    <Content Include="copyoutput\utils\GoldbergEmu\experimental\steamclient.dll" />
+    <Content Include="copyoutput\utils\GoldbergEmu\experimental\steamclient64.dll" />
+    <Content Include="copyoutput\utils\GoldbergEmu\experimental\steam_api.dll" />
+    <Content Include="copyoutput\utils\GoldbergEmu\experimental\steam_api64.dll" />
+    <Content Include="copyoutput\utils\GoldbergEmu\experimental_steamclient\Readme.txt" />
+    <Content Include="copyoutput\utils\GoldbergEmu\experimental_steamclient\steamclient.dll" />
+    <Content Include="copyoutput\utils\GoldbergEmu\experimental_steamclient\steamclient64.dll" />
+    <Content Include="copyoutput\utils\GoldbergEmu\experimental_steamclient\steamclient_loader.exe" />
+    <Content Include="copyoutput\utils\GoldbergEmu\lobby_connect\lobby_connect.exe" />
+    <Content Include="copyoutput\utils\GoldbergEmu\lobby_connect\Readme.txt" />
+    <Content Include="copyoutput\utils\GoldbergEmu\Readme.txt" />
+    <Content Include="copyoutput\utils\GoldbergEmu\settings\account_name.txt" />
+    <Content Include="copyoutput\utils\GoldbergEmu\settings\user_steam_id.txt" />
+    <Content Include="copyoutput\utils\GoldbergEmu\source_code\Readme.txt" />
+    <Content Include="copyoutput\utils\GoldbergEmu\steam_api.dll" />
+    <Content Include="copyoutput\utils\GoldbergEmu\steam_api64.dll" />
+    <Content Include="copyoutput\utils\GoldbergEmu\steam_appid.EDIT_AND_RENAME.txt" />
+    <Content Include="copyoutput\utils\GoldbergEmu\steam_interfaces.EXAMPLE.txt" />
+    <Content Include="copyoutput\utils\GoldbergEmu\steam_settings.EXAMPLE\app_paths.EXAMPLE.txt" />
+    <Content Include="copyoutput\utils\GoldbergEmu\steam_settings.EXAMPLE\controller.EXAMPLE\glyphs\button_a.png" />
+    <Content Include="copyoutput\utils\GoldbergEmu\steam_settings.EXAMPLE\controller.EXAMPLE\glyphs\button_b.png" />
+    <Content Include="copyoutput\utils\GoldbergEmu\steam_settings.EXAMPLE\controller.EXAMPLE\glyphs\button_x.png" />
+    <Content Include="copyoutput\utils\GoldbergEmu\steam_settings.EXAMPLE\controller.EXAMPLE\glyphs\button_y.png" />
+    <Content Include="copyoutput\utils\GoldbergEmu\steam_settings.EXAMPLE\controller.EXAMPLE\glyphs\shoulder_l.png" />
+    <Content Include="copyoutput\utils\GoldbergEmu\steam_settings.EXAMPLE\controller.EXAMPLE\glyphs\shoulder_r.png" />
+    <Content Include="copyoutput\utils\GoldbergEmu\steam_settings.EXAMPLE\controller.EXAMPLE\glyphs\stick_dpad_e.png" />
+    <Content Include="copyoutput\utils\GoldbergEmu\steam_settings.EXAMPLE\controller.EXAMPLE\glyphs\stick_dpad_n.png" />
+    <Content Include="copyoutput\utils\GoldbergEmu\steam_settings.EXAMPLE\controller.EXAMPLE\glyphs\stick_dpad_s.png" />
+    <Content Include="copyoutput\utils\GoldbergEmu\steam_settings.EXAMPLE\controller.EXAMPLE\glyphs\stick_dpad_w.png" />
+    <Content Include="copyoutput\utils\GoldbergEmu\steam_settings.EXAMPLE\controller.EXAMPLE\glyphs\stick_l_click.png" />
+    <Content Include="copyoutput\utils\GoldbergEmu\steam_settings.EXAMPLE\controller.EXAMPLE\glyphs\stick_l_move.png" />
+    <Content Include="copyoutput\utils\GoldbergEmu\steam_settings.EXAMPLE\controller.EXAMPLE\glyphs\stick_r_click.png" />
+    <Content Include="copyoutput\utils\GoldbergEmu\steam_settings.EXAMPLE\controller.EXAMPLE\glyphs\stick_r_move.png" />
+    <Content Include="copyoutput\utils\GoldbergEmu\steam_settings.EXAMPLE\controller.EXAMPLE\glyphs\trigger_l_click.png" />
+    <Content Include="copyoutput\utils\GoldbergEmu\steam_settings.EXAMPLE\controller.EXAMPLE\glyphs\trigger_l_pull.png" />
+    <Content Include="copyoutput\utils\GoldbergEmu\steam_settings.EXAMPLE\controller.EXAMPLE\glyphs\trigger_r_click.png" />
+    <Content Include="copyoutput\utils\GoldbergEmu\steam_settings.EXAMPLE\controller.EXAMPLE\glyphs\trigger_r_pull.png" />
+    <Content Include="copyoutput\utils\GoldbergEmu\steam_settings.EXAMPLE\controller.EXAMPLE\glyphs\xbox_button_dpad_e.png" />
+    <Content Include="copyoutput\utils\GoldbergEmu\steam_settings.EXAMPLE\controller.EXAMPLE\glyphs\xbox_button_dpad_move.png" />
+    <Content Include="copyoutput\utils\GoldbergEmu\steam_settings.EXAMPLE\controller.EXAMPLE\glyphs\xbox_button_dpad_n.png" />
+    <Content Include="copyoutput\utils\GoldbergEmu\steam_settings.EXAMPLE\controller.EXAMPLE\glyphs\xbox_button_dpad_s.png" />
+    <Content Include="copyoutput\utils\GoldbergEmu\steam_settings.EXAMPLE\controller.EXAMPLE\glyphs\xbox_button_dpad_w.png" />
+    <Content Include="copyoutput\utils\GoldbergEmu\steam_settings.EXAMPLE\controller.EXAMPLE\glyphs\xbox_button_select.png" />
+    <Content Include="copyoutput\utils\GoldbergEmu\steam_settings.EXAMPLE\controller.EXAMPLE\glyphs\xbox_button_start.png" />
+    <Content Include="copyoutput\utils\GoldbergEmu\steam_settings.EXAMPLE\controller.EXAMPLE\InGameControls.txt" />
+    <Content Include="copyoutput\utils\GoldbergEmu\steam_settings.EXAMPLE\controller.EXAMPLE\MenuControls.txt" />
+    <Content Include="copyoutput\utils\GoldbergEmu\steam_settings.EXAMPLE\custom_broadcasts.EXAMPLE.txt" />
+    <Content Include="copyoutput\utils\GoldbergEmu\steam_settings.EXAMPLE\depots.EXAMPLE.txt" />
+    <Content Include="copyoutput\utils\GoldbergEmu\steam_settings.EXAMPLE\disable_networking.EXAMPLE.txt" />
+    <Content Include="copyoutput\utils\GoldbergEmu\steam_settings.EXAMPLE\disable_overlay.EXAMPLE.txt" />
+    <Content Include="copyoutput\utils\GoldbergEmu\steam_settings.EXAMPLE\DLC.EXAMPLE.txt" />
+    <Content Include="copyoutput\utils\GoldbergEmu\steam_settings.EXAMPLE\leaderboards.EXAMPLE.txt" />
+    <Content Include="copyoutput\utils\GoldbergEmu\steam_settings.EXAMPLE\mods.EXAMPLE\12345\Readme.txt" />
+    <Content Include="copyoutput\utils\GoldbergEmu\steam_settings.EXAMPLE\offline.EXAMPLE.txt" />
+    <Content Include="copyoutput\utils\GoldbergEmu\steam_settings.EXAMPLE\stats.EXAMPLE.txt" />
+    <Content Include="copyoutput\utils\GoldbergEmu\tools\generate_interfaces_file.exe" />
+    <Content Include="copyoutput\utils\GoldbergEmu\tools\Readme_generate_interfaces.txt" />
+    <Content Include="copyoutput\utils\SmartSteamEmu\SmartSteamEmu.dll" />
+    <Content Include="copyoutput\utils\SmartSteamEmu\SmartSteamEmu.txt" />
+    <Content Include="copyoutput\utils\SmartSteamEmu\SmartSteamEmu64.dll" />
+    <Content Include="copyoutput\utils\SmartSteamEmu\SmartSteamEmu\Common\avatar.png" />
+    <Content Include="copyoutput\utils\SmartSteamEmu\SmartSteamEmu\Common\Readme.txt" />
+    <Content Include="copyoutput\utils\SmartSteamEmu\SmartSteamEmu\Plugins\SSEFirewall.dll" />
+    <Content Include="copyoutput\utils\SmartSteamEmu\SmartSteamEmu\Plugins\SSEFirewall64.dll" />
+    <Content Include="copyoutput\utils\SmartSteamEmu\SmartSteamEmu\Plugins\SSEOverlay\message.wav" />
+    <Content Include="copyoutput\utils\SmartSteamEmu\SmartSteamEmu\Plugins\SSEOverlay\screenshot.wav" />
+    <Content Include="copyoutput\utils\SmartSteamEmu\SmartSteamEmu\Plugins\x64\SSEOverlay.dll" />
+    <Content Include="copyoutput\utils\SmartSteamEmu\SmartSteamEmu\Plugins\x86\SSEOverlay.dll" />
+    <Content Include="copyoutput\utils\SmartSteamEmu\SmartSteamLoader.exe" />
+    <Content Include="copyoutput\utils\SmartSteamEmu\SmartSteamLoader_x64.exe" />
+    <Content Include="copyoutput\utils\Steam Stub DRM Patcher\x64\winmm.dll" />
+    <Content Include="copyoutput\utils\Steam Stub DRM Patcher\x86\winmm.dll" />
+    <Content Include="copyoutput\utils\x360ce\dinput8.dll" />
+    <Content Include="copyoutput\utils\x360ce\dinput8_x64.dll" />
+    <Content Include="copyoutput\utils\x360ce\x360ce.exe" />
+    <Content Include="copyoutput\utils\x360ce\x360ce_x64.exe" />
+    <Content Include="copyoutput\utils\x360ce\xinput1_3.dll" />
+    <Content Include="copyoutput\utils\x360ce\xinput1_3_x64.dll" />
+    <Content Include="copyoutput\utils\XInputPlus\DI8dotNET.dll" />
+    <Content Include="copyoutput\utils\XInputPlus\ja\XInputPlus.resources.dll" />
+    <Content Include="copyoutput\utils\XInputPlus\Loader\ja\XInputPlusLoader.resources.dll" />
+    <Content Include="copyoutput\utils\XInputPlus\Loader\XInputPlusInjector.dll" />
+    <Content Include="copyoutput\utils\XInputPlus\Loader\XInputPlusInjector64.dll" />
+    <Content Include="copyoutput\utils\XInputPlus\Loader\XInputPlusLoader.exe" />
+    <Content Include="copyoutput\utils\XInputPlus\ReadMe_en.txt" />
+    <Content Include="copyoutput\utils\XInputPlus\XInputPlus.exe" />
+    <Content Include="copyoutput\utils\XInputPlus\ìXÉVùÜù=.txt" />
+    <Content Include="copyoutput\utils\XInputPlus\òKé+é¿ô¦é¦é¡é+é¦éó.txt" />
     <None Include="Resources\setting.png" />
     <Content Include="icon.ico" />
     <Content Include="Resources\icon.ico" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="copyoutput\utils\User\" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
@@ -312,7 +453,8 @@
   <PropertyGroup>
     <PostBuildEvent>echo.&gt;Built.flag
 copy $(SolutionDir)ThirdParty\easyhook\*.dll $(TargetPath)\..
-copy $(SolutionDir)ThirdParty\easyhook\*.exe $(TargetPath)\..</PostBuildEvent>
+copy $(SolutionDir)ThirdParty\easyhook\*.exe $(TargetPath)\..
+xcopy $(ProjectDir)copyoutput $(TargetPath)\.. /s/h/e/k/f/c/Y</PostBuildEvent>
   </PropertyGroup>
   <PropertyGroup>
     <PreBuildEvent>
