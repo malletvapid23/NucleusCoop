@@ -57,6 +57,8 @@ namespace Nucleus.Coop.Forms
                 JObject jObject = JsonConvert.DeserializeObject(rawHandlers) as JObject;
 
                 JArray handlers = jObject["Handlers"] as JArray;
+
+                bool minResult = false;
                 for (int i = 0; i < handlers.Count; i++)
                 {
                     Handler handler = new Handler();
@@ -80,6 +82,14 @@ namespace Nucleus.Coop.Forms
                     handler.CommentCount = jObject["Handlers"][i]["commentCount"].ToString();
                     handler.CurrentVersion = jObject["Handlers"][i]["currentVersion"].ToString();
                     handler.CurrentPackage = jObject["Handlers"][i]["currentPackage"].ToString();
+
+                    if(chkBox_Verified.Checked && !Boolean.Parse(handler.Verified))
+                    {
+                        continue;
+                    }
+
+                    if (!minResult)
+                        minResult = true;
 
                     searchHandlers.Add(handler);
 
@@ -118,8 +128,17 @@ namespace Nucleus.Coop.Forms
                         lvi.SubItems[2].ForeColor = Color.Green;
                     }
                 }
-                list_Games.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent);
-                list_Games.AutoResizeColumns(ColumnHeaderAutoResizeStyle.HeaderSize);
+
+                if (!minResult)
+                {
+                    MessageBox.Show("No results found.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    txt_Search.Focus();
+                }
+                else
+                {
+                    list_Games.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent);
+                    list_Games.AutoResizeColumns(ColumnHeaderAutoResizeStyle.HeaderSize);
+                }
             }
         }
 
