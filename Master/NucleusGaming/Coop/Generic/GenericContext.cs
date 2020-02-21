@@ -5,8 +5,10 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Xml;
@@ -86,6 +88,9 @@ namespace Nucleus.Gaming
         public string[] CopyCustomUtils;
         public int PlayersPerInstance;
         public bool UseDevReorder;
+
+        [DllImport("iphlpapi.dll", CharSet = CharSet.Auto)]
+        private static extern int GetBestInterface(UInt32 destAddr, out UInt32 bestIfIndex);
 
         public Type HandlerType
         {
@@ -211,29 +216,19 @@ namespace Nucleus.Gaming
         {
             get
             {
-                //var host = Dns.GetHostEntry(Dns.GetHostName());
-                //foreach (var ip in host.AddressList)
+                //string localIP;
+                //using (Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, 0))
                 //{
-                //    if (ip.AddressFamily == AddressFamily.InterNetwork)
-                //    {
-                //        return ip.ToString();
-                //    }
+                //    socket.Connect("8.8.8.8", 65530);
+                //    IPEndPoint endPoint = socket.LocalEndPoint as IPEndPoint;
+                //    localIP = endPoint.Address.ToString();
                 //}
-                //return "ERROR";
+                
+                var dadada = GetBestInterface(BitConverter.ToUInt32(IPAddress.Parse("8.8.8.8").GetAddressBytes(), 0), out uint interfaceIndex);
+                IPAddress xxxd = NetworkInterface.GetAllNetworkInterfaces()
+                                .Where(netInterface => netInterface.GetIPProperties().GetIPv4Properties().Index == BitConverter.ToInt32(BitConverter.GetBytes(interfaceIndex), 0)).First().GetIPProperties().UnicastAddresses.Where(ipAdd => ipAdd.Address.AddressFamily == AddressFamily.InterNetwork).First().Address;
 
-                //return Dns.GetHostEntry(Dns.GetHostName())
-                //    .AddressList.FirstOrDefault(ip => ip.AddressFamily == AddressFamily.InterNetwork)
-                //    .ToString();
-
-                string localIP;
-                using (Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, 0))
-                {
-                    socket.Connect("8.8.8.8", 65530);
-                    IPEndPoint endPoint = socket.LocalEndPoint as IPEndPoint;
-                    localIP = endPoint.Address.ToString();
-                }
-
-                return localIP;
+                return xxxd.ToString();
             }
         }
 
@@ -241,7 +236,7 @@ namespace Nucleus.Gaming
         {
             get
             {
-                return $@"C:\Users\{System.Environment.UserName}\NucleusCoop\{Nickname}\";
+                return $@"C:\Users\{Environment.UserName}\NucleusCoop\{Nickname}\";
             }
         }
 
@@ -249,7 +244,7 @@ namespace Nucleus.Gaming
         {
             get
             {
-                return $@"C:\Users\{System.Environment.UserName}\NucleusCoop\";
+                return $@"C:\Users\{Environment.UserName}\NucleusCoop\";
             }
         }
 
