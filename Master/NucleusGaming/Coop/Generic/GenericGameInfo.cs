@@ -175,6 +175,7 @@ namespace Nucleus.Gaming
         public string[] RenameAndOrMoveFiles;
         public string[] DeleteFiles;
         public bool GoldbergExperimentalRename;
+        public string[] KillProcessesOnClose;
 
 		// -- From USS
 		//Effectively a switch for all of USS features

@@ -321,11 +321,18 @@ namespace Nucleus.Gaming
             {
                 Process[] procs = Process.GetProcesses();
 
+                List<string> addtlProcsToKill = new List<string>();
+                if (gen.KillProcessesOnClose?.Length > 0)
+                {
+                    addtlProcsToKill = gen.KillProcessesOnClose.ToList();
+                }
+
+
                 foreach (Process proc in procs)
                 {
                     try
                     {
-                        if (proc.ProcessName.ToLower() == Path.GetFileNameWithoutExtension(gen.ExecutableName.ToLower()) || (proc.Id != 0 && attachedIds.Contains(proc.Id)) || (gen.Hook.ForceFocusWindowName != "" && proc.MainWindowTitle == gen.Hook.ForceFocusWindowName))
+                        if (addtlProcsToKill.Contains(proc.ProcessName, StringComparer.OrdinalIgnoreCase) || proc.ProcessName.ToLower() == Path.GetFileNameWithoutExtension(gen.LauncherExe.ToLower()) || proc.ProcessName.ToLower() == Path.GetFileNameWithoutExtension(gen.ExecutableName.ToLower()) || (proc.Id != 0 && attachedIds.Contains(proc.Id)) || (gen.Hook.ForceFocusWindowName != "" && proc.MainWindowTitle == gen.Hook.ForceFocusWindowName))
                         {
                             Log(string.Format("Killing process {0} (pid {1})", proc.ProcessName, proc.Id));
                             proc.Kill();
@@ -4693,8 +4700,12 @@ namespace Nucleus.Gaming
                 }
                 steamDllFolder = steamDllrootFolder.Remove(0, (tempRootFolder.Length));
                 //instanceSteamDllFolder = Path.Combine(linkFolder, steamDllFolder);
+
+
                 instanceSteamDllFolder = linkFolder.TrimEnd('\\') + "\\" + steamDllFolder.TrimStart('\\');
-                if (gen.UseNucleusEnvironment)
+
+
+                if (gen.UseNucleusEnvironment && gen.GoldbergNoLocalSave)
                 {
                     instanceSteamSettingsFolder = $@"C:\Users\{Environment.UserName}\NucleusCoop\{player.Nickname}\AppData\Roaming\Goldberg SteamEmu Saves\settings\";
                 }
