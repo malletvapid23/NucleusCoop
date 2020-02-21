@@ -230,7 +230,7 @@
             // 
             this.sideInfoLbl.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.sideInfoLbl.AutoSize = true;
-            this.sideInfoLbl.Location = new System.Drawing.Point(845, 10);
+            this.sideInfoLbl.Location = new System.Drawing.Point(899, 10);
             this.sideInfoLbl.Name = "sideInfoLbl";
             this.sideInfoLbl.Size = new System.Drawing.Size(0, 21);
             this.sideInfoLbl.TabIndex = 14;

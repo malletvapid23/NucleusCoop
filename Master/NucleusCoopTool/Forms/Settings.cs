@@ -323,7 +323,30 @@ namespace Nucleus.Coop
 
         private void Btn_credits_Click(object sender, EventArgs e)
         {
-            MessageBox.Show("NucleusCoop Mod - " + mainForm.version + "\n\nCredits\n---------------------------------------------------------------------\nOriginal NucleusCoop Project: Lucas Assis (lucasassislar)\nMod: ZeroFox\nMultiple keyboards/mice & hooks: Ilyaki\n\nThis mod brings further enhancements to NucleusCoop, such as:\n- HUGE increase to the amount of compabitle games\n- Much more customization (via game scripts)\n- 6 and 8 player support\n- Quality of life improvements\n- Bug fixes\n- And more!\n\nFull mod changelog in Mod-Readme.txt\n\nAll this wouldn't have been possible without Lucas. Thank you Lucas <3. Make split-screen great again!\n\nSpecial thanks to: Talos91 and the Splitscreen Dreams discord.", "Credits",MessageBoxButtons.OK,MessageBoxIcon.Information);
+            MessageBox.Show("NucleusCoop Mod - " + mainForm.version + 
+                "\n" +
+                "\nCredits" +
+                "\n---------------------------------------------------------------------" +
+                "\nOriginal NucleusCoop Project: Lucas Assis (lucasassislar)" +
+                "\nMod: ZeroFox" +
+                "\nMultiple keyboards/mice & hooks: Ilyaki" +
+                "\nWebsite & handler API: r-mach" +
+                "\n" +
+                "\nAdditional credits to all original developers of third party utilities Nucleus uses:" +
+                "\nMr_Goldberg (Goldberg Emulator), syahmixp (SmartSteamEmu), EJocys (x360ce), 0dd14 Lab (Xinput Plus), r1ch (ForceBindIP), HaYDeN (Flawless Widescreen), briankendall (devreorder), VerGreeneyes (DirectXWrapper)" +
+                "\n" +
+                "\nThis mod brings further enhancements to NucleusCoop, such as:" +
+                "\n- Huge increase to the amount of compabitle games" +
+                "\n- Much more customization (via game scripts)" +
+                "\n- Support for any number of players" +
+                "\n- Quality of life improvements" +
+                "\n- Bug fixes\n- And so much more!" +
+                "\n" +
+                "\nFull mod changelog in Mod-Readme.txt" +
+                "\n" +
+                "\nAll this wouldn't have been possible without Lucas. Thank you Lucas <3" +
+                "\n" +
+                "\nSpecial thanks to: Talos91, PoundlandBacon and the rest of the Splitscreen Dreams discord community.", "Credits",MessageBoxButtons.OK,MessageBoxIcon.Information);
         }
 
         private void NumHorDiv_ValueChanged(object sender, EventArgs e)

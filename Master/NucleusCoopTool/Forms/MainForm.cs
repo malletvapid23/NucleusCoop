@@ -156,7 +156,7 @@ namespace Nucleus.Coop
                 btn_gameOptions.Font = new Font("Segoe UI", float.Parse((ini.IniReadValue("Advanced", "Font")))-1.75f);
             }
                 
-            sideInfoLbl.Text = "Modded by ZeroFox" + "\n" + version;
+            sideInfoLbl.Text = "Mod version" + "\n" + version;
 
             positionsControl = new PositionsControl();
             Settings settingsForm = new Settings(this, positionsControl);
