@@ -51,6 +51,7 @@
             this.label2 = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
             this.pic_GameCover = new System.Windows.Forms.PictureBox();
+            this.linkLabel_MoreInfo = new System.Windows.Forms.LinkLabel();
             ((System.ComponentModel.ISupportInitialize)(this.pic_GameCover)).BeginInit();
             this.SuspendLayout();
             // 
@@ -204,7 +205,7 @@
             this.txt_GameName.Location = new System.Drawing.Point(127, 12);
             this.txt_GameName.Name = "txt_GameName";
             this.txt_GameName.ReadOnly = true;
-            this.txt_GameName.Size = new System.Drawing.Size(426, 26);
+            this.txt_GameName.Size = new System.Drawing.Size(362, 26);
             this.txt_GameName.TabIndex = 39;
             // 
             // btn_Close
@@ -325,11 +326,25 @@
             this.pic_GameCover.TabIndex = 0;
             this.pic_GameCover.TabStop = false;
             // 
+            // linkLabel_MoreInfo
+            // 
+            this.linkLabel_MoreInfo.AutoSize = true;
+            this.linkLabel_MoreInfo.Font = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.linkLabel_MoreInfo.Location = new System.Drawing.Point(495, 21);
+            this.linkLabel_MoreInfo.Name = "linkLabel_MoreInfo";
+            this.linkLabel_MoreInfo.Size = new System.Drawing.Size(58, 13);
+            this.linkLabel_MoreInfo.TabIndex = 52;
+            this.linkLabel_MoreInfo.TabStop = true;
+            this.linkLabel_MoreInfo.Text = "More Info";
+            this.linkLabel_MoreInfo.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.linkLabel_MoreInfo.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.LinkLabel_MoreInfo_LinkClicked);
+            // 
             // HandlerInfo
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 21F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(565, 528);
+            this.Controls.Add(this.linkLabel_MoreInfo);
             this.Controls.Add(this.txt_Updated);
             this.Controls.Add(this.label10);
             this.Controls.Add(this.txt_Created);
@@ -389,5 +404,6 @@
         private System.Windows.Forms.Label label9;
         private System.Windows.Forms.TextBox txt_Updated;
         private System.Windows.Forms.Label label10;
+        private System.Windows.Forms.LinkLabel linkLabel_MoreInfo;
     }
 }

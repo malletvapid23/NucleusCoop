@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
@@ -102,6 +103,11 @@ namespace Nucleus.Coop.Forms
         {
             DownloadPrompt downloadPrompt = new DownloadPrompt(Handler, mainForm);
             downloadPrompt.ShowDialog();
+        }
+
+        private void LinkLabel_MoreInfo_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            Process.Start(Handler.GameUrl);
         }
     }
 }
