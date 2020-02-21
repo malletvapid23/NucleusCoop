@@ -56,5 +56,5 @@ Mod: ZeroFox
 Multiple keyboards/mice & hooks: Ilyaki
 Website & handler API: r-mach
 
-Additional credits to all original developers of third party utilities Nucleus uses:" +
+Additional credits to all original developers of third party utilities Nucleus uses:
 Mr_Goldberg (Goldberg Emulator), syahmixp (SmartSteamEmu), EJocys (x360ce), 0dd14 Lab (Xinput Plus), r1ch (ForceBindIP), HaYDeN (Flawless Widescreen), briankendall (devreorder), VerGreeneyes (DirectXWrapper)
