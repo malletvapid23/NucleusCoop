@@ -2,12 +2,12 @@
 Nucles Co-Op is a tool for Windows that allows split-screen play on many games that do not initially support it. Its purpose is to make it as easy as possible for the average user to play games locally.
 
 This repo is an unofficial mod of the Nucleus Co-Op application. The mod is based off of the official Nucleus Co-Op Alpha 8 build and features enhancements and quality of life changes including:
-- HUGE increase to the amount of compabitle games
+- Huge increase to the amount of compabitle games
 - Much more customization (via game scripts)
-- 6 and 8 player support
+- Support for any number of players
 - Quality of life improvements
 - Bug fixes
-- And more!
+- And so much more!
 
 View the full list of features/changes and changelog in Mod-Readme.txt in releases.
 
@@ -51,16 +51,10 @@ You can donate via PayPal through this link:
 Thank you ^_^
 
 # Credits
-The original NucleusCo-Op Project: Lucas Assis
+Original NucleusCoop Project: Lucas Assis (lucasassislar)
+Mod: ZeroFox
+Multiple keyboards/mice & hooks: Ilyaki
+Website & handler API: r-mach
 
-NucleusCo-Op Mod: ZeroFox
-
-Ilyaki for his hook source code
-
-R-Mach for his help and contributions
-
-
-Special shout-out to: Talos91, the Splitscreen Dreams discord.
-
-
-All this wouldn't have been possible without Lucas. Thank you Lucas <3. Make split-screen great again!
+Additional credits to all original developers of third party utilities Nucleus uses:
+Mr_Goldberg (Goldberg Emulator), syahmixp (SmartSteamEmu), EJocys (x360ce), 0dd14 Lab (Xinput Plus), r1ch (ForceBindIP), HaYDeN (Flawless Widescreen), briankendall (devreorder), VerGreeneyes (DirectXWrapper)
