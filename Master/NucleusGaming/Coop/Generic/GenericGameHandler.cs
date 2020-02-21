@@ -527,11 +527,11 @@ namespace Nucleus.Gaming
         {
             this.userGame = game;
             this.profile = profile;
-#if DEBUG
-			isDebug = true;
-#else
-	        isDebug = false;
-#endif
+//#if DEBUG
+//			isDebug = true;
+//#else
+//	        isDebug = false;
+//#endif
 
             iniNetworkInterface = ini.IniReadValue("Misc", "Network");
 
