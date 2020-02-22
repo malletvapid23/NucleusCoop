@@ -327,24 +327,27 @@ namespace Nucleus.Gaming
                     addtlProcsToKill = gen.KillProcessesOnClose.ToList();
                 }
 
-
                 foreach (Process proc in procs)
                 {
                     try
                     {
-                        if (addtlProcsToKill.Contains(proc.ProcessName, StringComparer.OrdinalIgnoreCase) || proc.ProcessName.ToLower() == Path.GetFileNameWithoutExtension(gen.LauncherExe.ToLower()) || proc.ProcessName.ToLower() == Path.GetFileNameWithoutExtension(gen.ExecutableName.ToLower()) || (proc.Id != 0 && attachedIds.Contains(proc.Id)) || (gen.Hook.ForceFocusWindowName != "" && proc.MainWindowTitle == gen.Hook.ForceFocusWindowName))
+                        if ((gen.LauncherExe != null && proc.ProcessName.ToLower() == Path.GetFileNameWithoutExtension(gen.LauncherExe.ToLower())) || addtlProcsToKill.Contains(proc.ProcessName, StringComparer.OrdinalIgnoreCase) || proc.ProcessName.ToLower() == Path.GetFileNameWithoutExtension(gen.ExecutableName.ToLower()) || (proc.Id != 0 && attachedIds.Contains(proc.Id)) || (gen.Hook.ForceFocusWindowName != "" && proc.MainWindowTitle == gen.Hook.ForceFocusWindowName))
                         {
                             Log(string.Format("Killing process {0} (pid {1})", proc.ProcessName, proc.Id));
                             proc.Kill();
                         }
+                        
                     }
-                    catch
+                    catch (Exception ex)
                     {
-
+                        Log(ex.InnerException + " " + ex.Message);
                     }
                 }
             }
-            catch { }
+            catch (Exception ex)
+            {
+                Log(ex.InnerException + " " + ex.Message);
+            }
         }
 
         public void End(bool fromStopButton)
