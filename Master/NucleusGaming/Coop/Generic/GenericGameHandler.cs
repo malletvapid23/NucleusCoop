@@ -2938,7 +2938,6 @@ namespace Nucleus.Gaming
             lStyle = lStyle & ~User32_WS.WS_MINIMIZE;
             lStyle = lStyle & ~User32_WS.WS_MAXIMIZE;
             lStyle = lStyle & ~User32_WS.WS_SYSMENU;
-            lStyle = lStyle & User32_WS.WS_DISABLED;
             User32Interop.SetWindowLong(hwnd, User32_WS.GWL_STYLE, lStyle);
 
             lStyle = User32Interop.GetWindowLong(hwnd, User32_WS.GWL_EXSTYLE);

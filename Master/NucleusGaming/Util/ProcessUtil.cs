@@ -52,6 +52,13 @@ namespace Nucleus
         }
         public static bool KillMutex(Process process, string mutexType, string mutexName, bool partial)
         {
+            if (mutexName.ToLower().StartsWith("type:") && mutexName.Contains("|"))
+            {
+                mutexType = mutexName.Substring("type:".Length, mutexName.IndexOf('|') - "type:".Length);
+                mutexName = mutexName.Substring(mutexName.IndexOf('|') + 1);
+            }
+
+
             Log(string.Format("Attempting to kill mutex"));
             // 4 tries
             for (int i = 1; i < 4; i++)
@@ -123,6 +130,13 @@ namespace Nucleus
 
         public static bool MutexExists(Process process, string mutexType, string mutexName, bool partial)
         {
+            if(mutexName.ToLower().StartsWith("type:") && mutexName.Contains("|"))
+            {
+                mutexType = mutexName.Substring("type:".Length, mutexName.IndexOf('|') - "type:".Length);
+                mutexName = mutexName.Substring(mutexName.IndexOf('|') + 1);
+            }
+
+
             Log(string.Format("Checking if mutex '{0}' of type '{1}' exists in process '{2} (pid {3})'", mutexName,mutexType,process.MainWindowTitle,process.Id));
             // 4 tries
             for (int i = 0; i < 4; i++)
