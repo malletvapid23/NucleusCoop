@@ -14,6 +14,7 @@ using SlimDX.DirectInput;
 using System.Runtime.InteropServices;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
+using Nucleus.Gaming.Coop.InputManagement;
 
 namespace Nucleus.Coop
 {
@@ -167,8 +168,10 @@ namespace Nucleus.Coop
                 tbox.Clear();
             }
 
+
             dinput = new DirectInput();
             IList<DeviceInstance> devices = dinput.GetDevices(DeviceClass.GameController, DeviceEnumerationFlags.AttachedOnly);
+            int gcDevicesCnt = devices.Count;
             for (int i = 0; i < devices.Count; i++)
             {
                 DeviceInstance device = devices[i];
@@ -185,6 +188,30 @@ namespace Nucleus.Coop
                 gamePad.Dispose();
             }
             dinput.Dispose();
+            
+            
+            foreach (var device in RawInputManager.GetDeviceList().Where(x => x.deviceInfo.dwType <= 1))
+            {
+
+                //string hid = device.deviceInfo.hid.ToString();
+                //int start = hid.IndexOf("hid#");
+                //int end = hid.LastIndexOf("#{");
+                //string fhid = hid.Substring(start, end - start).Replace('#', '\\').ToUpper();
+
+                //controllerGuids[gcDevicesCnt].Text = fhid;
+                string did = string.Empty;
+                if(device.deviceInfo.dwType == 1)
+                {
+                    did = "T" + device.deviceInfo.dwType + "PID" + device.deviceInfo.hid.dwProductId + "VID" + device.deviceInfo.hid.dwVendorId + "VN" + device.deviceInfo.hid.dwVersionNumber;
+                }
+                controllerGuids[gcDevicesCnt].Text = did;
+
+                if (ini.IniReadValue("ControllerMapping", did) != "")
+                {
+                    controllerNicks[gcDevicesCnt].Text = ini.IniReadValue("ControllerMapping", did);
+                }
+                gcDevicesCnt++;
+            }
         }
 
         private void SettingsSaveBtn_Click(object sender, EventArgs e)

@@ -25,6 +25,7 @@ namespace Nucleus.Gaming
         public string[] DirSymlinkExclusions;
         public string[] FileSymlinkExclusions;
         public string[] FileSymlinkCopyInstead;
+        public string[] DirSymlinkCopyInstead;
         public string[] DirExclusions;
         public bool KeepSymLinkOnExit;
 
@@ -176,10 +177,16 @@ namespace Nucleus.Gaming
         public string[] DeleteFiles;
         public bool GoldbergExperimentalRename;
         public string[] KillProcessesOnClose;
+        public bool KeyboardPlayerSkipPreventWindowDeactivate;
+        public bool DontResize;
+        public bool DontReposition;
+        public bool NotTopMost;
+        public string[] WindowStyleValues;
+        public string[] ExtWindowStyleValues;
 
-		// -- From USS
-		//Effectively a switch for all of USS features
-		public bool SupportsMultipleKeyboardsAndMice;
+        // -- From USS
+        //Effectively a switch for all of USS features
+        public bool SupportsMultipleKeyboardsAndMice;
 		
 		//Hooks
 		public bool HookSetCursorPos = true;

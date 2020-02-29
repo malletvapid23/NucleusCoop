@@ -193,22 +193,8 @@
     <None Include="copyoutput\utils\FlawlessWidescreen\x64\data\about_track.xm" />
     <None Include="copyoutput\utils\FlawlessWidescreen\x64\PluginCache\FWS_Plugins\GlobalDependencies\Scripts\StandardBase.lua" />
     <None Include="copyoutput\utils\FlawlessWidescreen\x64\PluginCache\FWS_Plugins\GlobalDependencies\Scripts\StandardTheme.lua" />
-    <None Include="copyoutput\utils\FlawlessWidescreen\x64\PluginCache\FWS_Plugins\Modules\DeadRising3 - Nucleus Instance 1\Dependencies\Scripts\DeadRising3 - Nucleus Instance 1.lua" />
-    <None Include="copyoutput\utils\FlawlessWidescreen\x64\PluginCache\FWS_Plugins\Modules\DeadRising3 - Nucleus Instance 1\Dependencies\Scripts\DeadRising3.lua" />
     <None Include="copyoutput\utils\FlawlessWidescreen\x64\Plugins\FWS_Plugins.fws" />
     <None Include="copyoutput\utils\FlawlessWidescreen\x86\data\about_track.xm" />
-    <None Include="packages.config" />
-    <None Include="Properties\Settings.settings">
-      <Generator>SettingsSingleFileGenerator</Generator>
-      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
-    </None>
-    <Compile Include="Properties\Settings.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Settings.settings</DependentUpon>
-      <DesignTimeSharedInput>True</DesignTimeSharedInput>
-    </Compile>
-    <None Include="SplitKey.snk" />
-    <None Include="copyoutput\utils\devreorder\devreorder.ini" />
     <None Include="copyoutput\utils\GoldbergEmu\experimental_steamclient\ColdClientLoader.ini" />
     <None Include="copyoutput\utils\GoldbergEmu\job_id" />
     <None Include="copyoutput\utils\GoldbergEmu\linux\lobby_connect\lobby_connect_x64" />
@@ -226,6 +212,18 @@
     <None Include="copyoutput\utils\GoldbergEmu\steam_settings.EXAMPLE\mods.EXAMPLE\12345\mod_file1" />
     <None Include="copyoutput\utils\GoldbergEmu\steam_settings.EXAMPLE\mods.EXAMPLE\12345\mod_file2" />
     <None Include="copyoutput\utils\GoldbergEmu\steam_settings.EXAMPLE\mods.EXAMPLE\12345\random_mod_file" />
+    <None Include="packages.config" />
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+    <None Include="SplitKey.snk" />
+    <None Include="copyoutput\utils\devreorder\devreorder.ini" />
     <None Include="copyoutput\utils\SmartSteamEmu\SmartSteamEmu.ini" />
     <None Include="copyoutput\utils\SmartSteamEmu\SmartSteamEmu\Common\218620\inventory.bin" />
     <None Include="copyoutput\utils\SmartSteamEmu\SmartSteamEmu\Common\218620\item_schema.bin" />
@@ -376,10 +374,6 @@
     <Content Include="copyoutput\utils\FlawlessWidescreen\x64\licences\FlawlessWidescreen.txt" />
     <Content Include="copyoutput\utils\FlawlessWidescreen\x64\licences\libcurl.txt" />
     <Content Include="copyoutput\utils\FlawlessWidescreen\x64\licences\Summary.txt" />
-    <Content Include="copyoutput\utils\FlawlessWidescreen\x64\PluginCache\FWS_Plugins\Modules\DeadRising3 - Nucleus Instance 1\Dependencies\Icons\LargeIcon.png" />
-    <Content Include="copyoutput\utils\FlawlessWidescreen\x64\PluginCache\FWS_Plugins\Modules\DeadRising3 - Nucleus Instance 1\Dependencies\Icons\SmallIcon.png" />
-    <Content Include="copyoutput\utils\FlawlessWidescreen\x64\PluginCache\FWS_Plugins\Modules\DeadRising3 - Nucleus Instance 1\Dependencies\Images\Background.jpg" />
-    <Content Include="copyoutput\utils\FlawlessWidescreen\x64\PluginCache\FWS_Plugins\Modules\DeadRising3 - Nucleus Instance 1\EnviromentState.xml" />
     <Content Include="copyoutput\utils\FlawlessWidescreen\x64\RepositoryCache\FWS_MasterRepo.xml" />
     <Content Include="copyoutput\utils\FlawlessWidescreen\x64\settings.xml" />
     <Content Include="copyoutput\utils\FlawlessWidescreen\x86\bass.dll" />
@@ -516,6 +510,7 @@
     <Content Include="Resources\icon.ico" />
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="copyoutput\utils\FlawlessWidescreen\x64\PluginCache\FWS_Plugins\Modules\" />
     <Folder Include="copyoutput\utils\User\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

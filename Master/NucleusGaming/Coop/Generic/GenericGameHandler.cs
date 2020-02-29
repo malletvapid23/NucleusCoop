@@ -203,6 +203,7 @@ namespace Nucleus.Gaming
         private List<string> dnsAddresses = new List<string>();
         string dnsServersStr;
         private string iniNetworkInterface;
+        private bool isPrevent;
 
         private List<string> addedFiles = new List<string>();
 
@@ -700,7 +701,7 @@ namespace Nucleus.Gaming
                     Log(string.Format("Mutexes - Handle(s): ({0}), KillMutexDelay: {1}, KillMutexType: {2}, RenameNotKillMutex: {3}, PartialMutexSearch: {4}", mutexList, gen.KillMutexDelay, gen.KillMutexType, gen.RenameNotKillMutex, gen.PartialMutexSearch));
                 }
 
-                Log("NucleusCoop mod version: 0.9.9.2");
+                Log("NucleusCoop mod version: 0.9.9.9");
                 string pcSpecs = "PC Info - ";
                 var name = (from x in new ManagementObjectSearcher("SELECT Caption FROM Win32_OperatingSystem").Get().Cast<ManagementObject>()
                             select x.GetPropertyValue("Caption")).FirstOrDefault();
@@ -798,7 +799,7 @@ namespace Nucleus.Gaming
 
                 if (ini.IniReadValue("Misc", "UseNicksInGame") == "True")
                 {
-                    if (!player.IsKeyboardPlayer)
+                    if (!player.IsKeyboardPlayer || (player.IsKeyboardPlayer && player.IsRawKeyboard))
                     {
                         if (ini.IniReadValue("ControllerMapping", player.HIDDeviceID) == "")
                         {
@@ -951,6 +952,26 @@ namespace Nucleus.Gaming
 
                 if (i > 0 && (gen.HookFocus || gen.SetWindowHook || gen.HideCursor || gen.PreventWindowDeactivation || gen.SupportsMultipleKeyboardsAndMice))
                 {
+                    if(gen.PreventWindowDeactivation && !isPrevent)
+                    {
+                        Log("PreventWindowDeactivation detected, setting flag");
+                        isPrevent = true;
+                    }
+
+                    if(isPrevent)
+                    {
+                        if (players[i - 1].IsKeyboardPlayer && gen.KeyboardPlayerSkipPreventWindowDeactivate)
+                        {
+                            Log("Ignoring PreventWindowDeactivation for keyboard player");
+                            gen.PreventWindowDeactivation = false;
+                        }
+                        else
+                        {
+                            Log("Keeping PreventWindowDeactivation on");
+                            gen.PreventWindowDeactivation = true;
+                        }
+                    }
+
                     if (gen.PostHookInstances?.Length > 0)
                     {
                         string[] instancesToHook = gen.PostHookInstances.Split(',');
@@ -1091,6 +1112,8 @@ namespace Nucleus.Gaming
                             fileCopies.Add(s.ToLower());
                         }
                     }
+
+
                     if (gen.DirSymlinkExclusions != null)
                     {
                         Log(gen.DirSymlinkExclusions.Length + " Directories in Game.DirSymlinkExclusions will be ignored");
@@ -1111,6 +1134,24 @@ namespace Nucleus.Gaming
                             string s = skipExclusions[k];
                             // make sure it's lower case
                             dirExclusions.Add("direxskip" + s.ToLower());
+                        }
+                    }
+                    if (gen.DirSymlinkCopyInstead != null)
+                    {
+                        Log(gen.DirSymlinkCopyInstead.Length + " directories and all its contents in Game.DirSymlinkCopyInstead will be copied instead of symlinked");
+                        string[] dirSymlinkCopyInstead = gen.DirSymlinkCopyInstead;
+                        for (int k = 0; k < dirSymlinkCopyInstead.Length; k++)
+                        {
+                            string[] files = Directory.GetFiles(Path.Combine(rootFolder, dirSymlinkCopyInstead[k]), "*", SearchOption.TopDirectoryOnly);
+
+                            foreach (string s in files)
+                            {
+                                fileCopies.Add(Path.GetFileName(s).ToLower());
+                            }
+
+                            //string s = dirSymlinkCopyInstead[k];
+                            // make sure it's lower case
+                            //fileCopies.Add(s.ToLower());
                         }
                     }
 
@@ -1438,6 +1479,10 @@ namespace Nucleus.Gaming
                 {
 
                     string[] files = Directory.GetFiles(linkFolder, "account_name.txt", SearchOption.AllDirectories);
+                    if(files.Length > 0)
+                    {
+                        Log("Goldberg is not enabled in script, however account_name.txt file(s) were found in folder. Will update nicknames");
+                    }
                     foreach (string nameFile in files)
                     {
                         if (!string.IsNullOrEmpty(player.Nickname))
@@ -1455,6 +1500,11 @@ namespace Nucleus.Gaming
                                 //MessageBox.Show("Found account_name.txt at: " + nameFile + ", replacing: " + File.ReadAllText(nameFile) + " with: " + player.Nickname + " for player " + i);
                                 File.Delete(nameFile);
                                 File.WriteAllText(nameFile, ini.IniReadValue("ControllerMapping", "Keyboard"));
+                            }
+                            else
+                            {
+                                File.Delete(nameFile);
+                                File.WriteAllText(nameFile, "Player " + (i + 1));
                             }
                         }
                     }
@@ -1545,7 +1595,7 @@ namespace Nucleus.Gaming
                     }
                     else
                     {
-                        if (ini.IniReadValue("Misc", "UseNicksInGame") == "True" && player.IsKeyboardPlayer && ini.IniReadValue("ControllerMapping", "Keyboard") != "")
+                        if (ini.IniReadValue("Misc", "UseNicksInGame") == "True" && player.IsKeyboardPlayer && !player.IsRawKeyboard && ini.IniReadValue("ControllerMapping", "Keyboard") != "")
                         {
                             emu.IniWriteValue("SmartSteamEmu", "PersonaName", ini.IniReadValue("ControllerMapping", "Keyboard"));
                         }
@@ -2046,7 +2096,7 @@ namespace Nucleus.Gaming
                                         Log(string.Format("Found process {0} (pid {1})", p.ProcessName, p.Id));
                                         attached.Add(p);
                                         attachedIds.Add(p.Id);
-                                        if(player.IsKeyboardPlayer)
+                                        if(player.IsKeyboardPlayer && !player.IsRawKeyboard)
                                         {
                                             keyboardProcId = p.Id;
                                         }
@@ -2077,7 +2127,7 @@ namespace Nucleus.Gaming
                     Log(string.Format("Obtained process {0} (pid {1})", proc.ProcessName, proc.Id));
                     attached.Add(proc);
                     attachedIds.Add(proc.Id);
-                    if (player.IsKeyboardPlayer)
+                    if (player.IsKeyboardPlayer && !player.IsRawKeyboard)
                     {
                         keyboardProcId = proc.Id;
                     }
@@ -2281,40 +2331,59 @@ namespace Nucleus.Gaming
                     {
 
                         Log("Attempting to repoisition, resize and strip borders for instance " + i);
-                        //prevProcessData.HWnd.Location = new Point(prevWindowX, prevWindowY);
-                        //prevProcessData.HWnd.Size = new Size(prevWindowWidth, prevWindowHeight);
-                        //uint lStyle = User32Interop.GetWindowLong(prevProcessData.HWnd.NativePtr, User32_WS.GWL_STYLE);
-                        //lStyle = lStyle & ~User32_WS.WS_CAPTION;
-                        //lStyle = lStyle & ~User32_WS.WS_THICKFRAME;
-                        //lStyle = lStyle & ~User32_WS.WS_MINIMIZE;
-                        //lStyle = lStyle & ~User32_WS.WS_MAXIMIZE;
-                        //lStyle = lStyle & ~User32_WS.WS_SYSMENU;
-                        //User32Interop.SetWindowLong(prevProcessData.HWnd.NativePtr, User32_WS.GWL_STYLE, lStyle);
-
-                        //lStyle = User32Interop.GetWindowLong(prevProcessData.HWnd.NativePtr, User32_WS.GWL_EXSTYLE);
-                        //lStyle = lStyle & ~User32_WS.WS_EX_DLGMODALFRAME;
-                        //lStyle = lStyle & ~User32_WS.WS_EX_CLIENTEDGE;
-                        //lStyle = lStyle & ~User32_WS.WS_EX_STATICEDGE;
-                        //User32Interop.SetWindowLong(prevProcessData.HWnd.NativePtr, User32_WS.GWL_EXSTYLE, lStyle);
-                        //User32Interop.SetWindowPos(prevProcessData.HWnd.NativePtr, IntPtr.Zero, 0, 0, 0, 0, (uint)(PositioningFlags.SWP_FRAMECHANGED | PositioningFlags.SWP_NOMOVE | PositioningFlags.SWP_NOSIZE | PositioningFlags.SWP_NOZORDER | PositioningFlags.SWP_NOOWNERZORDER));
-
-
                         try
                         {
                             data.HWnd.Location = new Point(prevWindowX, prevWindowY);
                             data.HWnd.Size = new Size(prevWindowWidth, prevWindowHeight);
                             uint lStyle = User32Interop.GetWindowLong(data.HWnd.NativePtr, User32_WS.GWL_STYLE);
-                            lStyle = lStyle & ~User32_WS.WS_CAPTION;
-                            lStyle = lStyle & ~User32_WS.WS_THICKFRAME;
-                            lStyle = lStyle & ~User32_WS.WS_MINIMIZE;
-                            lStyle = lStyle & ~User32_WS.WS_MAXIMIZE;
-                            lStyle = lStyle & ~User32_WS.WS_SYSMENU;
+                            if (gen.WindowStyleValues?.Length > 0)
+                            {
+                                Log("Using user custom window style");
+                                foreach (string val in gen.WindowStyleValues)
+                                {
+                                    if (val.StartsWith("~"))
+                                    {
+                                        lStyle &= ~Convert.ToUInt32(val.Substring(1), 16);
+                                    }
+                                    else
+                                    {
+                                        lStyle |= Convert.ToUInt32(val, 16);
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                lStyle &= ~User32_WS.WS_CAPTION;
+                                lStyle &= ~User32_WS.WS_THICKFRAME;
+                                lStyle &= ~User32_WS.WS_MINIMIZE;
+                                lStyle &= ~User32_WS.WS_MAXIMIZE;
+                                lStyle &= ~User32_WS.WS_SYSMENU;
+                            }
                             User32Interop.SetWindowLong(data.HWnd.NativePtr, User32_WS.GWL_STYLE, lStyle);
 
                             lStyle = User32Interop.GetWindowLong(data.HWnd.NativePtr, User32_WS.GWL_EXSTYLE);
-                            lStyle = lStyle & ~User32_WS.WS_EX_DLGMODALFRAME;
-                            lStyle = lStyle & ~User32_WS.WS_EX_CLIENTEDGE;
-                            lStyle = lStyle & ~User32_WS.WS_EX_STATICEDGE;
+                            if (gen.ExtWindowStyleValues?.Length > 0)
+                            {
+                                Log("Using user custom extended window style");
+                                foreach (string val in gen.ExtWindowStyleValues)
+                                {
+                                    if (val.StartsWith("~"))
+                                    {
+                                        lStyle &= ~Convert.ToUInt32(val.Substring(1), 16);
+                                    }
+                                    else
+                                    {
+                                        lStyle |= Convert.ToUInt32(val, 16);
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                lStyle &= ~User32_WS.WS_EX_DLGMODALFRAME;
+                                lStyle &= ~User32_WS.WS_EX_CLIENTEDGE;
+                                lStyle &= ~User32_WS.WS_EX_STATICEDGE;
+                            }
+
                             User32Interop.SetWindowLong(data.HWnd.NativePtr, User32_WS.GWL_EXSTYLE, lStyle);
                             User32Interop.SetWindowPos(data.HWnd.NativePtr, IntPtr.Zero, 0, 0, 0, 0, (uint)(PositioningFlags.SWP_FRAMECHANGED | PositioningFlags.SWP_NOMOVE | PositioningFlags.SWP_NOSIZE | PositioningFlags.SWP_NOZORDER | PositioningFlags.SWP_NOOWNERZORDER));
                         }
@@ -2328,7 +2397,7 @@ namespace Nucleus.Gaming
                     if (gen.FakeFocus)
                     {
                         Log("Start sending fake focus messages every 1000 ms");
-                        fakeFocus = new System.Threading.Thread(SendFocusMsgs);
+                        fakeFocus = new Thread(SendFocusMsgs);
                         fakeFocus.Start();
                     }
 
@@ -2365,8 +2434,43 @@ namespace Nucleus.Gaming
                         }
                     }
 
+                    if(!string.IsNullOrEmpty(gen.FlawlessWidescreen))
+                    {
+                        for(int fw = 0; fw < players.Count; fw++)
+                        {
+                            Process fwProc = Process.GetProcessById(players[fw].ProcessData.Process.Id);
+                            string windowTitle = "Nucleus Instance " + (fw + 1) + "(" + gen.Hook.ForceFocusWindowName + ")";
+
+                            if (fwProc.MainWindowTitle != windowTitle)
+                            {
+                                Log(string.Format("Resetting window text for pid {0} to {0}", fwProc.Id, windowTitle));
+                                SetWindowText(fwProc.MainWindowHandle, windowTitle);
+                            }
+                        }
+                    }
+
 					if ((i > 0 || players.Count == 1) && (gen.HookFocus || gen.SetWindowHook || gen.HideCursor || gen.PreventWindowDeactivation || gen.SupportsMultipleKeyboardsAndMice))
                     {
+                        if (gen.PreventWindowDeactivation && !isPrevent)
+                        {
+                            Log("PreventWindowDeactivation detected, setting flag");
+                            isPrevent = true;
+                        }
+
+                        if (isPrevent)
+                        {
+                            if (players[i].IsKeyboardPlayer && gen.KeyboardPlayerSkipPreventWindowDeactivate)
+                            {
+                                Log("Ignoring PreventWindowDeactivation for keyboard player");
+                                gen.PreventWindowDeactivation = false;
+                            }
+                            else
+                            {
+                                Log("Keeping PreventWindowDeactivation on");
+                                gen.PreventWindowDeactivation = true;
+                            }
+                        }
+
                         if (gen.PostHookInstances?.Length > 0)
                         {
                             string[] instancesToHook = gen.PostHookInstances.Split(',');
@@ -2398,6 +2502,17 @@ namespace Nucleus.Gaming
                             Log("ERROR - Could not obtain the window handle for Nucleus");
                             User32Interop.SetForegroundWindow(nucHwnd);
                         }
+                    }
+
+                    foreach(PlayerInfo plyr in players)
+                    {
+                        Process plyrProc = plyr.ProcessData.Process;
+
+                        const int flip = 0x00C00000 | 0x00080000 | 0x00040000; //WS_BORDER | WS_SYSMENU
+
+                        var x = (int)User32Interop.GetWindowLong(plyrProc.MainWindowHandle, User32_WS.GWL_STYLE);
+                        if ((x & flip) > 0)//has a border
+                            x &= (~flip);
                     }
 
 					//Window setup
@@ -2821,7 +2936,7 @@ namespace Nucleus.Gaming
                 Log(string.Format("Obtained process {0} (pid {1}) via process picker", proc.ProcessName, proc.Id));
                 attached.Add(proc);
                 attachedIds.Add(proc.Id);
-                if (player.IsKeyboardPlayer)
+                if (player.IsKeyboardPlayer && !player.IsRawKeyboard)
                 {
                     keyboardProcId = proc.Id;
                 }
@@ -2933,17 +3048,54 @@ namespace Nucleus.Gaming
             Point loc = new Point(players[playerIndex].MonitorBounds.X, players[playerIndex].MonitorBounds.Y);
             Size size = new Size(players[playerIndex].MonitorBounds.Width, players[playerIndex].MonitorBounds.Height);
             uint lStyle = User32Interop.GetWindowLong(hwnd, User32_WS.GWL_STYLE);
-            lStyle = lStyle & ~User32_WS.WS_CAPTION;
-            lStyle = lStyle & ~User32_WS.WS_THICKFRAME;
-            lStyle = lStyle & ~User32_WS.WS_MINIMIZE;
-            lStyle = lStyle & ~User32_WS.WS_MAXIMIZE;
-            lStyle = lStyle & ~User32_WS.WS_SYSMENU;
+            if (gen.WindowStyleValues?.Length > 0)
+            {
+                Log("Using user custom window style");
+                foreach (string val in gen.WindowStyleValues)
+                {
+                    if (val.StartsWith("~"))
+                    {
+                        lStyle &= ~Convert.ToUInt32(val.Substring(1), 16);
+                    }
+                    else
+                    {
+                        lStyle |= Convert.ToUInt32(val, 16);
+                    }
+                }
+            }
+            else
+            {
+                lStyle &= ~User32_WS.WS_CAPTION;
+                lStyle &= ~User32_WS.WS_THICKFRAME;
+                lStyle &= ~User32_WS.WS_MINIMIZE;
+                lStyle &= ~User32_WS.WS_MAXIMIZE;
+                lStyle &= ~User32_WS.WS_SYSMENU;
+            }
             User32Interop.SetWindowLong(hwnd, User32_WS.GWL_STYLE, lStyle);
 
             lStyle = User32Interop.GetWindowLong(hwnd, User32_WS.GWL_EXSTYLE);
-            lStyle = lStyle & ~User32_WS.WS_EX_DLGMODALFRAME;
-            lStyle = lStyle & ~User32_WS.WS_EX_CLIENTEDGE;
-            lStyle = lStyle & ~User32_WS.WS_EX_STATICEDGE;
+            if (gen.ExtWindowStyleValues?.Length > 0)
+            {
+                Log("Using user custom extended window style");
+                foreach (string val in gen.ExtWindowStyleValues)
+                {
+                    if (val.StartsWith("~"))
+                    {
+                        lStyle &= ~Convert.ToUInt32(val.Substring(1), 16);
+                    }
+                    else
+                    {
+                        lStyle |= Convert.ToUInt32(val, 16);
+                    }
+                }
+            }
+            else
+            {
+                lStyle &= ~User32_WS.WS_EX_DLGMODALFRAME;
+                lStyle &= ~User32_WS.WS_EX_CLIENTEDGE;
+                lStyle &= ~User32_WS.WS_EX_STATICEDGE;
+            }
+
             User32Interop.SetWindowLong(hwnd, User32_WS.GWL_EXSTYLE, lStyle);
             User32Interop.SetWindowPos(hwnd, IntPtr.Zero, 0, 0, 0, 0, (uint)(PositioningFlags.SWP_FRAMECHANGED | PositioningFlags.SWP_NOMOVE | PositioningFlags.SWP_NOSIZE | PositioningFlags.SWP_NOZORDER | PositioningFlags.SWP_NOOWNERZORDER));
 
@@ -2985,15 +3137,24 @@ namespace Nucleus.Gaming
                 loc.Y = yOffset;
             }
 
-            Log(string.Format("Resizing this game window and keeping aspect ratio. Values: width:{0}, height:{1}, aspectratio:{2}, origwidth:{3}, origheight:{4}, plyrboundwidth:{5}, plyrboundheight:{6}", size.Width, size.Height, origRatio, origWidth, origHeight, playerBoundsWidth, playerBoundsHeight));
-            WindowScrape.Static.HwndInterface.SetHwndSize(hwnd, size.Width, size.Height);
+            if(!gen.DontResize)
+            {
+                Log(string.Format("Resizing this game window and keeping aspect ratio. Values: width:{0}, height:{1}, aspectratio:{2}, origwidth:{3}, origheight:{4}, plyrboundwidth:{5}, plyrboundheight:{6}", size.Width, size.Height, origRatio, origWidth, origHeight, playerBoundsWidth, playerBoundsHeight));
+                WindowScrape.Static.HwndInterface.SetHwndSize(hwnd, size.Width, size.Height);
+            }
 
-            Log(string.Format("Repostioning this game window to coords x:{0},y:{1}", loc.X, loc.Y));
-            WindowScrape.Static.HwndInterface.SetHwndPos(hwnd, loc.X, loc.Y);
+            if(!gen.DontReposition)
+            {
+                Log(string.Format("Repostioning this game window to coords x:{0},y:{1}", loc.X, loc.Y));
+                WindowScrape.Static.HwndInterface.SetHwndPos(hwnd, loc.X, loc.Y);
+            }
 
             //User32Util.HideTaskbar();
-            Log("Setting this game window to top most");
-            WindowScrape.Static.HwndInterface.MakeTopMost(hwnd);
+            if(!gen.NotTopMost)
+            {
+                Log("Setting this game window to top most");
+                WindowScrape.Static.HwndInterface.MakeTopMost(hwnd);
+            }
 
 			//Set up raw input window.
 			var window = CreateRawInputWindow(proc, players[playerIndex]);
@@ -3001,7 +3162,47 @@ namespace Nucleus.Gaming
             if (gen.HookFocus || gen.SetWindowHook || gen.HideCursor || gen.PreventWindowDeactivation || gen.SupportsMultipleKeyboardsAndMice)
             {
                 Log("Injecting post-launch hooks for this process");
-                InjectDLLs(proc, window);
+                //InjectDLLs(proc, window);
+                //Thread.Sleep(1000);
+
+                if (gen.PreventWindowDeactivation && !isPrevent)
+                {
+                    Log("PreventWindowDeactivation detected, setting flag");
+                    isPrevent = true;
+                }
+
+                if (isPrevent)
+                {
+                    if (players[playerIndex].IsKeyboardPlayer && gen.KeyboardPlayerSkipPreventWindowDeactivate)
+                    {
+                        Log("Ignoring PreventWindowDeactivation for keyboard player");
+                        gen.PreventWindowDeactivation = false;
+                    }
+                    else
+                    {
+                        Log("Keeping PreventWindowDeactivation on");
+                        gen.PreventWindowDeactivation = true;
+                    }
+                }
+
+                if (gen.PostHookInstances?.Length > 0)
+                {
+                    string[] instancesToHook = gen.PostHookInstances.Split(',');
+                    foreach (string instanceToHook in instancesToHook)
+                    {
+                        if (int.Parse(instanceToHook) == (playerIndex + 1))
+                        {
+                            User32Interop.SetForegroundWindow(proc.MainWindowHandle);
+                            InjectDLLs(proc, window);
+                        }
+                    }
+                }
+                else
+                {
+                    User32Interop.SetForegroundWindow(proc.MainWindowHandle);
+                    InjectDLLs(proc, window);
+                }
+
                 Thread.Sleep(1000);
             }
         }
@@ -3471,7 +3672,7 @@ namespace Nucleus.Gaming
             {
                 PlayerInfo p = players[i];
 
-                if (p.IsKeyboardPlayer)
+                if (p.IsKeyboardPlayer && !p.IsRawKeyboard)
                 {
                     ProcessData data = p.ProcessData;
                     if (data == null)
@@ -3568,26 +3769,68 @@ namespace Nucleus.Gaming
 
                             if (!gen.PromptBetweenInstances)
                             {
-                                Log("Setting game window to top most");
-                                data.HWnd.TopMost = true;
+                                if(!gen.NotTopMost)
+                                {
+                                    Log("Setting game window to top most");
+                                    data.HWnd.TopMost = true;
+                                }
                             }
 
 
                             if (data.Status == 2)
                             {
+
                                 Log("Removing game window border for pid " + data.Process.Id);
                                 uint lStyle = User32Interop.GetWindowLong(data.HWnd.NativePtr, User32_WS.GWL_STYLE);
-                                lStyle = lStyle & ~User32_WS.WS_CAPTION;
-                                lStyle = lStyle & ~User32_WS.WS_THICKFRAME;
-                                lStyle = lStyle & ~User32_WS.WS_MINIMIZE;
-                                lStyle = lStyle & ~User32_WS.WS_MAXIMIZE;
-                                lStyle = lStyle & ~User32_WS.WS_SYSMENU;
+                                if(gen.WindowStyleValues?.Length > 0)
+                                {
+                                    Log("Using user custom window style");
+                                    foreach(string val in gen.WindowStyleValues)
+                                    {
+                                        if(val.StartsWith("~"))
+                                        {
+                                            lStyle &= ~Convert.ToUInt32(val.Substring(1), 16);
+                                        }
+                                        else
+                                        {
+                                            lStyle |= Convert.ToUInt32(val, 16);
+                                        }
+                                    }
+                                }
+                                else
+                                {
+                                    lStyle &= ~User32_WS.WS_CAPTION;
+                                    lStyle &= ~User32_WS.WS_THICKFRAME;
+                                    lStyle &= ~User32_WS.WS_MINIMIZE;
+                                    lStyle &= ~User32_WS.WS_MAXIMIZE;
+                                    lStyle &= ~User32_WS.WS_SYSMENU;
+                                }
                                 User32Interop.SetWindowLong(data.HWnd.NativePtr, User32_WS.GWL_STYLE, lStyle);
 
                                 lStyle = User32Interop.GetWindowLong(data.HWnd.NativePtr, User32_WS.GWL_EXSTYLE);
-                                lStyle = lStyle & ~User32_WS.WS_EX_DLGMODALFRAME;
-                                lStyle = lStyle & ~User32_WS.WS_EX_CLIENTEDGE;
-                                lStyle = lStyle & ~User32_WS.WS_EX_STATICEDGE;
+
+                                if (gen.ExtWindowStyleValues?.Length > 0)
+                                {
+                                    Log("Using user custom extended window style");
+                                    foreach (string val in gen.ExtWindowStyleValues)
+                                    {
+                                        if (val.StartsWith("~"))
+                                        {
+                                            lStyle &= ~Convert.ToUInt32(val.Substring(1), 16);
+                                        }
+                                        else
+                                        {
+                                            lStyle |= Convert.ToUInt32(val, 16);
+                                        }
+                                    }
+                                }
+                                else
+                                {
+                                    lStyle &= ~User32_WS.WS_EX_DLGMODALFRAME;
+                                    lStyle &= ~User32_WS.WS_EX_CLIENTEDGE;
+                                    lStyle &= ~User32_WS.WS_EX_STATICEDGE;
+                                }
+
                                 User32Interop.SetWindowLong(data.HWnd.NativePtr, User32_WS.GWL_EXSTYLE, lStyle);
                                 User32Interop.SetWindowPos(data.HWnd.NativePtr, IntPtr.Zero, 0, 0, 0, 0, (uint)(PositioningFlags.SWP_FRAMECHANGED | PositioningFlags.SWP_NOMOVE | PositioningFlags.SWP_NOSIZE | PositioningFlags.SWP_NOZORDER | PositioningFlags.SWP_NOOWNERZORDER));
                                 //User32Interop.SetForegroundWindow(data.HWnd.NativePtr);
@@ -3610,7 +3853,7 @@ namespace Nucleus.Gaming
                             }
                             else if (data.Status == 1)
                             {
-                                if (!gen.KeepAspectRatio && !gen.KeepMonitorAspectRatio && !dllRepos)
+                                if (!gen.KeepAspectRatio && !gen.KeepMonitorAspectRatio && !dllRepos && !gen.DontResize)
                                 {
                                     Log(string.Format("Repostioning game window for pid {0} to coords x:{1},y:{2}", data.Process.Id, data.Position.X, data.Position.Y));
                                     data.HWnd.Location = data.Position;
@@ -3621,7 +3864,7 @@ namespace Nucleus.Gaming
 
                                 if (gen.LockMouse)
                                 {
-                                    if (p.IsKeyboardPlayer)
+                                    if (p.IsKeyboardPlayer && !p.IsRawKeyboard)
                                     {
                                         _cursorModule.Setup(data.Process, p.MonitorBounds);
                                     }
@@ -3633,7 +3876,7 @@ namespace Nucleus.Gaming
                             }
                             else if (data.Status == 0)
                             {
-                                if (!dllResize)
+                                if (!dllResize && !gen.DontResize)
                                 {
                                     if (gen.KeepAspectRatio || gen.KeepMonitorAspectRatio)
                                     {
@@ -3980,17 +4223,56 @@ namespace Nucleus.Gaming
                 prevProcessData.HWnd.Location = new Point(prevWindowX, prevWindowY);
                 prevProcessData.HWnd.Size = new Size(prevWindowWidth, prevWindowHeight);
                 uint lStyle = User32Interop.GetWindowLong(prevProcessData.HWnd.NativePtr, User32_WS.GWL_STYLE);
-                lStyle = lStyle & ~User32_WS.WS_CAPTION;
-                lStyle = lStyle & ~User32_WS.WS_THICKFRAME;
-                lStyle = lStyle & ~User32_WS.WS_MINIMIZE;
-                lStyle = lStyle & ~User32_WS.WS_MAXIMIZE;
-                lStyle = lStyle & ~User32_WS.WS_SYSMENU;
+                if (gen.WindowStyleValues?.Length > 0)
+                {
+                    Log("Using user custom window style");
+                    foreach (string val in gen.WindowStyleValues)
+                    {
+                        if (val.StartsWith("~"))
+                        {
+                            lStyle &= ~Convert.ToUInt32(val.Substring(1), 16);
+                        }
+                        else
+                        {
+                            lStyle |= Convert.ToUInt32(val, 16);
+                        }
+                    }
+                }
+                else
+                {
+                    lStyle &= ~User32_WS.WS_CAPTION;
+                    lStyle &= ~User32_WS.WS_THICKFRAME;
+                    lStyle &= ~User32_WS.WS_MINIMIZE;
+                    lStyle &= ~User32_WS.WS_MAXIMIZE;
+                    lStyle &= ~User32_WS.WS_SYSMENU;
+                }
                 User32Interop.SetWindowLong(prevProcessData.HWnd.NativePtr, User32_WS.GWL_STYLE, lStyle);
 
                 lStyle = User32Interop.GetWindowLong(prevProcessData.HWnd.NativePtr, User32_WS.GWL_EXSTYLE);
-                lStyle = lStyle & ~User32_WS.WS_EX_DLGMODALFRAME;
-                lStyle = lStyle & ~User32_WS.WS_EX_CLIENTEDGE;
-                lStyle = lStyle & ~User32_WS.WS_EX_STATICEDGE;
+
+                if (gen.ExtWindowStyleValues?.Length > 0)
+                {
+                    Log("Using user custom extended window style");
+                    foreach (string val in gen.ExtWindowStyleValues)
+                    {
+                        if (val.StartsWith("~"))
+                        {
+                            lStyle &= ~Convert.ToUInt32(val.Substring(1), 16);
+                        }
+                        else
+                        {
+                            lStyle |= Convert.ToUInt32(val, 16);
+                        }
+                    }
+                }
+                else
+                {
+                    lStyle &= ~User32_WS.WS_EX_DLGMODALFRAME;
+                    lStyle &= ~User32_WS.WS_EX_CLIENTEDGE;
+                    lStyle &= ~User32_WS.WS_EX_STATICEDGE;
+                }
+
+
                 User32Interop.SetWindowLong(prevProcessData.HWnd.NativePtr, User32_WS.GWL_EXSTYLE, lStyle);
                 User32Interop.SetWindowPos(prevProcessData.HWnd.NativePtr, IntPtr.Zero, 0, 0, 0, 0, (uint)(PositioningFlags.SWP_FRAMECHANGED | PositioningFlags.SWP_NOMOVE | PositioningFlags.SWP_NOSIZE | PositioningFlags.SWP_NOZORDER | PositioningFlags.SWP_NOOWNERZORDER));
 
@@ -4834,7 +5116,7 @@ namespace Nucleus.Gaming
                         File.Delete(Path.Combine(instanceSteamSettingsFolder, "account_name.txt"));
                     }
 
-                    if (ini.IniReadValue("Misc", "UseNicksInGame") == "True" && player.IsKeyboardPlayer && ini.IniReadValue("ControllerMapping", "Keyboard") != "")
+                    if (ini.IniReadValue("Misc", "UseNicksInGame") == "True" && player.IsKeyboardPlayer && !player.IsRawKeyboard && ini.IniReadValue("ControllerMapping", "Keyboard") != "")
                     {
                         File.WriteAllText(Path.Combine(instanceSteamSettingsFolder, "account_name.txt"), ini.IniReadValue("ControllerMapping", "Keyboard"));
                         Log("Generating account_name.txt with nickname " + ini.IniReadValue("ControllerMapping", "Keyboard"));

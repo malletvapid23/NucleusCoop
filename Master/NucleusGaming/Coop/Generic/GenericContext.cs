@@ -180,6 +180,14 @@ namespace Nucleus.Gaming
             }
         }
 
+        public bool IsKeyboardPlayer
+        {
+            get
+            {
+                return pInfo.IsKeyboardPlayer;
+            }
+        }
+
         public int OrigAspectRatio
         {
             get

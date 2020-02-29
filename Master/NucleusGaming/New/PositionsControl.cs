@@ -1314,7 +1314,7 @@ namespace Nucleus.Coop
                         }
                         g.DrawImage(gamepadImg, gamepadRect);
                     }
-                    else if (info.IsKeyboardPlayer)
+                    else if (info.IsKeyboardPlayer && !info.IsRawKeyboard && !info.IsRawMouse)
                     {
                         g.DrawImage(keyboardImg, gamepadRect);
                     }

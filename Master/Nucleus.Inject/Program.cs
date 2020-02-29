@@ -233,6 +233,7 @@ namespace Nucleus.Inject
 					else
 						result = Injector32.RhCreateAndInject(InEXEPath, InCommandLine, InProcessCreationFlags, envPtr,
 							InInjectionOptions, InLibraryPath_x86, "", ptr, (uint) size, pid);
+					Log("CreateAndInject result code: " + result);
 					if (result != 0)
 					{
 						Log("Attempt " + (attempts + 1) +
@@ -254,11 +255,13 @@ namespace Nucleus.Inject
 				if (isFailed)
 				{
 					Console.WriteLine("injectfailed");
+					Log("CreateAndInject failed");
 				}
 				else
 				{
 					//if (procid == 0)
 					Console.WriteLine((uint) Marshal.ReadInt32(pid));
+					Log("CreateAndInject successful, returning " + pid);
 					//else
 					//Console.WriteLine(procid);
 				}

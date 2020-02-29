@@ -16,7 +16,7 @@ using System.Windows.Forms;
 
 namespace Nucleus.Gaming.Coop.InputManagement
 {
-	class RawInputProcessor
+	public class RawInputProcessor
 	{
 		private static RawInputProcessor rawInputProcessor = null;
 

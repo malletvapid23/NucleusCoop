@@ -9,7 +9,7 @@ using System.Threading;
 
 namespace Nucleus.Gaming.Coop.InputManagement
 {
-	static class RawInputManager
+	public static class RawInputManager
 	{
 		public static readonly List<Window> windows = new List<Window>();
 
@@ -126,9 +126,14 @@ namespace Nucleus.Gaming.Coop.InputManagement
 					GamepadId = i++,
 					IsRawMouse = device.deviceInfo.dwType == 0,
 					IsRawKeyboard = device.deviceInfo.dwType == 1,
+					HIDDeviceID = "T" + device.deviceInfo.dwType + "PID" + device.deviceInfo.hid.dwProductId + "VID" + device.deviceInfo.hid.dwVendorId + "VN" + device.deviceInfo.hid.dwVersionNumber
 				};
 				if (player.IsRawMouse) player.RawMouseDeviceHandle = device.deviceHandle;
-				if (player.IsRawKeyboard) player.RawKeyboardDeviceHandle = device.deviceHandle;
+				if (player.IsRawKeyboard)
+				{
+					player.RawKeyboardDeviceHandle = device.deviceHandle;
+					player.IsKeyboardPlayer = true;
+				};
 
 				yield return player;
 			}
