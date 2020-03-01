@@ -191,6 +191,7 @@ namespace Nucleus.Gaming
 		public bool HookUseLegacyInput;
 		public bool HookDontUpdateLegacyInMouseMsg;
 		public bool HookMouseVisibility = true;
+		public bool HookReRegisterRawInput = false;
 
 		//Not hooks
 		public bool SendNormalMouseInput = true;

@@ -300,6 +300,7 @@ namespace Nucleus.Inject
 			bool.TryParse(args[i++], out bool legacyInput);
 			bool.TryParse(args[i++], out bool updateAbsoluteFlagInMouseMessage);
 			bool.TryParse(args[i++], out bool mouseVisibilitySendBack);
+			bool.TryParse(args[i++], out bool reRegisterRawInput);
 
 			string writePipeName = args[i++];
 			string readPipeName = args[i++];
@@ -354,6 +355,7 @@ namespace Nucleus.Inject
 			dataToSend[index++] = Bool_1_0(legacyInput);
 			dataToSend[index++] = Bool_1_0(updateAbsoluteFlagInMouseMessage);
 			dataToSend[index++] = Bool_1_0(mouseVisibilitySendBack);
+			dataToSend[index++] = Bool_1_0(reRegisterRawInput);
 
 			dataToSend[index++] = (byte) (logPathLength >> 24);
 			dataToSend[index++] = (byte) (logPathLength >> 16);

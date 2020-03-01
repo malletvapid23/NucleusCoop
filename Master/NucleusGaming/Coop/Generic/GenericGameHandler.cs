@@ -3317,6 +3317,7 @@ namespace Nucleus.Gaming
 					gen.SupportsMultipleKeyboardsAndMice && gen.HookUseLegacyInput,
 					!gen.HookDontUpdateLegacyInMouseMsg,
 					gen.SupportsMultipleKeyboardsAndMice && gen.HookMouseVisibility,
+					gen.HookReRegisterRawInput,
 
 					windowNull ? "" : (window.HookPipe?.pipeNameWrite ?? ""),
 					windowNull ? "" : (window.HookPipe?.pipeNameRead ?? ""),

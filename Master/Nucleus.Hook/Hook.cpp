@@ -100,6 +100,8 @@ extern "C" void __declspec(dllexport) __stdcall NativeInjectionEntryPoint(REMOTE
 void __stdcall NativeInjectionEntryPoint(REMOTE_ENTRY_INFO* inRemoteInfo)
 {
 	const auto pid = GetCurrentProcessId();
+
+	//TODO: RENABLE
 	hWnd = FindWindowFromProcessId(pid);
 	
 	BYTE* data = inRemoteInfo->UserData;
@@ -133,6 +135,7 @@ void __stdcall NativeInjectionEntryPoint(REMOTE_ENTRY_INFO* inRemoteInfo)
 	options.legacyInput = NEXTBOOL;
 	options.updateAbsoluteFlagInMouseMessage = NEXTBOOL;
 	options.mouseVisibilitySendBack = NEXTBOOL;
+	options.reregisterRawInput = NEXTBOOL;
 #undef NEXTBOOL
 
 	const auto pathLength = static_cast<size_t>(bytesToInt(p));
@@ -173,8 +176,10 @@ void __stdcall NativeInjectionEntryPoint(REMOTE_ENTRY_INFO* inRemoteInfo)
 		" setWindow: " << options.setWindow <<
 		" hideCursor: " << options.hideCursor <<
 		" hookFocus: " << options.hookFocus <<
+		" mouseVisibilitySendBack: " << options.mouseVisibilitySendBack <<
+		" reregisterRawInput: " << options.reregisterRawInput <<
 		"\n");
-
+	
 	if (options.setWindow)
 		installSetWindowHook();
 
@@ -199,11 +204,11 @@ void __stdcall NativeInjectionEntryPoint(REMOTE_ENTRY_INFO* inRemoteInfo)
 	if (options.getKeyboardState)
 		installGetKeyboardStateHook();
 
-	if (options.filterRawInput || options.filterMouseMessages || options.legacyInput || options.preventWindowDeactivation)
+	if (options.filterRawInput || options.filterMouseMessages || options.legacyInput || options.preventWindowDeactivation || options.reregisterRawInput)
 	{
 		installMessageFilterHooks();
 	}
-
+	
 	DEBUGLOG("Hook injection complete\n");
 
 	Piping::startPipeListen();

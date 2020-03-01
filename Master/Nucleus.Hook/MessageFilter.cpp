@@ -5,6 +5,9 @@
 #include "Globals.h"
 #include <windowsx.h>
 #include "Piping.h"
+#include "ReRegisterRawInput.h"
+
+bool searchingForRawInputToReRegister = false;
 
 BOOL filterMessage(const LPMSG lpMsg)
 {
@@ -15,6 +18,14 @@ BOOL filterMessage(const LPMSG lpMsg)
 #define ALLOW return 1;
 #define BLOCK memset(lpMsg, 0, sizeof(MSG)); return -1;
 
+	if (searchingForRawInputToReRegister && msg == WM_INPUT)
+	{
+		searchingForRawInputToReRegister = false;
+
+		//We found the window that this process using for raw input. Now re-register raw input for it.
+		reRegisterRawInput(lpMsg->hwnd);
+	}
+	
 	//Filter raw input
 	if (msg == WM_INPUT && options.filterRawInput)
 	{
@@ -181,6 +192,8 @@ BOOL WINAPI PeekMessageW_Hook(LPMSG lpMsg, HWND hWnd, UINT wMsgFilterMin, UINT w
 
 void installMessageFilterHooks()
 {
+	searchingForRawInputToReRegister = options.reregisterRawInput;
+	
 	DEBUGLOG("Injecting message filter hooks\n");
 	installHook(TEXT("user32"), "GetMessageA", GetMessageA_Hook);
 	installHook(TEXT("user32"), "GetMessageW", GetMessageW_Hook);
