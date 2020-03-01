@@ -1588,6 +1588,20 @@ namespace Nucleus.Gaming
                     emu.IniWriteValue("SmartSteamEmu", "AppId", context.SteamID);
                     emu.IniWriteValue("SmartSteamEmu", "SteamIdGeneration", "Manual");
                     emu.IniWriteValue("SmartSteamEmu", "ManualSteamId", (random_steam_id + i).ToString());
+                    string lang = "english";
+                    if (ini.IniReadValue("Misc", "SteamLang") != "" && ini.IniReadValue("Misc", "SteamLang") != "Automatic")
+                    {
+                        gen.GoldbergLanguage = ini.IniReadValue("Misc", "SteamLang").ToLower();
+                    }
+                    if (gen.GoldbergLanguage?.Length > 0)
+                    {
+                        lang = gen.GoldbergLanguage;
+                    }
+                    else
+                    {
+                        lang = gen.GetSteamLanguage();
+                    }
+                    emu.IniWriteValue("SmartSteamEmu", "Language", lang);
 
                     if (ini.IniReadValue("Misc", "UseNicksInGame") == "True" && !string.IsNullOrEmpty(player.Nickname))
                     {
@@ -5146,6 +5160,10 @@ namespace Nucleus.Gaming
                 File.WriteAllText(Path.Combine(instanceSteamSettingsFolder, "user_steam_id.txt"), (steamID).ToString());
 
                 string lang = "english";
+                if (ini.IniReadValue("Misc", "SteamLang") != "" && ini.IniReadValue("Misc", "SteamLang") != "Automatic")
+                {
+                    gen.GoldbergLanguage = ini.IniReadValue("Misc", "SteamLang").ToLower();
+                }
                 if (gen.GoldbergLanguage?.Length > 0)
                 {
                     lang = gen.GoldbergLanguage;

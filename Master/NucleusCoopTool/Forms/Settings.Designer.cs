@@ -30,6 +30,8 @@
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Settings));
             this.groupBox4 = new System.Windows.Forms.GroupBox();
+            this.cmb_Lang = new System.Windows.Forms.ComboBox();
+            this.label34 = new System.Windows.Forms.Label();
             this.cmb_Network = new System.Windows.Forms.ComboBox();
             this.label32 = new System.Windows.Forms.Label();
             this.debugLogCheck = new System.Windows.Forms.CheckBox();
@@ -133,6 +135,8 @@
             // 
             // groupBox4
             // 
+            this.groupBox4.Controls.Add(this.cmb_Lang);
+            this.groupBox4.Controls.Add(this.label34);
             this.groupBox4.Controls.Add(this.cmb_Network);
             this.groupBox4.Controls.Add(this.label32);
             this.groupBox4.Controls.Add(this.debugLogCheck);
@@ -145,16 +149,65 @@
             this.groupBox4.TabStop = false;
             this.groupBox4.Text = "Miscellaneous";
             // 
+            // cmb_Lang
+            // 
+            this.cmb_Lang.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cmb_Lang.FormattingEnabled = true;
+            this.cmb_Lang.Items.AddRange(new object[] {
+            "Automatic",
+            "Arabic",
+            "Brazilian",
+            "Bulgarian",
+            "Schinese",
+            "Tchinese",
+            "Czech",
+            "Danish",
+            "Dutch",
+            "English",
+            "Finnish",
+            "French",
+            "German",
+            "Greek",
+            "Hungarian",
+            "Italian",
+            "Japanese",
+            "Koreana",
+            "Norwegian",
+            "Polish",
+            "Portuguese",
+            "Romanian",
+            "Russian",
+            "Spanish",
+            "Swedish",
+            "Thai",
+            "Turkish",
+            "Ukrainian"});
+            this.cmb_Lang.Location = new System.Drawing.Point(149, 27);
+            this.cmb_Lang.MaxDropDownItems = 10;
+            this.cmb_Lang.Name = "cmb_Lang";
+            this.cmb_Lang.Size = new System.Drawing.Size(232, 29);
+            this.cmb_Lang.TabIndex = 64;
+            // 
+            // label34
+            // 
+            this.label34.AutoSize = true;
+            this.label34.Location = new System.Drawing.Point(15, 30);
+            this.label34.Name = "label34";
+            this.label34.Size = new System.Drawing.Size(128, 21);
+            this.label34.TabIndex = 63;
+            this.label34.Text = "Steam Language:";
+            this.label34.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            // 
             // cmb_Network
             // 
             this.cmb_Network.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cmb_Network.FormattingEnabled = true;
             this.cmb_Network.Items.AddRange(new object[] {
             "Automatic"});
-            this.cmb_Network.Location = new System.Drawing.Point(94, 124);
+            this.cmb_Network.Location = new System.Drawing.Point(102, 121);
             this.cmb_Network.MaxDropDownItems = 10;
             this.cmb_Network.Name = "cmb_Network";
-            this.cmb_Network.Size = new System.Drawing.Size(287, 29);
+            this.cmb_Network.Size = new System.Drawing.Size(279, 29);
             this.cmb_Network.TabIndex = 62;
             this.cmb_Network.DropDown += new System.EventHandler(this.cmb_Network_DropDown);
             this.cmb_Network.DropDownClosed += new System.EventHandler(this.cmb_Network_DropDownClosed);
@@ -162,7 +215,7 @@
             // label32
             // 
             this.label32.AutoSize = true;
-            this.label32.Location = new System.Drawing.Point(15, 127);
+            this.label32.Location = new System.Drawing.Point(15, 124);
             this.label32.Name = "label32";
             this.label32.Size = new System.Drawing.Size(73, 21);
             this.label32.TabIndex = 61;
@@ -172,7 +225,7 @@
             // debugLogCheck
             // 
             this.debugLogCheck.AutoSize = true;
-            this.debugLogCheck.Location = new System.Drawing.Point(19, 63);
+            this.debugLogCheck.Location = new System.Drawing.Point(19, 93);
             this.debugLogCheck.Name = "debugLogCheck";
             this.debugLogCheck.Size = new System.Drawing.Size(155, 25);
             this.debugLogCheck.TabIndex = 0;
@@ -182,7 +235,7 @@
             // useNicksCheck
             // 
             this.useNicksCheck.AutoSize = true;
-            this.useNicksCheck.Location = new System.Drawing.Point(19, 32);
+            this.useNicksCheck.Location = new System.Drawing.Point(19, 62);
             this.useNicksCheck.Name = "useNicksCheck";
             this.useNicksCheck.Size = new System.Drawing.Size(200, 25);
             this.useNicksCheck.TabIndex = 20;
@@ -1258,5 +1311,7 @@
         private System.Windows.Forms.ComboBox cmb_Network;
         private System.Windows.Forms.Label label32;
         private System.Windows.Forms.Label label33;
+        private System.Windows.Forms.Label label34;
+        private System.Windows.Forms.ComboBox cmb_Lang;
     }
 }

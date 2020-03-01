@@ -59,6 +59,15 @@ namespace Nucleus.Coop
                 cmb_Network.SelectedIndex = 0;
             }
 
+            if (ini.IniReadValue("Misc", "SteamLang") != "")
+            {
+                cmb_Lang.Text = ini.IniReadValue("Misc", "SteamLang");
+            }
+            else
+            {
+                cmb_Lang.SelectedIndex = 0;
+            }
+
             //Hotkeys
             if (ini.IniReadValue("Hotkeys", "Close").Contains('+'))
             {
@@ -203,14 +212,15 @@ namespace Nucleus.Coop
                 if(device.deviceInfo.dwType == 0)
                 {
                     did = "T" + device.deviceInfo.dwType + "PID" + device.deviceInfo.hid.dwProductId + "VID" + device.deviceInfo.hid.dwVendorId + "VN" + device.deviceInfo.hid.dwVersionNumber;
+                    controllerGuids[gcDevicesCnt].Text = did;
+                    gcDevicesCnt++;
                 }
-                controllerGuids[gcDevicesCnt].Text = did;
+                
 
                 if (ini.IniReadValue("ControllerMapping", did) != "")
                 {
                     controllerNicks[gcDevicesCnt].Text = ini.IniReadValue("ControllerMapping", did);
                 }
-                gcDevicesCnt++;
             }
         }
 
@@ -254,6 +264,7 @@ namespace Nucleus.Coop
                 ini.IniWriteValue("Misc", "UseNicksInGame", useNicksCheck.Checked.ToString());
                 ini.IniWriteValue("Misc", "DebugLog", debugLogCheck.Checked.ToString());
                 ini.IniWriteValue("Misc", "Network", cmb_Network.SelectedItem.ToString());
+                ini.IniWriteValue("Misc", "SteamLang", cmb_Lang.SelectedItem.ToString());
 
                 //ini.IniWriteValue("CustomLayout", "Enabled", enableCustomCheckbox.Checked.ToString());
                 ini.IniWriteValue("CustomLayout", "HorizontalLines", numHorDiv.Value.ToString());
