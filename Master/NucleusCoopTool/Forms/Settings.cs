@@ -200,7 +200,7 @@ namespace Nucleus.Coop
 
                 //controllerGuids[gcDevicesCnt].Text = fhid;
                 string did = string.Empty;
-                if(device.deviceInfo.dwType == 1)
+                if(device.deviceInfo.dwType == 0)
                 {
                     did = "T" + device.deviceInfo.dwType + "PID" + device.deviceInfo.hid.dwProductId + "VID" + device.deviceInfo.hid.dwVendorId + "VN" + device.deviceInfo.hid.dwVersionNumber;
                 }
