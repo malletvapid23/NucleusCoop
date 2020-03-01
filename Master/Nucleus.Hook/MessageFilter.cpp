@@ -9,6 +9,8 @@
 
 bool searchingForRawInputToReRegister = false;
 
+WNDPROC originalWndProc = nullptr;
+
 BOOL filterMessage(const LPMSG lpMsg)
 {
 	const auto msg = lpMsg->message;
@@ -156,7 +158,8 @@ LRESULT CALLBACK WndProc_Hook(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam
 			return -1;
 		}
 		default:
-			DefWindowProc(hwnd, uMsg, wParam, lParam);
+			//DefWindowProc(hwnd, uMsg, wParam, lParam);
+			return CallWindowProc(originalWndProc, hwnd, uMsg, wParam, lParam);
 	}
 	return 1;
 }
@@ -206,6 +209,8 @@ void installMessageFilterHooks()
 	if (options.preventWindowDeactivation)
 	{
 		DEBUGLOG("Injecting WndProc message filter for PreventWindowDeactivation\n");
+		originalWndProc = reinterpret_cast<WNDPROC>(GetWindowLongPtr(hWnd, GWLP_WNDPROC));
+		
 		SetWindowLongPtr(hWnd, GWLP_WNDPROC, (LONG_PTR)WndProc_Hook);
 	}
 }
