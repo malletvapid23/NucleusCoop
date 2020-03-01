@@ -14,6 +14,22 @@ using System.Windows.Forms;
 
 namespace StartGame
 {
+
+    internal static class Extensions
+    {
+        [DllImport("Kernel32.dll")]
+        private static extern bool QueryFullProcessImageName([In] IntPtr hProcess, [In] uint dwFlags, [Out] StringBuilder lpExeName, [In, Out] ref uint lpdwSize);
+
+        public static string GetMainModuleFileName(this Process process, int buffer = 1024)
+        {
+            var fileNameBuilder = new StringBuilder(buffer);
+            uint bufferLength = (uint)fileNameBuilder.Capacity + 1;
+            return QueryFullProcessImageName(process.Handle, 0, fileNameBuilder, ref bufferLength) ?
+                fileNameBuilder.ToString() :
+                null;
+        }
+    }
+
     class Program
     {
         private const int tries = 2;
@@ -318,8 +334,9 @@ namespace StartGame
                     {
                         foreach (Process gameProc in gameProcs)
                         {
-                            if (gameProc.MainModule.FileName == path)
+                            if (gameProc.GetMainModuleFileName().ToLower() == path.ToLower())
                             {
+                                
                                 Log("Process with this path is already running! Skipping creating a new process");
                                 pOutPID = (uint)gameProc.Id;
                                 alreadyExists = true;
@@ -435,17 +452,18 @@ namespace StartGame
                 }
 
                 Thread.Sleep(100);
+
                 bool isRunning = Process.GetProcesses().Any(x => x.Id == (int)pOutPID);
                 bool foundProc = false;
-                if (!isRunning || (isRunning && Process.GetProcessById((int)pOutPID).ProcessName != Path.GetFileNameWithoutExtension(path)))
+                if (!isRunning || (isRunning && Process.GetProcessById((int)pOutPID).ProcessName.ToLower() != Path.GetFileNameWithoutExtension(path).ToLower()))
                 {
                     if(isRunning)
                     {
-                        Log("Process ID " + pOutPID + "exists but does not match expected process name. Attempting to resolve.");
+                        Log("Process ID " + pOutPID + " exists but does not match expected process name. Attempting to resolve.");
                     }
                     else
                     {
-                        Log("Process ID " + pOutPID + "doesn't currently exist. Seeing if there is a process running by its path");
+                        Log("Process ID " + pOutPID + " doesn't currently exist. Seeing if there is a process running by its path");
                     }
 
                     Process[] gameProcs = Process.GetProcessesByName(Path.GetFileNameWithoutExtension(path));
@@ -454,7 +472,7 @@ namespace StartGame
                     {
                         foreach (Process gameProc in gameProcs)
                         {
-                            if (gameProc.MainModule.FileName == path)
+                            if (gameProc.GetMainModuleFileName().ToLower() == path.ToLower())
                             {
                                 Log("Process ID changed to " + pOutPID);
                                 foundProc = true;
@@ -475,7 +493,7 @@ namespace StartGame
                 else
                 {
                     Log("Process ID: " + pOutPID);
-                    if(Process.GetProcessById((int)pOutPID).MainModule.FileName == path)
+                    if(Process.GetProcessById((int)pOutPID).GetMainModuleFileName().ToLower() == path.ToLower())
                     {
                         foundProc = true;
                         isRunning = true;

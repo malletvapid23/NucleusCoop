@@ -254,14 +254,16 @@ namespace Nucleus.Inject
 
 				if (isFailed)
 				{
-					Console.WriteLine("injectfailed");
 					Log("CreateAndInject failed");
+					Console.WriteLine("injectfailed");
+					
 				}
 				else
 				{
 					//if (procid == 0)
-					Console.WriteLine((uint) Marshal.ReadInt32(pid));
-					Log("CreateAndInject successful, returning " + pid);
+					Log("CreateAndInject successful, returning " + Marshal.ReadInt32(pid));
+					Console.WriteLine(Marshal.ReadInt32(pid));
+					
 					//else
 					//Console.WriteLine(procid);
 				}
@@ -269,11 +271,12 @@ namespace Nucleus.Inject
 			catch (Exception ex)
 			{
 				Log(string.Format("ERROR - {0}", ex.Message));
+				Console.WriteLine("injectfailed");
 			}
 
-			Marshal.FreeHGlobal(pid);
+			//Marshal.FreeHGlobal(pid);
 
-			Console.WriteLine(Marshal.ReadInt32(pid).ToString());
+			//Console.WriteLine(Marshal.ReadInt32(pid).ToString());
 		}
 
 
