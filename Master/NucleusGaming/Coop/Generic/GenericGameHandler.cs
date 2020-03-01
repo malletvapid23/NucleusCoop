@@ -3129,22 +3129,38 @@ namespace Nucleus.Gaming
                     }
                 }
 
-                int newWidth = playerBoundsWidth;
+                double newWidth = playerBoundsWidth;
                 double newHeight = playerBoundsHeight;
 
-                if (origHeight > 0 && origWidth > 0)
+                if (newWidth < origWidth)
                 {
-                    origRatio = (double)origHeight / origWidth;
-
-                    newWidth = playerBoundsWidth;
-                    newHeight = (origRatio * newWidth);
-
-                    if (newHeight > playerBoundsHeight)
+                    if (origHeight > 0 && origWidth > 0)
                     {
-                        newHeight = playerBoundsHeight;
+                        origRatio = (double)origWidth / origHeight;
+
+                        newHeight = (newWidth / origRatio);
+
+                        if (newHeight > playerBoundsWidth)
+                        {
+                            newHeight = playerBoundsWidth;
+                        }
                     }
                 }
-                size.Width = newWidth;
+                else
+                {
+                    if (origHeight > 0 && origWidth > 0)
+                    {
+                        origRatio = (double)origWidth / origHeight;
+
+                        newWidth = (newHeight * origRatio);
+
+                        if (newWidth > playerBoundsHeight)
+                        {
+                            newWidth = playerBoundsHeight;
+                        }
+                    }
+                }
+                size.Width = (int)newWidth;
                 size.Height = (int)newHeight;
 
                 int yOffset = (int)(loc.Y + ((playerBoundsHeight - newHeight) / 2));
@@ -3912,14 +3928,13 @@ namespace Nucleus.Gaming
                                         double newWidth = playerBoundsWidth;
                                         double newHeight = playerBoundsHeight;
 
-                                        if(newHeight > newWidth)
+                                        if(newWidth < origWidth)
                                         {
                                             if (origHeight > 0 && origWidth > 0)
                                             {
                                                 origRatio = (double)origWidth / origHeight;
 
-                                                //newWidth = playerBoundsWidth;
-                                                newHeight = (origRatio / newWidth);
+                                                newHeight = (newWidth / origRatio);
 
                                                 if (newHeight > playerBoundsHeight)
                                                 {
@@ -3933,8 +3948,7 @@ namespace Nucleus.Gaming
                                             {
                                                 origRatio = (double)origWidth / origHeight;
 
-                                                newWidth = ( newHeight * origRatio );
-                                                //newHeight = (origRatio * newWidth);
+                                                newWidth = (newHeight * origRatio);
 
                                                 if (newWidth > playerBoundsWidth)
                                                 {
@@ -3943,33 +3957,16 @@ namespace Nucleus.Gaming
                                             }
                                         }
 
-
-
-                                        //int newWidth = 0;
-                                        //int newHeight = 0;
-
-                                        //if (origWidth > playerBoundsWidth)
-                                        //{
-                                        //    newWidth = playerBoundsWidth;
-                                        //    newHeight = Convert.ToInt32(playerBoundsWidth / origRatio);
-                                        //}
-                                        //if(newHeight > playerBoundsHeight || newHeight == 0)
-                                        //{
-                                        //    newHeight = playerBoundsHeight;
-                                        //}
-                                        //if(newWidth > playerBoundsWidth || newWidth == 0)
-                                        //{
-                                        //    newWidth = Convert.ToInt32(playerBoundsHeight * origRatio);
-                                        //}
                                         Log(string.Format("Resizing game window for pid {0} and keeping aspect ratio. Values: width:{1}, height:{2}, aspectratio:{3}, origwidth:{4}, origheight:{5}, plyrboundwidth:{6}, plyrboundheight:{7}", data.Process.Id, (int)newWidth, (int)newHeight, (Math.Truncate(origRatio * 100) / 100), origWidth, origHeight, playerBoundsWidth, playerBoundsHeight));
                                         data.HWnd.Size = new Size(Convert.ToInt32(newWidth), Convert.ToInt32(newHeight));
 
-                                        if(playerBoundsHeight > playerBoundsWidth)
+                                        //x horizontal , y vertical
+                                        if(newWidth < origWidth)
                                         {
                                             int yOffset = Convert.ToInt32(data.Position.Y + ((playerBoundsHeight - newHeight) / 2));
                                             data.Position.Y = yOffset;
                                         }
-                                        else
+                                        if(newHeight < origHeight)
                                         {
                                             int xOffset = Convert.ToInt32(data.Position.X + ((playerBoundsWidth - newWidth) / 2));
                                             data.Position.X = xOffset;
