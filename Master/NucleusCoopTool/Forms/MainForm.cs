@@ -898,7 +898,7 @@ namespace Nucleus.Coop
             if (File.Exists(userProfile))
             {
                 string jsonString = File.ReadAllText(userProfile);
-                JObject jObject = Newtonsoft.Json.JsonConvert.DeserializeObject(jsonString) as JObject;
+                JObject jObject = JsonConvert.DeserializeObject(jsonString) as JObject;
 
                 JArray games = jObject["Games"] as JArray;
                 for (int i = 0; i < games.Count; i++)
@@ -914,7 +914,7 @@ namespace Nucleus.Coop
                         {
                             arch = "x64";
                         }
-                        else if(Is64Bit(exePath) == true)
+                        else if(Is64Bit(exePath) == false)
                         {
                             arch = "x86";
                         }
