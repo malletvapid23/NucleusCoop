@@ -190,6 +190,7 @@
     <None Include="app.manifest">
       <SubType>Designer</SubType>
     </None>
+    <None Include="copyoutput\Settings.ini" />
     <None Include="copyoutput\utils\FlawlessWidescreen\x64\data\about_track.xm" />
     <None Include="copyoutput\utils\FlawlessWidescreen\x64\PluginCache\FWS_Plugins\GlobalDependencies\Scripts\StandardBase.lua" />
     <None Include="copyoutput\utils\FlawlessWidescreen\x64\PluginCache\FWS_Plugins\GlobalDependencies\Scripts\StandardTheme.lua" />

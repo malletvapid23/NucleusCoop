@@ -409,6 +409,7 @@ namespace StartGame
                             injectProc.OutputDataReceived += proc_OutputDataReceived;
                             injectProc.BeginOutputReadLine();
                             injectProc.WaitForExit();
+
                         }
                         catch (Exception ex)
                         {
@@ -425,6 +426,8 @@ namespace StartGame
                         //{
                         //    ResumeThread(procInfo.hThread);
                         //}
+
+                        Thread.Sleep(1000);
                     }
 
                 }
@@ -446,12 +449,12 @@ namespace StartGame
                     regMethod = true;
                 }
 
+                Thread.Sleep(1000);
+
                 while (pOutPID == 0)
                 {
                     Thread.Sleep(50);
                 }
-
-                Thread.Sleep(100);
 
                 bool isRunning = Process.GetProcesses().Any(x => x.Id == (int)pOutPID);
                 bool foundProc = false;
@@ -530,7 +533,7 @@ namespace StartGame
                 {
                     //if (regMethod)
                     //{
-                        Thread.Sleep(100);
+                        //Thread.Sleep(100);
                         Log(string.Format("Game started, process ID: {0}", pOutPID));
                     //}
                     //else

@@ -3001,6 +3001,10 @@ namespace Nucleus.Gaming
                     Log(string.Format("Prompted user for Instance {0}", (i + 1)));
                     MessageBox.Show("Press OK when game instance " + (i + 1) + " has been launched and/or you wish to continue.", "Nucleus - Prompt Between Instances End", MessageBoxButtons.OK, MessageBoxIcon.None, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly);
                 }
+                else
+                {
+                    Thread.Sleep(1000);
+                }
             }
 
             int playerIndex = 0;
@@ -3014,6 +3018,7 @@ namespace Nucleus.Gaming
                 string procName = Path.GetFileNameWithoutExtension(gen.ExecutableName).ToLower();
                 if (proc.ProcessName.ToLower() == procName)
                 {
+                    Thread.Sleep(1000);
                     ChangeGameWindow(proc, players, playerIndex);
                     playerIndex++;
                 }
@@ -3024,11 +3029,14 @@ namespace Nucleus.Gaming
                 int numMissing = players.Count - playerIndex;
                 for(int x = 0; x <= numMissing; x++)
                 {
+                    Thread.Sleep(1000);
                     Process proc = LaunchProcessPick(players[playerIndex + 1]);
                     ChangeGameWindow(proc, players, playerIndex + 1);
                     playerIndex++;
                 }
             }
+
+            Thread.Sleep(1000);
 
             if (gen.FakeFocus)
             {
@@ -3163,8 +3171,16 @@ namespace Nucleus.Gaming
                 size.Width = (int)newWidth;
                 size.Height = (int)newHeight;
 
-                int yOffset = (int)(loc.Y + ((playerBoundsHeight - newHeight) / 2));
-                loc.Y = yOffset;
+                if (newWidth < origWidth)
+                {
+                    int yOffset = Convert.ToInt32(loc.Y + ((playerBoundsHeight - newHeight) / 2));
+                    loc.Y = yOffset;
+                }
+                if (newHeight < origHeight)
+                {
+                    int xOffset = Convert.ToInt32(loc.X + ((playerBoundsWidth - newWidth) / 2));
+                    loc.X = xOffset;
+                }
             }
 
             if(!gen.DontResize)
@@ -3188,6 +3204,8 @@ namespace Nucleus.Gaming
 
 			//Set up raw input window.
 			var window = CreateRawInputWindow(proc, players[playerIndex]);
+
+            Thread.Sleep(1000);
 
             if (gen.HookFocus || gen.SetWindowHook || gen.HideCursor || gen.PreventWindowDeactivation || gen.SupportsMultipleKeyboardsAndMice)
             {
@@ -3232,8 +3250,6 @@ namespace Nucleus.Gaming
                     User32Interop.SetForegroundWindow(proc.MainWindowHandle);
                     InjectDLLs(proc, window);
                 }
-
-                Thread.Sleep(1000);
             }
         }
 
