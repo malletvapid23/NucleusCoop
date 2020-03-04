@@ -130,6 +130,7 @@
             this.txt_AuthDesc.Size = new System.Drawing.Size(533, 93);
             this.txt_AuthDesc.TabIndex = 45;
             this.txt_AuthDesc.Text = "";
+            this.txt_AuthDesc.LinkClicked += new System.Windows.Forms.LinkClickedEventHandler(this.txt_AuthDesc_LinkClicked);
             // 
             // txt_Comm
             // 
@@ -143,6 +144,7 @@
             this.txt_Comm.Size = new System.Drawing.Size(533, 93);
             this.txt_Comm.TabIndex = 44;
             this.txt_Comm.Text = "";
+            this.txt_Comm.LinkClicked += new System.Windows.Forms.LinkClickedEventHandler(this.txt_Comm_LinkClicked);
             // 
             // txt_Verified
             // 

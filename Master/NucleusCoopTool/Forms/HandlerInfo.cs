@@ -109,5 +109,15 @@ namespace Nucleus.Coop.Forms
         {
             Process.Start(Handler.GameUrl);
         }
+
+        private void txt_AuthDesc_LinkClicked(object sender, LinkClickedEventArgs e)
+        {
+            Process.Start(e.LinkText);
+        }
+
+        private void txt_Comm_LinkClicked(object sender, LinkClickedEventArgs e)
+        {
+            Process.Start(e.LinkText);
+        }
     }
 }
