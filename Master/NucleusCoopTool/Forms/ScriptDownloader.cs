@@ -23,6 +23,8 @@ namespace Nucleus.Coop.Forms
 
         private MainForm mainForm;
 
+        private string lastSearch;
+
         public ScriptDownloader(MainForm mf)
         {
             InitializeComponent();
@@ -37,6 +39,8 @@ namespace Nucleus.Coop.Forms
         {
             if (!string.IsNullOrEmpty(txt_Search.Text) && txt_Search.Text.Replace(" ", string.Empty).Length > 0)
             {
+                lastSearch = txt_Search.Text;
+
                 list_Games.Items.Clear();
                 searchHandlers.Clear();
 
@@ -210,6 +214,28 @@ namespace Nucleus.Coop.Forms
 
                 DownloadPrompt downloadPrompt = new DownloadPrompt(handler, mainForm);
                 downloadPrompt.ShowDialog();
+            }
+        }
+
+        private void chkBox_Verified_Click(object sender, EventArgs e)
+        {
+            if (chkBox_Verified.Checked)
+            {
+                if (list_Games.Items.Count > 0)
+                {
+                    foreach (ListViewItem game in list_Games.Items)
+                    {
+                        if (game.SubItems[2].Text != "ü")
+                        {
+                            game.Remove();
+                        }
+                    }
+                }
+            }
+            else
+            {
+                txt_Search.Text = lastSearch;
+                btn_Search.PerformClick();
             }
         }
     }

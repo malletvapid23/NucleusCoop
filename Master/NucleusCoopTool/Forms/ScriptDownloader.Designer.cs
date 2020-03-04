@@ -191,6 +191,7 @@
             this.chkBox_Verified.TabIndex = 33;
             this.chkBox_Verified.Text = "Only Verified";
             this.chkBox_Verified.UseVisualStyleBackColor = true;
+            this.chkBox_Verified.Click += new System.EventHandler(this.chkBox_Verified_Click);
             // 
             // ScriptDownloader
             // 
