@@ -80,7 +80,7 @@ namespace Nucleus.Coop.Forms
                     if(count == 1)
                     {
                         handlerFolders.Add(ze.FileName.TrimEnd('/'));
-                        if(ze.FileName == frmHandleTitle)
+                        if(ze.FileName.TrimEnd('/') == frmHandleTitle)
                         {
                             isHFolderMain = true;
                             if(Directory.Exists(Path.Combine(scriptFolder, frmHandleTitle)))
