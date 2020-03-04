@@ -120,17 +120,33 @@ namespace Nucleus.Coop.Forms
                     imageList.Images.Add(bmp);
                     list_Games.SmallImageList = imageList;
 
-
-                    string[] handlerDisplayCols = { handler.OwnerName, vSymb, handler.DownloadCount, handler.Stars, handler.CreatedAt, handler.UpdatedAt };
+                    string[] handlerDisplayCols = { handler.OwnerName, vSymb, handler.DownloadCount, handler.Stars, handler.CreatedAt, handler.UpdatedAt, handler.Description };
                     list_Games.Items.Add(" " + handler.GameName).SubItems.AddRange(handlerDisplayCols);
                     list_Games.Items[i].ImageIndex = i;
+
+                    list_Games.Items[i].SubItems[5].Text = list_Games.Items[i].SubItems[5].Text.Substring(0, list_Games.Items[i].SubItems[5].Text.IndexOf(' '));
+                    if(int.Parse(handler.CurrentVersion) > 1)
+                    {
+                        list_Games.Items[i].SubItems[6].Text = list_Games.Items[i].SubItems[6].Text.Substring(0, list_Games.Items[i].SubItems[6].Text.IndexOf(' '));
+                    }
+                    else
+                    {
+                        list_Games.Items[i].SubItems[6].Text = string.Empty;
+                    }
+
+                    if(list_Games.Items[i].SubItems[7].Text.Length > 50)
+                    {
+                        list_Games.Items[i].SubItems[7].Text = list_Games.Items[i].SubItems[7].Text.Substring(0, 50) + "...";
+                    }
 
                     foreach (ListViewItem lvi in list_Games.Items)
                     {
                         lvi.UseItemStyleForSubItems = false;
-                        lvi.SubItems[2].Font = new Font(new FontFamily("Wingdings"), 10, FontStyle.Bold);
-                        lvi.SubItems[2].ForeColor = Color.Green;
                     }
+
+                    list_Games.Items[i].SubItems[2].Font = new Font(new FontFamily("Wingdings"), 10, FontStyle.Bold);
+                    list_Games.Items[i].SubItems[2].ForeColor = Color.Green;
+
                 }
 
                 if (!minResult)

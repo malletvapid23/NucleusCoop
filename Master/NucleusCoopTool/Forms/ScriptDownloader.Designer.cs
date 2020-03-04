@@ -38,6 +38,7 @@
             this.stars = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.createdAt = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.updatedAt = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.description = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.btn_Search = new System.Windows.Forms.Button();
             this.btn_Close = new System.Windows.Forms.Button();
             this.btn_Download = new System.Windows.Forms.Button();
@@ -71,7 +72,8 @@
             this.downloadCount,
             this.stars,
             this.createdAt,
-            this.updatedAt});
+            this.updatedAt,
+            this.description});
             this.list_Games.Font = new System.Drawing.Font("Segoe UI", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.list_Games.FullRowSelect = true;
             this.list_Games.HideSelection = false;
@@ -120,6 +122,10 @@
             // 
             this.updatedAt.Text = "Last Updated";
             this.updatedAt.Width = 138;
+            // 
+            // description
+            // 
+            this.description.Text = "Author Description";
             // 
             // btn_Search
             // 
@@ -233,5 +239,6 @@
         private System.Windows.Forms.Button btn_Info;
         private System.Windows.Forms.ColumnHeader stars;
         private System.Windows.Forms.CheckBox chkBox_Verified;
+        private System.Windows.Forms.ColumnHeader description;
     }
 }

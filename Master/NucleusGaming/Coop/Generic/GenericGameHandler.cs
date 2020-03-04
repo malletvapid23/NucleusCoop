@@ -2322,7 +2322,12 @@ namespace Nucleus.Gaming
                     MessageBox.Show("Press OK when ready to install hooks and/or start sending fake messages.", "Nucleus - Prompt Between Instances", MessageBoxButtons.OK, MessageBoxIcon.None, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly);
                     foreach (Process aproc in attached)
                     {
-                        User32Interop.SetWindowPos(aproc.MainWindowHandle, new IntPtr(-1), 0, 0, 0, 0, (uint)(PositioningFlags.SWP_NOMOVE | PositioningFlags.SWP_NOSIZE | PositioningFlags.SWP_SHOWWINDOW));
+                        IntPtr topMostFlag = new IntPtr(-1);
+                        if(!gen.NotTopMost)
+                        {
+                            topMostFlag = new IntPtr(-2);
+                        }
+                        User32Interop.SetWindowPos(aproc.MainWindowHandle, topMostFlag, 0, 0, 0, 0, (uint)(PositioningFlags.SWP_NOMOVE | PositioningFlags.SWP_NOSIZE | PositioningFlags.SWP_SHOWWINDOW));
                     }
                 }
                 else
