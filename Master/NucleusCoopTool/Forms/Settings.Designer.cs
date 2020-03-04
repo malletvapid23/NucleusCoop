@@ -398,16 +398,16 @@
             // 
             // keyboardNick
             // 
-            this.keyboardNick.Location = new System.Drawing.Point(265, 383);
-            this.keyboardNick.MaxLength = 5;
+            this.keyboardNick.Location = new System.Drawing.Point(265, 382);
+            this.keyboardNick.MaxLength = 9;
             this.keyboardNick.Name = "keyboardNick";
-            this.keyboardNick.Size = new System.Drawing.Size(85, 29);
+            this.keyboardNick.Size = new System.Drawing.Size(102, 29);
             this.keyboardNick.TabIndex = 59;
             // 
             // label31
             // 
             this.label31.AutoSize = true;
-            this.label31.Location = new System.Drawing.Point(59, 386);
+            this.label31.Location = new System.Drawing.Point(59, 385);
             this.label31.Name = "label31";
             this.label31.Size = new System.Drawing.Size(200, 21);
             this.label31.TabIndex = 60;
@@ -463,10 +463,10 @@
             // 
             // controllerEightNick
             // 
-            this.controllerEightNick.Location = new System.Drawing.Point(282, 265);
-            this.controllerEightNick.MaxLength = 5;
+            this.controllerEightNick.Location = new System.Drawing.Point(265, 265);
+            this.controllerEightNick.MaxLength = 9;
             this.controllerEightNick.Name = "controllerEightNick";
-            this.controllerEightNick.Size = new System.Drawing.Size(85, 29);
+            this.controllerEightNick.Size = new System.Drawing.Size(102, 29);
             this.controllerEightNick.TabIndex = 53;
             // 
             // controllerEightGuid
@@ -474,7 +474,7 @@
             this.controllerEightGuid.Location = new System.Drawing.Point(67, 265);
             this.controllerEightGuid.Name = "controllerEightGuid";
             this.controllerEightGuid.ReadOnly = true;
-            this.controllerEightGuid.Size = new System.Drawing.Size(209, 29);
+            this.controllerEightGuid.Size = new System.Drawing.Size(192, 29);
             this.controllerEightGuid.TabIndex = 55;
             this.controllerEightGuid.TabStop = false;
             // 
@@ -490,10 +490,10 @@
             // 
             // controllerSevenNick
             // 
-            this.controllerSevenNick.Location = new System.Drawing.Point(282, 234);
-            this.controllerSevenNick.MaxLength = 5;
+            this.controllerSevenNick.Location = new System.Drawing.Point(265, 234);
+            this.controllerSevenNick.MaxLength = 9;
             this.controllerSevenNick.Name = "controllerSevenNick";
-            this.controllerSevenNick.Size = new System.Drawing.Size(85, 29);
+            this.controllerSevenNick.Size = new System.Drawing.Size(102, 29);
             this.controllerSevenNick.TabIndex = 50;
             // 
             // controllerSevenGuid
@@ -501,7 +501,7 @@
             this.controllerSevenGuid.Location = new System.Drawing.Point(67, 234);
             this.controllerSevenGuid.Name = "controllerSevenGuid";
             this.controllerSevenGuid.ReadOnly = true;
-            this.controllerSevenGuid.Size = new System.Drawing.Size(209, 29);
+            this.controllerSevenGuid.Size = new System.Drawing.Size(192, 29);
             this.controllerSevenGuid.TabIndex = 52;
             this.controllerSevenGuid.TabStop = false;
             // 
@@ -517,10 +517,10 @@
             // 
             // controllerSixNick
             // 
-            this.controllerSixNick.Location = new System.Drawing.Point(282, 203);
-            this.controllerSixNick.MaxLength = 5;
+            this.controllerSixNick.Location = new System.Drawing.Point(265, 203);
+            this.controllerSixNick.MaxLength = 9;
             this.controllerSixNick.Name = "controllerSixNick";
-            this.controllerSixNick.Size = new System.Drawing.Size(85, 29);
+            this.controllerSixNick.Size = new System.Drawing.Size(102, 29);
             this.controllerSixNick.TabIndex = 47;
             // 
             // controllerSixGuid
@@ -528,7 +528,7 @@
             this.controllerSixGuid.Location = new System.Drawing.Point(67, 203);
             this.controllerSixGuid.Name = "controllerSixGuid";
             this.controllerSixGuid.ReadOnly = true;
-            this.controllerSixGuid.Size = new System.Drawing.Size(209, 29);
+            this.controllerSixGuid.Size = new System.Drawing.Size(192, 29);
             this.controllerSixGuid.TabIndex = 49;
             this.controllerSixGuid.TabStop = false;
             // 
@@ -544,10 +544,10 @@
             // 
             // controllerFiveNick
             // 
-            this.controllerFiveNick.Location = new System.Drawing.Point(282, 172);
-            this.controllerFiveNick.MaxLength = 5;
+            this.controllerFiveNick.Location = new System.Drawing.Point(265, 172);
+            this.controllerFiveNick.MaxLength = 9;
             this.controllerFiveNick.Name = "controllerFiveNick";
-            this.controllerFiveNick.Size = new System.Drawing.Size(85, 29);
+            this.controllerFiveNick.Size = new System.Drawing.Size(102, 29);
             this.controllerFiveNick.TabIndex = 44;
             // 
             // controllerFiveGuid
@@ -555,7 +555,7 @@
             this.controllerFiveGuid.Location = new System.Drawing.Point(67, 172);
             this.controllerFiveGuid.Name = "controllerFiveGuid";
             this.controllerFiveGuid.ReadOnly = true;
-            this.controllerFiveGuid.Size = new System.Drawing.Size(209, 29);
+            this.controllerFiveGuid.Size = new System.Drawing.Size(192, 29);
             this.controllerFiveGuid.TabIndex = 46;
             this.controllerFiveGuid.TabStop = false;
             // 
@@ -572,7 +572,7 @@
             // label13
             // 
             this.label13.AutoSize = true;
-            this.label13.Location = new System.Drawing.Point(121, 13);
+            this.label13.Location = new System.Drawing.Point(114, 13);
             this.label13.Name = "label13";
             this.label13.Size = new System.Drawing.Size(105, 21);
             this.label13.TabIndex = 43;
@@ -580,10 +580,10 @@
             // 
             // controllerFourNick
             // 
-            this.controllerFourNick.Location = new System.Drawing.Point(282, 141);
-            this.controllerFourNick.MaxLength = 5;
+            this.controllerFourNick.Location = new System.Drawing.Point(265, 141);
+            this.controllerFourNick.MaxLength = 9;
             this.controllerFourNick.Name = "controllerFourNick";
-            this.controllerFourNick.Size = new System.Drawing.Size(85, 29);
+            this.controllerFourNick.Size = new System.Drawing.Size(102, 29);
             this.controllerFourNick.TabIndex = 40;
             // 
             // controllerFourGuid
@@ -591,7 +591,7 @@
             this.controllerFourGuid.Location = new System.Drawing.Point(67, 141);
             this.controllerFourGuid.Name = "controllerFourGuid";
             this.controllerFourGuid.ReadOnly = true;
-            this.controllerFourGuid.Size = new System.Drawing.Size(209, 29);
+            this.controllerFourGuid.Size = new System.Drawing.Size(192, 29);
             this.controllerFourGuid.TabIndex = 42;
             this.controllerFourGuid.TabStop = false;
             // 
@@ -607,10 +607,10 @@
             // 
             // controllerThreeNick
             // 
-            this.controllerThreeNick.Location = new System.Drawing.Point(282, 110);
-            this.controllerThreeNick.MaxLength = 5;
+            this.controllerThreeNick.Location = new System.Drawing.Point(265, 110);
+            this.controllerThreeNick.MaxLength = 9;
             this.controllerThreeNick.Name = "controllerThreeNick";
-            this.controllerThreeNick.Size = new System.Drawing.Size(85, 29);
+            this.controllerThreeNick.Size = new System.Drawing.Size(102, 29);
             this.controllerThreeNick.TabIndex = 39;
             // 
             // controllerThreeGuid
@@ -618,7 +618,7 @@
             this.controllerThreeGuid.Location = new System.Drawing.Point(67, 110);
             this.controllerThreeGuid.Name = "controllerThreeGuid";
             this.controllerThreeGuid.ReadOnly = true;
-            this.controllerThreeGuid.Size = new System.Drawing.Size(209, 29);
+            this.controllerThreeGuid.Size = new System.Drawing.Size(192, 29);
             this.controllerThreeGuid.TabIndex = 38;
             this.controllerThreeGuid.TabStop = false;
             // 
@@ -634,10 +634,10 @@
             // 
             // controllerTwoNick
             // 
-            this.controllerTwoNick.Location = new System.Drawing.Point(282, 79);
-            this.controllerTwoNick.MaxLength = 5;
+            this.controllerTwoNick.Location = new System.Drawing.Point(265, 79);
+            this.controllerTwoNick.MaxLength = 9;
             this.controllerTwoNick.Name = "controllerTwoNick";
-            this.controllerTwoNick.Size = new System.Drawing.Size(85, 29);
+            this.controllerTwoNick.Size = new System.Drawing.Size(102, 29);
             this.controllerTwoNick.TabIndex = 36;
             // 
             // controllerTwoGuid
@@ -645,7 +645,7 @@
             this.controllerTwoGuid.Location = new System.Drawing.Point(67, 79);
             this.controllerTwoGuid.Name = "controllerTwoGuid";
             this.controllerTwoGuid.ReadOnly = true;
-            this.controllerTwoGuid.Size = new System.Drawing.Size(209, 29);
+            this.controllerTwoGuid.Size = new System.Drawing.Size(192, 29);
             this.controllerTwoGuid.TabIndex = 34;
             this.controllerTwoGuid.TabStop = false;
             // 
@@ -662,7 +662,7 @@
             // label8
             // 
             this.label8.AutoSize = true;
-            this.label8.Location = new System.Drawing.Point(284, 13);
+            this.label8.Location = new System.Drawing.Point(277, 13);
             this.label8.Name = "label8";
             this.label8.Size = new System.Drawing.Size(80, 21);
             this.label8.TabIndex = 32;
@@ -670,10 +670,10 @@
             // 
             // controllerOneNick
             // 
-            this.controllerOneNick.Location = new System.Drawing.Point(282, 48);
-            this.controllerOneNick.MaxLength = 5;
+            this.controllerOneNick.Location = new System.Drawing.Point(265, 48);
+            this.controllerOneNick.MaxLength = 9;
             this.controllerOneNick.Name = "controllerOneNick";
-            this.controllerOneNick.Size = new System.Drawing.Size(85, 29);
+            this.controllerOneNick.Size = new System.Drawing.Size(102, 29);
             this.controllerOneNick.TabIndex = 35;
             // 
             // controllerOneGuid
@@ -681,7 +681,7 @@
             this.controllerOneGuid.Location = new System.Drawing.Point(67, 48);
             this.controllerOneGuid.Name = "controllerOneGuid";
             this.controllerOneGuid.ReadOnly = true;
-            this.controllerOneGuid.Size = new System.Drawing.Size(209, 29);
+            this.controllerOneGuid.Size = new System.Drawing.Size(192, 29);
             this.controllerOneGuid.TabIndex = 31;
             this.controllerOneGuid.TabStop = false;
             // 
@@ -734,10 +734,10 @@
             // 
             // controllerSixteenNick
             // 
-            this.controllerSixteenNick.Location = new System.Drawing.Point(282, 265);
-            this.controllerSixteenNick.MaxLength = 5;
+            this.controllerSixteenNick.Location = new System.Drawing.Point(265, 265);
+            this.controllerSixteenNick.MaxLength = 9;
             this.controllerSixteenNick.Name = "controllerSixteenNick";
-            this.controllerSixteenNick.Size = new System.Drawing.Size(85, 29);
+            this.controllerSixteenNick.Size = new System.Drawing.Size(102, 29);
             this.controllerSixteenNick.TabIndex = 79;
             // 
             // controllerSixteenGuid
@@ -745,7 +745,7 @@
             this.controllerSixteenGuid.Location = new System.Drawing.Point(67, 265);
             this.controllerSixteenGuid.Name = "controllerSixteenGuid";
             this.controllerSixteenGuid.ReadOnly = true;
-            this.controllerSixteenGuid.Size = new System.Drawing.Size(209, 29);
+            this.controllerSixteenGuid.Size = new System.Drawing.Size(192, 29);
             this.controllerSixteenGuid.TabIndex = 81;
             this.controllerSixteenGuid.TabStop = false;
             // 
@@ -761,10 +761,10 @@
             // 
             // controllerFifteenNick
             // 
-            this.controllerFifteenNick.Location = new System.Drawing.Point(282, 234);
-            this.controllerFifteenNick.MaxLength = 5;
+            this.controllerFifteenNick.Location = new System.Drawing.Point(265, 234);
+            this.controllerFifteenNick.MaxLength = 9;
             this.controllerFifteenNick.Name = "controllerFifteenNick";
-            this.controllerFifteenNick.Size = new System.Drawing.Size(85, 29);
+            this.controllerFifteenNick.Size = new System.Drawing.Size(102, 29);
             this.controllerFifteenNick.TabIndex = 76;
             // 
             // controllerFifteenGuid
@@ -772,7 +772,7 @@
             this.controllerFifteenGuid.Location = new System.Drawing.Point(67, 234);
             this.controllerFifteenGuid.Name = "controllerFifteenGuid";
             this.controllerFifteenGuid.ReadOnly = true;
-            this.controllerFifteenGuid.Size = new System.Drawing.Size(209, 29);
+            this.controllerFifteenGuid.Size = new System.Drawing.Size(192, 29);
             this.controllerFifteenGuid.TabIndex = 78;
             this.controllerFifteenGuid.TabStop = false;
             // 
@@ -788,10 +788,10 @@
             // 
             // controllerFourteenNick
             // 
-            this.controllerFourteenNick.Location = new System.Drawing.Point(282, 203);
-            this.controllerFourteenNick.MaxLength = 5;
+            this.controllerFourteenNick.Location = new System.Drawing.Point(265, 203);
+            this.controllerFourteenNick.MaxLength = 9;
             this.controllerFourteenNick.Name = "controllerFourteenNick";
-            this.controllerFourteenNick.Size = new System.Drawing.Size(85, 29);
+            this.controllerFourteenNick.Size = new System.Drawing.Size(102, 29);
             this.controllerFourteenNick.TabIndex = 73;
             // 
             // controllerFourteenGuid
@@ -799,7 +799,7 @@
             this.controllerFourteenGuid.Location = new System.Drawing.Point(67, 203);
             this.controllerFourteenGuid.Name = "controllerFourteenGuid";
             this.controllerFourteenGuid.ReadOnly = true;
-            this.controllerFourteenGuid.Size = new System.Drawing.Size(209, 29);
+            this.controllerFourteenGuid.Size = new System.Drawing.Size(192, 29);
             this.controllerFourteenGuid.TabIndex = 75;
             this.controllerFourteenGuid.TabStop = false;
             // 
@@ -815,10 +815,10 @@
             // 
             // controllerThirteenNick
             // 
-            this.controllerThirteenNick.Location = new System.Drawing.Point(282, 172);
-            this.controllerThirteenNick.MaxLength = 5;
+            this.controllerThirteenNick.Location = new System.Drawing.Point(265, 172);
+            this.controllerThirteenNick.MaxLength = 9;
             this.controllerThirteenNick.Name = "controllerThirteenNick";
-            this.controllerThirteenNick.Size = new System.Drawing.Size(85, 29);
+            this.controllerThirteenNick.Size = new System.Drawing.Size(102, 29);
             this.controllerThirteenNick.TabIndex = 70;
             // 
             // controllerThirteenGuid
@@ -826,7 +826,7 @@
             this.controllerThirteenGuid.Location = new System.Drawing.Point(67, 172);
             this.controllerThirteenGuid.Name = "controllerThirteenGuid";
             this.controllerThirteenGuid.ReadOnly = true;
-            this.controllerThirteenGuid.Size = new System.Drawing.Size(209, 29);
+            this.controllerThirteenGuid.Size = new System.Drawing.Size(192, 29);
             this.controllerThirteenGuid.TabIndex = 72;
             this.controllerThirteenGuid.TabStop = false;
             // 
@@ -843,7 +843,7 @@
             // label21
             // 
             this.label21.AutoSize = true;
-            this.label21.Location = new System.Drawing.Point(121, 13);
+            this.label21.Location = new System.Drawing.Point(114, 13);
             this.label21.Name = "label21";
             this.label21.Size = new System.Drawing.Size(105, 21);
             this.label21.TabIndex = 69;
@@ -851,10 +851,10 @@
             // 
             // controllerTwelveNick
             // 
-            this.controllerTwelveNick.Location = new System.Drawing.Point(282, 141);
-            this.controllerTwelveNick.MaxLength = 5;
+            this.controllerTwelveNick.Location = new System.Drawing.Point(265, 141);
+            this.controllerTwelveNick.MaxLength = 9;
             this.controllerTwelveNick.Name = "controllerTwelveNick";
-            this.controllerTwelveNick.Size = new System.Drawing.Size(85, 29);
+            this.controllerTwelveNick.Size = new System.Drawing.Size(102, 29);
             this.controllerTwelveNick.TabIndex = 66;
             // 
             // controllerTwelveGuid
@@ -862,7 +862,7 @@
             this.controllerTwelveGuid.Location = new System.Drawing.Point(67, 141);
             this.controllerTwelveGuid.Name = "controllerTwelveGuid";
             this.controllerTwelveGuid.ReadOnly = true;
-            this.controllerTwelveGuid.Size = new System.Drawing.Size(209, 29);
+            this.controllerTwelveGuid.Size = new System.Drawing.Size(192, 29);
             this.controllerTwelveGuid.TabIndex = 68;
             this.controllerTwelveGuid.TabStop = false;
             // 
@@ -878,10 +878,10 @@
             // 
             // controllerElevenNick
             // 
-            this.controllerElevenNick.Location = new System.Drawing.Point(282, 110);
-            this.controllerElevenNick.MaxLength = 5;
+            this.controllerElevenNick.Location = new System.Drawing.Point(265, 110);
+            this.controllerElevenNick.MaxLength = 9;
             this.controllerElevenNick.Name = "controllerElevenNick";
-            this.controllerElevenNick.Size = new System.Drawing.Size(85, 29);
+            this.controllerElevenNick.Size = new System.Drawing.Size(102, 29);
             this.controllerElevenNick.TabIndex = 65;
             // 
             // controllerElevenGuid
@@ -889,7 +889,7 @@
             this.controllerElevenGuid.Location = new System.Drawing.Point(67, 110);
             this.controllerElevenGuid.Name = "controllerElevenGuid";
             this.controllerElevenGuid.ReadOnly = true;
-            this.controllerElevenGuid.Size = new System.Drawing.Size(209, 29);
+            this.controllerElevenGuid.Size = new System.Drawing.Size(192, 29);
             this.controllerElevenGuid.TabIndex = 64;
             this.controllerElevenGuid.TabStop = false;
             // 
@@ -905,10 +905,10 @@
             // 
             // controllerTenNick
             // 
-            this.controllerTenNick.Location = new System.Drawing.Point(282, 79);
-            this.controllerTenNick.MaxLength = 5;
+            this.controllerTenNick.Location = new System.Drawing.Point(265, 79);
+            this.controllerTenNick.MaxLength = 9;
             this.controllerTenNick.Name = "controllerTenNick";
-            this.controllerTenNick.Size = new System.Drawing.Size(85, 29);
+            this.controllerTenNick.Size = new System.Drawing.Size(102, 29);
             this.controllerTenNick.TabIndex = 62;
             // 
             // controllerTenGuid
@@ -916,7 +916,7 @@
             this.controllerTenGuid.Location = new System.Drawing.Point(67, 79);
             this.controllerTenGuid.Name = "controllerTenGuid";
             this.controllerTenGuid.ReadOnly = true;
-            this.controllerTenGuid.Size = new System.Drawing.Size(209, 29);
+            this.controllerTenGuid.Size = new System.Drawing.Size(192, 29);
             this.controllerTenGuid.TabIndex = 60;
             this.controllerTenGuid.TabStop = false;
             // 
@@ -933,7 +933,7 @@
             // label25
             // 
             this.label25.AutoSize = true;
-            this.label25.Location = new System.Drawing.Point(284, 13);
+            this.label25.Location = new System.Drawing.Point(277, 13);
             this.label25.Name = "label25";
             this.label25.Size = new System.Drawing.Size(80, 21);
             this.label25.TabIndex = 58;
@@ -941,10 +941,10 @@
             // 
             // controllerNineNick
             // 
-            this.controllerNineNick.Location = new System.Drawing.Point(282, 48);
-            this.controllerNineNick.MaxLength = 5;
+            this.controllerNineNick.Location = new System.Drawing.Point(265, 48);
+            this.controllerNineNick.MaxLength = 9;
             this.controllerNineNick.Name = "controllerNineNick";
-            this.controllerNineNick.Size = new System.Drawing.Size(85, 29);
+            this.controllerNineNick.Size = new System.Drawing.Size(102, 29);
             this.controllerNineNick.TabIndex = 61;
             // 
             // controllerNineGuid
@@ -952,7 +952,7 @@
             this.controllerNineGuid.Location = new System.Drawing.Point(67, 48);
             this.controllerNineGuid.Name = "controllerNineGuid";
             this.controllerNineGuid.ReadOnly = true;
-            this.controllerNineGuid.Size = new System.Drawing.Size(209, 29);
+            this.controllerNineGuid.Size = new System.Drawing.Size(192, 29);
             this.controllerNineGuid.TabIndex = 57;
             this.controllerNineGuid.TabStop = false;
             // 
