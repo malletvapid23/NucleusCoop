@@ -42,7 +42,15 @@ namespace Nucleus.Coop.Forms
             }
 
             txt_Created.Text = Handler.CreatedAt;
-            txt_Updated.Text = Handler.UpdatedAt;
+            if(int.Parse(Handler.CurrentVersion) > 1)
+            {
+                txt_Updated.Text = Handler.UpdatedAt;
+            }
+            else
+            {
+                txt_Updated.Text = "N/A";
+            }
+            
             txt_AuthDesc.Text = Handler.Description;
 
             string _cover = $@"https://images.igdb.com/igdb/image/upload/t_cover_small/{Handler.GameCover}.jpg";

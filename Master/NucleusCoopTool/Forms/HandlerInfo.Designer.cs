@@ -61,10 +61,10 @@
             this.txt_Updated.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.txt_Updated.Font = new System.Drawing.Font("Segoe UI", 11F);
             this.txt_Updated.ForeColor = System.Drawing.SystemColors.Window;
-            this.txt_Updated.Location = new System.Drawing.Point(392, 186);
+            this.txt_Updated.Location = new System.Drawing.Point(380, 185);
             this.txt_Updated.Name = "txt_Updated";
             this.txt_Updated.ReadOnly = true;
-            this.txt_Updated.Size = new System.Drawing.Size(152, 20);
+            this.txt_Updated.Size = new System.Drawing.Size(166, 20);
             this.txt_Updated.TabIndex = 50;
             this.txt_Updated.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
@@ -73,7 +73,7 @@
             this.label10.AutoSize = true;
             this.label10.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label10.ForeColor = System.Drawing.Color.White;
-            this.label10.Location = new System.Drawing.Point(286, 186);
+            this.label10.Location = new System.Drawing.Point(275, 186);
             this.label10.Name = "label10";
             this.label10.Size = new System.Drawing.Size(99, 18);
             this.label10.TabIndex = 49;
@@ -86,10 +86,10 @@
             this.txt_Created.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.txt_Created.Font = new System.Drawing.Font("Segoe UI", 11F);
             this.txt_Created.ForeColor = System.Drawing.SystemColors.Window;
-            this.txt_Created.Location = new System.Drawing.Point(104, 186);
+            this.txt_Created.Location = new System.Drawing.Point(100, 185);
             this.txt_Created.Name = "txt_Created";
             this.txt_Created.ReadOnly = true;
-            this.txt_Created.Size = new System.Drawing.Size(152, 20);
+            this.txt_Created.Size = new System.Drawing.Size(166, 20);
             this.txt_Created.TabIndex = 48;
             this.txt_Created.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
@@ -98,7 +98,7 @@
             this.label9.AutoSize = true;
             this.label9.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label9.ForeColor = System.Drawing.Color.White;
-            this.label9.Location = new System.Drawing.Point(20, 186);
+            this.label9.Location = new System.Drawing.Point(19, 186);
             this.label9.Name = "label9";
             this.label9.Size = new System.Drawing.Size(75, 18);
             this.label9.TabIndex = 47;
