@@ -183,6 +183,7 @@ namespace Nucleus.Gaming
         public bool NotTopMost;
         public string[] WindowStyleValues;
         public string[] ExtWindowStyleValues;
+        public bool KillLastInstanceMutex;
 
         // -- From USS
         //Effectively a switch for all of USS features

@@ -2155,7 +2155,7 @@ namespace Nucleus.Gaming
 
                 if (i > 0 && gen.ResetWindows && prevProcessData != null)
                 {
-                    ResetWindowsExceptLast(i);
+                    ResetWindows(prevProcessData, prevWindowX, prevWindowY, prevWindowWidth, prevWindowHeight, i);
                 }
 
                 ProcessData data = new ProcessData(proc);
@@ -2323,7 +2323,7 @@ namespace Nucleus.Gaming
                     foreach (Process aproc in attached)
                     {
                         IntPtr topMostFlag = new IntPtr(-1);
-                        if(!gen.NotTopMost)
+                        if(gen.NotTopMost)
                         {
                             topMostFlag = new IntPtr(-2);
                         }
@@ -2346,72 +2346,46 @@ namespace Nucleus.Gaming
 
 				if (i == (players.Count - 1)) // all instances accounted for
                 {
-                    if (gen.ResetWindows)
+                    if(gen.KillLastInstanceMutex && !gen.RenameNotKillMutex)
                     {
-
-                        Log("Attempting to repoisition, resize and strip borders for instance " + i);
-                        try
+                        for (; ; )
                         {
-                            data.HWnd.Location = new Point(prevWindowX, prevWindowY);
-                            data.HWnd.Size = new Size(prevWindowWidth, prevWindowHeight);
-                            uint lStyle = User32Interop.GetWindowLong(data.HWnd.NativePtr, User32_WS.GWL_STYLE);
-                            if (gen.WindowStyleValues?.Length > 0)
+                            if (gen.KillMutex != null)
                             {
-                                Log("Using user custom window style");
-                                foreach (string val in gen.WindowStyleValues)
+                                if (gen.KillMutex.Length > 0 && !players[i].ProcessData.KilledMutexes)
                                 {
-                                    if (val.StartsWith("~"))
+                                    if (gen.KillMutexDelay > 0)
                                     {
-                                        lStyle &= ~Convert.ToUInt32(val.Substring(1), 16);
+                                        Thread.Sleep((gen.KillMutexDelay * 1000));
+                                    }
+
+                                    if (StartGameUtil.MutexExists(players[i].ProcessData.Process, gen.KillMutexType, gen.PartialMutexSearch, gen.KillMutex))
+                                    {
+                                        // mutexes still exist, must kill
+                                        StartGameUtil.KillMutex(players[i].ProcessData.Process, gen.KillMutexType, gen.PartialMutexSearch, gen.KillMutex);
+                                        players[i].ProcessData.KilledMutexes = true;
+                                        break;
                                     }
                                     else
                                     {
-                                        lStyle |= Convert.ToUInt32(val, 16);
+                                        // mutexes dont exist anymore
+                                        break;
                                     }
                                 }
                             }
                             else
                             {
-                                lStyle &= ~User32_WS.WS_CAPTION;
-                                lStyle &= ~User32_WS.WS_THICKFRAME;
-                                lStyle &= ~User32_WS.WS_MINIMIZE;
-                                lStyle &= ~User32_WS.WS_MAXIMIZE;
-                                lStyle &= ~User32_WS.WS_SYSMENU;
+                                break;
                             }
-                            User32Interop.SetWindowLong(data.HWnd.NativePtr, User32_WS.GWL_STYLE, lStyle);
-
-                            lStyle = User32Interop.GetWindowLong(data.HWnd.NativePtr, User32_WS.GWL_EXSTYLE);
-                            if (gen.ExtWindowStyleValues?.Length > 0)
-                            {
-                                Log("Using user custom extended window style");
-                                foreach (string val in gen.ExtWindowStyleValues)
-                                {
-                                    if (val.StartsWith("~"))
-                                    {
-                                        lStyle &= ~Convert.ToUInt32(val.Substring(1), 16);
-                                    }
-                                    else
-                                    {
-                                        lStyle |= Convert.ToUInt32(val, 16);
-                                    }
-                                }
-                            }
-                            else
-                            {
-                                lStyle &= ~User32_WS.WS_EX_DLGMODALFRAME;
-                                lStyle &= ~User32_WS.WS_EX_CLIENTEDGE;
-                                lStyle &= ~User32_WS.WS_EX_STATICEDGE;
-                            }
-
-                            User32Interop.SetWindowLong(data.HWnd.NativePtr, User32_WS.GWL_EXSTYLE, lStyle);
-                            User32Interop.SetWindowPos(data.HWnd.NativePtr, IntPtr.Zero, 0, 0, 0, 0, (uint)(PositioningFlags.SWP_FRAMECHANGED | PositioningFlags.SWP_NOMOVE | PositioningFlags.SWP_NOSIZE | PositioningFlags.SWP_NOZORDER | PositioningFlags.SWP_NOOWNERZORDER));
-                        }
-                        catch (Exception ex)
-                        {
-                            Log("ERROR - ResetWindows was unsuccessful for instance " + i + ". " + ex.Message);
                         }
                     }
 
+                    Thread.Sleep(1000);
+
+                    if (gen.ResetWindows)
+                    {
+                        ResetWindows(data, prevWindowX, prevWindowY, prevWindowWidth, prevWindowHeight, i + 1);
+                    }
 
                     if (gen.FakeFocus)
                     {
@@ -2531,7 +2505,12 @@ namespace Nucleus.Gaming
 
                         var x = (int)User32Interop.GetWindowLong(plyrProc.MainWindowHandle, User32_WS.GWL_STYLE);
                         if ((x & flip) > 0)//has a border
+                        {
+                            Log("Process id " + plyrProc.Id + " regained a border, removing it again");
                             x &= (~flip);
+                        }
+
+                        //ResetWindows(plyr.ProcessData, plyr.ProcessData.Position.X, plyr.ProcessData.Position.Y, plyr.ProcessData.Size.Width, plyr.ProcessData.Size.Height, plyr.PlayerID + 1);
                     }
 
 					//Window setup
@@ -4246,15 +4225,15 @@ namespace Nucleus.Gaming
 
         }
 
-        private void ResetWindowsExceptLast(int i)
+        private void ResetWindows(ProcessData processData, int x, int y, int w, int h, int i)
         {
             Log("Attempting to repoisition, resize and strip borders for instance " + (i - 1));
             //MessageBox.Show("Going to attempt to reposition and resize instance " + (i - 1));
             try
             {
-                prevProcessData.HWnd.Location = new Point(prevWindowX, prevWindowY);
-                prevProcessData.HWnd.Size = new Size(prevWindowWidth, prevWindowHeight);
-                uint lStyle = User32Interop.GetWindowLong(prevProcessData.HWnd.NativePtr, User32_WS.GWL_STYLE);
+                processData.HWnd.Location = new Point(x, y);
+                processData.HWnd.Size = new Size(w, h);
+                uint lStyle = User32Interop.GetWindowLong(processData.HWnd.NativePtr, User32_WS.GWL_STYLE);
                 if (gen.WindowStyleValues?.Length > 0)
                 {
                     Log("Using user custom window style");
@@ -4278,9 +4257,9 @@ namespace Nucleus.Gaming
                     lStyle &= ~User32_WS.WS_MAXIMIZE;
                     lStyle &= ~User32_WS.WS_SYSMENU;
                 }
-                User32Interop.SetWindowLong(prevProcessData.HWnd.NativePtr, User32_WS.GWL_STYLE, lStyle);
+                User32Interop.SetWindowLong(processData.HWnd.NativePtr, User32_WS.GWL_STYLE, lStyle);
 
-                lStyle = User32Interop.GetWindowLong(prevProcessData.HWnd.NativePtr, User32_WS.GWL_EXSTYLE);
+                lStyle = User32Interop.GetWindowLong(processData.HWnd.NativePtr, User32_WS.GWL_EXSTYLE);
 
                 if (gen.ExtWindowStyleValues?.Length > 0)
                 {
@@ -4305,15 +4284,15 @@ namespace Nucleus.Gaming
                 }
 
 
-                User32Interop.SetWindowLong(prevProcessData.HWnd.NativePtr, User32_WS.GWL_EXSTYLE, lStyle);
-                User32Interop.SetWindowPos(prevProcessData.HWnd.NativePtr, IntPtr.Zero, 0, 0, 0, 0, (uint)(PositioningFlags.SWP_FRAMECHANGED | PositioningFlags.SWP_NOMOVE | PositioningFlags.SWP_NOSIZE | PositioningFlags.SWP_NOZORDER | PositioningFlags.SWP_NOOWNERZORDER));
+                User32Interop.SetWindowLong(processData.HWnd.NativePtr, User32_WS.GWL_EXSTYLE, lStyle);
+                User32Interop.SetWindowPos(processData.HWnd.NativePtr, IntPtr.Zero, 0, 0, 0, 0, (uint)(PositioningFlags.SWP_FRAMECHANGED | PositioningFlags.SWP_NOMOVE | PositioningFlags.SWP_NOSIZE | PositioningFlags.SWP_NOZORDER | PositioningFlags.SWP_NOOWNERZORDER));
 
             }
             catch (Exception ex)
             {
                 Log("ERROR - ResetWindows was unsuccessful for instance " + (i - 1) + ". " + ex.Message);
             }
-            if (prevProcessData.HWnd.Location != new Point(prevWindowX, prevWindowY) || prevProcessData.HWnd.Size != new Size(prevWindowWidth, prevWindowHeight))
+            if (processData.HWnd.Location != new Point(x, y) || processData.HWnd.Size != new Size(w, h))
             {
                 Log("ERROR - ResetWindows was unsuccessful for instance " + (i - 1));
             }
