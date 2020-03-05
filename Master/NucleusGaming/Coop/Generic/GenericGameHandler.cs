@@ -2506,8 +2506,9 @@ namespace Nucleus.Gaming
                         var x = (int)User32Interop.GetWindowLong(plyrProc.MainWindowHandle, User32_WS.GWL_STYLE);
                         if ((x & flip) > 0)//has a border
                         {
-                            Log("Process id " + plyrProc.Id + " regained a border, removing it again");
-                            x &= (~flip);
+                            Log("Process id " + plyrProc.Id + " regained a border, trying to remove it again");
+                            //x &= (~flip);
+                            ResetWindows(plyr.ProcessData, plyr.ProcessData.Position.X, plyr.ProcessData.Position.Y, plyr.ProcessData.Size.Width, plyr.ProcessData.Size.Height, plyr.PlayerID + 1);
                         }
 
                         //ResetWindows(plyr.ProcessData, plyr.ProcessData.Position.X, plyr.ProcessData.Position.Y, plyr.ProcessData.Size.Width, plyr.ProcessData.Size.Height, plyr.PlayerID + 1);
