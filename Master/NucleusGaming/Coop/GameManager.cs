@@ -620,6 +620,49 @@ namespace Nucleus.Gaming
             }
 
         }
+
+
+        public void AddScript(string handlerName)
+        {
+            string jsfolder = GetJsScriptsPath();
+            DirectoryInfo jsFolder = new DirectoryInfo(jsfolder);
+
+            FileInfo f = new FileInfo(Path.Combine(jsFolder.FullName, handlerName + ".js"));
+            try
+            {
+                using (Stream str = f.OpenRead())
+                {
+                    string ext = Path.GetFileNameWithoutExtension(f.Name);
+                    string pathBlock = Path.Combine(f.Directory.FullName, ext);
+
+                    GenericGameInfo info = new GenericGameInfo(f.Name, pathBlock, str);
+
+                    LogManager.Log("Found game info: " + info.GameName);
+                    if (games.Any(c => c.Value.GUID == info.GUID))
+                    {
+                        games.Remove(info.GUID);
+                    }
+                    games.Add(info.GUID, info);
+
+                    if (gameInfos.Any(c => c.Value.GUID == info.GUID))
+                    {
+                        gameInfos.Remove(info.GUID);
+                    }
+                    gameInfos.Add(info.GUID, info);
+                }
+            }
+            catch (ArgumentNullException)
+            {
+                //continue; // Issue with content of script, ignore this as error prompt is already displayed
+            }
+            catch (ArgumentException ex)
+            {
+                MessageBox.Show(ex.InnerException + ": " + ex.Message, "Error with script " + f.Name, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                //continue;
+            }
+
+            
+        }
         #endregion
 
         public void Play(IGameHandler handler)

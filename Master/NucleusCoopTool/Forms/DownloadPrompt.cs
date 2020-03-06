@@ -164,6 +164,7 @@ namespace Nucleus.Coop.Forms
                     }
                 }
 
+                Gaming.GameManager.Instance.AddScript(frmHandleTitle);
                 mainForm.SearchGame(exeName);
             }
 
