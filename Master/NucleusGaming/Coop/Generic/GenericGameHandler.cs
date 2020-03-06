@@ -4296,10 +4296,17 @@ namespace Nucleus.Gaming
             {
                 Log("ERROR - ResetWindows was unsuccessful for instance " + (i - 1) + ". " + ex.Message);
             }
-            if (processData.HWnd.Location != new Point(x, y) || processData.HWnd.Size != new Size(w, h))
+
+            try
             {
-                Log("ERROR - ResetWindows was unsuccessful for instance " + (i - 1));
-            }
+	            if (processData.HWnd.Location != new Point(x, y) || processData.HWnd.Size != new Size(w, h))
+	            {
+		            Log("ERROR - ResetWindows was unsuccessful for instance " + (i - 1));
+	            }
+            }catch(Exception e)
+			{
+				Log("ERROR - Exception in ResetWindows for instance " + (i - 1) + ", error = " + e);
+			}
         }
 
         private void CustomDllEnabled(GenericContext context, PlayerInfo player, Rectangle playerBounds, int i)
