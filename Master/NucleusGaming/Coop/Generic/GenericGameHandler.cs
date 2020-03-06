@@ -3318,6 +3318,8 @@ namespace Nucleus.Gaming
 					!gen.HookDontUpdateLegacyInMouseMsg,
 					gen.SupportsMultipleKeyboardsAndMice && gen.HookMouseVisibility,
 					gen.HookReRegisterRawInput,
+					gen.HookReRegisterRawInputMouse,
+					gen.HookReRegisterRawInputKeyboard,
 
 					windowNull ? "" : (window.HookPipe?.pipeNameWrite ?? ""),
 					windowNull ? "" : (window.HookPipe?.pipeNameRead ?? ""),

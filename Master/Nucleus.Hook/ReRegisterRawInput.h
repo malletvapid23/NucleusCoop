@@ -1,4 +1,11 @@
 #pragma once
 #include "pch.h"
 
-void reRegisterRawInput(HWND hwnd);
+namespace ReRegisterRawInput
+{
+	extern volatile bool hasReRegisteredRawInput;
+
+	void reRegisterRawInput(HWND hwnd);
+
+	void SetupReRegisterRawInput();
+}
