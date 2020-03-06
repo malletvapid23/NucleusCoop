@@ -232,6 +232,7 @@ copy $(SolutionDir)$(PlatformTarget)\$(Configuration)\$(TargetName).dll $(Soluti
     <ClInclude Include="Options.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="Piping.h" />
+    <ClInclude Include="ReRegisterRawInput.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">
@@ -260,6 +261,7 @@ copy $(SolutionDir)$(PlatformTarget)\$(Configuration)\$(TargetName).dll $(Soluti
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</CompileAsManaged>
     </ClCompile>
     <ClCompile Include="Piping.cpp" />
+    <ClCompile Include="RawInputReRegister.cpp" />
     <ClCompile Include="SetWindowHook.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

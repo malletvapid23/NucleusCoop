@@ -5,8 +5,14 @@
 #include "Globals.h"
 #include <windowsx.h>
 #include "Piping.h"
+#include "ReRegisterRawInput.h"
+#include <mutex>
 
-BOOL filterMessage(const LPMSG lpMsg)
+bool filterMessageCalledAtLeastOnce = false;
+
+WNDPROC originalWndProc = nullptr;
+
+BOOL filterMessage(const volatile LPMSG lpMsg)
 {
 	const auto msg = lpMsg->message;
 	const auto wParam = lpMsg->wParam;
@@ -14,7 +20,23 @@ BOOL filterMessage(const LPMSG lpMsg)
 
 #define ALLOW return 1;
 #define BLOCK memset(lpMsg, 0, sizeof(MSG)); return -1;
+			
+	if (!filterMessageCalledAtLeastOnce)
+	{
+		filterMessageCalledAtLeastOnce = true;
+		DEBUGLOG("First filter message call.\n");
+	}
+	
+	if (!ReRegisterRawInput::hasReRegisteredRawInput && options.reRegisterRawInput && (((msg & WM_INPUT) == WM_INPUT) || (msg == WM_INPUT)))
+	{
+		ReRegisterRawInput::hasReRegisteredRawInput = true;
 
+		DEBUGLOG("Detected raw input window from filterMessage");
+		
+		//We found the window that this process using for raw input. Now re-register raw input for it.
+		ReRegisterRawInput::reRegisterRawInput(lpMsg->hwnd);
+	}
+	
 	//Filter raw input
 	if (msg == WM_INPUT && options.filterRawInput)
 	{
@@ -47,6 +69,11 @@ BOOL filterMessage(const LPMSG lpMsg)
 
 				BLOCK;
 			}
+		}
+		else
+		{
+			//Probably a broken message.
+			BLOCK;
 		}
 	}
 
@@ -137,17 +164,21 @@ BOOL filterMessage(const LPMSG lpMsg)
 
 LRESULT CALLBACK WndProc_Hook(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
-	switch (uMsg)
+	if (uMsg == WM_KILLFOCUS && options.preventWindowDeactivation)
 	{
-		case WM_KILLFOCUS:
-		{
-			//SetFocus(hWnd);
-			return -1;
-		}
-		default:
-			DefWindowProc(hwnd, uMsg, wParam, lParam);
+		return -1;
 	}
-	return 1;
+
+	//There is no point using WndProc filter for this as it only hooks one window
+	/*if (hasReRegisteredRawInput && uMsg == WM_INPUT)
+	{
+		hasReRegisteredRawInput = false;
+
+		//We found the window that this process using for raw input. Now re-register raw input for it.
+		reRegisterRawInput(hwnd);
+	}*/
+	
+	return CallWindowProc(originalWndProc, hwnd, uMsg, wParam, lParam);
 }
 
 
@@ -169,18 +200,37 @@ BOOL WINAPI PeekMessageA_Hook(LPMSG lpMsg, HWND hWnd, UINT wMsgFilterMin, UINT w
 {
 	const auto ret = PeekMessageA(lpMsg, hWnd, wMsgFilterMin, wMsgFilterMax, wRemoveMsg);
 
-	return ret == FALSE ? FALSE : filterMessage(lpMsg);
+	return ret == FALSE ? FALSE : ((1+filterMessage(lpMsg))/2);//TODO: filterMessage returns -1 but PeekMessage expects FALSE(0): is this okay?
 }
 
 BOOL WINAPI PeekMessageW_Hook(LPMSG lpMsg, HWND hWnd, UINT wMsgFilterMin, UINT wMsgFilterMax, UINT wRemoveMsg)
 {
 	const auto ret = PeekMessageW(lpMsg, hWnd, wMsgFilterMin, wMsgFilterMax, wRemoveMsg);
-
-	return ret == FALSE ? FALSE : filterMessage(lpMsg);
+	
+	return ret == FALSE ? FALSE : ((1 + filterMessage(lpMsg)) / 2);
 }
 
-void installMessageFilterHooks()
+UINT WINAPI GetRawInputData_Hook(
+	HRAWINPUT hRawInput,
+	UINT      uiCommand,
+	RAWINPUT* pData,
+	PUINT     pcbSize,
+	UINT      cbSizeHeader)
 {
+	auto ret = GetRawInputData(hRawInput, uiCommand, pData, pcbSize, cbSizeHeader);
+	
+	if (pData != NULL && ret != 0)
+	{
+		pData->header.wParam = RIM_INPUT; // Sent in foreground
+	}
+
+	return ret;
+}
+
+
+
+void installMessageFilterHooks()
+{	
 	DEBUGLOG("Injecting message filter hooks\n");
 	installHook(TEXT("user32"), "GetMessageA", GetMessageA_Hook);
 	installHook(TEXT("user32"), "GetMessageW", GetMessageW_Hook);
@@ -188,11 +238,19 @@ void installMessageFilterHooks()
 	installHook(TEXT("user32"), "PeekMessageA", PeekMessageA_Hook);
 	installHook(TEXT("user32"), "PeekMessageW", PeekMessageW_Hook);
 
+	if(options.filterRawInput)
+	{
+		installHook(TEXT("user32"), "GetRawInputData", GetRawInputData_Hook);
+	}
+	
 	//TODO: filterMessage doesn't work for PreventWindowDeactivation?
+	//TODO: This method seems to cause CSGO/Minecraft to not respond? "Hook Injection Complete" is never printed to the log. API Monitor shows calls being repeated infinitely?
 	//Using original method instead:
 	if (options.preventWindowDeactivation)
 	{
-		DEBUGLOG("Injecting WndProc message filter for PreventWindowDeactivation\n");
+		DEBUGLOG("Injecting WndProc message filter\n");
+		originalWndProc = reinterpret_cast<WNDPROC>(GetWindowLongPtr(hWnd, GWLP_WNDPROC));
+		
 		SetWindowLongPtr(hWnd, GWLP_WNDPROC, (LONG_PTR)WndProc_Hook);
 	}
 }

@@ -9,6 +9,7 @@
 #include "Globals.h"
 #include "Piping.h"
 #include "FakeMouse.h"
+#include "ReRegisterRawInput.h"
 
 #ifdef _DEBUG
 bool IsDebug = false;
@@ -69,7 +70,7 @@ NTSTATUS installHook(const LPCSTR moduleHandle, const LPCSTR proc, void* callBac
 
 	// Install the hook
 	const auto result = LhInstallHook(
-		GetProcAddress(GetModuleHandle(moduleHandle), proc),
+		static_cast<void*>(GetProcAddress(GetModuleHandle(moduleHandle), proc)),
 		callBack,
 		NULL,
 		&hHook);
@@ -85,9 +86,16 @@ NTSTATUS installHook(const LPCSTR moduleHandle, const LPCSTR proc, void* callBac
 		ULONG ACLEntries[1] = { 0 };
 
 		// Disable the hook for the provided threadIds, enable for all others
-		LhSetExclusiveACL(ACLEntries, 1, &hHook);
+		const auto ACLres = LhSetExclusiveACL(ACLEntries, 1, &hHook);
 
-		DEBUGLOG("Successfully installed " << proc << " hook, in module: " << moduleHandle << ", result: " << result << "\n")
+		if (FAILED(ACLres))
+		{
+			DEBUGLOG("Error setting ACL for " << proc << " hook, ACLres = " << ACLres << ", error msg: " << RtlGetLastErrorString() << "\n");
+		}
+		else
+		{
+			DEBUGLOG("Successfully installed " << proc << " hook, in module: " << moduleHandle << ", result: " << result << "\n");
+		}
 	}
 
 	return result;
@@ -100,6 +108,8 @@ extern "C" void __declspec(dllexport) __stdcall NativeInjectionEntryPoint(REMOTE
 void __stdcall NativeInjectionEntryPoint(REMOTE_ENTRY_INFO* inRemoteInfo)
 {
 	const auto pid = GetCurrentProcessId();
+
+	//TODO: RENABLE
 	hWnd = FindWindowFromProcessId(pid);
 	
 	BYTE* data = inRemoteInfo->UserData;
@@ -133,6 +143,9 @@ void __stdcall NativeInjectionEntryPoint(REMOTE_ENTRY_INFO* inRemoteInfo)
 	options.legacyInput = NEXTBOOL;
 	options.updateAbsoluteFlagInMouseMessage = NEXTBOOL;
 	options.mouseVisibilitySendBack = NEXTBOOL;
+	options.reRegisterRawInput = NEXTBOOL;
+	options.reRegisterRawInputMouse = NEXTBOOL;
+	options.reRegisterRawInputKeyboard = NEXTBOOL;
 #undef NEXTBOOL
 
 	const auto pathLength = static_cast<size_t>(bytesToInt(p));
@@ -158,6 +171,7 @@ void __stdcall NativeInjectionEntryPoint(REMOTE_ENTRY_INFO* inRemoteInfo)
 	Piping::startSharedMem();
 
 	DEBUGLOG("Starting hook injection," <<
+		" hWnd: " << hWnd <<
 		" WritePipeName: " << std::string(Piping::writePipeName.begin(), Piping::writePipeName.end()) <<
 		" ReadPipeName: " << std::string(Piping::readPipeName.begin(), Piping::readPipeName.end()) <<
 		" preventWindowDeactivation: " << options.preventWindowDeactivation <<
@@ -173,8 +187,12 @@ void __stdcall NativeInjectionEntryPoint(REMOTE_ENTRY_INFO* inRemoteInfo)
 		" setWindow: " << options.setWindow <<
 		" hideCursor: " << options.hideCursor <<
 		" hookFocus: " << options.hookFocus <<
+		" mouseVisibilitySendBack: " << options.mouseVisibilitySendBack <<
+		" reRegisterRawInput: " << options.reRegisterRawInput <<
+		" reRegisterRawInputMouse: " << options.reRegisterRawInputMouse <<
+		" reRegisterRawInputKeyboard: " << options.reRegisterRawInputKeyboard <<
 		"\n");
-
+	
 	if (options.setWindow)
 		installSetWindowHook();
 
@@ -199,11 +217,17 @@ void __stdcall NativeInjectionEntryPoint(REMOTE_ENTRY_INFO* inRemoteInfo)
 	if (options.getKeyboardState)
 		installGetKeyboardStateHook();
 
-	if (options.filterRawInput || options.filterMouseMessages || options.legacyInput || options.preventWindowDeactivation)
+	if (options.reRegisterRawInput)
+	{
+		//Needs to be before message filter.
+		ReRegisterRawInput::SetupReRegisterRawInput();
+	}
+	
+	if (options.filterRawInput || options.filterMouseMessages || options.legacyInput || options.preventWindowDeactivation || options.reRegisterRawInput)
 	{
 		installMessageFilterHooks();
 	}
-
+	
 	DEBUGLOG("Hook injection complete\n");
 
 	Piping::startPipeListen();
