@@ -141,11 +141,18 @@ BOOL filterMessage(const volatile LPMSG lpMsg)
 		}
 
 		// || Msg == 0x00FF
-		if ((msg >= WM_XBUTTONDOWN && msg <= WM_XBUTTONDBLCLK) || msg == WM_MOUSEMOVE || msg == WM_MOUSEACTIVATE || msg
+		if ((msg >= WM_XBUTTONDOWN && msg <= WM_XBUTTONDBLCLK) || msg == WM_MOUSEMOVE || msg
 			== WM_MOUSEHOVER || msg == WM_MOUSELEAVE || msg == WM_MOUSEWHEEL || msg == WM_SETCURSOR || msg ==
-			WM_NCMOUSELEAVE) //Other mouse events. 
+			WM_NCMOUSELEAVE || msg == WM_KILLFOCUS || msg == WM_CAPTURECHANGED) //Other mouse events. 
 		{
 			BLOCK;
+		}
+		
+		if (msg == WM_MOUSEACTIVATE)
+		{
+			lpMsg->wParam = reinterpret_cast<WPARAM>(hWnd);
+			lpMsg->lParam = 1;
+			ALLOW;
 		}
 
 		if (msg == WM_ACTIVATE)
@@ -242,18 +249,18 @@ UINT WINAPI GetRawInputData_Hook(
 
 
 void installMessageFilterHooks()
-{	
+{
+	if (options.filterRawInput)
+	{
+		installHook(TEXT("user32"), "GetRawInputData", GetRawInputData_Hook);
+	}
+	
 	DEBUGLOG("Injecting message filter hooks\n");
 	installHook(TEXT("user32"), "GetMessageA", GetMessageA_Hook);
 	installHook(TEXT("user32"), "GetMessageW", GetMessageW_Hook);
 
 	installHook(TEXT("user32"), "PeekMessageA", PeekMessageA_Hook);
 	installHook(TEXT("user32"), "PeekMessageW", PeekMessageW_Hook);
-
-	if(options.filterRawInput)
-	{
-		installHook(TEXT("user32"), "GetRawInputData", GetRawInputData_Hook);
-	}
 	
 	//TODO: filterMessage doesn't work for PreventWindowDeactivation?
 	//TODO: This method seems to cause CSGO/Minecraft to not respond? "Hook Injection Complete" is never printed to the log. API Monitor shows calls being repeated infinitely?

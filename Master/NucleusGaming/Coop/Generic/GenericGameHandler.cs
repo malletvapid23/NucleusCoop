@@ -3640,8 +3640,14 @@ namespace Nucleus.Gaming
 
 					foreach (Process proc in attached)
 					{
+						//Deep Rock Galactic doesn't work with this message
+						if (gen.FakeFocusSendActivate)
+						{
+							//User32Interop.SendMessage(proc.MainWindowHandle, (int) FocusMessages.WM_ACTIVATE, (IntPtr) 0x00000001, (IntPtr) proc.MainWindowHandle);
+							User32Interop.SendMessage(proc.MainWindowHandle, (int)FocusMessages.WM_ACTIVATE, (IntPtr)0x00000002, IntPtr.Zero);
+						}
+
 						User32Interop.SendMessage(proc.MainWindowHandle, (int)FocusMessages.WM_ACTIVATEAPP, (IntPtr)1, IntPtr.Zero);
-						User32Interop.SendMessage(proc.MainWindowHandle, (int)FocusMessages.WM_ACTIVATE, (IntPtr)0x00000002, IntPtr.Zero);
 						User32Interop.SendMessage(proc.MainWindowHandle, (int)FocusMessages.WM_NCACTIVATE, (IntPtr)0x00000001, IntPtr.Zero);
 						User32Interop.SendMessage(proc.MainWindowHandle, (int)FocusMessages.WM_SETFOCUS, IntPtr.Zero, IntPtr.Zero);
 						User32Interop.SendMessage(proc.MainWindowHandle, (int)FocusMessages.WM_MOUSEACTIVATE, (IntPtr)proc.MainWindowHandle, (IntPtr)1);
