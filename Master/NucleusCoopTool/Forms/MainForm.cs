@@ -674,6 +674,11 @@ namespace Nucleus.Coop
             btn_Play.Text = "S T O P";
             btnBack.Enabled = false;
 
+            gameManager.AddScript(Path.GetFileNameWithoutExtension(currentGame.JsFileName));
+
+            currentGame = gameManager.GetGame(currentGameInfo.ExePath);
+            currentGameInfo.InitializeDefault(currentGame, currentGameInfo.ExePath);
+
             handler = gameManager.MakeHandler(currentGame);
             handler.Initialize(currentGameInfo, GameProfile.CleanClone(currentProfile));
             handler.Ended += handler_Ended;

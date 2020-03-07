@@ -2499,6 +2499,8 @@ namespace Nucleus.Gaming
 
                     foreach(PlayerInfo plyr in players)
                     {
+                        Thread.Sleep(1000);
+
                         Process plyrProc = plyr.ProcessData.Process;
 
                         const int flip = 0x00C00000 | 0x00080000 | 0x00040000; //WS_BORDER | WS_SYSMENU
@@ -2506,12 +2508,10 @@ namespace Nucleus.Gaming
                         var x = (int)User32Interop.GetWindowLong(plyrProc.MainWindowHandle, User32_WS.GWL_STYLE);
                         if ((x & flip) > 0)//has a border
                         {
-                            Log("Process id " + plyrProc.Id + " regained a border, trying to remove it again");
+                            Log("Process id " + plyrProc.Id + ", still has or regained a border, trying to remove it (again)");
                             //x &= (~flip);
                             ResetWindows(plyr.ProcessData, plyr.ProcessData.Position.X, plyr.ProcessData.Position.Y, plyr.ProcessData.Size.Width, plyr.ProcessData.Size.Height, plyr.PlayerID + 1);
                         }
-
-                        //ResetWindows(plyr.ProcessData, plyr.ProcessData.Position.X, plyr.ProcessData.Position.Y, plyr.ProcessData.Size.Width, plyr.ProcessData.Size.Height, plyr.PlayerID + 1);
                     }
 
 					//Window setup
