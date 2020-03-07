@@ -10,7 +10,7 @@
 
 bool filterMessageCalledAtLeastOnce = false;
 
-WNDPROC originalWndProc = nullptr;
+//WNDPROC originalWndProc = nullptr;
 
 BOOL filterMessage(const volatile LPMSG lpMsg)
 {
@@ -164,21 +164,33 @@ BOOL filterMessage(const volatile LPMSG lpMsg)
 
 LRESULT CALLBACK WndProc_Hook(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
-	if (uMsg == WM_KILLFOCUS && options.preventWindowDeactivation)
+	//if (uMsg == WM_KILLFOCUS && options.preventWindowDeactivation)
+	//{
+	//	return -1;
+	//}
+
+	////There is no point using WndProc filter for this as it only hooks one window
+	///*if (hasReRegisteredRawInput && uMsg == WM_INPUT)
+	//{
+	//	hasReRegisteredRawInput = false;
+
+	//	//We found the window that this process using for raw input. Now re-register raw input for it.
+	//	reRegisterRawInput(hwnd);
+	//}*/
+	//
+	//return CallWindowProc(originalWndProc, hwnd, uMsg, wParam, lParam);
+
+	switch (uMsg)
 	{
+	case WM_KILLFOCUS:
+	{
+		//SetFocus(hWnd);
 		return -1;
 	}
-
-	//There is no point using WndProc filter for this as it only hooks one window
-	/*if (hasReRegisteredRawInput && uMsg == WM_INPUT)
-	{
-		hasReRegisteredRawInput = false;
-
-		//We found the window that this process using for raw input. Now re-register raw input for it.
-		reRegisterRawInput(hwnd);
-	}*/
-	
-	return CallWindowProc(originalWndProc, hwnd, uMsg, wParam, lParam);
+	default:
+		DefWindowProc(hwnd, uMsg, wParam, lParam);
+	}
+	return 1;
 }
 
 
@@ -249,7 +261,7 @@ void installMessageFilterHooks()
 	if (options.preventWindowDeactivation)
 	{
 		DEBUGLOG("Injecting WndProc message filter\n");
-		originalWndProc = reinterpret_cast<WNDPROC>(GetWindowLongPtr(hWnd, GWLP_WNDPROC));
+		//originalWndProc = reinterpret_cast<WNDPROC>(GetWindowLongPtr(hWnd, GWLP_WNDPROC));
 		
 		SetWindowLongPtr(hWnd, GWLP_WNDPROC, (LONG_PTR)WndProc_Hook);
 	}
