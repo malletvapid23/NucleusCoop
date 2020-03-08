@@ -132,9 +132,9 @@ namespace Nucleus.Gaming.Coop.InputManagement
 				if (player.IsRawKeyboard)
 				{
 					player.RawKeyboardDeviceHandle = device.deviceHandle;
-					player.IsKeyboardPlayer = true;
+					
 				};
-
+				player.IsKeyboardPlayer = true;
 				yield return player;
 			}
 		}
