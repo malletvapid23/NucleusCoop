@@ -344,7 +344,13 @@ namespace Nucleus.Gaming.Coop.InputManagement
 			    return;
 
 		    if (!splitScreenRunning() && PlayerInfos != null)
-			    foreach (var toFlash in PlayerInfos.Where(x => x != null && (x.RawMouseDeviceHandle.Equals(hDevice) || x.RawKeyboardDeviceHandle.Equals(hDevice))))
+			    foreach (var toFlash in PlayerInfos.Where(x => x != null && 
+                       (
+                           (type == HeaderDwType.RIM_TYPEMOUSE && x.RawMouseDeviceHandle.Equals(hDevice)) || 
+                           (type == HeaderDwType.RIM_TYPEKEYBOARD && x.RawKeyboardDeviceHandle.Equals(hDevice))
+                           )
+                       )
+			    )
 			    {
 				    toFlash.FlashIcon();
 			    }

@@ -137,6 +137,37 @@ namespace Nucleus.Gaming.Coop.InputManagement
 				player.IsKeyboardPlayer = true;
 				yield return player;
 			}
+
+			// Zero device handle mouse
+			{
+				PlayerInfo playerMouseZero = new PlayerInfo
+				{
+					GamepadId = i++,
+					IsRawMouse = true,
+					IsRawKeyboard = false,
+					HIDDeviceID = "MouseHandleZero"
+				};
+				playerMouseZero.RawMouseDeviceHandle = IntPtr.Zero;
+				playerMouseZero.RawKeyboardDeviceHandle = (IntPtr) (-1);
+				playerMouseZero.IsKeyboardPlayer = true;
+				yield return playerMouseZero;
+			}
+
+
+			// Zero device handle keyboard
+			{
+				PlayerInfo playerKeyboardZero = new PlayerInfo
+				{
+					GamepadId = i++,
+					IsRawMouse = false,
+					IsRawKeyboard = true,
+					HIDDeviceID = "KeyboardHandleZero"
+				};
+				playerKeyboardZero.RawKeyboardDeviceHandle = IntPtr.Zero;
+				playerKeyboardZero.RawMouseDeviceHandle = (IntPtr)(-1);
+				playerKeyboardZero.IsKeyboardPlayer = true;
+				yield return playerKeyboardZero;
+			}
 		}
 	}
 }
