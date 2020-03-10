@@ -75,4 +75,22 @@ namespace FakeMouse
 			sentVisibility = show;
 		}
 	}
+
+	void InternalGetCursorPosition(LPPOINT lpPoint)
+	{
+		if (!options.legacyInput || useAbsoluteCursorPos)
+		{
+			//Absolute mouse position (always do this if legacy input is off)
+			lpPoint->x = *(Piping::memBuf);
+			lpPoint->y = *(Piping::memBuf + 1);
+		}
+		else
+		{
+			//Delta mouse position
+			lpPoint->x = getAndUpdateFakeX();
+			lpPoint->y = getAndUpdateFakeY();
+		}
+
+		ClientToScreen(hWnd, lpPoint);
+	}
 }

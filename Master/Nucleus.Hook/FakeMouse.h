@@ -22,4 +22,6 @@ namespace FakeMouse
 
 	int getAndUpdateFakeX();
 	int getAndUpdateFakeY();
+
+	void InternalGetCursorPosition(LPPOINT lpPoint);
 }

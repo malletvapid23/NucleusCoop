@@ -126,6 +126,8 @@ BOOL filterMessage(const volatile LPMSG lpMsg)
 	//USS signature is 1 << 7 or 0b10000000 for WM_MOUSEMOVE(0x0200). If this is detected, allow event to pass
 	if (options.filterMouseMessages)
 	{
+		FakeMouse::InternalGetCursorPosition(&(lpMsg->pt));
+		
 		if (msg == WM_KILLFOCUS || msg == WM_ACTIVATE && wParam == 0 || msg == WM_CAPTURECHANGED || msg == WM_ACTIVATE && static_cast<int>(lParam) == reinterpret_cast<int>(hWnd))
 		{
 			BLOCK;
