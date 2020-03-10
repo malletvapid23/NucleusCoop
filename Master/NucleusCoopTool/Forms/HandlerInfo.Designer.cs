@@ -303,9 +303,9 @@
             this.label2.ForeColor = System.Drawing.Color.White;
             this.label2.Location = new System.Drawing.Point(15, 220);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(178, 18);
+            this.label2.Size = new System.Drawing.Size(195, 18);
             this.label2.TabIndex = 28;
-            this.label2.Text = "Author Description/Notes:";
+            this.label2.Text = "Uploader Description/Notes:";
             this.label2.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             // 
             // label1

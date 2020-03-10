@@ -2497,7 +2497,7 @@ namespace Nucleus.Gaming
                         }
                     }
 
-                    foreach(PlayerInfo plyr in players)
+                    foreach (PlayerInfo plyr in players)
                     {
                         Thread.Sleep(1000);
 
@@ -2509,13 +2509,13 @@ namespace Nucleus.Gaming
                         if ((x & flip) > 0)//has a border
                         {
                             Log("Process id " + plyrProc.Id + ", still has or regained a border, trying to remove it (again)");
-                            //x &= (~flip);
+                            x &= (~flip);
                             ResetWindows(plyr.ProcessData, plyr.ProcessData.Position.X, plyr.ProcessData.Position.Y, plyr.ProcessData.Size.Width, plyr.ProcessData.Size.Height, plyr.PlayerID + 1);
                         }
                     }
 
-					//Window setup
-					foreach (var window in RawInputManager.windows)
+                    //Window setup
+                    foreach (var window in RawInputManager.windows)
 					{
 						var hWnd = window.hWnd;
 
@@ -4241,8 +4241,11 @@ namespace Nucleus.Gaming
             //MessageBox.Show("Going to attempt to reposition and resize instance " + (i - 1));
             try
             {
-                processData.HWnd.Location = new Point(x, y);
-                processData.HWnd.Size = new Size(w, h);
+                if(!gen.DontReposition)
+                    processData.HWnd.Location = new Point(x, y);
+                if(!gen.DontResize)
+                    processData.HWnd.Size = new Size(w, h);
+
                 uint lStyle = User32Interop.GetWindowLong(processData.HWnd.NativePtr, User32_WS.GWL_STYLE);
                 if (gen.WindowStyleValues?.Length > 0)
                 {
@@ -4305,11 +4308,12 @@ namespace Nucleus.Gaming
 
             try
             {
-	            if (processData.HWnd.Location != new Point(x, y) || processData.HWnd.Size != new Size(w, h))
+	            if ((processData.HWnd.Location != new Point(x, y) && !gen.DontReposition) || (processData.HWnd.Size != new Size(w, h) && !gen.DontResize))
 	            {
 		            Log("ERROR - ResetWindows was unsuccessful for instance " + (i - 1));
 	            }
-            }catch(Exception e)
+            }
+            catch(Exception e)
 			{
 				Log("ERROR - Exception in ResetWindows for instance " + (i - 1) + ", error = " + e);
 			}

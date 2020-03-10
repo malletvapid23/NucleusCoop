@@ -93,7 +93,7 @@
             // 
             // ownerName
             // 
-            this.ownerName.Text = "Author";
+            this.ownerName.Text = "Uploader";
             this.ownerName.Width = 120;
             // 
             // verified
@@ -125,7 +125,7 @@
             // 
             // description
             // 
-            this.description.Text = "Author Description";
+            this.description.Text = "Uploader Description";
             // 
             // btn_Search
             // 
