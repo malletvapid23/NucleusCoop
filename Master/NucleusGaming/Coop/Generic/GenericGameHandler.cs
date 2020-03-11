@@ -543,6 +543,11 @@ namespace Nucleus.Gaming
 //#else
 //	        isDebug = false;
 //#endif
+            if (ini.IniReadValue("Misc", "DebugLog") == "True")
+            {
+                isDebug = true;
+            }
+
 
             iniNetworkInterface = ini.IniReadValue("Misc", "Network");
 
