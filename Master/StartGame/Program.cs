@@ -419,7 +419,7 @@ namespace StartGame
                         if (injectFailed)
                         {
                             injectFailed = false;
-                            throw new Exception("Failed to create and/or inject start up hook dll.");
+                            throw new Exception("Failed to create and/or inject start up hook dll. " + tri + " of 2.");
                         }
 
                         //if(useNucleusEnvironment)
@@ -572,6 +572,7 @@ namespace StartGame
             }
             if(e.Data.Equals("injectfailed"))
             {
+                injectFailed = true;
                 return;
             }
             //Log($"Redirected output: {e.Data}");

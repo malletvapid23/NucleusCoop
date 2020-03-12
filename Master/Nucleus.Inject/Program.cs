@@ -233,6 +233,9 @@ namespace Nucleus.Inject
 					else
 						result = Injector32.RhCreateAndInject(InEXEPath, InCommandLine, InProcessCreationFlags, envPtr,
 							InInjectionOptions, InLibraryPath_x86, "", ptr, (uint) size, pid);
+
+					Thread.Sleep(1000);
+
 					Log("CreateAndInject result code: " + result);
 					if (result != 0)
 					{
