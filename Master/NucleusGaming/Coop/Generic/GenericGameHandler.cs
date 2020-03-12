@@ -543,6 +543,11 @@ namespace Nucleus.Gaming
 //#else
 //	        isDebug = false;
 //#endif
+            if (ini.IniReadValue("Misc", "DebugLog") == "True")
+            {
+                isDebug = true;
+            }
+
 
             iniNetworkInterface = ini.IniReadValue("Misc", "Network");
 
@@ -1298,12 +1303,12 @@ namespace Nucleus.Gaming
                     }
                 }
 
-                if (gen.UserProfileConfigPath?.Length > 0 || gen.ForceUserProfileConfigCopy)
+                if ((gen.UserProfileConfigPath?.Length > 0 || gen.ForceUserProfileConfigCopy) && gen.UseNucleusEnvironment)
                 {
                     UserProfileConfigCopy(player);
                 }
 
-                if (gen.UserProfileSavePath?.Length > 0 || gen.ForceUserProfileSaveCopy)
+                if ((gen.UserProfileSavePath?.Length > 0 || gen.ForceUserProfileSaveCopy) && gen.UseNucleusEnvironment)
                 {
                     UserProfileSaveCopy(player);
                 }
