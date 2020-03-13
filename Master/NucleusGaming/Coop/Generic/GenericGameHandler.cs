@@ -3880,8 +3880,15 @@ namespace Nucleus.Gaming
                                 User32Interop.SetWindowPos(data.HWnd.NativePtr, IntPtr.Zero, 0, 0, 0, 0, (uint)(PositioningFlags.SWP_FRAMECHANGED | PositioningFlags.SWP_NOMOVE | PositioningFlags.SWP_NOSIZE | PositioningFlags.SWP_NOZORDER | PositioningFlags.SWP_NOOWNERZORDER));
                                 //User32Interop.SetForegroundWindow(data.HWnd.NativePtr);
                                 //User32Interop.SetWindowPos(data.HWnd.NativePtr, new IntPtr(-2), 0, 0, 0, 0, (uint)(PositioningFlags.SWP_NOSIZE | PositioningFlags.SWP_NOMOVE));
-                                ShowWindow(data.HWnd.NativePtr, 6);
-                                ShowWindow(data.HWnd.NativePtr, 9);
+                                
+                                //Minimise and un-minimise the window. Fixes black borders in Minecraft, but causing stretching issues in games like Minecraft.
+                                if (gen.RefreshWindowAfterStart)
+                                {
+	                                ShowWindow(data.HWnd.NativePtr, 6);
+	                                ShowWindow(data.HWnd.NativePtr, 9);
+                                }
+
+
                                 //User32Interop.SetWindowPos(data.HWnd.NativePtr, IntPtr.Zero, 0, 0, 0, 0, (uint)(PositioningFlags.SWP_NOSIZE | PositioningFlags.SWP_NOMOVE));
 
                                 data.Finished = true;
