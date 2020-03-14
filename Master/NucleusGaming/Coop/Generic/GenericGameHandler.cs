@@ -2526,9 +2526,9 @@ namespace Nucleus.Gaming
 
 						//Logger.WriteLine($"hWnd={hWnd}, mouse={window.MouseAttached}, kb={window.KeyboardAttached}");
 
-						if (gen.DrawFakeMouseCursor && gen.SupportsMultipleKeyboardsAndMice)
+						if (gen.DrawFakeMouseCursor)//&& gen.SupportsMultipleKeyboardsAndMice)
 						{
-							window.NeedsCursorToBeCreatedOnMainMessageLoop = true;
+							RawInputManager.CreateCursorsOnWindowThread();
 						}
 
 						//Borderlands 2 (and some other games) requires WM_INPUT to be sent to a window named DIEmWin, not the main hWnd.

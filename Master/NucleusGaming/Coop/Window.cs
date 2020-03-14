@@ -182,7 +182,6 @@ namespace Nucleus.Gaming.Coop
 			}
 		}
 
-		public bool NeedsCursorToBeCreatedOnMainMessageLoop { get; set; } = false;
 		private PointerForm pointerForm = null;
 		public bool CursorVisibility
 		{
