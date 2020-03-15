@@ -348,6 +348,7 @@ namespace Nucleus.Coop
                     player.IsDInput = true;
                     player.GamepadId = i;
                     string hid = player.DInputJoystick.Properties.InterfacePath;
+                    player.RawHID = hid;
                     int start = hid.IndexOf("hid#");
                     int end = hid.LastIndexOf("#{");
                     string fhid = hid.Substring(start, end - start).Replace('#', '\\').ToUpper();
@@ -436,6 +437,7 @@ namespace Nucleus.Coop
                                 player.GamepadName = device.InstanceName;
                                 player.DInputJoystick = new Joystick(dinput, device.InstanceGuid);
                                 string hid = player.DInputJoystick.Properties.InterfacePath;
+                                player.RawHID = hid;
                                 int start = hid.IndexOf("hid#");
                                 int end = hid.LastIndexOf("#{");
                                 string fhid = hid.Substring(start, end - start).Replace('#', '\\').ToUpper();

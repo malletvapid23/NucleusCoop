@@ -697,7 +697,7 @@ namespace Nucleus.Gaming
                 Log(string.Format("Utils - UseGoldberg: {0}, NeedsSteamEmulation: {1}, UseX360ce: {2}, UseDevReorder: {3}, UseDirectX9Wrapper: {4}, UseSteamStubDRMPatcher: {5}", gen.UseGoldberg, gen.NeedsSteamEmulation, gen.UseX360ce, gen.UseDevReorder, gen.UseDirectX9Wrapper, gen.UseSteamStubDRMPatcher));
                 Log(string.Format("Options - UseNucleusEnvironment: {0}, ThirdPartyLaunch: {1}, SetForegroundWindowElsewhere: {2}, SymlinkFolders: {3}", gen.UseNucleusEnvironment, gen.ThirdPartyLaunch, gen.SetForegroundWindowElsewhere, gen.SymlinkFolders));
                 Log(string.Format("Goldberg Settings - GoldbergNeedSteamInterface: {0}, GoldbergExperimental: {1}, GoldbergIgnoreSteamAppId: {2}, CreateSteamAppIdByExe: {3}, GoldbergLobbyConnect: {4}, GoldbergNoLocalSave: {5}", gen.GoldbergNeedSteamInterface, gen.GoldbergExperimental, gen.GoldbergIgnoreSteamAppId, gen.CreateSteamAppIdByExe, gen.GoldbergLobbyConnect, gen.GoldbergNoLocalSave));
-                Log(string.Format("Start-up Hooks - HookInit: {0}, RenameNotKillMutex: {1}, SetWindowHookStart: {2}, BlockRawInput: {3}", gen.HookInit, gen.RenameNotKillMutex, gen.SetWindowHookStart, gen.BlockRawInput));
+                Log(string.Format("Start-up Hooks - HookInit: {0}, RenameNotKillMutex: {1}, SetWindowHookStart: {2}, BlockRawInput: {3}, CreateSingleDeviceFile: {4}", gen.HookInit, gen.RenameNotKillMutex, gen.SetWindowHookStart, gen.BlockRawInput, gen.CreateSingleDeviceFile));
                 Log(string.Format("Post Hooks - SetWindowHook: {0}, HookFocus: {1}, HideCursor: {2}, PreventWindowDeactivation: {3}", gen.SetWindowHook, gen.HookFocus, gen.HideCursor, gen.PreventWindowDeactivation));
 
                 if (gen.KillMutex?.Length > 0)
@@ -706,7 +706,7 @@ namespace Nucleus.Gaming
                     Log(string.Format("Mutexes - Handle(s): ({0}), KillMutexDelay: {1}, KillMutexType: {2}, RenameNotKillMutex: {3}, PartialMutexSearch: {4}", mutexList, gen.KillMutexDelay, gen.KillMutexType, gen.RenameNotKillMutex, gen.PartialMutexSearch));
                 }
 
-                Log("NucleusCoop mod version: 0.9.9.9");
+                Log("NucleusCoop mod version: 0.9.9.9 f1");
                 string pcSpecs = "PC Info - ";
                 var name = (from x in new ManagementObjectSearcher("SELECT Caption FROM Win32_OperatingSystem").Get().Cast<ManagementObject>()
                             select x.GetPropertyValue("Caption")).FirstOrDefault();
@@ -1528,13 +1528,14 @@ namespace Nucleus.Gaming
                     //Log("Removing starting arguments as a launcher is being used");
                     //startArgs = string.Empty;
 
-                    if (gen.HookInit || gen.RenameNotKillMutex || gen.SetWindowHookStart || gen.BlockRawInput)
+                    if (gen.HookInit || gen.RenameNotKillMutex || gen.SetWindowHookStart || gen.BlockRawInput || gen.CreateSingleDeviceFile)
                     {
                         Log("Disabling start up hooks as a launcher is being used");
                         gen.HookInit = false;
                         gen.RenameNotKillMutex = false;
                         gen.SetWindowHookStart = false;
                         gen.BlockRawInput = false;
+                        gen.CreateSingleDeviceFile = false;
                     }
                 }
 
@@ -1671,7 +1672,7 @@ namespace Nucleus.Gaming
 
                     if (!gen.ThirdPartyLaunch)
                     {
-                        if (/*context.KillMutex?.Length > 0 || */(gen.HookInit || (gen.RenameNotKillMutex && context.KillMutex?.Length > 0) || gen.SetWindowHookStart || gen.BlockRawInput) && !gen.CMDLaunch && !gen.UseForceBindIP) /*|| (gen.CMDLaunch && i==0))*/
+                        if (/*context.KillMutex?.Length > 0 || */(gen.HookInit || (gen.RenameNotKillMutex && context.KillMutex?.Length > 0) || gen.SetWindowHookStart || gen.BlockRawInput || gen.CreateSingleDeviceFile) && !gen.CMDLaunch && !gen.UseForceBindIP) /*|| (gen.CMDLaunch && i==0))*/
                         {
 
                             string mu = "";
@@ -1707,7 +1708,7 @@ namespace Nucleus.Gaming
                             Log(string.Format("Launching game located at {0} through StartGameUtil", exePath));
                             uint sguOutPID = StartGameUtil.StartGame(/*
                                 GetRelativePath(exePath, nucleusRootFolder)*/exePath, startArgs,
-                                gen.HookInit, gen.HookInitDelay, gen.RenameNotKillMutex, mu, gen.SetWindowHookStart, isDebug, nucleusRootFolder, gen.BlockRawInput, gen.UseNucleusEnvironment, player.Nickname, startupHooksEnabled/*, gen.RunAsAdmin, rawHID,*/ /*GetRelativePath(linkFolder, nucleusRootFolder)*/);
+                                gen.HookInit, gen.HookInitDelay, gen.RenameNotKillMutex, mu, gen.SetWindowHookStart, isDebug, nucleusRootFolder, gen.BlockRawInput, gen.UseNucleusEnvironment, player.Nickname, startupHooksEnabled, gen.CreateSingleDeviceFile, player.RawHID/*, gen.RunAsAdmin, rawHID,*/ /*GetRelativePath(linkFolder, nucleusRootFolder)*/);
 
                             try
                             {

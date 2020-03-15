@@ -186,6 +186,7 @@ namespace Nucleus.Gaming
         public string[] ExtWindowStyleValues;
         public bool KillLastInstanceMutex;
         public bool RefreshWindowAfterStart = false;
+        public bool CreateSingleDeviceFile;
 
         // -- From USS
         //Effectively a switch for all of USS features

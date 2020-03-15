@@ -43,6 +43,8 @@ namespace StartGame
         private static bool renameMutex;
         private static bool setWindow;
         private static bool blockRaw;
+        private static bool createSingle;
+        private static string rawHid;
         //private static bool runAdmin;
 
         private static string root;
@@ -312,7 +314,7 @@ namespace StartGame
                 STARTUPINFO startup = new STARTUPINFO();
                 startup.cb = Marshal.SizeOf(startup);
 
-                if (useStartupHooks && (isHook || renameMutex || setWindow || blockRaw))
+                if (useStartupHooks && (isHook || renameMutex || setWindow || blockRaw || createSingle))
                 {
                     Log("Starting game and injecting start up hooks via Nucleus.Inject");
 
@@ -383,7 +385,9 @@ namespace StartGame
                             nucleusFolderPath,
                             blockRaw,
                             useNucleusEnvironment,
-                            playerNick
+                            playerNick,
+                            createSingle,
+                            rawHid
                             };
 
                             var sbArgs = new StringBuilder();
@@ -635,6 +639,8 @@ namespace StartGame
                              && !skey.Contains("numplayers")
                              && !skey.Contains("symlink")
                              //&& !skey.Contains("rawhid")
+                             && !skey.Contains("createsingle")
+                             && !skey.Contains("rawhid")
                              && !skey.Contains("output"))
                              
                                                           
@@ -697,6 +703,14 @@ namespace StartGame
                     else if (key.Contains("blockraw"))
                     {
                         blockRaw = Boolean.Parse(splited[1]);
+                    }
+                    else if (key.Contains("createsingle"))
+                    {
+                        createSingle = Boolean.Parse(splited[1]);
+                    }
+                    else if (key.Contains("rawhid"))
+                    {
+                        rawHid = splited[1];
                     }
                     else if (key.Contains("nucenv"))
                     {

@@ -121,6 +121,8 @@ namespace Nucleus.Inject
 			bool.TryParse(args[i++], out bool blockRaw);
 			bool.TryParse(args[i++], out bool useCustomEnvironment);
 			string playerNick = args[i++];
+			bool.TryParse(args[i++], out bool createSingle);
+			string rawHid = args[i++];
 
 			//IntPtr InPassThruBuffer = Marshal.StringToHGlobalUni(args[i++]);
 			//uint.TryParse(args[i++], out uint InPassThruSize);
@@ -174,13 +176,22 @@ namespace Nucleus.Inject
 			var targetsBytes = Encoding.Unicode.GetBytes(mutexToRename);
 			int targetsBytesLength = targetsBytes.Length;
 
-			int size = 27 + logPathLength + targetsBytesLength;
+			var rawHidBytes = Encoding.Unicode.GetBytes(rawHid);
+			int rawHidBytesLength = rawHidBytes.Length;
+
+			int size = 28 + logPathLength + targetsBytesLength + rawHidBytesLength;
 			var data = new byte[size];
 			data[0] = hookWindow == true ? (byte) 1 : (byte) 0;
 			data[1] = renameMutex == true ? (byte) 1 : (byte) 0;
 			data[2] = setWindow == true ? (byte) 1 : (byte) 0;
 			data[3] = isDebug == true ? (byte) 1 : (byte) 0;
 			data[4] = blockRaw == true ? (byte) 1 : (byte) 0;
+			data[5] = createSingle == true ? (byte)1 : (byte) 0;
+
+			data[6] = (byte)(rawHidBytesLength >> 24);
+			data[7] = (byte)(rawHidBytesLength >> 16);
+			data[8] = (byte)(rawHidBytesLength >> 8);
+			data[9] = (byte)rawHidBytesLength;
 
 			data[10] = (byte) (logPathLength >> 24);
 			data[11] = (byte) (logPathLength >> 16);
@@ -195,6 +206,8 @@ namespace Nucleus.Inject
 			Array.Copy(logPath, 0, data, 18, logPathLength);
 
 			Array.Copy(targetsBytes, 0, data, 19 + logPathLength, targetsBytesLength);
+
+			Array.Copy(rawHidBytes, 0, data, 20 + logPathLength + targetsBytesLength, rawHidBytesLength);
 
 			IntPtr ptr = Marshal.AllocHGlobal(size);
 			Marshal.Copy(data, 0, ptr, size);
