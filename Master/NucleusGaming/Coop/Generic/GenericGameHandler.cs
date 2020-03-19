@@ -2342,16 +2342,37 @@ namespace Nucleus.Gaming
                     Thread.Sleep(TimeSpan.FromSeconds(gen.PauseBetweenStarts));
                 }
 
-				//Set up raw input window
-				//if (player.IsRawKeyboard || player.IsRawMouse)
-				{
-					var window = CreateRawInputWindow(proc, player);
+                if(!IsRunning(proc))
+                {
+                    Log("Process is no longer running. Attempting to find process by window title");
+                    Process[] processes = Process.GetProcesses();
+                    foreach (var process in processes)
+                    {
+                        if (process.MainWindowTitle == gen.Hook.ForceFocusWindowName && !attachedIds.Contains(process.Id))
+                        {
+                            Log("Process found, " + process.ProcessName + " pid (" + process.Id + ")");
+                            proc = process;
+                            data.AssignProcess(proc);
+                            player.ProcessData.AssignProcess(proc);
+                            attachedIds.RemoveAt(attachedIds.Count - 1);
+                            attachedIds.Add(proc.Id);
+                        }
+                    }
+                }
+
+                Log(string.Format("Process details; Name: {0}, ID: {1}, MainWindowtitle: {2}, MainWindowHandle: {3}", proc.ProcessName, proc.Id, proc.MainWindowTitle, proc.MainWindowHandle));
+
+                //Set up raw input window
+                //if (player.IsRawKeyboard || player.IsRawMouse)
+                {
+                    var window = CreateRawInputWindow(proc, player);
 
 					nextWindowToInject = window;
 				}
 
-				if (i == (players.Count - 1)) // all instances accounted for
+				if (i == (players.Count - 1))
                 {
+                    Log("All instances accounted for, performing final preperations");
                     if(gen.KillLastInstanceMutex && !gen.RenameNotKillMutex)
                     {
                         for (; ; )
@@ -2572,7 +2593,8 @@ namespace Nucleus.Gaming
 
         private Window CreateRawInputWindow(Process proc, PlayerInfo player)
         {
-	        var hWnd = WaitForProcWindowHandleNotZero(proc);
+            Log("Creating raw input window");
+            var hWnd = WaitForProcWindowHandleNotZero(proc);
 	        var mouseHdev = player.IsRawKeyboard ? player.RawMouseDeviceHandle : (IntPtr) (-1);
 	        var keyboardHdev = player.IsRawMouse ? player.RawKeyboardDeviceHandle : (IntPtr) (-1);
 
@@ -2587,6 +2609,14 @@ namespace Nucleus.Gaming
 
 	        RawInputManager.windows.Add(window);
 	        return window;
+        }
+
+        private static bool IsRunning(Process process)
+        {
+            try { Process.GetProcessById(process.Id); }
+            catch (InvalidOperationException) { return false; }
+            catch (ArgumentException) { return false; }
+            return true;
         }
 
         private void DeleteFiles(string linkFolder, int i)
@@ -4154,7 +4184,7 @@ namespace Nucleus.Gaming
 		{
 			try
 			{
-				if ((int)proc.MainWindowHandle == 0)
+                if ((int)proc.MainWindowHandle == 0)
 				{
 					for (int times = 0; times < 200; times++)
 					{

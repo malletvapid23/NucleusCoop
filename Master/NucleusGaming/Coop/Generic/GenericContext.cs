@@ -188,11 +188,39 @@ namespace Nucleus.Gaming
             }
         }
 
-        public int OrigAspectRatio
+        public int OrigAspectRatioDecimal
         {
             get
             {
                 return profile.Screens[pInfo.PlayerID].display.Width / profile.Screens[pInfo.PlayerID].display.Height;
+            }
+        }
+
+        public string OrigAspectRatio
+        {
+            get
+            {
+                int width = profile.Screens[pInfo.PlayerID].display.Width;
+                int height = profile.Screens[pInfo.PlayerID].display.Height;
+                var gcd = GCD(width, height);
+                return string.Format("{0}:{1}", width / gcd, height / gcd);
+            }
+        }
+
+        public int AspectRatioDecimal
+        {
+            get
+            {
+                return Width / Height;
+            }
+        }
+
+        public string AspectRatio
+        {
+            get
+            {
+                var gcd = GCD(Width, Height);
+                return string.Format("{0}:{1}", Width / gcd, Height / gcd);
             }
         }
 
@@ -276,6 +304,11 @@ namespace Nucleus.Gaming
             //set { }
 
             get; set;
+        }
+
+        static int GCD(int a, int b)
+        {
+            return b == 0 ? Math.Abs(a) : GCD(b, a % b);
         }
 
         public void WriteTextFile(string path, string[] lines)
