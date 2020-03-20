@@ -2295,7 +2295,7 @@ namespace Nucleus.Gaming
                         string windowTitle = proc.MainWindowTitle + "(" + i + ")";
                         if(!string.IsNullOrEmpty(gen.FlawlessWidescreen))
                         {
-                            windowTitle = "Nucleus Instance " + (i + 1) + "(" + gen.Hook.ForceFocusWindowName + ")";
+                            windowTitle = "Nucleus Instance " + (i + 1) + "(" + gen.Hook.ForceFocusWindowName.Replace("®", "%R") + ")";
                         }
                         Log(string.Format("Setting window text to {0}", windowTitle));
                         SetWindowText(proc.MainWindowHandle, windowTitle);
@@ -2459,7 +2459,7 @@ namespace Nucleus.Gaming
                         for(int fw = 0; fw < players.Count; fw++)
                         {
                             Process fwProc = Process.GetProcessById(players[fw].ProcessData.Process.Id);
-                            string windowTitle = "Nucleus Instance " + (fw + 1) + "(" + gen.Hook.ForceFocusWindowName + ")";
+                            string windowTitle = "Nucleus Instance " + (fw + 1) + "(" + gen.Hook.ForceFocusWindowName.Replace("®", "%R") + ")";
 
                             if (fwProc.MainWindowTitle != windowTitle)
                             {
@@ -2800,7 +2800,7 @@ namespace Nucleus.Gaming
                 List<string> textChanges = new List<string>();
                 string scriptPath = Path.Combine(newFwGameFolder, "Dependencies\\Scripts\\" + gen.FlawlessWidescreen + " - Nucleus Instance " + (i + 1) + ".lua");
 
-                textChanges.Add(context.FindLineNumberInTextFile(scriptPath, "Process_WindowName = ", SearchType.StartsWith) + "|Process_WindowName = \"" + "Nucleus Instance " + (i + 1) + "(" + gen.Hook.ForceFocusWindowName + ")\"");
+                textChanges.Add(context.FindLineNumberInTextFile(scriptPath, "Process_WindowName = ", SearchType.StartsWith) + "|Process_WindowName = \"" + "Nucleus Instance " + (i + 1) + "(" + gen.Hook.ForceFocusWindowName.Replace("®", "%R") + ")\"");
                 context.ReplaceLinesInTextFile(scriptPath, textChanges.ToArray());
 
                 string path = Path.Combine(utilFolder, "Plugins\\FWS_Plugins.fws");
@@ -4453,7 +4453,7 @@ namespace Nucleus.Gaming
                     windowTitle = gen.Hook.ForceFocusWindowName + "(" + i + ")";
                     if (!string.IsNullOrEmpty(gen.FlawlessWidescreen))
                     {
-                        windowTitle = "Nucleus Instance " + (i + 1) + "(" + gen.Hook.ForceFocusWindowName + ")";
+                        windowTitle = "Nucleus Instance " + (i + 1) + "(" + gen.Hook.ForceFocusWindowName.Replace("®", "%R") + ")";
                     }
                 }
                 x360.IniWriteValue("Options", "ForceFocusWindowName", windowTitle.ToString(CultureInfo.InvariantCulture));
