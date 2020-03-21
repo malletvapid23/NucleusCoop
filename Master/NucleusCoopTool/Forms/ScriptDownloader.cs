@@ -44,6 +44,9 @@ namespace Nucleus.Coop.Forms
                 list_Games.Items.Clear();
                 searchHandlers.Clear();
 
+                ServicePointManager.Expect100Continue = true;
+                ServicePointManager.SecurityProtocol = (SecurityProtocolType)3072;
+
                 string searchParam = Uri.EscapeDataString(txt_Search.Text);
                 string rawHandlers = Get(api + "handlers/" + searchParam);
                 txt_Search.Clear();
@@ -108,8 +111,6 @@ namespace Nucleus.Coop.Forms
                     }
 
                     string _cover = $@"https://images.igdb.com/igdb/image/upload/t_micro/{handler.GameCover}.jpg";
-                    ServicePointManager.Expect100Continue = true;
-                    ServicePointManager.SecurityProtocol = (SecurityProtocolType)3072;
 
                     WebRequest request = WebRequest.Create(_cover);
                     WebResponse resp = request.GetResponse();
@@ -161,7 +162,6 @@ namespace Nucleus.Coop.Forms
                 }
             }
         }
-
 
         public string Get(string uri)
         {
