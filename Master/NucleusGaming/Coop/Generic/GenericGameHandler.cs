@@ -910,50 +910,54 @@ namespace Nucleus.Gaming
                     }
                 }
 
-                if (!gen.RenameNotKillMutex && i > 0 && (gen.KillMutex?.Length > 0 || !hasSetted))
+                if(!gen.KillMutexAtEnd)
                 {
-                    PlayerInfo before = players[i - 1];
-                    for (; ; )
+                    if (!gen.RenameNotKillMutex && i > 0 && (gen.KillMutex?.Length > 0 || !hasSetted))
                     {
-                        if (exited > 0)
+                        PlayerInfo before = players[i - 1];
+                        for (; ; )
                         {
-                            return "";
-                        }
-                        Thread.Sleep(1000);
-
-                        if (gen.KillMutex != null)
-                        {
-                            if (gen.KillMutex.Length > 0 && !before.ProcessData.KilledMutexes)
+                            if (exited > 0)
                             {
-                                // check for the existence of the mutexes
-                                // before invoking our StartGame app to kill them
-                                ProcessData pdata = before.ProcessData;
+                                return "";
+                            }
+                            Thread.Sleep(1000);
 
-                                if (gen.KillMutexDelay > 0)
+                            if (gen.KillMutex != null)
+                            {
+                                if (gen.KillMutex.Length > 0 && !before.ProcessData.KilledMutexes)
                                 {
-                                    Thread.Sleep((gen.KillMutexDelay * 1000));
-                                }
+                                    // check for the existence of the mutexes
+                                    // before invoking our StartGame app to kill them
+                                    ProcessData pdata = before.ProcessData;
 
-                                if (StartGameUtil.MutexExists(pdata.Process, gen.KillMutexType, gen.PartialMutexSearch, gen.KillMutex))
-                                {
-                                    // mutexes still exist, must kill
-                                    StartGameUtil.KillMutex(pdata.Process, gen.KillMutexType, gen.PartialMutexSearch, gen.KillMutex);
-                                    pdata.KilledMutexes = true;
-                                    break;
-                                }
-                                else
-                                {
-                                    // mutexes dont exist anymore
-                                    break;
+                                    if (gen.KillMutexDelay > 0)
+                                    {
+                                        Thread.Sleep((gen.KillMutexDelay * 1000));
+                                    }
+
+                                    if (StartGameUtil.MutexExists(pdata.Process, gen.KillMutexType, gen.PartialMutexSearch, gen.KillMutex))
+                                    {
+                                        // mutexes still exist, must kill
+                                        StartGameUtil.KillMutex(pdata.Process, gen.KillMutexType, gen.PartialMutexSearch, gen.KillMutex);
+                                        pdata.KilledMutexes = true;
+                                        break;
+                                    }
+                                    else
+                                    {
+                                        // mutexes dont exist anymore
+                                        break;
+                                    }
                                 }
                             }
-                        }
-                        else
-                        {
-                            break;
+                            else
+                            {
+                                break;
+                            }
                         }
                     }
                 }
+                
 
                 if (i > 0 && (gen.HookFocus || gen.SetWindowHook || gen.HideCursor || gen.PreventWindowDeactivation || gen.SupportsMultipleKeyboardsAndMice))
                 {
@@ -2989,6 +2993,7 @@ namespace Nucleus.Gaming
 
             for (int i = 0; i < players.Count; i++)
             {
+                
                 PlayerInfo player = players[i];
 
                 if (gen.ChangeIPPerInstance)
@@ -3025,6 +3030,67 @@ namespace Nucleus.Gaming
                 else
                 {
                     Thread.Sleep(1000);
+                }
+
+                if (gen.KillMutexAtEnd)
+                {
+
+                    //PlayerInfo before = players[i];
+                    for (; ; )
+                    {
+                        Thread.Sleep(1000);
+
+                        if (gen.KillMutex != null)
+                        {
+                            Log("Beginning mutex killing");
+                            if (gen.KillMutex.Length > 0)
+                            {
+                                ProcessData pdata = null;
+                                if (player.ProcessData != null)
+                                {
+                                    Log(string.Format("Using player process data. Process: {0} pid({1})", player.ProcessData.Process.ProcessName, player.ProcessData.Process.Id));
+                                    pdata = player.ProcessData;
+                                }
+                                else
+                                {
+                                    Log("Player process data was null. Attempting to find process by executable name.");
+                                    Process[] cProcs = Process.GetProcesses();
+                                    foreach (Process p in cProcs)
+                                    {
+                                        if (p.ProcessName.ToLower() == Path.GetFileNameWithoutExtension(gen.ExecutableName.ToLower()) && !attachedIds.Contains(p.Id))
+                                        {
+                                            Log(string.Format("Found process {0} pid({1})", p.ProcessName, p.Id));
+                                            pdata = new ProcessData(p);
+                                            player.ProcessData = pdata;
+                                            attachedIds.Add(p.Id);
+                                        }
+                                    }
+                                }
+
+                                if (gen.KillMutexDelay > 0)
+                                {
+                                    Thread.Sleep((gen.KillMutexDelay * 1000));
+                                }
+
+                                if (StartGameUtil.MutexExists(pdata.Process, gen.KillMutexType, gen.PartialMutexSearch, gen.KillMutex))
+                                {
+                                    // mutexes still exist, must kill
+                                    StartGameUtil.KillMutex(pdata.Process, gen.KillMutexType, gen.PartialMutexSearch, gen.KillMutex);
+                                    pdata.KilledMutexes = true;
+                                    break;
+                                }
+                                else
+                                {
+                                    // mutexes dont exist anymore
+                                    break;
+                                }
+                            }
+                        }
+                        else
+                        {
+                            break;
+                        }
+                    }
                 }
             }
 
