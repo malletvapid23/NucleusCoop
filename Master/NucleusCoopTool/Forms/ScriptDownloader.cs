@@ -12,6 +12,7 @@ using System.Web;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System.Text.RegularExpressions;
+using ListViewSorter;
 
 namespace Nucleus.Coop.Forms
 {
@@ -25,9 +26,14 @@ namespace Nucleus.Coop.Forms
 
         private string lastSearch;
 
+        private ListViewColumnSorter lvwColumnSorter;
+
         public ScriptDownloader(MainForm mf)
         {
             InitializeComponent();
+
+            lvwColumnSorter = new ListViewColumnSorter();
+            list_Games.ListViewItemSorter = lvwColumnSorter;
 
             mainForm = mf;
 
@@ -37,12 +43,25 @@ namespace Nucleus.Coop.Forms
 
         private void btn_Search_Click(object sender, EventArgs e)
         {
+            if(txt_Search.Text.Contains("\\") || txt_Search.Text.Contains("/"))
+            {
+                MessageBox.Show("Search cannot contain the characters \"/\" or \"\\\".", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            if(txt_Search.Text.StartsWith("*") || txt_Search.Text == ".")
+            {
+                MessageBox.Show("Illegal search query, please try something else.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
             if (!string.IsNullOrEmpty(txt_Search.Text) && txt_Search.Text.Replace(" ", string.Empty).Length > 0)
             {
                 lastSearch = txt_Search.Text;
 
                 list_Games.Items.Clear();
                 searchHandlers.Clear();
+                lbl_Status.Text = "";
 
                 ServicePointManager.Expect100Continue = true;
                 ServicePointManager.SecurityProtocol = (SecurityProtocolType)3072;
@@ -51,7 +70,12 @@ namespace Nucleus.Coop.Forms
                 string rawHandlers = Get(api + "handlers/" + searchParam);
                 txt_Search.Clear();
 
-                if(rawHandlers == "{}")
+                if(rawHandlers == null)
+                {
+                    
+                    return;
+                }
+                else if(rawHandlers == "{}")
                 {
                     MessageBox.Show("No results found.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     txt_Search.Focus();
@@ -66,8 +90,14 @@ namespace Nucleus.Coop.Forms
                 JArray handlers = jObject["Handlers"] as JArray;
 
                 bool minResult = false;
+
+                list_Games.BeginUpdate();
+                Cursor.Current = Cursors.WaitCursor;
+
                 for (int i = 0; i < handlers.Count; i++)
                 {
+                    
+                    lbl_Status.Text = "Status: Fetching " + i + "/" + handlers.Count + " handlers.";
                     Handler handler = new Handler();
 
                     handler.Id = jObject["Handlers"][i]["_id"].ToString();
@@ -147,8 +177,8 @@ namespace Nucleus.Coop.Forms
 
                     list_Games.Items[i].SubItems[2].Font = new Font(new FontFamily("Wingdings"), 10, FontStyle.Bold);
                     list_Games.Items[i].SubItems[2].ForeColor = Color.Green;
-
                 }
+                
 
                 if (!minResult)
                 {
@@ -160,19 +190,38 @@ namespace Nucleus.Coop.Forms
                     list_Games.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent);
                     list_Games.AutoResizeColumns(ColumnHeaderAutoResizeStyle.HeaderSize);
                 }
+
+                lvwColumnSorter.SortColumn = 0;
+                lvwColumnSorter.Order = SortOrder.Ascending;
+                list_Games.SetSortIcon(0, lvwColumnSorter.Order);
+
+                list_Games.Sort();
+
+                list_Games.EndUpdate();
+                Cursor.Current = Cursors.Default;
+
+                lbl_Status.Text = "Status: " + handlers.Count + " results returned.";
             }
         }
 
         public string Get(string uri)
         {
-            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(uri);
-            //request.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
-
-            using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
-            using (Stream stream = response.GetResponseStream())
-            using (StreamReader reader = new StreamReader(stream))
+            try
             {
-                return reader.ReadToEnd();
+                HttpWebRequest request = (HttpWebRequest)WebRequest.Create(uri);
+                //request.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
+
+                using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
+                using (Stream stream = response.GetResponseStream())
+                using (StreamReader reader = new StreamReader(stream))
+                {
+                    return reader.ReadToEnd();
+                }
+            }
+            catch(Exception ex)
+            {
+                MessageBox.Show(string.Format("{0}: {1}", ex.ToString(), ex.Message), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return null;
             }
         }
 
@@ -197,7 +246,39 @@ namespace Nucleus.Coop.Forms
 
         private void list_Games_ColumnClick(object sender, ColumnClickEventArgs e)
         {
-            
+            ListView myListView = (ListView)sender;
+
+            // Determine if clicked column is already the column that is being sorted.
+            if (e.Column == lvwColumnSorter.SortColumn)
+            {
+                // Reverse the current sort direction for this column.
+                if (lvwColumnSorter.Order == SortOrder.Ascending)
+                {
+                    lvwColumnSorter.Order = SortOrder.Descending;
+                }
+                else
+                {
+                    lvwColumnSorter.Order = SortOrder.Ascending;
+                }
+            }
+            else
+            {
+                // Set the column number that is to be sorted; default to descending.
+                lvwColumnSorter.SortColumn = e.Column;
+                if(e.Column == 0)
+                {
+                    lvwColumnSorter.Order = SortOrder.Ascending;
+                }
+                else
+                {
+                    lvwColumnSorter.Order = SortOrder.Descending;
+                }
+                
+            }
+
+            // Perform the sort with these new sort options.
+            myListView.Sort();
+            myListView.SetSortIcon(e.Column, lvwColumnSorter.Order);
         }
 
         private void btn_Info_Click(object sender, EventArgs e)
@@ -253,6 +334,12 @@ namespace Nucleus.Coop.Forms
                 txt_Search.Text = lastSearch;
                 btn_Search.PerformClick();
             }
+        }
+
+        private void btn_ViewAll_Click(object sender, EventArgs e)
+        {
+            txt_Search.Text = "|";
+            btn_Search.PerformClick();
         }
     }
 }
