@@ -285,8 +285,24 @@ namespace Nucleus.Coop.Forms
         {
             if(list_Games.SelectedItems.Count == 1)
             {
-                int index = list_Games.Items.IndexOf(list_Games.SelectedItems[0]);
-                HandlerInfo handlerInfo = new HandlerInfo(searchHandlers[index], mainForm);
+                //int index = list_Games.Items.IndexOf(list_Games.SelectedItems[0]);
+
+                Handler handler = null;
+                foreach (Handler hndl in searchHandlers)
+                {
+                    if (list_Games.SelectedItems[0].SubItems[0].Text.EndsWith(hndl.GameName) && list_Games.SelectedItems[0].SubItems[1].Text == hndl.OwnerName)
+                    {
+                        handler = hndl;
+                        break;
+                    }
+                }
+
+                if (handler == null)
+                {
+                    MessageBox.Show("Error fetching handler", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+                HandlerInfo handlerInfo = new HandlerInfo(handler, mainForm);
                 handlerInfo.ShowDialog();
             }
         }
@@ -295,8 +311,23 @@ namespace Nucleus.Coop.Forms
         {
             if (list_Games.SelectedItems.Count == 1)
             {
-                int index = list_Games.Items.IndexOf(list_Games.SelectedItems[0]);
-                Handler handler = searchHandlers[index];
+                //int index = list_Games.Items.IndexOf(list_Games.SelectedItems[0]);
+                //Handler handler = searchHandlers[index];
+                Handler handler = null;
+                foreach (Handler hndl in searchHandlers)
+                {
+                    if(list_Games.SelectedItems[0].SubItems[0].Text.EndsWith(hndl.GameName) && list_Games.SelectedItems[0].SubItems[1].Text == hndl.OwnerName)
+                    {
+                        handler = hndl;
+                        break;
+                    }
+                }
+
+                if(handler == null)
+                {
+                    MessageBox.Show("Error fetching handler", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
 
                 Regex pattern = new Regex("[\\/:*?\"<>|]");
                 string frmHandleTitle = pattern.Replace(handler.Title, "");
