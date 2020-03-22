@@ -385,7 +385,7 @@ namespace Nucleus.Gaming
 
         public void RemoveLineInTextFile(string path, int lineNum, string encoder)
         {
-            string[] lines = File.ReadAllLines(path);
+            string[] lines = File.ReadAllLines(path, Encoding.GetEncoding(encoder));
             if (lineNum < 0 || lineNum > lines.Length)
             {
                 return;
@@ -455,7 +455,7 @@ namespace Nucleus.Gaming
 
         public void RemoveLineInTextFile(string path, string searchValue, SearchType type, string encoder)
         {
-            string[] lines = File.ReadAllLines(path);
+            string[] lines = File.ReadAllLines(path, Encoding.GetEncoding(encoder));
             if (File.Exists(path))
             {
                 File.Delete(path);
@@ -531,7 +531,7 @@ namespace Nucleus.Gaming
 
         public void ReplaceLinesInTextFile(string path, string[] newLines, string encoder)
         {
-            string[] lines = File.ReadAllLines(path);
+            string[] lines = File.ReadAllLines(path, Encoding.GetEncoding(encoder));
             if (File.Exists(path))
             {
                 File.Delete(path);
@@ -585,7 +585,7 @@ namespace Nucleus.Gaming
 
         public void ReplacePartialLinesInTextFile(string path, string[] newLines, string encoder)
         {
-            string[] lines = File.ReadAllLines(path);
+            string[] lines = File.ReadAllLines(path, Encoding.GetEncoding(encoder));
             if (File.Exists(path))
             {
                 File.Delete(path);
