@@ -559,15 +559,6 @@ HANDLE CreateFileW_Hook(
 
 	if(fileNameStr.find("HID") != std::string::npos)
 	{
-		//if (IsDebug)
-		//{
-		//	bool result = caseInSensStringCompare(fileNameStr, rawHidStr);
-		//	outfile.open(nucleusFolder + logFile, std::ios_base::app);
-		//	outfile << date_string() << "SHOOK: CREATEFILE - " << fileNameStr << " " << rawHidStr << " compare: " << result << "\n";
-		//	outfile.close();
-		//}
-		
-		//if (fileNameStr.find("#8&37c6b2bf&0&0000#") != std::string::npos)
 		if(!caseInSensStringCompare(fileNameStr, rawHidStr))
 		{
 			if (IsDebug)
@@ -581,6 +572,46 @@ HANDLE CreateFileW_Hook(
 	}
 
 	return CreateFileW(
+		lpFileName,
+		dwDesiredAccess,
+		dwShareMode,
+		lpSecurityAttributes,
+		dwCreationDisposition,
+		dwFlagsAndAttributes,
+		hTemplateFile
+	);
+}
+
+HANDLE CreateFileA_Hook(
+	LPCSTR				  lpFileName,
+	DWORD                 dwDesiredAccess,
+	DWORD                 dwShareMode,
+	LPSECURITY_ATTRIBUTES lpSecurityAttributes,
+	DWORD                 dwCreationDisposition,
+	DWORD                 dwFlagsAndAttributes,
+	HANDLE                hTemplateFile
+)
+{
+	string fileNameStr(lpFileName);
+
+	wstring rawHidWstring(rawHid);
+	string rawHidStr(rawHidWstring.begin(), rawHidWstring.end());
+
+	if (fileNameStr.find("HID") != std::string::npos)
+	{
+		if (!caseInSensStringCompare(fileNameStr, rawHidStr))
+		{
+			if (IsDebug)
+			{
+				outfile.open(nucleusFolder + logFile, std::ios_base::app);
+				outfile << date_string() << "SHOOK: CREATEFILE - BLOCKING " << fileNameStr << "\n";
+				outfile.close();
+			}
+			return INVALID_HANDLE_VALUE;
+		}
+	}
+
+	return CreateFileA(
 		lpFileName,
 		dwDesiredAccess,
 		dwShareMode,
@@ -900,6 +931,7 @@ void __stdcall NativeInjectionEntryPoint(REMOTE_ENTRY_INFO* inRemoteInfo)
 		}
 
 		installHook("kernel32", "CreateFileW", CreateFileW_Hook);
+		installHook("kernel32", "CreateFileA", CreateFileA_Hook);
 
 		if (!RenameMutex)
 		{
