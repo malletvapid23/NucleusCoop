@@ -349,7 +349,7 @@ namespace Nucleus.Gaming.Coop.InputManagement
                            (type == HeaderDwType.RIM_TYPEMOUSE && x.RawMouseDeviceHandle.Equals(hDevice)) || 
                            (type == HeaderDwType.RIM_TYPEKEYBOARD && x.RawKeyboardDeviceHandle.Equals(hDevice))
                            )
-                       )
+                       ).ToArray()
 			    )
 			    {
 				    toFlash.FlashIcon();

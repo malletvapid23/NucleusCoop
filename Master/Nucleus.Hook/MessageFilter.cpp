@@ -12,14 +12,15 @@ bool filterMessageCalledAtLeastOnce = false;
 
 //WNDPROC originalWndProc = nullptr;
 
-BOOL filterMessage(const volatile LPMSG lpMsg)
+BOOL filterMessage(const LPMSG lpMsg)
 {
 	const auto msg = lpMsg->message;
 	const auto wParam = lpMsg->wParam;
 	const auto lParam = lpMsg->lParam;
 
 #define ALLOW return 1;
-#define BLOCK memset(lpMsg, 0, sizeof(MSG)); return -1;
+	//Massive performance benefits for returning a successful WM_NULL compared to causing an error in the application. (see Deep Rock Galactic mouse movement)
+#define BLOCK memset(lpMsg, 0, sizeof(MSG)); return 1;
 			
 	if (!filterMessageCalledAtLeastOnce)
 	{
@@ -42,17 +43,19 @@ BOOL filterMessage(const volatile LPMSG lpMsg)
 	{
 		lpMsg->wParam = RIM_INPUT;//While in foreground
 
-		UINT dwSize = 0;
+		
 		const auto sorh = sizeof(RAWINPUTHEADER);
+		UINT dwSize = sorh;
 		static RAWINPUT raw[sorh];
-
-		if (0 == GetRawInputData(reinterpret_cast<HRAWINPUT>(lpMsg->lParam), RID_HEADER, nullptr, &dwSize, sorh) &&
-			dwSize == sorh &&
-			dwSize == GetRawInputData(reinterpret_cast<HRAWINPUT>(lpMsg->lParam), RID_HEADER, raw, &dwSize, sorh))
+		
+		if (//0 == GetRawInputData(reinterpret_cast<HRAWINPUT>(lpMsg->lParam), RID_HEADER, nullptr, &dwSize, sorh) &&
+//			dwSize == sorh &&
+			0 != GetRawInputData(reinterpret_cast<HRAWINPUT>(lpMsg->lParam), RID_HEADER, raw, &dwSize, sorh)
+			)
 		{
 			if (raw->header.dwType == RIM_TYPEMOUSE)
 			{
-				if (raw->header.hDevice == FakeMouse::allowedMouseHandle)
+				if(raw->header.hDevice == FakeMouse::allowedMouseHandle)
 				{
 					ALLOW;
 				}
@@ -128,11 +131,11 @@ BOOL filterMessage(const volatile LPMSG lpMsg)
 	{
 		FakeMouse::InternalGetCursorPosition(&(lpMsg->pt));
 		
-		if (msg == WM_KILLFOCUS || msg == WM_ACTIVATE && wParam == 0 || msg == WM_CAPTURECHANGED || msg == WM_ACTIVATE && static_cast<int>(lParam) == reinterpret_cast<int>(hWnd))
+		if (msg == WM_KILLFOCUS || /*msg == WM_ACTIVATE && wParam == 0 ||*/ msg == WM_CAPTURECHANGED /*|| msg == WM_ACTIVATE && static_cast<int>(lParam) == reinterpret_cast<int>(hWnd)*/)
 		{
 			BLOCK;
 		}
-
+		
 		if (msg == WM_MOUSEMOVE && (static_cast<int>(wParam) & 0b10000000) > 0)
 		{
 			if (!options.legacyInput)
@@ -161,6 +164,21 @@ BOOL filterMessage(const volatile LPMSG lpMsg)
 		{
 			lpMsg->lParam = 1;
 			lpMsg->wParam = 0;
+			ALLOW;
+		}
+
+		if (msg == WM_NCACTIVATE)
+		{
+			BLOCK;
+			//lpMsg->wParam = TRUE;
+			//lpMsg->lParam = NULL;
+			//ALLOW;
+		}
+
+		if (msg == WM_ACTIVATEAPP)
+		{
+			lpMsg->wParam = TRUE;
+			lpMsg->lParam = NULL;
 			ALLOW;
 		}
 	}
