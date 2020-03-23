@@ -475,6 +475,12 @@ namespace Nucleus.Coop
                 Refresh();
             }
 
+            if (dinput != null)
+            {
+                dinput.Dispose();
+                dinput = null;
+            }
+
         }
 
         private void AddPlayer(int i, float playerWidth, float playerHeight, float offset)
