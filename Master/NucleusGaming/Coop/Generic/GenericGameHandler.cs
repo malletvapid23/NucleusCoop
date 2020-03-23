@@ -361,6 +361,36 @@ namespace Nucleus.Gaming
 	        }
 
             Log("----------------- SHUTTING DOWN -----------------");
+
+            string[] regFiles = Directory.GetFiles(Path.Combine(Directory.GetCurrentDirectory(), "utils\\backup"), "*.reg", SearchOption.AllDirectories);
+            if(regFiles.Length > 0)
+            {
+                foreach(string regFilePath in regFiles)
+                {
+                    Process proc = new Process();
+
+                    try
+                    {
+                        proc.StartInfo.FileName = "reg.exe";
+                        proc.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
+                        proc.StartInfo.CreateNoWindow = true;
+                        proc.StartInfo.UseShellExecute = false;
+
+                        string command = "import " + regFilePath;
+                        proc.StartInfo.Arguments = command;
+                        proc.Start();
+
+                        proc.WaitForExit();
+                    }
+                    catch (System.Exception)
+                    {
+                        proc.Dispose();
+                    }
+
+                    File.Delete(regFilePath);
+                }
+            }
+
 			if (fakeFocus != null && fakeFocus.IsAlive)
             {
                 fakeFocus.Abort();

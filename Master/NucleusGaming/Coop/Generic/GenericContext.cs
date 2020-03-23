@@ -2,6 +2,7 @@
 using Nucleus.Gaming.Coop;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -88,6 +89,8 @@ namespace Nucleus.Gaming
         public string[] CopyCustomUtils;
         public int PlayersPerInstance;
         public bool UseDevReorder;
+
+        private List<string> regKeyPaths = new List<string>();
 
         [DllImport("iphlpapi.dll", CharSet = CharSet.Auto)]
         private static extern int GetBestInterface(UInt32 destAddr, out UInt32 bestIfIndex);
@@ -815,8 +818,39 @@ namespace Nucleus.Gaming
             }
         }
 
+        void ExportRegistry(string strKey, string filepath)
+        {
+            try
+            {
+                using (Process proc = new Process())
+                {
+                    proc.StartInfo.FileName = "reg.exe";
+                    proc.StartInfo.UseShellExecute = false;
+                    proc.StartInfo.RedirectStandardOutput = true;
+                    proc.StartInfo.RedirectStandardError = true;
+                    proc.StartInfo.CreateNoWindow = true;
+                    proc.StartInfo.Arguments = "export \"" + strKey + "\" \"" + filepath + "\" /y";
+                    proc.Start();
+                    string stdout = proc.StandardOutput.ReadToEnd();
+                    string stderr = proc.StandardError.ReadToEnd();
+                    proc.WaitForExit();
+                }
+            }
+            catch (Exception ex)
+            {
+                // handle exception
+            }
+        }
+
         public void DeleteRegKey(string baseKey, string sKey, string subKey)
         {
+            string fullKeyPath = baseKey + "\\" + sKey;
+            if (!regKeyPaths.Contains(fullKeyPath))
+            {
+                regKeyPaths.Add(fullKeyPath);
+                ExportRegistry(baseKey + "\\" + sKey, Directory.GetCurrentDirectory() + "\\utils\\backup\\" + sKey.Substring(sKey.LastIndexOf('\\') + 1) + ".reg");
+            }
+
             if (baseKey == "HKEY_LOCAL_MACHINE" || baseKey == "HKEY_CURRENT_USER")
             {
                 if (baseKey == "HKEY_LOCAL_MACHINE")
@@ -845,6 +879,13 @@ namespace Nucleus.Gaming
             //QWord = 11,
             //String = 1,
             //Unknown = 0
+
+            string fullKeyPath = baseKey + "\\" + sKey;
+            if(!regKeyPaths.Contains(fullKeyPath))
+            {
+                regKeyPaths.Add(fullKeyPath);
+                ExportRegistry(baseKey + "\\" + sKey, Directory.GetCurrentDirectory() + "\\utils\\backup\\" + sKey.Substring(sKey.LastIndexOf('\\') + 1) + ".reg");
+            }
 
             if (regType == RegType.Binary)
             {
