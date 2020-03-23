@@ -75,7 +75,7 @@ namespace Nucleus.Gaming
             bool special = false;
             bool skip = false;
 
-            if (!string.IsNullOrEmpty(dirExclusions[0]))
+            if (dirExclusions.Length > 0 && !string.IsNullOrEmpty(dirExclusions[0]))
             {
                 for (int j = 0; j < dirExclusions.Length; j++)
                 {
