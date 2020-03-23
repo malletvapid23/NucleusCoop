@@ -1826,9 +1826,17 @@ namespace Nucleus.Gaming
                                     }
 
                                     string cmdLine = "\"" + exePath + "\" " + startArgs;
+                                    if (!gen.CMDStartArgsInside)
+                                    {
+                                        cmdLine = "\"" + exePath + " " + startArgs + "\"";
+                                    }
                                     if (cmdOps?.Length > 0 && i < cmdOps.Length)
                                     {
                                         cmdLine = cmdOps[i] + " \"" + exePath + "\" " + startArgs;
+                                        if (!gen.CMDStartArgsInside)
+                                        {
+                                            cmdLine = cmdOps[i] + " \"" + exePath + " " + startArgs + "\"";
+                                        }
                                     }
                                     //string cmdLine = cmdOps[i] + " \"" + exePath + " " + startArgs + "\"";
                                     Log(string.Format("Launching game via command prompt with the following line: {0}", cmdLine));

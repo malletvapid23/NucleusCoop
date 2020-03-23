@@ -188,6 +188,7 @@ namespace Nucleus.Gaming
         public bool RefreshWindowAfterStart = false;
         public bool CreateSingleDeviceFile;
         public bool KillMutexAtEnd;
+        public bool CMDStartArgsInside;
         public bool UseEACBypass;
 
         // -- From USS
