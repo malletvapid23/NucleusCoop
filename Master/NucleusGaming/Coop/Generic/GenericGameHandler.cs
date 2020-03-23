@@ -1429,6 +1429,11 @@ namespace Nucleus.Gaming
                     UseSteamStubDRMPatcher(garch);
                 }
 
+                if (gen.UseEACBypass)
+                {
+                    UseEACBypass(linkFolder);
+                }
+
                 if (gen.UseGoldberg)
                 {
                     UseGoldberg(rootFolder, nucleusRootFolder, linkFolder, i, player, players);
@@ -5087,6 +5092,35 @@ namespace Nucleus.Gaming
                 File.Delete(Path.Combine(instanceExeFolder, "steam_appid.txt"));
             }
             File.WriteAllText(Path.Combine(instanceExeFolder, "steam_appid.txt"), gen.SteamID);
+        }
+
+        private void UseEACBypass(string linkFolder)
+        {
+            Log("Starting EAC Bypass setup");
+
+            string utilFolder = Path.Combine(Directory.GetCurrentDirectory(), "utils\\EAC Bypass");
+
+            string[] eac64DllFiles = Directory.GetFiles(linkFolder, "EasyAntiCheat_x64.dll", SearchOption.AllDirectories);
+            foreach (string nameFile in eac64DllFiles)
+            {
+                Log("Found " + nameFile);
+                string dir = Path.GetDirectoryName(nameFile);
+
+                Log("Deleting file and copying bypass dll");
+                File.Delete(nameFile);
+                File.Copy(Path.Combine(utilFolder, "EasyAntiCheat_x64.dll"), Path.Combine(dir, "EasyAntiCheat_x64.dll"), true);
+            }
+
+            string[] eac86DllFiles = Directory.GetFiles(linkFolder, "EasyAntiCheat_x86.dll", SearchOption.AllDirectories);
+            foreach (string nameFile in eac86DllFiles)
+            {
+                Log("Found " + nameFile);
+                string dir = Path.GetDirectoryName(nameFile);
+
+                Log("Deleting file and copying bypass dll");
+                File.Delete(nameFile);
+                File.Copy(Path.Combine(utilFolder, "EasyAntiCheat_x86.dll"), Path.Combine(dir, "EasyAntiCheat_x86.dll"), true);
+            }
         }
 
         private void UseGoldberg(string rootFolder, string nucleusRootFolder, string linkFolder, int i, PlayerInfo player, List<PlayerInfo> players)

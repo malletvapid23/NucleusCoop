@@ -188,6 +188,7 @@ namespace Nucleus.Gaming
         public bool RefreshWindowAfterStart = false;
         public bool CreateSingleDeviceFile;
         public bool KillMutexAtEnd;
+        public bool UseEACBypass;
 
         // -- From USS
         //Effectively a switch for all of USS features
