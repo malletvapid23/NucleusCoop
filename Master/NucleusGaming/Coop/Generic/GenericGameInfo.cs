@@ -190,6 +190,7 @@ namespace Nucleus.Gaming
         public bool KillMutexAtEnd;
         public bool CMDStartArgsInside;
         public bool UseEACBypass;
+        public bool LaunchAsDifferentUsers;
 
         // -- From USS
         //Effectively a switch for all of USS features

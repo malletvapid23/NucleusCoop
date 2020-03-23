@@ -30,6 +30,7 @@ using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Xml;
 using System.Net;
+using System.Security.Principal;
 
 namespace Nucleus.Gaming
 {
@@ -204,6 +205,8 @@ namespace Nucleus.Gaming
         string dnsServersStr;
         private string iniNetworkInterface;
         private bool isPrevent;
+
+        private bool earlyExit;
 
         private List<string> addedFiles = new List<string>();
 
@@ -396,34 +399,63 @@ namespace Nucleus.Gaming
                 fakeFocus.Abort();
             }
 
-            if(gen.ChangeIPPerInstance)
+            if(!earlyExit)
             {
-                Log("Reverting IP settings back to normal");
-                MessageBox.Show("Reverting IP settings back to normal. You may receive another prompt to action it.", "Nucleus - Change IP Per Instance");
-                if(isDHCPenabled)
+                if (gen.LaunchAsDifferentUsers)
                 {
-                    SetDHCP(iniNetworkInterface);
-                }
-                else
-                {
-                    SetIP(iniNetworkInterface, currentIPaddress, currentSubnetMask, currentGateway);
-                }
-
-                //if (isDynamicDns)
-                //{
-                //    SetDNS(iniNetworkInterface, true);
-                //}
-            }
-
-            if(gen.FlawlessWidescreen?.Length > 0)
-            {
-                Process[] runnProcs = Process.GetProcesses();
-                foreach (Process proc in runnProcs)
-                {
-                    if (proc.ProcessName.ToLower() == "flawlesswidescreen")
+                    Log("Deleting temporary user accounts");
+                    string deleteUserBatPath = Path.Combine(Directory.GetCurrentDirectory(), "utils\\LaunchUsers\\delete_users.bat");
+                    if (File.Exists(deleteUserBatPath))
                     {
-                        Log("Killing Flawless Widescreen app");
-                        proc.Kill();
+                        File.Delete(deleteUserBatPath);
+                    }
+
+                    using (StreamWriter sw = new StreamWriter(deleteUserBatPath))
+                    {
+                        sw.WriteLine(@"@echo off");
+                        for (int pc = 1; pc <= numPlayers; pc++)
+                        {
+                            sw.WriteLine($@"net user nucleus-instance{pc} /delete");
+                        }
+                    }
+
+                    Process user = new Process();
+                    user.StartInfo.FileName = "utils\\LaunchUsers\\delete_users.bat";
+                    user.StartInfo.Verb = "runas";
+                    user.StartInfo.UseShellExecute = true;
+                    user.Start();
+                }
+
+                if (gen.ChangeIPPerInstance)
+                {
+                    Log("Reverting IP settings back to normal");
+                    MessageBox.Show("Reverting IP settings back to normal. You may receive another prompt to action it.", "Nucleus - Change IP Per Instance");
+                    if (isDHCPenabled)
+                    {
+                        SetDHCP(iniNetworkInterface);
+                    }
+                    else
+                    {
+                        SetIP(iniNetworkInterface, currentIPaddress, currentSubnetMask, currentGateway);
+                    }
+
+                    //if (isDynamicDns)
+                    //{
+                    //    SetDNS(iniNetworkInterface, true);
+                    //}
+                }
+            
+
+                if(gen.FlawlessWidescreen?.Length > 0)
+                {
+                    Process[] runnProcs = Process.GetProcesses();
+                    foreach (Process proc in runnProcs)
+                    {
+                        if (proc.ProcessName.ToLower() == "flawlesswidescreen")
+                        {
+                            Log("Killing Flawless Widescreen app");
+                            proc.Kill();
+                        }
                     }
                 }
             }
@@ -703,6 +735,16 @@ namespace Nucleus.Gaming
 
         public string Play()
         {
+            WindowsIdentity identity = WindowsIdentity.GetCurrent();
+            WindowsPrincipal principal = new WindowsPrincipal(identity);
+
+            if (gen.LaunchAsDifferentUsers && !principal.IsInRole(WindowsBuiltInRole.Administrator))
+            {
+                earlyExit = true;
+                MessageBox.Show("When launching processes as different users, you must run Nucleus as administrator.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                Application.Exit();
+            }
+
             //bool gameIs64 = false;
             garch = "x86";
             if (Is64Bit(userGame.ExePath) == true)
@@ -1711,7 +1753,7 @@ namespace Nucleus.Gaming
 
                     if (!gen.ThirdPartyLaunch)
                     {
-                        if (/*context.KillMutex?.Length > 0 || */(gen.HookInit || (gen.RenameNotKillMutex && context.KillMutex?.Length > 0) || gen.SetWindowHookStart || gen.BlockRawInput || gen.CreateSingleDeviceFile) && !gen.CMDLaunch && !gen.UseForceBindIP) /*|| (gen.CMDLaunch && i==0))*/
+                        if (/*context.KillMutex?.Length > 0 || */(gen.HookInit || (gen.RenameNotKillMutex && context.KillMutex?.Length > 0) || gen.SetWindowHookStart || gen.BlockRawInput || gen.CreateSingleDeviceFile) && !gen.CMDLaunch && !gen.UseForceBindIP && !gen.LaunchAsDifferentUsers) /*|| (gen.CMDLaunch && i==0))*/
                         {
 
                             string mu = "";
@@ -1761,7 +1803,64 @@ namespace Nucleus.Gaming
                         }
                         else
                         {
-                            if (gen.CMDLaunch /*&& i >= 1*/ || (gen.UseForceBindIP && i > 0))
+                            if (gen.LaunchAsDifferentUsers)
+                            {
+                                //create users OR reset their password if they exists.
+                                
+                                if (i == 0)
+                                {
+                                    Log("Creating temporary user accounts for each player, that will be used to launch from");
+                                    string createUserBatPath = Path.Combine(Directory.GetCurrentDirectory(), "utils\\LaunchUsers\\create_users.bat");
+                                    if (File.Exists(createUserBatPath))
+                                    {
+                                        File.Delete(createUserBatPath);
+                                    }
+
+                                    using(StreamWriter sw = new StreamWriter(createUserBatPath))
+                                    {
+                                        sw.WriteLine(@"@echo off");
+                                        for(int pc = 1; pc <= numPlayers; pc++)
+                                        {
+                                            sw.WriteLine($@"net user nucleusplayer{pc} 12345 /add && net user nucleusplayer{pc} 12345 && net localgroup Administrators nucleusplayer{pc} /add");
+                                        }
+                                    }
+
+                                    Process user = new Process();
+                                    user.StartInfo.FileName = "utils\\LaunchUsers\\create_users.bat";
+                                    user.StartInfo.Verb = "runas";
+                                    user.StartInfo.UseShellExecute = true;
+                                    user.Start();
+                                }
+
+                                Thread.Sleep(1000);
+
+                                Process cmd = new Process();
+                                cmd.StartInfo.FileName = "cmd.exe";
+                                //cmd.StartInfo.RedirectStandardInput = true;
+                                //cmd.StartInfo.RedirectStandardOutput = true;
+                                //cmd.StartInfo.CreateNoWindow = true;
+                                cmd.StartInfo.Verb = "runas";
+                                cmd.StartInfo.UseShellExecute = true;
+                                
+
+                                if (gen.LaunchAsDifferentUsers)
+                                {
+                                    //int increase = i + 1;
+                                    string psexecPath = Path.Combine(Directory.GetCurrentDirectory(), "utils\\LaunchUsers\\psexec.exe");
+                                    string cmdLine = "/C " + psexecPath /*"utils\\LaunchUsers\\psexec.exe"*/ + " -h -u nucleusplayer" + (i+1) + " -p 12345 -d -i \"" + exePath + "\" " + startArgs;
+                                    Log(string.Format("Launching game as different user, through psexec: {0}", cmdLine));
+                                    //cmd.StandardInput.WriteLine(cmdLine);
+                                    cmd.StartInfo.Arguments = cmdLine;
+                                }
+                                cmd.Start();
+                                cmd.WaitForExit();
+                                //cmd.StandardInput.Flush();
+                                //cmd.StandardInput.Close();
+                                //cmd.WaitForExit();
+
+                                proc = null;
+                            }
+                            else if (gen.CMDLaunch /*&& i >= 1*/ || (gen.UseForceBindIP && i > 0))
                             {
                                 string[] cmdOps = gen.CMDOptions;
                                 Process cmd = new Process();
