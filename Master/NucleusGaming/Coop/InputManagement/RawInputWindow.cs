@@ -109,10 +109,13 @@ namespace Nucleus.Gaming.Coop.InputManagement
 				{
 					//Create cursors
 					Logger.WriteLine($"RawInputWindow received create cursors message");
+
+					bool internalInputUpdate = msg.wParam == (IntPtr) 1;
+
 					foreach (var window in RawInputManager.windows)
 					{
 						//Cursor needs to be created on the MainForm message loop so it can be accessed in the loop.
-						window.CreateCursor();
+						window.CreateCursor(internalInputUpdate);
 					}
 				}
 				else

@@ -30,9 +30,9 @@ namespace Nucleus.Gaming.Coop.InputManagement
 			WinApi.PostMessageA(rawInputWindow.hWnd, 0x0400, IntPtr.Zero, IntPtr.Zero);
 		}
 
-		public static void CreateCursorsOnWindowThread()
+		public static void CreateCursorsOnWindowThread(bool internalInputUpdate)
 		{
-			WinApi.PostMessageA(rawInputWindow.hWnd, 0x0400 + 1, IntPtr.Zero, IntPtr.Zero);
+			WinApi.PostMessageA(rawInputWindow.hWnd, 0x0400 + 1, internalInputUpdate ? (IntPtr)1 : IntPtr.Zero, IntPtr.Zero);
 		}
 
 		private static void WindowThread(object rawInputProcessor)
