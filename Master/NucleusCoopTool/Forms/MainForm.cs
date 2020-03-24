@@ -543,7 +543,7 @@ namespace Nucleus.Coop
 
         private void KillCurrentStep()
         {
-            currentStep?.Ended();
+            
             //this.StepPanel.Controls.Clear();
 
             if (currentGameInfo.Game.Description?.Length > 0)
@@ -670,6 +670,8 @@ namespace Nucleus.Coop
 
                 return;
             }
+
+            currentStep?.Ended();
 
             btn_Play.Text = "S T O P";
             btnBack.Enabled = false;
