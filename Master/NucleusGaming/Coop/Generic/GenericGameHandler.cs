@@ -1266,6 +1266,10 @@ namespace Nucleus.Gaming
                             // copy the directory
                             int exitCode;
                             FileUtil.CopyDirectory(rootFolder, new DirectoryInfo(rootFolder), linkFolder, out exitCode, dirExclusions.ToArray(), fileExclusionsArr, true);
+                            while (exitCode != 1)
+                            {
+                                Thread.Sleep(25);
+                            }
                         }
                         else if (gen.HardlinkGame)
                         {
