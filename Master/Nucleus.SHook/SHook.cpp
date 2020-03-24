@@ -429,21 +429,6 @@ UINT WINAPI GetRawInputDeviceList_Hook(PRAWINPUTDEVICELIST pRawInputDeviceList, 
 	return 0; //GetRawInputDeviceList(pRawInputDeviceList, puiNumDevices, cbSize);
 }
 
-BOOL WINAPI RegisterRawInputDevices_Hook(PRAWINPUTDEVICE pRawInputDevices, UINT uiNumDevices, UINT cbSize)
-{
-	//TODO: for all in list
-	pRawInputDevices[0].dwFlags = pRawInputDevices[0].dwFlags & (~RIDEV_CAPTUREMOUSE);
-	//pRawInputDevices[0].dwFlags =  RIDEV_INPUTSINK;
-
-	//return true;
-	return RegisterRawInputDevices(pRawInputDevices, uiNumDevices, cbSize);
-}
-
-HWND WINAPI SetCapture_Hook(HWND __hWnd)
-{
-	return __hWnd;
-}
-
 UINT WINAPI GetRegisteredRawInputDevices_Hook(PRAWINPUTDEVICE pRawInputDevices, PUINT puiNumDevices, UINT cbSize)
 {
 	*puiNumDevices = 0;
@@ -814,13 +799,8 @@ void __stdcall NativeInjectionEntryPoint(REMOTE_ENTRY_INFO* inRemoteInfo)
 		//installHook("user32", "PeekMessageA", PeekMessageA_Hook);
 		//installHook("user32", "PeekMessageW", PeekMessageW_Hook);
 
-		//TODO: revert!
-		//installHook("user32", "GetRawInputDeviceList", GetRawInputDeviceList_Hook);
-		//installHook("user32", "GetRegisteredRawInputDevices", GetRegisteredRawInputDevices_Hook);
-
-		installHook("user32", "RegisterRawInputDevices", RegisterRawInputDevices_Hook);
-		installHook("user32", "SetCapture", SetCapture_Hook);
-		
+		installHook("user32", "GetRawInputDeviceList", GetRawInputDeviceList_Hook);
+		installHook("user32", "GetRegisteredRawInputDevices", GetRegisteredRawInputDevices_Hook);
 		//installHook("user32", "RegisterRawInputDevices", RegisterRawInputDevices_Hook);
 
 		/*LONG_PTR g_OldWndProc = SetWindowLongPtr(hWnd, GWLP_WNDPROC, (LONG_PTR)WndProc_Hook);*/

@@ -2528,7 +2528,7 @@ namespace Nucleus.Gaming
 
 						if (gen.DrawFakeMouseCursor)//&& gen.SupportsMultipleKeyboardsAndMice)
 						{
-							RawInputManager.CreateCursorsOnWindowThread(gen.UpdateFakeMouseWithInternalInput && !player.IsRawMouse);
+							RawInputManager.CreateCursorsOnWindowThread();
 						}
 
 						//Borderlands 2 (and some other games) requires WM_INPUT to be sent to a window named DIEmWin, not the main hWnd.

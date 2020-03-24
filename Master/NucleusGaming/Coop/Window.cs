@@ -6,12 +6,9 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
-using System.IO.MemoryMappedFiles;
 using System.Linq;
 using System.Text;
-using System.Threading;
 using System.Windows.Forms;
-using Timer = System.Windows.Forms.Timer;
 
 namespace Nucleus.Gaming.Coop
 {
@@ -40,11 +37,6 @@ namespace Nucleus.Gaming.Coop
 		public int Height => Bounds.Bottom - Bounds.Top;
 
 		public HookPipe HookPipe { get; private set; }
-
-		//Draws a fake cursor based on the game's calls to SetCursorPos
-		private System.Threading.Timer cursorInternalInputUpdateTimer;
-		private uint cursorInternalInputUpdateCounter = 0;
-		private const uint CURSOR_INTERNAL_INPUT_UPDATE_CYCLES_BEFORE_UPDATING_BOUNDS = 500;
 
 		#region Mouse Cursor
 		/* How drawing the fake mouse cursor works:
@@ -207,35 +199,10 @@ namespace Nucleus.Gaming.Coop
 			}
 		}
 
-		public void CreateCursor(bool internalInputUpdate)
+		public void CreateCursor()
 		{
 			pointerForm = new PointerForm(hWnd, Width, Height, Bounds.Left, Bounds.Top);
 			pointerForm.Show();
-
-			if (internalInputUpdate)
-			{
-				cursorInternalInputUpdateTimer = new System.Threading.Timer(CursorInternalInputUpdate, null, 0, 7);
-			}
-		}
-
-		private void CursorInternalInputUpdate(object state)
-		{
-			if (HookPipe != null && HookPipe.sharedMemView != null)
-			{
-				MemoryMappedViewAccessor view = HookPipe.sharedMemView;
-
-				MousePosition.x = Math.Min(Width, Math.Max(view.ReadInt32(0), 0));
-				MousePosition.y = Math.Min(Height, Math.Max(view.ReadInt32(4), 0));
-
-				cursorInternalInputUpdateCounter = ++cursorInternalInputUpdateCounter % CURSOR_INTERNAL_INPUT_UPDATE_CYCLES_BEFORE_UPDATING_BOUNDS;
-				if (cursorInternalInputUpdateCounter == 0)
-				{
-					//Need to do this somehow. For mice it's done whenever the user clicks. (But this is for controllers).
-					UpdateBounds();
-				}
-
-				UpdateCursorPosition();
-			}
 		}
 
 		bool hasRepaintedSinceLastInvisible = false;
