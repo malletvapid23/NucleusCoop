@@ -409,39 +409,24 @@ UINT WINAPI GetRawInputDeviceList_Hook(PRAWINPUTDEVICELIST pRawInputDeviceList, 
 {
 	*puiNumDevices = 0;
 
-//#define MAX_CONTROLLERS 4
-//
-//	HMODULE xinput_lib = LoadLibrary("xinput1_3.dll");
-//
-//	XInputGetStateExProc XInputGetStateEx;
-//	int XInputGetStateExOrdinal = 100;
-//	XInputGetStateEx = (XInputGetStateExProc)GetProcAddress(xinput_lib, (LPCTSTR)XInputGetStateExOrdinal);
-//
-//	for (DWORD i = 0; i < MAX_CONTROLLERS; i++)
-//	{
-//		XINPUT_STATE state;
-//		ZeroMemory(&state, sizeof(XINPUT_STATE));
-//		DWORD dwResult = XInputGetState(i, &state);
-//		ZeroMemory(&state, sizeof(XINPUT_STATE));
-//		DWORD dwResultEx = XInputGetStateEx(i, &state);
-//	}
+	//#define MAX_CONTROLLERS 4
+	//
+	//	HMODULE xinput_lib = LoadLibrary("xinput1_3.dll");
+	//
+	//	XInputGetStateExProc XInputGetStateEx;
+	//	int XInputGetStateExOrdinal = 100;
+	//	XInputGetStateEx = (XInputGetStateExProc)GetProcAddress(xinput_lib, (LPCTSTR)XInputGetStateExOrdinal);
+	//
+	//	for (DWORD i = 0; i < MAX_CONTROLLERS; i++)
+	//	{
+	//		XINPUT_STATE state;
+	//		ZeroMemory(&state, sizeof(XINPUT_STATE));
+	//		DWORD dwResult = XInputGetState(i, &state);
+	//		ZeroMemory(&state, sizeof(XINPUT_STATE));
+	//		DWORD dwResultEx = XInputGetStateEx(i, &state);
+	//	}
 
 	return 0; //GetRawInputDeviceList(pRawInputDeviceList, puiNumDevices, cbSize);
-}
-
-BOOL WINAPI RegisterRawInputDevices_Hook(PRAWINPUTDEVICE pRawInputDevices, UINT uiNumDevices, UINT cbSize)
-{
-	//TODO: for all in list
-	pRawInputDevices[0].dwFlags = pRawInputDevices[0].dwFlags & (~RIDEV_CAPTUREMOUSE);
-	//pRawInputDevices[0].dwFlags =  RIDEV_INPUTSINK;
-
-	//return true;
-	return RegisterRawInputDevices(pRawInputDevices, uiNumDevices, cbSize);
-}
-
-HWND WINAPI SetCapture_Hook(HWND __hWnd)
-{
-	return __hWnd;
 }
 
 UINT WINAPI GetRegisteredRawInputDevices_Hook(PRAWINPUTDEVICE pRawInputDevices, PUINT puiNumDevices, UINT cbSize)
@@ -577,7 +562,7 @@ BOOL CALLBACK EnumProc(HWND hWnd, LPARAM lParam) {
 // Main entry
 HWND FindWindowFromProcessId(DWORD dwProcessId) {
 	EnumData ed = { dwProcessId };
-	if (!EnumWindows(EnumProc, (LPARAM)& ed) &&
+	if (!EnumWindows(EnumProc, (LPARAM)&ed) &&
 		(GetLastError() == ERROR_SUCCESS)) {
 		return ed.hWnd;
 	}
@@ -676,7 +661,7 @@ void installFindMutexHooks(LPCWSTR targets)
 
 	//Ntdll functions
 #define GET_NT_PROC(name, type) (type)GetProcAddress(GetModuleHandle("ntdll.dll"), name)
-	
+
 	NtCreateMutant = GET_NT_PROC("NtCreateMutant", t_NtCreateMutant);
 	NtCreateMutant = GET_NT_PROC("NtCreateMutant", t_NtCreateMutant);
 	NtOpenMutant = GET_NT_PROC("NtOpenMutant", t_NtOpenMutant);
@@ -710,7 +695,7 @@ void installFindMutexHooks(LPCWSTR targets)
 
 // EasyHook will be looking for this export to support DLL injection. If not found then 
 // DLL injection will fail.
-extern "C" void __declspec(dllexport) __stdcall NativeInjectionEntryPoint(REMOTE_ENTRY_INFO* inRemoteInfo);
+extern "C" void __declspec(dllexport) __stdcall NativeInjectionEntryPoint(REMOTE_ENTRY_INFO * inRemoteInfo);
 
 void __stdcall NativeInjectionEntryPoint(REMOTE_ENTRY_INFO* inRemoteInfo)
 {
@@ -750,7 +735,7 @@ void __stdcall NativeInjectionEntryPoint(REMOTE_ENTRY_INFO* inRemoteInfo)
 		outfile.close();
 	}
 
-	
+
 	if (SetWindow)
 	{
 		if (IsDebug)
@@ -814,13 +799,8 @@ void __stdcall NativeInjectionEntryPoint(REMOTE_ENTRY_INFO* inRemoteInfo)
 		//installHook("user32", "PeekMessageA", PeekMessageA_Hook);
 		//installHook("user32", "PeekMessageW", PeekMessageW_Hook);
 
-		//TODO: revert!
-		//installHook("user32", "GetRawInputDeviceList", GetRawInputDeviceList_Hook);
-		//installHook("user32", "GetRegisteredRawInputDevices", GetRegisteredRawInputDevices_Hook);
-
-		installHook("user32", "RegisterRawInputDevices", RegisterRawInputDevices_Hook);
-		installHook("user32", "SetCapture", SetCapture_Hook);
-		
+		installHook("user32", "GetRawInputDeviceList", GetRawInputDeviceList_Hook);
+		installHook("user32", "GetRegisteredRawInputDevices", GetRegisteredRawInputDevices_Hook);
 		//installHook("user32", "RegisterRawInputDevices", RegisterRawInputDevices_Hook);
 
 		/*LONG_PTR g_OldWndProc = SetWindowLongPtr(hWnd, GWLP_WNDPROC, (LONG_PTR)WndProc_Hook);*/
