@@ -394,7 +394,16 @@ namespace Nucleus.Gaming
                 }
             }
 
-			if (fakeFocus != null && fakeFocus.IsAlive)
+            List<PlayerInfo> data = profile.PlayerData;
+            foreach (PlayerInfo player in data)
+            {
+                if (player.DInputJoystick != null)
+                {
+                    player.DInputJoystick.Dispose();
+                }
+            }
+
+            if (fakeFocus != null && fakeFocus.IsAlive)
             {
                 fakeFocus.Abort();
             }
@@ -1065,7 +1074,7 @@ namespace Nucleus.Gaming
                                 Thread.Sleep(1000);
                                 ProcessData pdata = before.ProcessData;
                                 User32Interop.SetForegroundWindow(pdata.Process.MainWindowHandle);
-                                InjectDLLs(pdata.Process, nextWindowToInject);
+                                InjectDLLs(pdata.Process, nextWindowToInject, before);
 							}
 						}
                     }
@@ -1076,7 +1085,7 @@ namespace Nucleus.Gaming
                         Thread.Sleep(1000);
                         ProcessData pdata = before.ProcessData;
                         User32Interop.SetForegroundWindow(pdata.Process.MainWindowHandle);
-                        InjectDLLs(pdata.Process, nextWindowToInject);
+                        InjectDLLs(pdata.Process, nextWindowToInject, before);
 					}
 				}
 
@@ -1117,6 +1126,7 @@ namespace Nucleus.Gaming
                         //dirExclusions.Add(gen.BinariesFolder);
                     }
                     exePath = Path.Combine(linkBinFolder, this.userGame.Game.ExecutableName);
+                    origExePath = Path.Combine(linkBinFolder, this.userGame.Game.ExecutableName);
 
                     Log("Starting symlink and copies");
                     if (gen.SymlinkFiles != null)
@@ -1793,7 +1803,8 @@ namespace Nucleus.Gaming
                             Log(string.Format("Launching game located at {0} through StartGameUtil", exePath));
                             uint sguOutPID = StartGameUtil.StartGame(/*
                                 GetRelativePath(exePath, nucleusRootFolder)*/exePath, startArgs,
-                                gen.HookInit, gen.HookInitDelay, gen.RenameNotKillMutex, mu, gen.SetWindowHookStart, isDebug, nucleusRootFolder, gen.BlockRawInput, gen.UseNucleusEnvironment, player.Nickname, startupHooksEnabled, gen.CreateSingleDeviceFile, player.RawHID/*, gen.RunAsAdmin, rawHID,*/ /*GetRelativePath(linkFolder, nucleusRootFolder)*/);
+                                gen.HookInit, gen.HookInitDelay, gen.RenameNotKillMutex, mu, gen.SetWindowHookStart, isDebug, nucleusRootFolder, gen.BlockRawInput, gen.UseNucleusEnvironment, player.Nickname, startupHooksEnabled, gen.CreateSingleDeviceFile, player.RawHID, player.MonitorBounds.Width, player.MonitorBounds.Height, player.MonitorBounds.X
+                                , player.MonitorBounds.Y/*, gen.RunAsAdmin, rawHID,*/ /*GetRelativePath(linkFolder, nucleusRootFolder)*/);
 
                             try
                             {
@@ -2140,7 +2151,6 @@ namespace Nucleus.Gaming
                     {
                         Log("Skipping launching of game via Nucleus for third party launch");
                         MessageBox.Show("Press Ok when game has launched.", "Nucleus - Third Party Launch");
-
                     }
 
                     if (gen.LauncherExe?.Length > 0)
@@ -2650,7 +2660,7 @@ namespace Nucleus.Gaming
                                 {
                                     Log("Injecting hook DLL for last instance");
                                     User32Interop.SetForegroundWindow(data.Process.MainWindowHandle);
-                                    InjectDLLs(data.Process, nextWindowToInject);
+                                    InjectDLLs(data.Process, nextWindowToInject, players[i]);
                                 }
                             }
                         }
@@ -2658,7 +2668,7 @@ namespace Nucleus.Gaming
                         {
                             Log("Injecting hook DLL for last instance");
                             User32Interop.SetForegroundWindow(data.Process.MainWindowHandle);
-                            InjectDLLs(data.Process, nextWindowToInject);
+                            InjectDLLs(data.Process, nextWindowToInject, players[i]);
 						}
 					}
 
@@ -3474,14 +3484,14 @@ namespace Nucleus.Gaming
                         if (int.Parse(instanceToHook) == (playerIndex + 1))
                         {
                             User32Interop.SetForegroundWindow(proc.MainWindowHandle);
-                            InjectDLLs(proc, window);
+                            InjectDLLs(proc, window, players[playerIndex]);
                         }
                     }
                 }
                 else
                 {
                     User32Interop.SetForegroundWindow(proc.MainWindowHandle);
-                    InjectDLLs(proc, window);
+                    InjectDLLs(proc, window, players[playerIndex]);
                 }
             }
         }
@@ -3759,7 +3769,7 @@ namespace Nucleus.Gaming
 
 		//private void InjectDLLs(Process proc)
 		//{
-		private void InjectDLLs(Process proc, Window window)
+		private void InjectDLLs(Process proc, Window window, PlayerInfo player)
 		{
 			WaitForProcWindowHandleNotZero(proc);
 
@@ -3794,6 +3804,11 @@ namespace Nucleus.Gaming
 					nucleusFolderPath, // Primarily for log output
 		            gen.SetWindowHook, // SetWindow hook (prevents window from moving)
 					gen.PreventWindowDeactivation,
+                    player.MonitorBounds.Width,
+                    player.MonitorBounds.Height,
+                    player.MonitorBounds.X,
+                    player.MonitorBounds.Y,
+                    
 
 					//These options are enabled by default, but if the game isn't using these features the hooks are unwanted
 					gen.SupportsMultipleKeyboardsAndMice && gen.HookSetCursorPos,
@@ -3888,8 +3903,8 @@ namespace Nucleus.Gaming
 
 					foreach (Process proc in attached)
 					{
-						//Deep Rock Galactic doesn't work with this message
-						if (gen.FakeFocusSendActivate)
+                        //Deep Rock Galactic doesn't work with this message
+                        if (gen.FakeFocusSendActivate)
 						{
 							//User32Interop.SendMessage(proc.MainWindowHandle, (int) FocusMessages.WM_ACTIVATE, (IntPtr) 0x00000001, (IntPtr) proc.MainWindowHandle);
 							User32Interop.SendMessage(proc.MainWindowHandle, (int)FocusMessages.WM_ACTIVATE, (IntPtr)0x00000002, IntPtr.Zero);

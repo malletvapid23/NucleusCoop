@@ -151,7 +151,13 @@ void __stdcall NativeInjectionEntryPoint(REMOTE_ENTRY_INFO* inRemoteInfo)
 	const auto pathLength = static_cast<size_t>(bytesToInt(p));
 	const auto writePipeNameLength = static_cast<size_t>(bytesToInt(p + 4));
 	const auto readPipeNameLength = static_cast<size_t>(bytesToInt(p + 8));
-	p += 12;
+
+	const int width = bytesToInt(p + 12);
+	const int height = bytesToInt(p + 16);
+	const int posx = bytesToInt(p + 20);
+	const int posy = bytesToInt(p + 24);
+
+	p += 28;
 
 	//C# gives number of bytes without null termination
 	const auto nucleusFolderPath = static_cast<PWSTR>(malloc(pathLength + sizeof(WCHAR)));
@@ -191,10 +197,14 @@ void __stdcall NativeInjectionEntryPoint(REMOTE_ENTRY_INFO* inRemoteInfo)
 		" reRegisterRawInput: " << options.reRegisterRawInput <<
 		" reRegisterRawInputMouse: " << options.reRegisterRawInputMouse <<
 		" reRegisterRawInputKeyboard: " << options.reRegisterRawInputKeyboard <<
+		" width: " << width <<
+		" height: " << height <<
+		" posx: " << posx <<
+		" posy: " << posy <<
 		"\n");
 	
 	if (options.setWindow)
-		installSetWindowHook();
+		installSetWindowHook(width, height, posx, posy);
 
 	if (options.hookFocus)
 		installFocusHooks();

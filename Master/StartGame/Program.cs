@@ -61,6 +61,11 @@ namespace StartGame
         private static bool injectFailed;
         private static bool useStartupHooks = true;
 
+        private static int width;
+        private static int height;
+        private static int posx;
+        private static int posy;
+
         //private static bool gameIs64 = false;
 
         private static string mutexToRename;
@@ -387,7 +392,11 @@ namespace StartGame
                             useNucleusEnvironment,
                             playerNick,
                             createSingle,
-                            rawHid
+                            rawHid,
+                            width,
+                            height,
+                            posx,
+                            posy
                             };
 
                             var sbArgs = new StringBuilder();
@@ -623,6 +632,10 @@ namespace StartGame
                              && !skey.Contains("renamemutex")
                              && !skey.Contains("mutextorename")
                              && !skey.Contains("setwindow")
+                             && !skey.Contains("width")
+                             && !skey.Contains("height")
+                             && !skey.Contains("posx")
+                             && !skey.Contains("posy")
                              && !skey.Contains("isdebug")
                              && !skey.Contains("nucleusfolderpath")
                              && !skey.Contains("blockraw")
@@ -691,6 +704,22 @@ namespace StartGame
                     else if (key.Contains("setwindow"))
                     {
                         setWindow = Boolean.Parse(splited[1]);
+                    }
+                    else if (key.Contains("width"))
+                    {
+                        width = Int32.Parse(splited[1]);
+                    }
+                    else if (key.Contains("height"))
+                    {
+                        height = Int32.Parse(splited[1]);
+                    }
+                    else if (key.Contains("posx"))
+                    {
+                        posx = Int32.Parse(splited[1]);
+                    }
+                    else if (key.Contains("posy"))
+                    {
+                        posy = Int32.Parse(splited[1]);
                     }
                     else if (key.Contains("isdebug"))
                     {

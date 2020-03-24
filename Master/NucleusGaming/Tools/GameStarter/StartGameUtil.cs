@@ -111,7 +111,7 @@ namespace Nucleus.Gaming.Tools.GameStarter
         /// <param name="waitTime"></param>
         /// <param name="mutex"></param>
         /// <returns></returns>
-        public static uint StartGame(string pathToGame, string args, bool hook, bool delay, bool renameMutex, string mutexNames, bool setWindow, bool isDebug, string nucleusFolder, bool blockRaw, bool UseNucleusEnvironment, string playerNick, bool startupHooksEnabled, bool createSingle, string rawHid, /*bool runAdmin, string rawHid,*/ string workingDir = null)
+        public static uint StartGame(string pathToGame, string args, bool hook, bool delay, bool renameMutex, string mutexNames, bool setWindow, bool isDebug, string nucleusFolder, bool blockRaw, bool UseNucleusEnvironment, string playerNick, bool startupHooksEnabled, bool createSingle, string rawHid, int width, int height, int posx, int posy, /*bool runAdmin, string rawHid,*/ string workingDir = null)
         {
             lock (locker)
             {
@@ -125,7 +125,7 @@ namespace Nucleus.Gaming.Tools.GameStarter
                 }
 
                 //string arguments = 
-                startInfo.Arguments = "\"" + "hook|::|" + hook + "\" \"delay|::|" + delay + "\" \"renamemutex|::|" + renameMutex + "\" \"mutextorename|::|" + mutexNames + "\" \"setwindow|::|" + setWindow + "\" \"isdebug|::|" + isDebug + "\" \"nucleusfolderpath|::|" + nucleusFolder + "\" \"blockraw|::|" + blockRaw + "\" \"nucenv|::|" + UseNucleusEnvironment + "\" \"playernick|::|" + playerNick + "\" \"starthks|::|" + startupHooksEnabled  + "\" \"createsingle|::|" + createSingle + "\" \"rawhid|::|" + rawHid /*+ "\" \"rawhid|::|" + rawHid*/ + "\" \"game|::|" + pathToGame + workingDir + ";" + args + "\"";
+                startInfo.Arguments = "\"" + "hook|::|" + hook + "\" \"delay|::|" + delay + "\" \"renamemutex|::|" + renameMutex + "\" \"mutextorename|::|" + mutexNames + "\" \"setwindow|::|" + setWindow + "\" \"isdebug|::|" + isDebug + "\" \"nucleusfolderpath|::|" + nucleusFolder + "\" \"blockraw|::|" + blockRaw + "\" \"nucenv|::|" + UseNucleusEnvironment + "\" \"playernick|::|" + playerNick + "\" \"starthks|::|" + startupHooksEnabled  + "\" \"createsingle|::|" + createSingle + "\" \"rawhid|::|" + rawHid + "\" \"width|::|" + width + "\" \"height|::|" + height + "\" \"posx|::|" + posx + "\" \"posy|::|" + posy /*+ "\" \"rawhid|::|" + rawHid*/ + "\" \"game|::|" + pathToGame + workingDir + ";" + args + "\"";
                 startInfo.RedirectStandardOutput = true;
                 startInfo.UseShellExecute = false;
 
