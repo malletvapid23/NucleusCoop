@@ -213,6 +213,7 @@ namespace Nucleus.Gaming
 		public bool ForwardRawKeyboardInput = false;
 		public bool ForwardRawMouseInput = false;
 		public bool DrawFakeMouseCursor = true;
+		public bool UpdateFakeMouseWithInternalInput = false;
 		public bool LockInputAtStart = false;
 		public bool PreventGameFocus = false;
 		public int LockInputToggleKey = 0x23;//End by default. Keys: https://docs.microsoft.com/en-us/windows/win32/inputdev/virtual-key-codes

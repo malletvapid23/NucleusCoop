@@ -40,7 +40,7 @@ namespace Nucleus.Gaming.Coop.InputManagement
 		NamedPipeServerStream pipeServerWrite;//Written from Hooks
 
 		MemoryMappedFile sharedMem;
-		MemoryMappedViewAccessor sharedMemView;
+		public MemoryMappedViewAccessor sharedMemView;
 		readonly string sharedMemName;
 		const long sharedMemSize = 4 * 4;
 
