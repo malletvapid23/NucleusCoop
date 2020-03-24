@@ -102,7 +102,7 @@ namespace Nucleus.Coop
         {
 	        this.BackColor = Color.FromArgb(40, 40, 40);
 
-            dinput = new DirectInput();
+            //dinput = new DirectInput();
             //dinputJoysticks = new List<Joystick>();
             xinputControllers = new List<Controller>();
             for (int i = 0; i < 4; i++)
@@ -173,11 +173,35 @@ namespace Nucleus.Coop
                 dinput.Dispose();
                 dinput = null;
             }
+
+            List<PlayerInfo> data = profile.PlayerData;
+            foreach (PlayerInfo player in data)
+            {
+                if (player.DInputJoystick != null)
+                {
+                    player.DInputJoystick.Dispose();
+                }
+            }
         }
 
         public override void Ended()
         {
             base.Ended();
+
+            List<PlayerInfo> data = profile.PlayerData;
+            foreach (PlayerInfo player in data)
+            {
+                if (player.DInputJoystick != null)
+                {
+                    player.DInputJoystick.Dispose();
+                }
+            }
+
+            if (dinput != null)
+            {
+                dinput.Dispose();
+                dinput = null;
+            }
 
             gamepadTimer.Enabled = false;
             gamepadPollTimer.Enabled = false;
@@ -216,11 +240,13 @@ namespace Nucleus.Coop
             {
                 if (player.DInputJoystick.Acquire().IsFailure)
                 {
+                    //player.DInputJoystick.Dispose();
                     return;
                 }
 
                 if (player.DInputJoystick.Poll().IsFailure)
                 {
+                    //player.DInputJoystick.Dispose();
                     return;
                 }
 
@@ -268,8 +294,11 @@ namespace Nucleus.Coop
 
             GenericGameInfo g = game.Game;
 
+            dinput = new DirectInput();
+
             if (g.Hook.DInputEnabled || g.Hook.XInputReroute)
             {
+                DirectInput dinput = new DirectInput();
                 IList<DeviceInstance> devices = dinput.GetDevices(DeviceClass.GameController /*SlimDX.DirectInput.DeviceType.Gamepad*/, DeviceEnumerationFlags.AttachedOnly);
 
                 // first search for disconnected gamepads
@@ -303,6 +332,7 @@ namespace Nucleus.Coop
                     if (!foundGamepad)
                     {
                         data[j].DInputJoystick.Unacquire();
+                        data[j].DInputJoystick.Dispose();
                         changed = true;
                         data.RemoveAt(j);
                         j--;
@@ -358,6 +388,8 @@ namespace Nucleus.Coop
                         player.Nickname = ini.IniReadValue("ControllerMapping", fhid);
                     }
                     player.DInputJoystick.Acquire();
+
+                    dinput.Dispose();
                     //data.Insert(0, player);
                     data.Add(player);
                 }
@@ -380,6 +412,7 @@ namespace Nucleus.Coop
                         if (!c.IsConnected)
                         {
                             data[j].DInputJoystick.Unacquire();
+                            data[j].DInputJoystick.Dispose();
                             changed = true;
                             data.RemoveAt(j);
                             j--;
@@ -423,6 +456,8 @@ namespace Nucleus.Coop
 
                         changed = true;
 
+                        DirectInput dinput = new DirectInput();
+
                         PlayerInfo player = new PlayerInfo();
                         IList<DeviceInstance> devices = dinput.GetDevices(SlimDX.DirectInput.DeviceType.Gamepad /*DeviceClass.GameController*/, DeviceEnumerationFlags.AttachedOnly);
                         for (int x = 0; x < devices.Count; x++)
@@ -447,7 +482,8 @@ namespace Nucleus.Coop
                                     player.Nickname = ini.IniReadValue("ControllerMapping", fhid);
                                 }
                                 player.DInputJoystick.Acquire();
-
+                                
+                                dinput.Dispose();
                                 break;
                             }
                             else
