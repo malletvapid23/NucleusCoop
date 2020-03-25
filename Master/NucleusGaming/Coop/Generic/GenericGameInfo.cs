@@ -191,6 +191,7 @@ namespace Nucleus.Gaming
         public bool CMDStartArgsInside;
         public bool UseEACBypass;
         public bool LaunchAsDifferentUsers;
+        public bool RunLauncherAndExe;
 
         // -- From USS
         //Effectively a switch for all of USS features

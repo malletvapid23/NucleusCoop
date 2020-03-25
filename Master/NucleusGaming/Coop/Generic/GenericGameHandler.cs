@@ -187,6 +187,7 @@ namespace Nucleus.Gaming
         private bool dllRepos = false;
 
         private string exePath;
+        private string origExePath;
         //public string UserProfileConfigPath;
         //public string UserProfileSavePath;
         private string instanceExeFolder;
@@ -2216,46 +2217,105 @@ namespace Nucleus.Gaming
                 {
                     Log("Searching for game process");
                     if (!gen.ForceProcessPick)
+                if(gen.LauncherExe?.Length > 0 && gen.RunLauncherAndExe)
+                {
+                    Log("Launching exe " + origExePath);
+                    ProcessStartInfo startInfo = new ProcessStartInfo();
+                    startInfo.FileName = origExePath;
+                    proc = Process.Start(startInfo);
+
+                    int counter = 0;
+                    bool found = false;
+                    if (gen.GameName == "Ghost Recon Wildlands" && i > 0)
+                    {
+                        //Log("Wait for first process to close");
+                        //while (IsRunning(proc))
+                        //{
+                        //    Thread.Sleep(100);
+                        //}
+
+                        Log("Launching exe again " + origExePath);
+                        startInfo = new ProcessStartInfo();
+                        startInfo.FileName = origExePath;
+                        proc = Process.Start(startInfo);
+
+                        Log("Waiting to find process by window title");
+                        //counter = 0;
+                        //found = false;
+                        while (!found)
+                        {
+                            Process[] processes = Process.GetProcessesByName(Path.GetFileNameWithoutExtension(gen.ExecutableName));
+                            foreach (var process in processes)
+                            {
+                                if ((int)process.MainWindowHandle > 0 && process.MainWindowTitle == gen.Hook.ForceFocusWindowName && (attachedIds.Count == 0 || (attachedIds.Count > 0 && !attachedIds.Contains(process.Id))))
+                                {
+                                    Log("Process found, " + process.ProcessName + " pid (" + process.Id + ") after " + counter + " seconds");
+                                    proc = process;
+                                    attachedIds.Add(process.Id);
+                                    found = true;
+                                    Log(string.Format("Process details; Name: {0}, ID: {1}, MainWindowtitle: {2}, MainWindowHandle: {3}", process.ProcessName, process.Id, process.MainWindowTitle, process.MainWindowHandle));
+                                    break;
+                                }
+                            }
+                            counter++;
+                            Thread.Sleep(1000);
+                        }
+
+                        Thread.Sleep(1000);
+                    }
+                    else
+                    {
+                        Log("Waiting to find process by window title");
+                        //counter = 0;
+                        //found = false;
+                        while (!found)
+                        {
+                            Process[] processes = Process.GetProcessesByName(Path.GetFileNameWithoutExtension(gen.ExecutableName));
+                            foreach (var process in processes)
+                            {
+                                if ((int)process.MainWindowHandle > 0 && process.MainWindowTitle == gen.Hook.ForceFocusWindowName && (attachedIds.Count == 0 || (attachedIds.Count > 0 && !attachedIds.Contains(process.Id))))
+                                {
+                                    Log("Process found, " + process.ProcessName + " pid (" + process.Id + ") after " + counter + " seconds");
+                                    proc = process;
+                                    attachedIds.Add(process.Id);
+                                    found = true;
+                                    Log(string.Format("Process details; Name: {0}, ID: {1}, MainWindowtitle: {2}, MainWindowHandle: {3}", process.ProcessName, process.Id, process.MainWindowTitle, process.MainWindowHandle));
+                                    break;
+                                }
+                            }
+                            counter++;
+                            Thread.Sleep(1000);
+                        }
+                    }
+
+                    Thread.Sleep(10000);
+                }
+
+                if (gen.NeedsSteamEmulation || gen.ForceProcessPick || proc == null || gen.CMDLaunch || gen.UseForceBindIP || gen.GameName == "Halo Custom Edition" || (proc != null && !IsRunning(proc)) /*|| gen.LauncherExe?.Length > 0*/)
+                {
+                    Log("Searching for game process");
+
+                    if (gen.GameName == "Halo Custom Edition" || gen.GameName == "Ghost Recon Wildlands" /*|| gen.LauncherExe?.Length > 0*/)
+                    {
+                        //Halo CE and GRW seem to need to wait X additional seconds otherwise crashes...
+                        Thread.Sleep(10000);
+                    }
+
+                    string ids = "";
+                    foreach (int id in attachedIds)
+                    {
+                        ids += id + " ";
+                    }
+                    Log("PIDs stored " + ids);
+
+                    if (!gen.ForceProcessPick)
                     {
                         //bool foundUnique = false;
                         for (int times = 0; times < 200; times++)
                         {
                             Thread.Sleep(50);
 
-                            string proceName = "";
-                            if (gen.GameName == "Halo Custom Edition" /*|| gen.LauncherExe?.Length > 0*/)
-                            {
-                                //Halo CE seems to need to wait X additional seconds otherwise crashes...
-                                Thread.Sleep(10000);
-                                //if (gen.GameName == "Halo Custom Edition")
-                                //{
-                                //    proceName = "haloce";
-                                //}
-                                //else
-                                //{
-                                proceName = Path.GetFileNameWithoutExtension(gen.ExecutableName).ToLower();
-                                //}
-                            }
-                            else
-                            {
-                                proceName = Path.GetFileNameWithoutExtension(gen.ExecutableName).ToLower();
-                            }
-
-                            //string launcherName = string.Empty;
-                            //if (gen.LauncherExe?.Length > 0)
-                            //{
-                            //    launcherName = Path.GetFileNameWithoutExtension(gen.LauncherExe).ToLower();
-                            //}
-
-                            //if (!string.IsNullOrEmpty(launcherName))
-                            //{
-                            //    Log(string.Format("Attempting to find game process {0}, or its launcher: {1}", proceName, launcherName));
-                            //}
-                            //else
-                            //{
-                            //    Log(string.Format("Attempting to find game process {0}", proceName));
-                            //}
-
+                            string proceName = Path.GetFileNameWithoutExtension(gen.ExecutableName).ToLower();
 
                             Process[] procs = Process.GetProcesses();
                             for (int j = 0; j < procs.Length; j++)
@@ -2268,10 +2328,12 @@ namespace Nucleus.Gaming
                                 {
                                     if (!attachedIds.Contains(p.Id)) //&& (int)p.MainWindowHandle > 0)
                                     {
-                                        if (p.ProcessName == "javaw")
+                                        if (p.ProcessName == "javaw" || p.ProcessName == "GRW")
                                         {
                                             if ((int)p.MainWindowHandle == 0)
+                                            {
                                                 continue;
+                                            }
                                         }
                                         Log(string.Format("Found process {0} (pid {1})", p.ProcessName, p.Id));
                                         attached.Add(p);
@@ -2313,6 +2375,31 @@ namespace Nucleus.Gaming
                     }
                     //InjectDLLs(proc);
                 }
+
+                if (!IsRunning(proc))
+                {
+                    Log("Process is no longer running. Attempting to find process by window title");
+                    Process[] processes = Process.GetProcesses();
+                    foreach (var process in processes)
+                    {
+                        if (process.MainWindowTitle == gen.Hook.ForceFocusWindowName && !attachedIds.Contains(process.Id))
+                        {
+                            Log("Process found, " + process.ProcessName + " pid (" + process.Id + ")");
+                            proc = process;
+                            //data.AssignProcess(proc);
+                            //player.ProcessData.AssignProcess(proc);
+                            //attachedIds.RemoveAt(attachedIds.Count - 1);
+                            attachedIds.Add(proc.Id);
+                            if (player.IsKeyboardPlayer && !player.IsRawKeyboard)
+                            {
+                                keyboardProcId = proc.Id;
+                            }
+                        }
+                    }
+                }
+
+                Log(string.Format("Process details; Name: {0}, ID: {1}, MainWindowtitle: {2}, MainWindowHandle: {3}", proc.ProcessName, proc.Id, proc.MainWindowTitle, proc.MainWindowHandle));
+
 
                 if (gen.GoldbergLobbyConnect && i == 0)
                 {
@@ -2502,7 +2589,7 @@ namespace Nucleus.Gaming
                     Thread.Sleep(TimeSpan.FromSeconds(gen.PauseBetweenStarts));
                 }
 
-                if(!IsRunning(proc))
+                if (!IsRunning(proc))
                 {
                     Log("Process is no longer running. Attempting to find process by window title");
                     Process[] processes = Process.GetProcesses();
@@ -2512,25 +2599,65 @@ namespace Nucleus.Gaming
                         {
                             Log("Process found, " + process.ProcessName + " pid (" + process.Id + ")");
                             proc = process;
-                            data.AssignProcess(proc);
-                            player.ProcessData.AssignProcess(proc);
-                            attachedIds.RemoveAt(attachedIds.Count - 1);
+                            //data.AssignProcess(proc);
+                            //player.ProcessData.AssignProcess(proc);
+                            //attachedIds.RemoveAt(attachedIds.Count - 1);
                             attachedIds.Add(proc.Id);
+                            if (player.IsKeyboardPlayer && !player.IsRawKeyboard)
+                            {
+                                keyboardProcId = proc.Id;
+                            }
+
+                            Log("Recreating player process data");
+                            data = new ProcessData(proc);
+                            prevProcessData = data;
+
+                            playerBoundsWidth = playerBounds.Width;
+                            playerBoundsHeight = playerBounds.Height;
+
+                            if (context.Hook.WindowX > 0 && context.Hook.WindowY > 0)
+                            {
+                                data.Position = new Point(context.Hook.WindowX, context.Hook.WindowY);
+                                prevWindowX = context.Hook.WindowX;
+                                prevWindowY = context.Hook.WindowY;
+                            }
+                            else
+                            {
+                                data.Position = new Point(playerBounds.X, playerBounds.Y);
+                                prevWindowX = playerBounds.X;
+                                prevWindowY = playerBounds.Y;
+                            }
+
+                            if (context.Hook.ResWidth > 0 && context.Hook.ResHeight > 0)
+                            {
+                                data.Size = new Size(context.Hook.ResWidth, context.Hook.ResHeight);
+                                prevWindowWidth = context.Hook.ResWidth;
+                                prevWindowHeight = context.Hook.ResHeight;
+                            }
+                            else
+                            {
+                                data.Size = new Size(playerBounds.Width, playerBounds.Height);
+                                prevWindowWidth = playerBounds.Width;
+                                prevWindowHeight = playerBounds.Height;
+                            }
+
+                            data.KilledMutexes = context.KillMutex?.Length == 0;
+                            player.ProcessData = data;
+
+                            Log(string.Format("Process details; Name: {0}, ID: {1}, MainWindowtitle: {2}, MainWindowHandle: {3}", proc.ProcessName, proc.Id, proc.MainWindowTitle, proc.MainWindowHandle));
                         }
                     }
                 }
-
-                Log(string.Format("Process details; Name: {0}, ID: {1}, MainWindowtitle: {2}, MainWindowHandle: {3}", proc.ProcessName, proc.Id, proc.MainWindowTitle, proc.MainWindowHandle));
 
                 //Set up raw input window
                 //if (player.IsRawKeyboard || player.IsRawMouse)
                 {
                     var window = CreateRawInputWindow(proc, player);
 
-					nextWindowToInject = window;
-				}
+                    nextWindowToInject = window;
+                }
 
-				if (i == (players.Count - 1))
+                if (i == (players.Count - 1))
                 {
                     Log("All instances accounted for, performing final preperations");
                     if(gen.KillLastInstanceMutex && !gen.RenameNotKillMutex)
