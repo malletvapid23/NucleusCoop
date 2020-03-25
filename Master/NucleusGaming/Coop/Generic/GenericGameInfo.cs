@@ -192,6 +192,7 @@ namespace Nucleus.Gaming
         public bool UseEACBypass;
         public bool LaunchAsDifferentUsers;
         public bool RunLauncherAndExe;
+        public int PauseBetweenProcessGrab;
 
         // -- From USS
         //Effectively a switch for all of USS features

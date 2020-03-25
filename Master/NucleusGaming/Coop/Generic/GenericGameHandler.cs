@@ -2213,10 +2213,12 @@ namespace Nucleus.Gaming
                     MessageBox.Show("Press OK when ready for Nucleus to search for game process.", "Nucleus - Prompt Before Process Grab", MessageBoxButtons.OK, MessageBoxIcon.None, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly);
                 }
 
-                if (gen.NeedsSteamEmulation || gen.ForceProcessPick || proc == null || gen.CMDLaunch || gen.UseForceBindIP || gen.GameName == "Halo Custom Edition" /*|| gen.LauncherExe?.Length > 0*/)
+                if(gen.PauseBetweenProcessGrab > 0)
                 {
-                    Log("Searching for game process");
-                    if (!gen.ForceProcessPick)
+                    Log(string.Format("Pausing for {0} seconds", gen.PauseBetweenStarts));
+                    Thread.Sleep(TimeSpan.FromSeconds(gen.PauseBetweenStarts));
+                }
+
                 if(gen.LauncherExe?.Length > 0 && gen.RunLauncherAndExe)
                 {
                     Log("Launching exe " + origExePath);
