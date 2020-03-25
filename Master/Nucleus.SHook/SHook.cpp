@@ -423,22 +423,22 @@ UINT WINAPI GetRawInputDeviceList_Hook(PRAWINPUTDEVICELIST pRawInputDeviceList, 
 {
 	*puiNumDevices = 0;
 
-//#define MAX_CONTROLLERS 4
-//
-//	HMODULE xinput_lib = LoadLibrary("xinput1_3.dll");
-//
-//	XInputGetStateExProc XInputGetStateEx;
-//	int XInputGetStateExOrdinal = 100;
-//	XInputGetStateEx = (XInputGetStateExProc)GetProcAddress(xinput_lib, (LPCTSTR)XInputGetStateExOrdinal);
-//
-//	for (DWORD i = 0; i < MAX_CONTROLLERS; i++)
-//	{
-//		XINPUT_STATE state;
-//		ZeroMemory(&state, sizeof(XINPUT_STATE));
-//		DWORD dwResult = XInputGetState(i, &state);
-//		ZeroMemory(&state, sizeof(XINPUT_STATE));
-//		DWORD dwResultEx = XInputGetStateEx(i, &state);
-//	}
+	//#define MAX_CONTROLLERS 4
+	//
+	//	HMODULE xinput_lib = LoadLibrary("xinput1_3.dll");
+	//
+	//	XInputGetStateExProc XInputGetStateEx;
+	//	int XInputGetStateExOrdinal = 100;
+	//	XInputGetStateEx = (XInputGetStateExProc)GetProcAddress(xinput_lib, (LPCTSTR)XInputGetStateExOrdinal);
+	//
+	//	for (DWORD i = 0; i < MAX_CONTROLLERS; i++)
+	//	{
+	//		XINPUT_STATE state;
+	//		ZeroMemory(&state, sizeof(XINPUT_STATE));
+	//		DWORD dwResult = XInputGetState(i, &state);
+	//		ZeroMemory(&state, sizeof(XINPUT_STATE));
+	//		DWORD dwResultEx = XInputGetStateEx(i, &state);
+	//	}
 
 	return 0; //GetRawInputDeviceList(pRawInputDeviceList, puiNumDevices, cbSize);
 }
@@ -521,7 +521,7 @@ BOOL WINAPI RegisterUserApiHook_Hook(HINSTANCE hInstance, FARPROC CallbackFunc)
 FARPROC WINAPI GetProcAddress_Hook(HMODULE hModule, LPCSTR lpProcName)
 {
 	if (((DWORD)lpProcName >> 16) == 0) //Check if Ordinal
-	{ 
+	{
 		//do stuff to hook your wanted method in case you think it is being requested by ordinal
 
 		if (LOWORD(lpProcName) == 0x958) { //SetWindowPos Ordinal Win10x64
@@ -578,7 +578,7 @@ FARPROC WINAPI GetProcAddress_Hook(HMODULE hModule, LPCSTR lpProcName)
 	return GetProcAddress(hModule, lpProcName);
 }
 
-bool hasEnding(std::string const& fullString, std::string const& ending) 
+bool hasEnding(std::string const& fullString, std::string const& ending)
 {
 	if (fullString.length() >= ending.length()) {
 		return (0 == fullString.compare(fullString.length() - ending.length(), ending.length(), ending));
@@ -655,9 +655,9 @@ HANDLE CreateFileW_Hook(
 	wstring rawHidWstring(rawHid);
 	string rawHidStr(rawHidWstring.begin(), rawHidWstring.end());
 
-	if(fileNameStr.find("HID") != std::string::npos)
+	if (fileNameStr.find("HID") != std::string::npos)
 	{
-		if(!caseInSensStringCompare(fileNameStr, rawHidStr))
+		if (!caseInSensStringCompare(fileNameStr, rawHidStr))
 		{
 			if (IsDebug)
 			{
@@ -751,7 +751,7 @@ BOOL CALLBACK EnumProc(HWND hWnd, LPARAM lParam) {
 // Main entry
 HWND FindWindowFromProcessId(DWORD dwProcessId) {
 	EnumData ed = { dwProcessId };
-	if (!EnumWindows(EnumProc, (LPARAM)& ed) &&
+	if (!EnumWindows(EnumProc, (LPARAM)&ed) &&
 		(GetLastError() == ERROR_SUCCESS)) {
 		return ed.hWnd;
 	}
@@ -962,7 +962,7 @@ void installFindMutexHooks(LPCWSTR targets)
 
 	//Ntdll functions
 #define GET_NT_PROC(name, type) (type)GetProcAddress(GetModuleHandle("ntdll.dll"), name)
-	
+
 	NtCreateMutant = GET_NT_PROC("NtCreateMutant", t_NtCreateMutant);
 	NtCreateMutant = GET_NT_PROC("NtCreateMutant", t_NtCreateMutant);
 	NtOpenMutant = GET_NT_PROC("NtOpenMutant", t_NtOpenMutant);
@@ -996,7 +996,7 @@ void installFindMutexHooks(LPCWSTR targets)
 
 // EasyHook will be looking for this export to support DLL injection. If not found then 
 // DLL injection will fail.
-extern "C" void __declspec(dllexport) __stdcall NativeInjectionEntryPoint(REMOTE_ENTRY_INFO* inRemoteInfo);
+extern "C" void __declspec(dllexport) __stdcall NativeInjectionEntryPoint(REMOTE_ENTRY_INFO * inRemoteInfo);
 
 void __stdcall NativeInjectionEntryPoint(REMOTE_ENTRY_INFO* inRemoteInfo)
 {
@@ -1058,7 +1058,7 @@ void __stdcall NativeInjectionEntryPoint(REMOTE_ENTRY_INFO* inRemoteInfo)
 	//installHook("kernel32", "LoadLibraryExW", LoadLibraryExW_Hook);
 	//installHook("user32", "RegisterUserApiHook", RegisterUserApiHook_Hook);
 	//installHook("kernel32", "GetProcAddress", GetProcAddress_Hook);
-	
+
 	if (SetWindow)
 	{
 		if (IsDebug)

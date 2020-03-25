@@ -180,6 +180,8 @@ void __stdcall NativeInjectionEntryPoint(REMOTE_ENTRY_INFO* inRemoteInfo)
 		" hWnd: " << hWnd <<
 		" WritePipeName: " << std::string(Piping::writePipeName.begin(), Piping::writePipeName.end()) <<
 		" ReadPipeName: " << std::string(Piping::readPipeName.begin(), Piping::readPipeName.end()) <<
+		" AllowedRawMouseHandle: " << FakeMouse::allowedMouseHandle <<
+		" AllowedRawKeyboardHandle: " << FakeMouse::allowedKeyboardHandle <<
 		" preventWindowDeactivation: " << options.preventWindowDeactivation <<
 		" setCursorPos: " << options.setCursorPos <<
 		" getCursorPos: " << options.getCursorPos <<

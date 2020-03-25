@@ -349,7 +349,7 @@ namespace Nucleus.Gaming.Coop.InputManagement
                            (type == HeaderDwType.RIM_TYPEMOUSE && x.RawMouseDeviceHandle.Equals(hDevice)) || 
                            (type == HeaderDwType.RIM_TYPEKEYBOARD && x.RawKeyboardDeviceHandle.Equals(hDevice))
                            )
-                       )
+                       ).ToArray()
 			    )
 			    {
 				    toFlash.FlashIcon();
@@ -380,13 +380,6 @@ namespace Nucleus.Gaming.Coop.InputManagement
 			    //foreach (var window in Windows.Where(x => x.MouseAttached == hDevice))
 			    if (mouseHandleWindows.TryGetValue(hDevice, out Window window))
 			    {
-				    if (window.NeedsCursorToBeCreatedOnMainMessageLoop)
-				    {
-					    //Cursor needs to be created on the MainForm message loop so it can be accessed in the loop.
-					    window.NeedsCursorToBeCreatedOnMainMessageLoop = false;
-					    window.CreateCursor();
-				    }
-
 				    ProcessMouse(hRawInput, window, window.hWnd);
 			    }
 		    }

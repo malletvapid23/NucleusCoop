@@ -2837,9 +2837,9 @@ namespace Nucleus.Gaming
 
 						//Logger.WriteLine($"hWnd={hWnd}, mouse={window.MouseAttached}, kb={window.KeyboardAttached}");
 
-						if (gen.DrawFakeMouseCursor && gen.SupportsMultipleKeyboardsAndMice)
+						if (gen.DrawFakeMouseCursor)//&& gen.SupportsMultipleKeyboardsAndMice)
 						{
-							window.NeedsCursorToBeCreatedOnMainMessageLoop = true;
+							RawInputManager.CreateCursorsOnWindowThread(gen.UpdateFakeMouseWithInternalInput && !player.IsRawMouse);
 						}
 
 						//Borderlands 2 (and some other games) requires WM_INPUT to be sent to a window named DIEmWin, not the main hWnd.
@@ -4039,6 +4039,7 @@ namespace Nucleus.Gaming
 							User32Interop.SendMessage(proc.MainWindowHandle, (int)FocusMessages.WM_ACTIVATE, (IntPtr)0x00000002, IntPtr.Zero);
 						}
 
+						//TODO: NCACTIVATE is a bad idea?
 						User32Interop.SendMessage(proc.MainWindowHandle, (int)FocusMessages.WM_ACTIVATEAPP, (IntPtr)1, IntPtr.Zero);
 						User32Interop.SendMessage(proc.MainWindowHandle, (int)FocusMessages.WM_NCACTIVATE, (IntPtr)0x00000001, IntPtr.Zero);
 						User32Interop.SendMessage(proc.MainWindowHandle, (int)FocusMessages.WM_SETFOCUS, IntPtr.Zero, IntPtr.Zero);

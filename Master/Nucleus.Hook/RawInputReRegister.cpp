@@ -35,6 +35,9 @@ namespace ReRegisterRawInput
 
 	void SetupReRegisterRawInput()
 	{
+		//Install RegisterRawInputDevices hook to block and to monitor
+		installHook("user32", "RegisterRawInputDevices", RegisterRawInputDevices_Hook);
+		
 		//Call GetRegisteredRawInputDevices to check if raw input devices are already registered.
 		{
 			UINT numDevices = 0;
@@ -64,9 +67,6 @@ namespace ReRegisterRawInput
 				reRegisterRawInput(hwndTarget);
 			}
 		}
-
-		//Install RegisterRawInputDevices hook to block and to monitor
-		installHook("user32", "RegisterRawInputDevices", RegisterRawInputDevices_Hook);
 	}
 	
 	void reRegisterRawInput(HWND hwnd)
