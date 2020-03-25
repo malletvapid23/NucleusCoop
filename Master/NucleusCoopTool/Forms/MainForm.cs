@@ -24,7 +24,7 @@ namespace Nucleus.Coop
     /// </summary>
     public partial class MainForm : BaseForm
     {
-        public string version = "v0.9.9.9 f1";
+        public string version = "v0.9.9.9 r2";
 
         private Settings settingsForm = null;
 
