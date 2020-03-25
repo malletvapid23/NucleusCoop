@@ -191,7 +191,7 @@ namespace Nucleus.Gaming
             }
         }
 
-        public int OrigAspectRatioDecimal
+        public double OrigAspectRatioDecimal
         {
             get
             {
@@ -210,7 +210,7 @@ namespace Nucleus.Gaming
             }
         }
 
-        public int AspectRatioDecimal
+        public double AspectRatioDecimal
         {
             get
             {
