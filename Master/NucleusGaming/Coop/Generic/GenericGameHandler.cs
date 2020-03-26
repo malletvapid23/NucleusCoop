@@ -31,6 +31,7 @@ using System.Net.Sockets;
 using System.Xml;
 using System.Net;
 using System.Security.Principal;
+using System.DirectoryServices.AccountManagement;
 
 namespace Nucleus.Gaming
 {
@@ -126,6 +127,10 @@ namespace Nucleus.Gaming
 
         [DllImport("user32.dll", SetLastError = true)]
         static extern bool GetWindowRect(IntPtr hWnd, out RECT Rect);
+
+        [DllImport("userenv.dll", CharSet = CharSet.Unicode, ExactSpelling = false, SetLastError = true)]
+        public static extern bool DeleteProfile(string sidString, string profilePath, string omputerName);
+
 
         private bool gameIs64 = false;
 
@@ -281,7 +286,6 @@ namespace Nucleus.Gaming
         [DllImport("user32.dll")]
         static extern bool SetWindowText(IntPtr hWnd, string text);
 
-
         //[DllImport("EasyHook32.dll", CharSet = CharSet.Ansi)]
         //public static extern int RhCreateAndInject(
         //    [MarshalAsAttribute(UnmanagedType.LPWStr)] string InEXEPath,
@@ -355,6 +359,18 @@ namespace Nucleus.Gaming
             }
         }
 
+        private void DeleteProfileFolder(string file)
+        {
+            Process process = new Process();
+            ProcessStartInfo startInfo = new ProcessStartInfo();
+            //startInfo.WindowStyle = ProcessWindowStyle.Hidden;
+            startInfo.FileName = "cmd.exe";
+            startInfo.Arguments = "/C rd /S /Q  \"" + file + "\"";
+            process.StartInfo = startInfo;
+            process.Start();
+            process.WaitForExit();
+        }
+
         public void End(bool fromStopButton)
         {
 	        if (fromStopButton && LockInput.IsLocked)
@@ -414,6 +430,30 @@ namespace Nucleus.Gaming
                 if (gen.LaunchAsDifferentUsers)
                 {
                     Log("Deleting temporary user accounts");
+
+                    for (int pc = 1; pc <= numPlayers; pc++)
+                    {
+                        try
+                        {
+                            string username = $"nucleusplayer{pc}";
+                            var principalContext = new PrincipalContext(ContextType.Machine);
+                            var userPrincipal = UserPrincipal.FindByIdentity(principalContext, username);
+                            if (userPrincipal != null)
+                            {
+                                var userSid = userPrincipal.Sid;
+                                DeleteProfile(userSid.ToString(), null, null);
+                            }
+                            else
+                            {
+                                //MessageBox.Show("ERROR! User: {0} not found!", username);
+                            }
+                        }
+                        catch (Exception exception)
+                        {
+                            //MessageBox.Show(exception.Message);
+                        }
+                    }
+
                     string deleteUserBatPath = Path.Combine(Directory.GetCurrentDirectory(), "utils\\LaunchUsers\\delete_users.bat");
                     if (File.Exists(deleteUserBatPath))
                     {
@@ -422,10 +462,10 @@ namespace Nucleus.Gaming
 
                     using (StreamWriter sw = new StreamWriter(deleteUserBatPath))
                     {
-                        sw.WriteLine(@"@echo off");
+                        sw.WriteLine("@echo off");
                         for (int pc = 1; pc <= numPlayers; pc++)
                         {
-                            sw.WriteLine($@"net user nucleus-instance{pc} /delete");
+                            sw.WriteLine($"net user nucleusplayer{pc} /delete");
                         }
                     }
 
@@ -434,6 +474,13 @@ namespace Nucleus.Gaming
                     user.StartInfo.Verb = "runas";
                     user.StartInfo.UseShellExecute = true;
                     user.Start();
+                    user.WaitForExit();
+
+                    if (File.Exists(deleteUserBatPath))
+                    {
+                        File.Delete(deleteUserBatPath);
+                    }
+
                 }
 
                 if (gen.ChangeIPPerInstance)
@@ -588,6 +635,14 @@ namespace Nucleus.Gaming
                         }
                     }
                     Log("File deletion complete");
+                }
+            }
+
+            for (int pc = 1; pc <= numPlayers; pc++)
+            {
+                if (Directory.Exists($@"C:\Users\nucleusplayer{pc}"))
+                {
+                    DeleteProfileFolder($@"C:\Users\nucleusplayer{pc}");
                 }
             }
 #endif
@@ -1846,33 +1901,39 @@ namespace Nucleus.Gaming
                                     user.StartInfo.Verb = "runas";
                                     user.StartInfo.UseShellExecute = true;
                                     user.Start();
+                                    user.WaitForExit();
+
+                                    if (File.Exists(createUserBatPath))
+                                    {
+                                        File.Delete(createUserBatPath);
+                                    }
                                 }
 
                                 Thread.Sleep(1000);
 
                                 Process cmd = new Process();
                                 cmd.StartInfo.FileName = "cmd.exe";
-                                //cmd.StartInfo.RedirectStandardInput = true;
-                                //cmd.StartInfo.RedirectStandardOutput = true;
+                                cmd.StartInfo.RedirectStandardInput = true;
+                                cmd.StartInfo.RedirectStandardOutput = true;
                                 //cmd.StartInfo.CreateNoWindow = true;
                                 cmd.StartInfo.Verb = "runas";
-                                cmd.StartInfo.UseShellExecute = true;
-                                
+                                cmd.StartInfo.UseShellExecute = false;
 
-                                if (gen.LaunchAsDifferentUsers)
-                                {
-                                    //int increase = i + 1;
-                                    string psexecPath = Path.Combine(Directory.GetCurrentDirectory(), "utils\\LaunchUsers\\psexec.exe");
-                                    string cmdLine = "/C " + psexecPath /*"utils\\LaunchUsers\\psexec.exe"*/ + " -h -u nucleusplayer" + (i+1) + " -p 12345 -d -i \"" + exePath + "\" " + startArgs;
-                                    Log(string.Format("Launching game as different user, through psexec: {0}", cmdLine));
-                                    //cmd.StandardInput.WriteLine(cmdLine);
-                                    cmd.StartInfo.Arguments = cmdLine;
-                                }
                                 cmd.Start();
-                                cmd.WaitForExit();
-                                //cmd.StandardInput.Flush();
-                                //cmd.StandardInput.Close();
+                                
+                                //int increase = i + 1;
+                                string psexecPath = Path.Combine(Directory.GetCurrentDirectory(), "utils\\LaunchUsers\\psexec.exe");
+                                cmd.StandardInput.WriteLine("set path=%path%;" + Path.GetDirectoryName(psexecPath));
+                                string cmdLine = "psexec -h -u nucleusplayer" + (i+1) + " -p 12345 -d -i \"" + exePath + "\" " + startArgs;
+                                Log(string.Format("Launching game as different user, through psexec: {0}", cmdLine));
+                                cmd.StandardInput.WriteLine(cmdLine);
+                                //cmd.StartInfo.Arguments = cmdLine;
+
+                                //cmd.Start();
                                 //cmd.WaitForExit();
+                                cmd.StandardInput.Flush();
+                                cmd.StandardInput.Close();
+                                cmd.WaitForExit();
 
                                 proc = null;
                             }
