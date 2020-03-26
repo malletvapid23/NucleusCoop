@@ -195,7 +195,7 @@ namespace Nucleus.Gaming
         {
             get
             {
-                return profile.Screens[pInfo.PlayerID].display.Width / profile.Screens[pInfo.PlayerID].display.Height;
+                return (double)profile.Screens[pInfo.PlayerID].display.Width / profile.Screens[pInfo.PlayerID].display.Height;
             }
         }
 
@@ -214,7 +214,7 @@ namespace Nucleus.Gaming
         {
             get
             {
-                return Width / Height;
+                return (double)Width / Height;
             }
         }
 
