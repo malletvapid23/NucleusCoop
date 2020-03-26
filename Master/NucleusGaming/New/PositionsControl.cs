@@ -298,7 +298,7 @@ namespace Nucleus.Coop
 
             if (g.Hook.DInputEnabled || g.Hook.XInputReroute)
             {
-                DirectInput dinput = new DirectInput();
+                
                 IList<DeviceInstance> devices = dinput.GetDevices(DeviceClass.GameController /*SlimDX.DirectInput.DeviceType.Gamepad*/, DeviceEnumerationFlags.AttachedOnly);
 
                 // first search for disconnected gamepads
@@ -366,7 +366,12 @@ namespace Nucleus.Coop
 
                     // new gamepad
                     PlayerInfo player = new PlayerInfo();
-                    player.DInputJoystick = new Joystick(dinput, device.InstanceGuid);
+
+                    using (DirectInput dinput = new DirectInput())
+                    {
+                        player.DInputJoystick = new Joystick(dinput, device.InstanceGuid);
+                    }
+
                     if (player.DInputJoystick.Properties.InterfacePath.ToUpper().Contains("IG_") && !g.Hook.XInputReroute)
                     {
                         continue;
