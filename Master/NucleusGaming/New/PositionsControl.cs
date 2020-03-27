@@ -174,12 +174,17 @@ namespace Nucleus.Coop
                 dinput = null;
             }
 
-            List<PlayerInfo> data = profile.PlayerData;
-            foreach (PlayerInfo player in data)
+            List<PlayerInfo> data = null;
+            if (profile.PlayerData != null)
             {
-                if (player.DInputJoystick != null)
+                data = profile.PlayerData;
+
+                foreach (PlayerInfo player in data)
                 {
-                    player.DInputJoystick.Dispose();
+                    if (player.DInputJoystick != null)
+                    {
+                        player.DInputJoystick.Dispose();
+                    }
                 }
             }
         }
