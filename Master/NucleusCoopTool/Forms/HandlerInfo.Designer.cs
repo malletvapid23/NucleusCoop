@@ -332,6 +332,7 @@
             // 
             this.linkLabel_MoreInfo.AutoSize = true;
             this.linkLabel_MoreInfo.Font = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.linkLabel_MoreInfo.LinkColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(192)))), ((int)(((byte)(255)))));
             this.linkLabel_MoreInfo.Location = new System.Drawing.Point(495, 21);
             this.linkLabel_MoreInfo.Name = "linkLabel_MoreInfo";
             this.linkLabel_MoreInfo.Size = new System.Drawing.Size(58, 13);
