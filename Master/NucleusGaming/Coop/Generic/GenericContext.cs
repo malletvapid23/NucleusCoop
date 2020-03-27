@@ -314,6 +314,44 @@ namespace Nucleus.Gaming
             return b == 0 ? Math.Abs(a) : GCD(b, a % b);
         }
 
+        public void ModifiedDate(string file, int year, int month, int day, int hour, int minute, int second)
+        {
+            DateTime dt = new DateTime(year, month, day, hour, minute, second);
+            File.SetLastWriteTime(file, dt);
+        }
+
+        public void ModifiedDate(string file, int year, int month, int day)
+        {
+            DateTime dt = new DateTime(year, month, day, 0, 0, 0);
+            File.SetLastWriteTime(file, dt);
+        }
+
+        public void CreatedDate(string file, int year, int month, int day, int hour, int minute, int second)
+        {
+            DateTime dt = new DateTime(year, month, day, hour, minute, second);
+            File.SetCreationTime(file, dt);
+        }
+
+        public void CreatedDate(string file, int year, int month, int day)
+        {
+            DateTime dt = new DateTime(year, month, day, 0, 0, 0);
+            File.SetCreationTime(file, dt);
+        }
+
+        public string[] FindFiles(string rootFolder, string fileName)
+        {
+            string[] files = Directory.GetFiles(rootFolder, fileName, SearchOption.TopDirectoryOnly);
+            return files;
+        }
+
+        public string[] FindFiles(string rootFolder, string fileName, bool searchAll)
+        {
+            SearchOption searchOp = searchAll ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly;
+            string[] files = Directory.GetFiles(rootFolder, fileName, searchOp);
+            return files;
+        }
+
+
         public void WriteTextFile(string path, string[] lines)
         {
             if (File.Exists(path))
