@@ -52,6 +52,7 @@ namespace Nucleus.Gaming.Coop
         public string HIDDeviceID;
         public string Nickname;
         public string InstanceId;
+        public string RawHID;
 
         // Serialized
 

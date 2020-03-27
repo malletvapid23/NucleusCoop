@@ -186,6 +186,13 @@ namespace Nucleus.Gaming
         public string[] ExtWindowStyleValues;
         public bool KillLastInstanceMutex;
         public bool RefreshWindowAfterStart = false;
+        public bool CreateSingleDeviceFile;
+        public bool KillMutexAtEnd;
+        public bool CMDStartArgsInside;
+        public bool UseEACBypass;
+        public bool LaunchAsDifferentUsers;
+        public bool RunLauncherAndExe;
+        public int PauseBetweenProcessGrab;
 
         // -- From USS
         //Effectively a switch for all of USS features

@@ -45,6 +45,8 @@
             this.txt_Search = new System.Windows.Forms.TextBox();
             this.label4 = new System.Windows.Forms.Label();
             this.chkBox_Verified = new System.Windows.Forms.CheckBox();
+            this.lbl_Status = new System.Windows.Forms.Label();
+            this.btn_ViewAll = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // btn_Info
@@ -81,6 +83,7 @@
             this.list_Games.MultiSelect = false;
             this.list_Games.Name = "list_Games";
             this.list_Games.Size = new System.Drawing.Size(794, 291);
+            this.list_Games.Sorting = System.Windows.Forms.SortOrder.Ascending;
             this.list_Games.TabIndex = 31;
             this.list_Games.UseCompatibleStateImageBehavior = false;
             this.list_Games.View = System.Windows.Forms.View.Details;
@@ -132,7 +135,7 @@
             this.btn_Search.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.btn_Search.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btn_Search.ForeColor = System.Drawing.Color.White;
-            this.btn_Search.Location = new System.Drawing.Point(690, 6);
+            this.btn_Search.Location = new System.Drawing.Point(564, 6);
             this.btn_Search.Name = "btn_Search";
             this.btn_Search.Size = new System.Drawing.Size(120, 35);
             this.btn_Search.TabIndex = 30;
@@ -172,7 +175,7 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.txt_Search.Location = new System.Drawing.Point(72, 10);
             this.txt_Search.Name = "txt_Search";
-            this.txt_Search.Size = new System.Drawing.Size(487, 29);
+            this.txt_Search.Size = new System.Drawing.Size(361, 29);
             this.txt_Search.TabIndex = 26;
             this.txt_Search.KeyDown += new System.Windows.Forms.KeyEventHandler(this.txt_Search_KeyDown);
             // 
@@ -191,7 +194,7 @@
             // 
             this.chkBox_Verified.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.chkBox_Verified.AutoSize = true;
-            this.chkBox_Verified.Location = new System.Drawing.Point(565, 12);
+            this.chkBox_Verified.Location = new System.Drawing.Point(439, 12);
             this.chkBox_Verified.Name = "chkBox_Verified";
             this.chkBox_Verified.Size = new System.Drawing.Size(119, 25);
             this.chkBox_Verified.TabIndex = 33;
@@ -199,11 +202,35 @@
             this.chkBox_Verified.UseVisualStyleBackColor = true;
             this.chkBox_Verified.Click += new System.EventHandler(this.chkBox_Verified_Click);
             // 
+            // lbl_Status
+            // 
+            this.lbl_Status.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.lbl_Status.Location = new System.Drawing.Point(298, 351);
+            this.lbl_Status.Name = "lbl_Status";
+            this.lbl_Status.Size = new System.Drawing.Size(386, 24);
+            this.lbl_Status.TabIndex = 34;
+            this.lbl_Status.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            // 
+            // btn_ViewAll
+            // 
+            this.btn_ViewAll.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.btn_ViewAll.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btn_ViewAll.ForeColor = System.Drawing.Color.White;
+            this.btn_ViewAll.Location = new System.Drawing.Point(690, 6);
+            this.btn_ViewAll.Name = "btn_ViewAll";
+            this.btn_ViewAll.Size = new System.Drawing.Size(120, 35);
+            this.btn_ViewAll.TabIndex = 35;
+            this.btn_ViewAll.Text = "View All";
+            this.btn_ViewAll.UseVisualStyleBackColor = true;
+            this.btn_ViewAll.Click += new System.EventHandler(this.btn_ViewAll_Click);
+            // 
             // ScriptDownloader
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 21F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(822, 391);
+            this.Controls.Add(this.btn_ViewAll);
+            this.Controls.Add(this.lbl_Status);
             this.Controls.Add(this.chkBox_Verified);
             this.Controls.Add(this.btn_Info);
             this.Controls.Add(this.list_Games);
@@ -240,5 +267,7 @@
         private System.Windows.Forms.ColumnHeader stars;
         private System.Windows.Forms.CheckBox chkBox_Verified;
         private System.Windows.Forms.ColumnHeader description;
+        private System.Windows.Forms.Label lbl_Status;
+        private System.Windows.Forms.Button btn_ViewAll;
     }
 }

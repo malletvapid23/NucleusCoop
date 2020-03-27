@@ -24,7 +24,7 @@ namespace Nucleus.Coop
     /// </summary>
     public partial class MainForm : BaseForm
     {
-        public string version = "v0.9.9.9";
+        public string version = "v0.9.9.9 r3";
 
         private Settings settingsForm = null;
 
@@ -543,7 +543,7 @@ namespace Nucleus.Coop
 
         private void KillCurrentStep()
         {
-            currentStep?.Ended();
+            
             //this.StepPanel.Controls.Clear();
 
             if (currentGameInfo.Game.Description?.Length > 0)
@@ -670,6 +670,8 @@ namespace Nucleus.Coop
 
                 return;
             }
+
+            currentStep?.Ended();
 
             btn_Play.Text = "S T O P";
             btnBack.Enabled = false;

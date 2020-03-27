@@ -4,7 +4,7 @@
 
 NTSTATUS installHook(LPCSTR moduleHandle, LPCSTR proc, void* callBack);
 
-void installSetWindowHook();
+void installSetWindowHook(int width, int height, int posx, int posy);
 
 void installFocusHooks();
 

@@ -41,11 +41,13 @@ namespace Nucleus.Gaming
 
                 string lower = file.Name.ToLower();
                 bool cont = false;
+
                 for (int j = 0; j < exclusions.Length; j++)
                 {
                     string exc = exclusions[j];
-                    if (lower.Contains(exc))
+                    if (!string.IsNullOrEmpty(exc) && lower.Contains(exc))
                     {
+                        // check if the file is i
                         cont = true;
                         break;
                     }
@@ -66,19 +68,57 @@ namespace Nucleus.Gaming
             }
         }
 
-        public static void CopyDirectory(string root, DirectoryInfo currentDir, string destination, out int exitCode, string[] dirExclusions, string[] fileExclusions, bool overrideSpecial = false)
+        public static void CopyDirectory(string root, DirectoryInfo currentDir, string destination, out int exitCode, string[] dirExclusions, string[] fileExclusions, bool firstRun = true)
         {
             exitCode = 1;
 
-            Directory.CreateDirectory(destination);
-            // copy all files
-            CopyDirectoryFiles(currentDir.FullName, destination, out exitCode, fileExclusions);
+            bool special = false;
+            bool skip = false;
 
-            DirectoryInfo[] children = currentDir.GetDirectories();
-            for (int i = 0; i < children.Length; i++)
+            if (dirExclusions.Length > 0 && !string.IsNullOrEmpty(dirExclusions[0]))
             {
-                DirectoryInfo child = children[i];
-                CopyDirectory(root, child, Path.Combine(destination, child.Name), out exitCode, dirExclusions, fileExclusions);
+                for (int j = 0; j < dirExclusions.Length; j++)
+                {
+                    string exclusion = dirExclusions[j];
+                    string fullPath;
+                    if (exclusion.StartsWith("direxskip"))
+                    {
+                        fullPath = Path.Combine(root, exclusion.Substring(9).ToLower());
+                    }
+                    else
+                    {
+                        fullPath = Path.Combine(root, exclusion).ToLower();
+                    }
+
+                    if (!string.IsNullOrEmpty(exclusion) && fullPath.Contains(currentDir.FullName.ToLower()))
+                    {
+                        if (exclusion.StartsWith("direxskip"))
+                        {
+                            skip = true;
+                            break;
+                        }
+
+                        // special case, one of our subfolders is excluded
+                        special = true;
+                        break;
+                    }
+                }
+            }
+
+            if (!skip || firstRun)
+            {
+
+                Directory.CreateDirectory(destination);
+                // copy all files
+                CopyDirectoryFiles(currentDir.FullName, destination, out exitCode, fileExclusions);
+
+                DirectoryInfo[] children = currentDir.GetDirectories();
+                for (int i = 0; i < children.Length; i++)
+                {
+                    DirectoryInfo child = children[i];
+                    CopyDirectory(root, child, Path.Combine(destination, child.Name), out exitCode, dirExclusions, fileExclusions, false);
+                }
+
             }
         }
     }
