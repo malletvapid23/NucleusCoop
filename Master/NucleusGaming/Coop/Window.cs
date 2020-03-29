@@ -89,6 +89,16 @@ namespace Nucleus.Gaming.Coop
 			public bool readyToDraw;
 			private const int MILLISECONDS_BETWEEN_DRAW = 5;
 
+			//Hides in alt+tab menu
+			protected override CreateParams CreateParams
+			{
+				get
+				{
+					CreateParams cp = base.CreateParams;
+					cp.ExStyle |= 0x80;
+					return cp;
+				}
+			}
 			public PointerForm(IntPtr hWnd, int gameWindowWidth, int gameWindowHeight, int gameWindowX, int gameWindowY) : base()
 			{
 				this.hWnd = hWnd;
