@@ -3958,8 +3958,6 @@ namespace Nucleus.Gaming
 
         }
 
-		//private void InjectDLLs(Process proc)
-		//{
 		private void InjectDLLs(Process proc, Window window, PlayerInfo player)
 		{
 			WaitForProcWindowHandleNotZero(proc);
@@ -3999,9 +3997,9 @@ namespace Nucleus.Gaming
                     player.MonitorBounds.Height,
                     player.MonitorBounds.X,
                     player.MonitorBounds.Y,
-                    
+                    (player.IsRawMouse || player.IsRawKeyboard) ? 0 : (player.GamepadId+1),
 
-					//These options are enabled by default, but if the game isn't using these features the hooks are unwanted
+                    //These options are enabled by default, but if the game isn't using these features the hooks are unwanted
 					gen.SupportsMultipleKeyboardsAndMice && gen.HookSetCursorPos,
 					gen.SupportsMultipleKeyboardsAndMice && gen.HookGetCursorPos,
 					gen.SupportsMultipleKeyboardsAndMice && gen.HookGetKeyState,
@@ -4015,6 +4013,8 @@ namespace Nucleus.Gaming
 					gen.HookReRegisterRawInput,
 					gen.HookReRegisterRawInputMouse,
 					gen.HookReRegisterRawInputKeyboard,
+					gen.InjectHookXinput,
+					gen.InjectDinputToXinputTranslation,
 
 					windowNull ? "" : (window.HookPipe?.pipeNameWrite ?? ""),
 					windowNull ? "" : (window.HookPipe?.pipeNameRead ?? ""),

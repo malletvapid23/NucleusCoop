@@ -100,7 +100,19 @@ namespace Nucleus.Inject
 			}
 			else if (tier == 1)
 			{
+				try
+				{
+
+				
 				RuntimeHook(argsDecoded, i, is64);
+				}
+				catch (
+					Exception
+				e)
+				{
+					Log("error = " + e);
+					throw;
+				}
 			}
 		}
 
@@ -341,6 +353,8 @@ namespace Nucleus.Inject
 			int.TryParse(args[i++], out int posx);
 			int.TryParse(args[i++], out int posy);
 
+			int.TryParse(args[i++], out int controllerIndex);
+
 			bool.TryParse(args[i++], out bool setCursorPos);
 			bool.TryParse(args[i++], out bool getCursorPos);
 			bool.TryParse(args[i++], out bool getKeyState);
@@ -354,6 +368,8 @@ namespace Nucleus.Inject
 			bool.TryParse(args[i++], out bool reRegisterRawInput);
 			bool.TryParse(args[i++], out bool reRegisterRawInputMouse);
 			bool.TryParse(args[i++], out bool reRegisterRawInputKeyboard);
+			bool.TryParse(args[i++], out bool hookXinput);
+			bool.TryParse(args[i++], out bool dinputToXinputTranslation);
 
 			string writePipeName = args[i++];
 			string readPipeName = args[i++];
@@ -371,7 +387,7 @@ namespace Nucleus.Inject
 			var readPipeNameBytes = Encoding.Unicode.GetBytes(readPipeName);
 			int readPipeNameLength = readPipeNameBytes.Length;
 
-			int size = 58 + logPathLength + writePipeNameLength + readPipeNameLength;
+			int size = 256 + logPathLength + writePipeNameLength + readPipeNameLength;
 			IntPtr intPtr = Marshal.AllocHGlobal(size);
 			byte[] dataToSend = new byte[size];
 
@@ -411,6 +427,8 @@ namespace Nucleus.Inject
 			dataToSend[index++] = Bool_1_0(reRegisterRawInput);
 			dataToSend[index++] = Bool_1_0(reRegisterRawInputMouse);
 			dataToSend[index++] = Bool_1_0(reRegisterRawInputKeyboard);
+			dataToSend[index++] = Bool_1_0(hookXinput);
+			dataToSend[index++] = Bool_1_0(dinputToXinputTranslation);
 
 			dataToSend[index++] = (byte) (logPathLength >> 24);
 			dataToSend[index++] = (byte) (logPathLength >> 16);
@@ -446,6 +464,11 @@ namespace Nucleus.Inject
 			dataToSend[index++] = (byte)(posy >> 16);
 			dataToSend[index++] = (byte)(posy >> 8);
 			dataToSend[index++] = (byte)posy;
+
+			dataToSend[index++] = (byte)(controllerIndex >> 24);
+			dataToSend[index++] = (byte)(controllerIndex >> 16);
+			dataToSend[index++] = (byte)(controllerIndex >> 8);
+			dataToSend[index++] = (byte)controllerIndex;
 
 			Array.Copy(logPath, 0, dataToSend, index, logPathLength);
 			Array.Copy(writePipeNameBytes, 0, dataToSend, index + logPathLength, writePipeNameLength);

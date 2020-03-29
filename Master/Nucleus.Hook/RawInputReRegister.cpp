@@ -75,7 +75,7 @@ namespace ReRegisterRawInput
 		hasReRegisteredRawInput = true;
 				
 		//Deregister mouse
-		if (options.reRegisterRawInputMouse)
+		if (Globals::options.reRegisterRawInputMouse)
 		{
 			RAWINPUTDEVICE rid[1];
 			rid[0].usUsagePage = 0x01;
@@ -87,7 +87,7 @@ namespace ReRegisterRawInput
 		}
 
 		//Deregister keyboard
-		if(options.reRegisterRawInputKeyboard)
+		if(Globals::options.reRegisterRawInputKeyboard)
 		{
 			RAWINPUTDEVICE rid[1];
 			rid[0].usUsagePage = 0x01;
@@ -99,7 +99,7 @@ namespace ReRegisterRawInput
 		}
 
 		//Reregister mouse
-		if(options.reRegisterRawInputMouse)
+		if(Globals::options.reRegisterRawInputMouse)
 		{
 			RAWINPUTDEVICE rid[1];
 			rid[0].usUsagePage = 0x01;
@@ -111,7 +111,7 @@ namespace ReRegisterRawInput
 		}
 
 		//Reregister keyboard
-		if(options.reRegisterRawInputKeyboard)
+		if(Globals::options.reRegisterRawInputKeyboard)
 		{
 			RAWINPUTDEVICE rid[1];
 			rid[0].usUsagePage = 0x01;

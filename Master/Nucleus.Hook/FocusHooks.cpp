@@ -5,17 +5,17 @@
 
 HWND WINAPI GetForegroundWindow_Hook()
 {
-	return hWnd;
+	return Globals::hWnd;
 }
 
 HWND WINAPI WindowFromPoint_Hook(POINT Point)
 {
-	return hWnd;
+	return Globals::hWnd;
 }
 
 HWND WINAPI GetActiveWindow_Hook()
 {
-	return hWnd;
+	return Globals::hWnd;
 }
 
 BOOL WINAPI IsWindowEnabled_Hook(HWND hWnd)
@@ -25,12 +25,12 @@ BOOL WINAPI IsWindowEnabled_Hook(HWND hWnd)
 
 HWND WINAPI GetFocus_Hook()
 {
-	return hWnd;
+	return Globals::hWnd;
 }
 
 HWND WINAPI GetCapture_Hook()
 {
-	return hWnd;
+	return Globals::hWnd;
 }
 
 HWND WINAPI SetCapture_Hook(HWND inputHwnd)
