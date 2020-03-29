@@ -220,6 +220,7 @@ namespace Nucleus.Gaming
 		public bool ForwardRawKeyboardInput = false;
 		public bool ForwardRawMouseInput = false;
 		public bool DrawFakeMouseCursor = true;
+		public bool DrawFakeMouseCursorForControllers = false;
 		public bool UpdateFakeMouseWithInternalInput = false;
 		public bool LockInputAtStart = false;
 		public bool PreventGameFocus = false;
