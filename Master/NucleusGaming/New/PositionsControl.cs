@@ -174,10 +174,10 @@ namespace Nucleus.Coop
                 dinput = null;
             }
 
-            List<PlayerInfo> data = null;
-            if (profile.PlayerData != null)
+            
+            if (profile != null && profile.PlayerData != null)
             {
-                data = profile.PlayerData;
+                List<PlayerInfo> data = profile.PlayerData;
 
                 foreach (PlayerInfo player in data)
                 {
