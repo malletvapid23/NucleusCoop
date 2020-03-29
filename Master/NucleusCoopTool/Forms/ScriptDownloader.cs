@@ -28,6 +28,18 @@ namespace Nucleus.Coop.Forms
 
         private ListViewColumnSorter lvwColumnSorter;
 
+        private bool grabAll = false;
+
+        private JArray handlers;
+
+        private int entriesPerPage;
+
+        private int entryIndex = 0;
+
+        private int sortColumn = 0;
+
+        private SortOrder sortOrder = SortOrder.Ascending;
+
         public ScriptDownloader(MainForm mf)
         {
             InitializeComponent();
@@ -35,10 +47,14 @@ namespace Nucleus.Coop.Forms
             lvwColumnSorter = new ListViewColumnSorter();
             list_Games.ListViewItemSorter = lvwColumnSorter;
 
+            cmb_Sort.SelectedIndex = 0;
+            cmb_NumResults.SelectedIndex = 1;
+            entriesPerPage = Convert.ToInt32(cmb_NumResults.SelectedItem);
+
             mainForm = mf;
 
-            list_Games.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent);
-            list_Games.AutoResizeColumns(ColumnHeaderAutoResizeStyle.HeaderSize);
+            //list_Games.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent);
+            //list_Games.AutoResizeColumns(ColumnHeaderAutoResizeStyle.HeaderSize);
         }
 
         private void btn_Search_Click(object sender, EventArgs e)
@@ -55,24 +71,36 @@ namespace Nucleus.Coop.Forms
                 return;
             }
 
-            if (!string.IsNullOrEmpty(txt_Search.Text) && txt_Search.Text.Replace(" ", string.Empty).Length > 0)
+            if ((!string.IsNullOrEmpty(txt_Search.Text) && txt_Search.Text.Replace(" ", string.Empty).Length > 0) || grabAll)
             {
+                btn_Prev.Enabled = false;
+                btn_Next.Enabled = false;
+
                 lastSearch = txt_Search.Text;
 
-                list_Games.Items.Clear();
-                searchHandlers.Clear();
+                //list_Games.Items.Clear();
+                //searchHandlers.Clear();
                 lbl_Status.Text = "";
 
                 ServicePointManager.Expect100Continue = true;
                 ServicePointManager.SecurityProtocol = (SecurityProtocolType)3072;
 
                 string searchParam = Uri.EscapeDataString(txt_Search.Text);
-                string rawHandlers = Get(api + "handlers/" + searchParam);
+                string rawHandlers = null;
+                if(grabAll)
+                {
+                    rawHandlers = Get(api + "allhandlers");
+                    grabAll = false;
+                }
+                else
+                {
+                    rawHandlers = Get(api + "handlers/" + searchParam);
+                }
+                
                 txt_Search.Clear();
 
                 if(rawHandlers == null)
                 {
-                    
                     return;
                 }
                 else if(rawHandlers == "{}")
@@ -82,126 +110,181 @@ namespace Nucleus.Coop.Forms
                     return;
                 }
 
-                ImageList imageList = new ImageList();
-                imageList.ImageSize = new Size(35, 35);
-
                 JObject jObject = JsonConvert.DeserializeObject(rawHandlers) as JObject;
 
-                JArray handlers = jObject["Handlers"] as JArray;
+                JArray array = jObject["Handlers"] as JArray;
 
-                bool minResult = false;
-
-                list_Games.BeginUpdate();
-                Cursor.Current = Cursors.WaitCursor;
-
-                for (int i = 0; i < handlers.Count; i++)
+                switch(cmb_Sort.SelectedIndex)
                 {
-                    
-                    lbl_Status.Text = "Status: Fetching " + i + "/" + handlers.Count + " handlers.";
-                    Handler handler = new Handler();
-
-                    handler.Id = jObject["Handlers"][i]["_id"].ToString();
-                    handler.Owner = jObject["Handlers"][i]["owner"].ToString();
-                    handler.OwnerName = jObject["Handlers"][i]["ownerName"].ToString();
-                    handler.Description = jObject["Handlers"][i]["description"].ToString();
-                    handler.Title = jObject["Handlers"][i]["title"].ToString();
-                    handler.GameName = jObject["Handlers"][i]["gameName"].ToString();
-                    handler.GameDescription = jObject["Handlers"][i]["gameDescription"].ToString();
-                    handler.GameCover = jObject["Handlers"][i]["gameCover"].ToString();
-                    handler.GameId = jObject["Handlers"][i]["gameId"].ToString();
-                    handler.GameUrl = jObject["Handlers"][i]["gameUrl"].ToString();
-                    handler.CreatedAt = jObject["Handlers"][i]["createdAt"].ToString();
-                    handler.UpdatedAt = jObject["Handlers"][i]["updatedAt"].ToString();
-                    handler.Stars = jObject["Handlers"][i]["stars"].ToString();
-                    handler.DownloadCount = jObject["Handlers"][i]["downloadCount"].ToString();
-                    handler.Verified = jObject["Handlers"][i]["verified"].ToString();
-                    handler.Private = jObject["Handlers"][i]["private"].ToString();
-                    handler.CommentCount = jObject["Handlers"][i]["commentCount"].ToString();
-                    handler.CurrentVersion = jObject["Handlers"][i]["currentVersion"].ToString();
-                    handler.CurrentPackage = jObject["Handlers"][i]["currentPackage"].ToString();
-
-                    if(chkBox_Verified.Checked && !Boolean.Parse(handler.Verified))
-                    {
-                        continue;
-                    }
-
-                    if (!minResult)
-                        minResult = true;
-
-                    searchHandlers.Add(handler);
-
-                    string vSymb;
-                    if(handler.Verified == "True")
-                    {
-                        vSymb = "ü";
-                    }
-                    else
-                    {
-                        vSymb = string.Empty;
-                    }
-
-                    string _cover = $@"https://images.igdb.com/igdb/image/upload/t_micro/{handler.GameCover}.jpg";
-
-                    WebRequest request = WebRequest.Create(_cover);
-                    WebResponse resp = request.GetResponse();
-                    Stream respStream = resp.GetResponseStream();
-                    Bitmap bmp = new Bitmap(respStream);
-                    respStream.Dispose();
-
-                    imageList.Images.Add(bmp);
-                    list_Games.SmallImageList = imageList;
-
-                    string[] handlerDisplayCols = { handler.OwnerName, vSymb, handler.DownloadCount, handler.Stars, handler.CreatedAt, handler.UpdatedAt, handler.Description };
-                    list_Games.Items.Add(" " + handler.GameName).SubItems.AddRange(handlerDisplayCols);
-                    list_Games.Items[i].ImageIndex = i;
-
-                    list_Games.Items[i].SubItems[5].Text = list_Games.Items[i].SubItems[5].Text.Substring(0, list_Games.Items[i].SubItems[5].Text.IndexOf(' '));
-                    if(int.Parse(handler.CurrentVersion) > 1)
-                    {
-                        list_Games.Items[i].SubItems[6].Text = list_Games.Items[i].SubItems[6].Text.Substring(0, list_Games.Items[i].SubItems[6].Text.IndexOf(' '));
-                    }
-                    else
-                    {
-                        list_Games.Items[i].SubItems[6].Text = string.Empty;
-                    }
-
-                    if(list_Games.Items[i].SubItems[7].Text.Length > 50)
-                    {
-                        list_Games.Items[i].SubItems[7].Text = list_Games.Items[i].SubItems[7].Text.Substring(0, 50) + "...";
-                    }
-
-                    foreach (ListViewItem lvi in list_Games.Items)
-                    {
-                        lvi.UseItemStyleForSubItems = false;
-                    }
-
-                    list_Games.Items[i].SubItems[2].Font = new Font(new FontFamily("Wingdings"), 10, FontStyle.Bold);
-                    list_Games.Items[i].SubItems[2].ForeColor = Color.Green;
+                    case 0: // Alphabetical
+                        handlers = new JArray(array.OrderBy(obj => (string)obj["gameName"]));
+                        sortColumn = 0;
+                        sortOrder = SortOrder.Ascending;
+                        break;
+                    case 1: // Most Downloaded
+                        handlers = new JArray(array.OrderByDescending(obj => (int)obj["downloadCount"]));
+                        sortColumn = 3;
+                        sortOrder = SortOrder.Descending;
+                        break;
+                    case 2: // Most Likes
+                        handlers = new JArray(array.OrderByDescending(obj => (int)obj["stars"]));
+                        sortColumn = 4;
+                        sortOrder = SortOrder.Descending;
+                        break;
+                    case 3: // Most Recently Uploaded
+                        handlers = new JArray(array.OrderByDescending(obj => (DateTime)obj["createdAt"]));
+                        sortColumn = 5;
+                        sortOrder = SortOrder.Descending;
+                        break;
+                    case 4: // Most Recently Updated
+                        handlers = new JArray(array.OrderByDescending(obj => (DateTime)obj["updatedAt"]));
+                        sortColumn = 6;
+                        sortOrder = SortOrder.Descending;
+                        break;
                 }
-                
 
-                if (!minResult)
+                entryIndex = 0;
+                FetchHandlers(entryIndex);
+
+                if(handlers.Count > entriesPerPage)
                 {
-                    MessageBox.Show("No results found.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    txt_Search.Focus();
+                    btn_Next.Enabled = true;
+                }
+            }
+        }
+
+        private void FetchHandlers(int startIndex)
+        {
+            ImageList imageList = new ImageList();
+            imageList.ImageSize = new Size(35, 35);
+
+            list_Games.Items.Clear();
+            searchHandlers.Clear();
+            btn_Download.Enabled = false;
+            btn_Info.Enabled = false;
+
+            list_Games.BeginUpdate();
+            Cursor.Current = Cursors.WaitCursor;
+
+            int entriesToView = entriesPerPage;
+            if((startIndex + entriesPerPage) > handlers.Count)
+            {
+                entriesToView = handlers.Count - startIndex;
+            }
+
+            for (int i = 0; i < entriesToView; i++)
+            {
+                lbl_Status.Text = string.Format("Fetching {0}/{1} handlers", (i+1), entriesToView);
+                Handler handler = new Handler();
+
+                handler.Id = handlers[i+startIndex]["_id"].ToString();
+                handler.Owner = handlers[i+startIndex]["owner"].ToString();
+                handler.OwnerName = handlers[i+startIndex]["ownerName"].ToString();
+                handler.Description = handlers[i+startIndex]["description"].ToString();
+                handler.Title = handlers[i+startIndex]["title"].ToString();
+                handler.GameName = handlers[i+startIndex]["gameName"].ToString();
+                handler.GameDescription = handlers[i+startIndex]["gameDescription"].ToString();
+                handler.GameCover = handlers[i+startIndex]["gameCover"].ToString();
+                handler.GameId = handlers[i+startIndex]["gameId"].ToString();
+                handler.GameUrl = handlers[i+startIndex]["gameUrl"].ToString();
+                handler.CreatedAt = handlers[i+startIndex]["createdAt"].ToString();
+                handler.UpdatedAt = handlers[i+startIndex]["updatedAt"].ToString();
+                handler.Stars = handlers[i+startIndex]["stars"].ToString();
+                handler.DownloadCount = handlers[i+startIndex]["downloadCount"].ToString();
+                handler.Verified = handlers[i+startIndex]["verified"].ToString();
+                handler.Private = handlers[i+startIndex]["private"].ToString();
+                handler.CommentCount = handlers[i+startIndex]["commentCount"].ToString();
+                handler.CurrentVersion = handlers[i+startIndex]["currentVersion"].ToString();
+                handler.CurrentPackage = handlers[i+startIndex]["currentPackage"].ToString();
+
+                if (chkBox_Verified.Checked && !Boolean.Parse(handler.Verified))
+                {
+                    continue;
+                }
+
+                searchHandlers.Add(handler);
+
+                string vSymb;
+                if (handler.Verified == "True")
+                {
+                    vSymb = "ü";
                 }
                 else
                 {
-                    list_Games.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent);
-                    list_Games.AutoResizeColumns(ColumnHeaderAutoResizeStyle.HeaderSize);
+                    vSymb = string.Empty;
                 }
 
-                lvwColumnSorter.SortColumn = 0;
-                lvwColumnSorter.Order = SortOrder.Ascending;
-                list_Games.SetSortIcon(0, lvwColumnSorter.Order);
+                string _cover = $@"https://images.igdb.com/igdb/image/upload/t_micro/{handler.GameCover}.jpg";
 
-                list_Games.Sort();
+                WebRequest request = WebRequest.Create(_cover);
+                WebResponse resp = request.GetResponse();
+                Stream respStream = resp.GetResponseStream();
+                Bitmap bmp = new Bitmap(respStream);
+                respStream.Dispose();
 
-                list_Games.EndUpdate();
-                Cursor.Current = Cursors.Default;
+                imageList.Images.Add(bmp);
+                list_Games.SmallImageList = imageList;
 
-                lbl_Status.Text = "Status: " + handlers.Count + " results returned.";
+                string[] handlerDisplayCols = { handler.OwnerName, vSymb, handler.DownloadCount, handler.Stars, handler.CreatedAt, handler.UpdatedAt, handler.Description };
+                list_Games.Items.Add(" " + handler.GameName).SubItems.AddRange(handlerDisplayCols);
+                list_Games.Items[i].ImageIndex = i;
+
+                if(list_Games.Items[i].SubItems[5].Text.Contains(" "))
+                {
+                    list_Games.Items[i].SubItems[5].Text = list_Games.Items[i].SubItems[5].Text.Substring(0, list_Games.Items[i].SubItems[5].Text.IndexOf(' '));
+                }
+
+                if (int.Parse(handler.CurrentVersion) > 1)
+                {
+                    if (list_Games.Items[i].SubItems[6].Text.Contains(" "))
+                    {
+                        list_Games.Items[i].SubItems[6].Text = list_Games.Items[i].SubItems[6].Text.Substring(0, list_Games.Items[i].SubItems[6].Text.IndexOf(' '));
+                    }  
+                }
+                else
+                {
+                    list_Games.Items[i].SubItems[6].Text = string.Empty;
+                }
+
+                if (list_Games.Items[i].SubItems[7].Text.Length > 50)
+                {
+                    list_Games.Items[i].SubItems[7].Text = list_Games.Items[i].SubItems[7].Text.Substring(0, 50) + "...";
+                }
+
+                foreach (ListViewItem lvi in list_Games.Items)
+                {
+                    lvi.UseItemStyleForSubItems = false;
+                }
+
+                list_Games.Items[i].SubItems[2].Font = new Font(new FontFamily("Wingdings"), 10, FontStyle.Bold);
+                list_Games.Items[i].SubItems[2].ForeColor = Color.Green;
+
+
             }
+
+            list_Games.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent);
+            list_Games.AutoResizeColumns(ColumnHeaderAutoResizeStyle.HeaderSize);
+
+            lvwColumnSorter.SortColumn = sortColumn;
+            lvwColumnSorter.Order = sortOrder;
+            list_Games.SetSortIcon(0, lvwColumnSorter.Order);
+
+            list_Games.Sort();
+
+            list_Games.EndUpdate();
+
+            if(startIndex + entriesToView == handlers.Count)
+                btn_Next.Enabled = false;
+            else
+                btn_Next.Enabled = true;
+            if (startIndex == 0)
+                btn_Prev.Enabled = false;
+            else
+                btn_Prev.Enabled = true;
+
+            Cursor.Current = Cursors.Default;
+
+            lbl_Status.Text = string.Format("Viewing results {0}-{1}. Total: {2}", (startIndex + 1), entriesToView + startIndex, handlers.Count);
         }
 
         public string Get(string uri)
@@ -240,8 +323,10 @@ namespace Nucleus.Coop.Forms
 
         private void ScriptDownloader_Resize(object sender, EventArgs e)
         {
+            list_Games.BeginUpdate();
             list_Games.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent);
             list_Games.AutoResizeColumns(ColumnHeaderAutoResizeStyle.HeaderSize);
+            list_Games.EndUpdate();
         }
 
         private void list_Games_ColumnClick(object sender, ColumnClickEventArgs e)
@@ -279,6 +364,7 @@ namespace Nucleus.Coop.Forms
             // Perform the sort with these new sort options.
             myListView.Sort();
             myListView.SetSortIcon(e.Column, lvwColumnSorter.Order);
+            myListView.EnsureVisible(0);
         }
 
         private void btn_Info_Click(object sender, EventArgs e)
@@ -369,8 +455,89 @@ namespace Nucleus.Coop.Forms
 
         private void btn_ViewAll_Click(object sender, EventArgs e)
         {
-            txt_Search.Text = "|";
+            grabAll = true;
             btn_Search.PerformClick();
+        }
+
+        private void btn_Prev_Click(object sender, EventArgs e)
+        {
+            entryIndex -= entriesPerPage;
+            if (entryIndex < 0)
+                entryIndex = 0;
+            FetchHandlers(entryIndex);
+        }
+            
+
+        private void btn_Next_Click(object sender, EventArgs e)
+        {
+            entryIndex += entriesPerPage;
+            if (entryIndex > handlers.Count)
+                entryIndex = handlers.Count - entriesPerPage;
+            FetchHandlers(entryIndex);
+        }
+
+        private void cmb_NumResults_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if(cmb_NumResults.SelectedItem.ToString() == "All")
+            {
+                entriesPerPage = 9999;
+            }
+            else
+            {
+                entriesPerPage = Convert.ToInt32(cmb_NumResults.SelectedItem);
+            }
+
+            if (handlers != null && handlers.Count > 0)
+            {
+                FetchHandlers(entryIndex);
+            }
+        }
+
+        private void cmb_Sort_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if(list_Games.Items.Count > 0)
+            {
+                switch (cmb_Sort.SelectedIndex)
+                {
+                    case 0: // Alphabetical
+                        sortColumn = 0;
+                        sortOrder = SortOrder.Ascending;
+                        break;
+                    case 1: // Most Downloaded
+                        sortColumn = 3;
+                        sortOrder = SortOrder.Descending;
+                        break;
+                    case 2: // Most Likes
+                        sortColumn = 4;
+                        sortOrder = SortOrder.Descending;
+                        break;
+                    case 3: // Most Recently Uploaded
+                        sortColumn = 5;
+                        sortOrder = SortOrder.Descending;
+                        break;
+                    case 4: // Most Recently Updated
+                        sortColumn = 6;
+                        sortOrder = SortOrder.Descending;
+                        break;
+                }
+
+                list_Games.EnsureVisible(0);
+
+                lvwColumnSorter.SortColumn = sortColumn;
+                lvwColumnSorter.Order = sortOrder;
+                list_Games.SetSortIcon(sortColumn, lvwColumnSorter.Order);
+
+                list_Games.Sort();
+            }
+        }
+
+        private void list_Games_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if(list_Games.SelectedItems.Count == 1)
+            {
+                btn_Download.Enabled = true;
+                btn_Info.Enabled = true;
+            }
         }
     }
 }
