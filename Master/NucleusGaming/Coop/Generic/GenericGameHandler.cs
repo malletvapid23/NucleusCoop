@@ -1966,7 +1966,7 @@ namespace Nucleus.Gaming
                                 //int increase = i + 1;
                                 string psexecPath = Path.Combine(Directory.GetCurrentDirectory(), "utils\\LaunchUsers\\psexec.exe");
                                 cmd.StandardInput.WriteLine("set path=%path%;" + Path.GetDirectoryName(psexecPath));
-                                string cmdLine = "psexec -h -u nucleusplayer" + (i+1) + " -p 12345 -d -i \"" + exePath + "\" " + startArgs;
+                                string cmdLine = "psexec -accepteula -h -u nucleusplayer" + (i+1) + " -p 12345 -d -i \"" + exePath + "\" " + startArgs;
                                 Log(string.Format("Launching game as different user, through psexec: {0}", cmdLine));
                                 cmd.StandardInput.WriteLine(cmdLine);
                                 //cmd.StartInfo.Arguments = cmdLine;
