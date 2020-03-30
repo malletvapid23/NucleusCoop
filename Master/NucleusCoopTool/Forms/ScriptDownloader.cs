@@ -225,7 +225,7 @@ namespace Nucleus.Coop.Forms
                 imageList.Images.Add(bmp);
                 list_Games.SmallImageList = imageList;
 
-                string[] handlerDisplayCols = { handler.OwnerName, vSymb, handler.DownloadCount, handler.Stars, handler.CreatedAt, handler.UpdatedAt, handler.Description };
+                string[] handlerDisplayCols = { handler.OwnerName, vSymb, handler.DownloadCount, handler.Stars, handler.CreatedAt, handler.UpdatedAt, handler.Description, handler.Id };
                 list_Games.Items.Add(" " + handler.GameName).SubItems.AddRange(handlerDisplayCols);
                 list_Games.Items[i].ImageIndex = i;
 
@@ -264,6 +264,7 @@ namespace Nucleus.Coop.Forms
 
             list_Games.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent);
             list_Games.AutoResizeColumns(ColumnHeaderAutoResizeStyle.HeaderSize);
+            list_Games.Columns[8].Width = 0;
 
             lvwColumnSorter.SortColumn = sortColumn;
             lvwColumnSorter.Order = sortOrder;
@@ -326,6 +327,7 @@ namespace Nucleus.Coop.Forms
             list_Games.BeginUpdate();
             list_Games.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent);
             list_Games.AutoResizeColumns(ColumnHeaderAutoResizeStyle.HeaderSize);
+            list_Games.Columns[8].Width = 0;
             list_Games.EndUpdate();
         }
 
@@ -376,7 +378,7 @@ namespace Nucleus.Coop.Forms
                 Handler handler = null;
                 foreach (Handler hndl in searchHandlers)
                 {
-                    if (list_Games.SelectedItems[0].SubItems[0].Text.EndsWith(hndl.GameName) && list_Games.SelectedItems[0].SubItems[1].Text == hndl.OwnerName)
+                    if (list_Games.SelectedItems[0].SubItems[8].Text == hndl.Id)
                     {
                         handler = hndl;
                         break;
@@ -402,7 +404,7 @@ namespace Nucleus.Coop.Forms
                 Handler handler = null;
                 foreach (Handler hndl in searchHandlers)
                 {
-                    if(list_Games.SelectedItems[0].SubItems[0].Text.EndsWith(hndl.GameName) && list_Games.SelectedItems[0].SubItems[1].Text == hndl.OwnerName)
+                    if (list_Games.SelectedItems[0].SubItems[8].Text == hndl.Id)
                     {
                         handler = hndl;
                         break;
@@ -415,18 +417,18 @@ namespace Nucleus.Coop.Forms
                     return;
                 }
 
-                Regex pattern = new Regex("[\\/:*?\"<>|]");
-                string frmHandleTitle = pattern.Replace(handler.Title, "");
-                if (File.Exists(Path.Combine(Gaming.GameManager.Instance.GetJsScriptsPath(), frmHandleTitle + ".js")))
-                {
-                    DialogResult dialogResult = MessageBox.Show("An existing script with the name " + (frmHandleTitle + ".js") + " already exists. Do you wish to overwrite it?", "Script already exists", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
-                    if (dialogResult != DialogResult.Yes)
-                    {
-                        return;
-                    }
-                }
+                //Regex pattern = new Regex("[\\/:*?\"<>|]");
+                //string frmHandleTitle = pattern.Replace(handler.Title, ""); 
+                //if (File.Exists(Path.Combine(Gaming.GameManager.Instance.GetJsScriptsPath(), frmHandleTitle + ".js")))
+                //{
+                //    DialogResult dialogResult = MessageBox.Show("An existing script with the name " + (frmHandleTitle + ".js") + " already exists. Do you wish to overwrite it?", "Script already exists", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+                //    if (dialogResult != DialogResult.Yes)
+                //    {
+                //        return;
+                //    }
+                //}
 
-                DownloadPrompt downloadPrompt = new DownloadPrompt(handler, mainForm);
+                DownloadPrompt downloadPrompt = new DownloadPrompt(handler, mainForm, null);
                 downloadPrompt.ShowDialog();
             }
         }
@@ -537,6 +539,24 @@ namespace Nucleus.Coop.Forms
             {
                 btn_Download.Enabled = true;
                 btn_Info.Enabled = true;
+            }
+        }
+
+        private void btn_Extract_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog ofd = new OpenFileDialog
+            {
+                Title = "Select a game handler to extract",
+                DefaultExt = "nc",
+                InitialDirectory = Gaming.GameManager.Instance.GetJsScriptsPath(),
+                Filter = "nc files (*.nc)|*.nc"
+            };
+
+            DialogResult result = ofd.ShowDialog();
+            if (result == DialogResult.OK)
+            {
+                DownloadPrompt downloadPrompt = new DownloadPrompt(null, mainForm, ofd.FileName);
+                downloadPrompt.ShowDialog();
             }
         }
     }

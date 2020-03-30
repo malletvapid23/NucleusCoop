@@ -53,15 +53,17 @@
             this.label1 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
             this.cmb_Sort = new System.Windows.Forms.ComboBox();
+            this.id = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.btn_Extract = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // btn_Next
             // 
-            this.btn_Next.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.btn_Next.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
             this.btn_Next.Enabled = false;
             this.btn_Next.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btn_Next.ForeColor = System.Drawing.Color.White;
-            this.btn_Next.Location = new System.Drawing.Point(487, 393);
+            this.btn_Next.Location = new System.Drawing.Point(557, 387);
             this.btn_Next.Name = "btn_Next";
             this.btn_Next.Size = new System.Drawing.Size(184, 35);
             this.btn_Next.TabIndex = 37;
@@ -71,11 +73,11 @@
             // 
             // btn_Prev
             // 
-            this.btn_Prev.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.btn_Prev.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
             this.btn_Prev.Enabled = false;
             this.btn_Prev.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btn_Prev.ForeColor = System.Drawing.Color.White;
-            this.btn_Prev.Location = new System.Drawing.Point(12, 393);
+            this.btn_Prev.Location = new System.Drawing.Point(82, 387);
             this.btn_Prev.Name = "btn_Prev";
             this.btn_Prev.Size = new System.Drawing.Size(184, 35);
             this.btn_Prev.TabIndex = 36;
@@ -99,7 +101,7 @@
             // lbl_Status
             // 
             this.lbl_Status.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.lbl_Status.Location = new System.Drawing.Point(513, 54);
+            this.lbl_Status.Location = new System.Drawing.Point(514, 54);
             this.lbl_Status.Name = "lbl_Status";
             this.lbl_Status.Size = new System.Drawing.Size(295, 24);
             this.lbl_Status.TabIndex = 34;
@@ -119,11 +121,11 @@
             // 
             // btn_Info
             // 
-            this.btn_Info.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.btn_Info.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
             this.btn_Info.Enabled = false;
             this.btn_Info.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btn_Info.ForeColor = System.Drawing.Color.White;
-            this.btn_Info.Location = new System.Drawing.Point(350, 393);
+            this.btn_Info.Location = new System.Drawing.Point(420, 387);
             this.btn_Info.Name = "btn_Info";
             this.btn_Info.Size = new System.Drawing.Size(120, 35);
             this.btn_Info.TabIndex = 32;
@@ -144,14 +146,15 @@
             this.stars,
             this.createdAt,
             this.updatedAt,
-            this.description});
+            this.description,
+            this.id});
             this.list_Games.Font = new System.Drawing.Font("Segoe UI", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.list_Games.FullRowSelect = true;
             this.list_Games.HideSelection = false;
             this.list_Games.Location = new System.Drawing.Point(12, 88);
             this.list_Games.MultiSelect = false;
             this.list_Games.Name = "list_Games";
-            this.list_Games.Size = new System.Drawing.Size(798, 299);
+            this.list_Games.Size = new System.Drawing.Size(798, 293);
             this.list_Games.Sorting = System.Windows.Forms.SortOrder.Ascending;
             this.list_Games.TabIndex = 31;
             this.list_Games.UseCompatibleStateImageBehavior = false;
@@ -215,10 +218,10 @@
             // 
             // btn_Close
             // 
-            this.btn_Close.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.btn_Close.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
             this.btn_Close.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btn_Close.ForeColor = System.Drawing.Color.White;
-            this.btn_Close.Location = new System.Drawing.Point(688, 393);
+            this.btn_Close.Location = new System.Drawing.Point(450, 439);
             this.btn_Close.Name = "btn_Close";
             this.btn_Close.Size = new System.Drawing.Size(120, 35);
             this.btn_Close.TabIndex = 29;
@@ -228,11 +231,11 @@
             // 
             // btn_Download
             // 
-            this.btn_Download.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.btn_Download.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
             this.btn_Download.Enabled = false;
             this.btn_Download.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btn_Download.ForeColor = System.Drawing.Color.White;
-            this.btn_Download.Location = new System.Drawing.Point(213, 393);
+            this.btn_Download.Location = new System.Drawing.Point(283, 387);
             this.btn_Download.Name = "btn_Download";
             this.btn_Download.Size = new System.Drawing.Size(120, 35);
             this.btn_Download.TabIndex = 28;
@@ -271,7 +274,7 @@
             "100",
             "250",
             "All"});
-            this.cmb_NumResults.Location = new System.Drawing.Point(422, 53);
+            this.cmb_NumResults.Location = new System.Drawing.Point(423, 53);
             this.cmb_NumResults.Name = "cmb_NumResults";
             this.cmb_NumResults.Size = new System.Drawing.Size(85, 29);
             this.cmb_NumResults.TabIndex = 38;
@@ -281,7 +284,7 @@
             // 
             this.label1.AutoSize = true;
             this.label1.ForeColor = System.Drawing.Color.White;
-            this.label1.Location = new System.Drawing.Point(290, 56);
+            this.label1.Location = new System.Drawing.Point(291, 56);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(126, 21);
             this.label1.TabIndex = 39;
@@ -292,7 +295,7 @@
             // 
             this.label2.AutoSize = true;
             this.label2.ForeColor = System.Drawing.Color.White;
-            this.label2.Location = new System.Drawing.Point(12, 56);
+            this.label2.Location = new System.Drawing.Point(13, 56);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(63, 21);
             this.label2.TabIndex = 41;
@@ -309,17 +312,36 @@
             "Most Likes",
             "Most Recently Uploaded",
             "Most Recently Updated"});
-            this.cmb_Sort.Location = new System.Drawing.Point(81, 53);
+            this.cmb_Sort.Location = new System.Drawing.Point(82, 53);
             this.cmb_Sort.Name = "cmb_Sort";
             this.cmb_Sort.Size = new System.Drawing.Size(203, 29);
             this.cmb_Sort.TabIndex = 40;
             this.cmb_Sort.SelectedIndexChanged += new System.EventHandler(this.cmb_Sort_SelectedIndexChanged);
             // 
+            // id
+            // 
+            this.id.Text = "id";
+            this.id.Width = 0;
+            // 
+            // btn_Extract
+            // 
+            this.btn_Extract.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
+            this.btn_Extract.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btn_Extract.ForeColor = System.Drawing.Color.White;
+            this.btn_Extract.Location = new System.Drawing.Point(252, 439);
+            this.btn_Extract.Name = "btn_Extract";
+            this.btn_Extract.Size = new System.Drawing.Size(184, 35);
+            this.btn_Extract.TabIndex = 42;
+            this.btn_Extract.Text = "Extract Existing";
+            this.btn_Extract.UseVisualStyleBackColor = true;
+            this.btn_Extract.Click += new System.EventHandler(this.btn_Extract_Click);
+            // 
             // ScriptDownloader
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 21F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(822, 440);
+            this.ClientSize = new System.Drawing.Size(822, 486);
+            this.Controls.Add(this.btn_Extract);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.cmb_Sort);
             this.Controls.Add(this.label1);
@@ -373,5 +395,7 @@
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.ComboBox cmb_Sort;
+        private System.Windows.Forms.ColumnHeader id;
+        private System.Windows.Forms.Button btn_Extract;
     }
 }

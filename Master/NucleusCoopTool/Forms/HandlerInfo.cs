@@ -109,7 +109,7 @@ namespace Nucleus.Coop.Forms
 
         private void btn_Download_Click(object sender, EventArgs e)
         {
-            DownloadPrompt downloadPrompt = new DownloadPrompt(Handler, mainForm);
+            DownloadPrompt downloadPrompt = new DownloadPrompt(Handler, mainForm, null);
             downloadPrompt.ShowDialog();
         }
 
