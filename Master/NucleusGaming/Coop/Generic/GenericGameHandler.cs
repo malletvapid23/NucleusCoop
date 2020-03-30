@@ -396,7 +396,7 @@ namespace Nucleus.Gaming
                         proc.StartInfo.CreateNoWindow = true;
                         proc.StartInfo.UseShellExecute = false;
 
-                        string command = "import " + regFilePath;
+                        string command = "import \"" + regFilePath + "\"";
                         proc.StartInfo.Arguments = command;
                         proc.Start();
 
