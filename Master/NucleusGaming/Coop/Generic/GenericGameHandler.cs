@@ -1449,6 +1449,48 @@ namespace Nucleus.Gaming
                     }
                 }
 
+                if(gen.RunAdditionalFiles?.Length > 0)
+                {
+                    for (int fileIndex = 0; fileIndex < gen.RunAdditionalFiles.Length; fileIndex++)
+                    {
+                        string fileName = gen.RunAdditionalFiles[fileIndex];
+                        if(fileName.Contains('|'))
+                        {
+                            string[] fileNameSplit = fileName.Split('|');
+                            fileName = fileNameSplit[1];
+
+                            if(fileNameSplit[0].ToLower() != "all")
+                            {
+                                if (int.Parse(fileNameSplit[0]) != (i - 1))
+                                {
+                                    continue;
+                                }
+                            }
+                        }
+                        else
+                        {
+                            if(i > 0)
+                            {
+                                continue;
+                            }
+                        }
+                        Log("Running additional file: " + fileName);
+                        Process.Start(fileName);
+
+                        if(fileIndex < (gen.RunAdditionalFiles.Length - 1))
+                        {
+                            Log(string.Format("Pausing for {0} seconds", gen.PauseInbetweenRunFiles));
+                            Thread.Sleep(TimeSpan.FromSeconds(gen.PauseInbetweenRunFiles));
+                        }
+                    }
+                }
+
+                if(gen.PauseBetweenRunFilesAndLaunch > 0)
+                {
+                    Log(string.Format("Pausing for {0} seconds", gen.PauseBetweenRunFilesAndLaunch));
+                    Thread.Sleep(gen.PauseBetweenRunFilesAndLaunch);
+                }
+
                 if ((gen.UserProfileConfigPath?.Length > 0 || gen.ForceUserProfileConfigCopy) && gen.UseNucleusEnvironment)
                 {
                     UserProfileConfigCopy(player);

@@ -193,6 +193,9 @@ namespace Nucleus.Gaming
         public bool LaunchAsDifferentUsers;
         public bool RunLauncherAndExe;
         public int PauseBetweenProcessGrab;
+        public string[] RunAdditionalFiles;
+        public int PauseInbetweenRunFiles = 5;
+        public int PauseBetweenRunFilesAndLaunch;
 
         // -- From USS
         //Effectively a switch for all of USS features
