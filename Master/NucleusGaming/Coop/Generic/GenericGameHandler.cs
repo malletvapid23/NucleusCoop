@@ -476,10 +476,9 @@ namespace Nucleus.Gaming
                     user.Start();
                     user.WaitForExit();
 
-                    if (File.Exists(deleteUserBatPath))
-                    {
-                        File.Delete(deleteUserBatPath);
-                    }
+
+                    Directory.Delete(Path.GetDirectoryName(deleteUserBatPath), true);
+
 
                 }
 
@@ -1888,6 +1887,12 @@ namespace Nucleus.Gaming
                                 {
                                     Log("Creating temporary user accounts for each player, that will be used to launch from");
                                     string createUserBatPath = Path.Combine(Directory.GetCurrentDirectory(), "utils\\LaunchUsers\\create_users.bat");
+
+                                    if(!Directory.Exists(Path.GetDirectoryName(createUserBatPath)))
+                                    {
+                                        Directory.CreateDirectory(Path.GetDirectoryName(createUserBatPath));
+                                    }
+
                                     if (File.Exists(createUserBatPath))
                                     {
                                         File.Delete(createUserBatPath);
@@ -1919,26 +1924,21 @@ namespace Nucleus.Gaming
 
                                 Process cmd = new Process();
                                 cmd.StartInfo.FileName = "cmd.exe";
-                                cmd.StartInfo.RedirectStandardInput = true;
-                                cmd.StartInfo.RedirectStandardOutput = true;
-                                //cmd.StartInfo.CreateNoWindow = true;
-                                cmd.StartInfo.Verb = "runas";
                                 cmd.StartInfo.UseShellExecute = false;
+                                string cmdLine = $"/C runas /savecred /env /user:nucleusplayer{i + 1}" + " \"" + exePath + " " + startArgs + "\"";
+                                cmd.StartInfo.Arguments = cmdLine;
 
+                                if(gen.UseNucleusEnvironment)
+                                {
+                                    var username = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile).Replace(@"C:\Users\", "");
+                                    cmd.StartInfo.EnvironmentVariables["APPDATA"] = $@"C:\Users\{username}\NucleusCoop\{player.Nickname}\AppData\Roaming";
+                                    cmd.StartInfo.EnvironmentVariables["LOCALAPPDATA"] = $@"C:\Users\{username}\NucleusCoop\{player.Nickname}\AppData\Local";
+                                    cmd.StartInfo.EnvironmentVariables["USERPROFILE"] = $@"C:\Users\{username}\NucleusCoop\{player.Nickname}";
+                                    cmd.StartInfo.EnvironmentVariables["HOMEPATH"] = $@"\Users\{username}\NucleusCoop\{player.Nickname}";
+                                }
+
+                                Log(string.Format("Launching game as different user, using command: {0}", cmdLine));
                                 cmd.Start();
-                                
-                                //int increase = i + 1;
-                                string psexecPath = Path.Combine(Directory.GetCurrentDirectory(), "utils\\LaunchUsers\\psexec.exe");
-                                cmd.StandardInput.WriteLine("set path=%path%;" + Path.GetDirectoryName(psexecPath));
-                                string cmdLine = "psexec -accepteula -h -u nucleusplayer" + (i+1) + " -p 12345 -d -i \"" + exePath + "\" " + startArgs;
-                                Log(string.Format("Launching game as different user, through psexec: {0}", cmdLine));
-                                cmd.StandardInput.WriteLine(cmdLine);
-                                //cmd.StartInfo.Arguments = cmdLine;
-
-                                //cmd.Start();
-                                //cmd.WaitForExit();
-                                cmd.StandardInput.Flush();
-                                cmd.StandardInput.Close();
                                 cmd.WaitForExit();
 
                                 proc = null;
