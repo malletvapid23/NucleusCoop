@@ -183,7 +183,10 @@ namespace Nucleus.Inject
 			var rawHidBytes = Encoding.Unicode.GetBytes(rawHid);
 			int rawHidBytesLength = rawHidBytes.Length;
 
-			int size = 44 + logPathLength + targetsBytesLength + rawHidBytesLength;
+			var playerNickBytes = Encoding.Unicode.GetBytes(playerNick);
+			int playerNickLength = playerNickBytes.Length;
+
+			int size = 48 + logPathLength + targetsBytesLength + rawHidBytesLength + playerNickLength;
 			var data = new byte[size];
 			data[0] = hookWindow == true ? (byte) 1 : (byte) 0;
 			data[1] = renameMutex == true ? (byte) 1 : (byte) 0;
@@ -227,11 +230,18 @@ namespace Nucleus.Inject
 			data[32] = (byte)(posy >> 8);
 			data[33] = (byte)posy;
 
-			Array.Copy(logPath, 0, data, 34, logPathLength);
+			data[34] = (byte)(playerNickLength >> 24);
+			data[35] = (byte)(playerNickLength >> 16);
+			data[36] = (byte)(playerNickLength >> 8);
+			data[37] = (byte)playerNickLength;
 
-			Array.Copy(targetsBytes, 0, data, 35 + logPathLength, targetsBytesLength);
+			Array.Copy(logPath, 0, data, 38, logPathLength);
 
-			Array.Copy(rawHidBytes, 0, data, 36 + logPathLength + targetsBytesLength, rawHidBytesLength);
+			Array.Copy(targetsBytes, 0, data, 39 + logPathLength, targetsBytesLength);
+
+			Array.Copy(rawHidBytes, 0, data, 40 + logPathLength + targetsBytesLength, rawHidBytesLength);
+
+			Array.Copy(playerNickBytes, 0, data, 41 + logPathLength + targetsBytesLength + rawHidBytesLength, playerNickLength);
 
 			IntPtr ptr = Marshal.AllocHGlobal(size);
 			Marshal.Copy(data, 0, ptr, size);
