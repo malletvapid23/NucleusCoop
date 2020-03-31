@@ -427,7 +427,7 @@ namespace Nucleus.Gaming
 
             if(!earlyExit)
             {
-                if (gen.LaunchAsDifferentUsers)
+                if (gen.LaunchAsDifferentUsers || gen.LaunchAsDifferentUsersAlt)
                 {
                     Log("Deleting temporary user accounts");
 
@@ -477,7 +477,10 @@ namespace Nucleus.Gaming
                     user.WaitForExit();
 
 
-                    Directory.Delete(Path.GetDirectoryName(deleteUserBatPath), true);
+                    if (File.Exists(deleteUserBatPath))
+                    {
+                        File.Delete(deleteUserBatPath);
+                    }
 
 
                 }
@@ -1828,7 +1831,7 @@ namespace Nucleus.Gaming
 
                     if (!gen.ThirdPartyLaunch)
                     {
-                        if (/*context.KillMutex?.Length > 0 || */(gen.HookInit || (gen.RenameNotKillMutex && context.KillMutex?.Length > 0) || gen.SetWindowHookStart || gen.BlockRawInput || gen.CreateSingleDeviceFile) && !gen.CMDLaunch && !gen.UseForceBindIP && !gen.LaunchAsDifferentUsers) /*|| (gen.CMDLaunch && i==0))*/
+                        if (/*context.KillMutex?.Length > 0 || */(gen.HookInit || (gen.RenameNotKillMutex && context.KillMutex?.Length > 0) || gen.SetWindowHookStart || gen.BlockRawInput || gen.CreateSingleDeviceFile) && !gen.CMDLaunch && !gen.UseForceBindIP && !gen.LaunchAsDifferentUsers && !gen.LaunchAsDifferentUsersAlt) /*|| (gen.CMDLaunch && i==0))*/
                         {
 
                             string mu = "";
@@ -1879,7 +1882,7 @@ namespace Nucleus.Gaming
                         }
                         else
                         {
-                            if (gen.LaunchAsDifferentUsers)
+                            if (gen.LaunchAsDifferentUsers || gen.LaunchAsDifferentUsersAlt)
                             {
                                 //create users OR reset their password if they exists.
                                 
@@ -1887,11 +1890,6 @@ namespace Nucleus.Gaming
                                 {
                                     Log("Creating temporary user accounts for each player, that will be used to launch from");
                                     string createUserBatPath = Path.Combine(Directory.GetCurrentDirectory(), "utils\\LaunchUsers\\create_users.bat");
-
-                                    if(!Directory.Exists(Path.GetDirectoryName(createUserBatPath)))
-                                    {
-                                        Directory.CreateDirectory(Path.GetDirectoryName(createUserBatPath));
-                                    }
 
                                     if (File.Exists(createUserBatPath))
                                     {
@@ -1923,9 +1921,23 @@ namespace Nucleus.Gaming
                                 Thread.Sleep(1000);
 
                                 Process cmd = new Process();
-                                cmd.StartInfo.FileName = "cmd.exe";
+                                
                                 cmd.StartInfo.UseShellExecute = false;
-                                string cmdLine = $"/C runas /savecred /env /user:nucleusplayer{i + 1}" + " \"" + exePath + " " + startArgs + "\"";
+                                cmd.StartInfo.Verb = "runas";
+                                string cmdLine;
+                                if (!gen.LaunchAsDifferentUsersAlt)
+                                {
+                                    cmd.StartInfo.FileName = "cmd.exe";
+                                    cmdLine = $"elevate /C runas /savecred /env /user:nucleusplayer{i + 1}" + " \"" + exePath + " " + startArgs + "\"";
+                                }
+                                else
+                                {
+                                    string psexecPath = Path.Combine(Directory.GetCurrentDirectory(), "utils\\LaunchUsers\\psexec.exe");
+                                    cmd.StartInfo.FileName = psexecPath;
+                                    cmdLine = $"-accepteula -e -h -u nucleusplayer{i + 1} -p 12345 -d -i \"" + exePath + "\" " + startArgs;
+                                    cmd.StartInfo.EnvironmentVariables["PATH"] += (";" + Path.GetDirectoryName(psexecPath));
+                                }
+                                
                                 cmd.StartInfo.Arguments = cmdLine;
 
                                 if(gen.UseNucleusEnvironment)

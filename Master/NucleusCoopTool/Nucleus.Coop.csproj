@@ -480,6 +480,7 @@
     <Content Include="copyoutput\utils\GoldbergEmu\tools\generate_interfaces_file.exe" />
     <Content Include="copyoutput\utils\GoldbergEmu\tools\Readme_generate_interfaces.txt" />
     <None Include="Resources\setting.png" />
+    <Content Include="copyoutput\utils\LaunchUsers\PsExec.exe" />
     <Content Include="copyoutput\utils\SmartSteamEmu\SmartSteamEmu.dll" />
     <Content Include="copyoutput\utils\SmartSteamEmu\SmartSteamEmu.txt" />
     <Content Include="copyoutput\utils\SmartSteamEmu\SmartSteamEmu64.dll" />
