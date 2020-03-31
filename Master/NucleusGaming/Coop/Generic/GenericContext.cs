@@ -12,6 +12,7 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Xml;
 
 namespace Nucleus.Gaming
@@ -307,6 +308,102 @@ namespace Nucleus.Gaming
             //set { }
 
             get; set;
+        }
+
+        public void RunAdditionalFiles(string[] filePaths, bool changeWorkingDir, int secondsToPauseInbetween)
+        {
+            for (int fileIndex = 0; fileIndex<filePaths.Length; fileIndex++)
+            {
+                string fileName = filePaths[fileIndex];
+                if(fileName.Contains('|'))
+                {
+                    string[] fileNameSplit = fileName.Split('|');
+                    fileName = fileNameSplit[1];
+
+                    if(fileNameSplit[0].ToLower() != "all")
+                    {
+                        if (int.Parse(fileNameSplit[0]) != (pInfo.PlayerID - 1))
+                        {
+                            continue;
+                        }
+                    }
+}
+                else
+                {
+                    if(pInfo.PlayerID > 0)
+                    {
+                        continue;
+                    }
+                }
+                ProcessStartInfo psi = new ProcessStartInfo();
+                psi.FileName = fileName;
+                psi.UseShellExecute = false;
+                if(changeWorkingDir)
+                {
+                    psi.WorkingDirectory = GameManager.Instance.GetAppContentPath() + "\\AdditionalFiles";
+                }
+                else
+                {
+                    psi.WorkingDirectory = Path.GetDirectoryName(fileName);
+                }
+
+                Process.Start(psi);
+
+                if(fileIndex<(filePaths.Length - 1) && secondsToPauseInbetween > 0)
+                {
+                    Thread.Sleep(TimeSpan.FromSeconds(secondsToPauseInbetween));
+                }
+            }
+        }
+
+        public void RunAdditionalFiles(string[] filePaths, bool changeWorkingDir, int secondsToPauseInbetween, bool runAsAdmin)
+        {
+            for (int fileIndex = 0; fileIndex < filePaths.Length; fileIndex++)
+            {
+                string fileName = filePaths[fileIndex];
+                if (fileName.Contains('|'))
+                {
+                    string[] fileNameSplit = fileName.Split('|');
+                    fileName = fileNameSplit[1];
+
+                    if (fileNameSplit[0].ToLower() != "all")
+                    {
+                        if (int.Parse(fileNameSplit[0]) != (pInfo.PlayerID - 1))
+                        {
+                            continue;
+                        }
+                    }
+                }
+                else
+                {
+                    if (pInfo.PlayerID > 0)
+                    {
+                        continue;
+                    }
+                }
+                ProcessStartInfo psi = new ProcessStartInfo();
+                psi.FileName = fileName;
+                psi.UseShellExecute = false;
+                if (changeWorkingDir)
+                {
+                    psi.WorkingDirectory = GameManager.Instance.GetAppContentPath() + "\\AdditionalFiles";
+                }
+                else
+                {
+                    psi.WorkingDirectory = Path.GetDirectoryName(fileName);
+                }
+                if(runAsAdmin)
+                {
+                    psi.Verb = "runas";
+                }
+
+                Process.Start(psi);
+
+                if (fileIndex < (filePaths.Length - 1) && secondsToPauseInbetween > 0)
+                {
+                    Thread.Sleep(TimeSpan.FromSeconds(secondsToPauseInbetween));
+                }
+            }
         }
 
         static int GCD(int a, int b)
