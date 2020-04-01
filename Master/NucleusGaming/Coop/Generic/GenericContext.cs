@@ -394,6 +394,7 @@ namespace Nucleus.Gaming
                 }
                 if(runAsAdmin)
                 {
+                    psi.UseShellExecute = true;
                     psi.Verb = "runas";
                 }
 
