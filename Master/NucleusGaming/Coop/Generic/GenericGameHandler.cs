@@ -845,7 +845,7 @@ namespace Nucleus.Gaming
                     Log(string.Format("Mutexes - Handle(s): ({0}), KillMutexDelay: {1}, KillMutexType: {2}, RenameNotKillMutex: {3}, PartialMutexSearch: {4}", mutexList, gen.KillMutexDelay, gen.KillMutexType, gen.RenameNotKillMutex, gen.PartialMutexSearch));
                 }
 
-                Log("NucleusCoop mod version: 0.9.9.9 r3");
+                Log("NucleusCoop mod version: 0.9.9.9 r4");
                 string pcSpecs = "PC Info - ";
                 var name = (from x in new ManagementObjectSearcher("SELECT Caption FROM Win32_OperatingSystem").Get().Cast<ManagementObject>()
                             select x.GetPropertyValue("Caption")).FirstOrDefault();
@@ -1287,20 +1287,38 @@ namespace Nucleus.Gaming
                     }
                     if (gen.DirSymlinkCopyInstead != null)
                     {
-                        Log(gen.DirSymlinkCopyInstead.Length + " directories and all its contents in Game.DirSymlinkCopyInstead will be copied instead of symlinked");
+                        Log(gen.DirSymlinkCopyInstead.Length + " Directories and all its contents in Game.DirSymlinkCopyInstead will be copied instead of symlinked");
                         string[] dirSymlinkCopyInstead = gen.DirSymlinkCopyInstead;
+
+                        SearchOption toSearch = SearchOption.TopDirectoryOnly;
+                        if (gen.DirSymlinkCopyInsteadIncludeSubFolders)
+                        {
+                            toSearch = SearchOption.AllDirectories;
+                        }
+
                         for (int k = 0; k < dirSymlinkCopyInstead.Length; k++)
                         {
-                            string[] files = Directory.GetFiles(Path.Combine(rootFolder, dirSymlinkCopyInstead[k]), "*", SearchOption.TopDirectoryOnly);
+                            dirExclusions.Add(dirSymlinkCopyInstead[k].ToLower());
+
+                            if (gen.DirSymlinkCopyInsteadIncludeSubFolders)
+                            {
+                                foreach (string dir in Directory.GetDirectories(Path.Combine(rootFolder, dirSymlinkCopyInstead[k]), "*", SearchOption.AllDirectories))
+                                {
+                                    int extraChar = 1;
+                                    if(rootFolder.EndsWith("\\"))
+                                    {
+                                        extraChar = 0;
+                                    }
+                                    dirExclusions.Add(dir.Substring(rootFolder.Length + extraChar).ToLower());
+                                }
+                            }
+
+                            string[] files = Directory.GetFiles(Path.Combine(rootFolder, dirSymlinkCopyInstead[k]), "*", toSearch);
 
                             foreach (string s in files)
                             {
                                 fileCopies.Add(Path.GetFileName(s).ToLower());
                             }
-
-                            //string s = dirSymlinkCopyInstead[k];
-                            // make sure it's lower case
-                            //fileCopies.Add(s.ToLower());
                         }
                     }
 

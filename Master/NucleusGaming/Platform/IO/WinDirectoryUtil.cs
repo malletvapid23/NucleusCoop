@@ -1,5 +1,6 @@
 ﻿using Nucleus.Gaming.Platform.Windows.Interop;
 using System;
+using System.Diagnostics;
 using System.IO;
 
 namespace Nucleus.Gaming.Platform.Windows.IO
@@ -21,6 +22,22 @@ namespace Nucleus.Gaming.Platform.Windows.IO
         //        }
         //    }
         //}
+
+
+        private static readonly IniFile
+            ini = new IniFile(Path.Combine(Directory.GetCurrentDirectory(), "Settings.ini"));
+
+        private static void Log(string logMessage)
+        {
+            if (ini.IniReadValue("Misc", "DebugLog") == "True")
+            {
+                using (StreamWriter writer = new StreamWriter("debug-log.txt", true))
+                {
+                    writer.WriteLine($"[{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}]INJECT: {logMessage}");
+                    writer.Close();
+                }
+            }
+        }
 
 
         public static void LinkFiles(string rootFolder, string destination, out int exitCode, string[] exclusions, string[] copyInstead, bool hardLink)
@@ -111,6 +128,7 @@ namespace Nucleus.Gaming.Platform.Windows.IO
             bool special = false;
             bool skip = false;
 
+
             if (!string.IsNullOrEmpty(dirExclusions[0]))
             {
                 for (int j = 0; j < dirExclusions.Length; j++)
@@ -164,10 +182,8 @@ namespace Nucleus.Gaming.Platform.Windows.IO
                     Directory.CreateDirectory(destination);
                 }
 
-
                 //CmdUtil.LinkFiles(currentDir.FullName, destination, out exitCode, fileExclusions, fileCopyInstead, true);
                 WinDirectoryUtil.LinkFiles(currentDir.FullName, destination, out exitCode, fileExclusions, fileCopyInstead, hardLink);
-
 
                 DirectoryInfo[] children = currentDir.GetDirectories();
                 for (int i = 0; i < children.Length; i++)

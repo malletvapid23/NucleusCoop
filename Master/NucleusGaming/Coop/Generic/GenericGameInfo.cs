@@ -194,6 +194,7 @@ namespace Nucleus.Gaming
         public bool RunLauncherAndExe;
         public int PauseBetweenProcessGrab;
         public int PauseBetweenContextAndLaunch;
+        public bool DirSymlinkCopyInsteadIncludeSubFolders;
         public bool LaunchAsDifferentUsersAlt;
 
         // -- From USS
