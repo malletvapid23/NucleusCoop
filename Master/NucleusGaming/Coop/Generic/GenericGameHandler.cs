@@ -1636,7 +1636,10 @@ namespace Nucleus.Gaming
                     UseFlawlessWidescreen(i);
                 }
 
-                gen.PrePlay(context, this, player);
+                if(!gen.GamePlayAfterLaunch)
+                {
+                    gen.PrePlay(context, this, player);
+                }
 
                 if (gen.PauseBetweenContextAndLaunch > 0)
                 {
@@ -2261,6 +2264,10 @@ namespace Nucleus.Gaming
                 }
 
                 if(gen.ProcessChangesAtEnd)
+                if (gen.GamePlayAfterLaunch)
+                {
+                    gen.PrePlay(context, this, player);
+                }
                 {
                     if(i == (players.Count - 1))
                     {
