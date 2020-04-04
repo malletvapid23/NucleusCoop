@@ -980,28 +980,65 @@ namespace Nucleus.Gaming
 
         public void DeleteRegKey(string baseKey, string sKey, string subKey)
         {
+            if (baseKey != "HKEY_LOCAL_MACHINE" && baseKey != "HKEY_CURRENT_USER" && baseKey != "HKEY_USERS")
+            {
+                return;
+            }
+
+            RegistryKey key = null;
+            switch (baseKey)
+            {
+                case "HKEY_LOCAL_MACHINE":
+                    key = Registry.LocalMachine.OpenSubKey(sKey, true);
+                    break;
+                case "HKEY_CURRENT_USER":
+                    key = Registry.CurrentUser.OpenSubKey(sKey, true);
+                    break;
+                case "HKEY_USERS":
+                    key = Registry.Users.OpenSubKey(sKey, true);
+                    break;
+            }
+
             string fullKeyPath = baseKey + "\\" + sKey;
-            if (!regKeyPaths.Contains(fullKeyPath))
+            if (!regKeyPaths.Contains(fullKeyPath) && key != null)
             {
                 regKeyPaths.Add(fullKeyPath);
                 ExportRegistry(baseKey + "\\" + sKey, Directory.GetCurrentDirectory() + "\\utils\\backup\\" + sKey.Substring(sKey.LastIndexOf('\\') + 1) + ".reg");
             }
 
-            if (baseKey == "HKEY_LOCAL_MACHINE" || baseKey == "HKEY_CURRENT_USER")
+            key.DeleteSubKey(subKey);
+            key.Close();
+        }
+
+        public string ReadRegKey(string baseKey, string sKey, string subKey)
+        {
+            if (baseKey != "HKEY_LOCAL_MACHINE" && baseKey != "HKEY_CURRENT_USER" && baseKey != "HKEY_USERS")
             {
-                if (baseKey == "HKEY_LOCAL_MACHINE")
-                {
-                    RegistryKey key = Registry.LocalMachine.OpenSubKey(sKey, true);
-                    key.DeleteSubKey(subKey);
-                    key.Close();
-                }
-                else
-                {
-                    RegistryKey key = Registry.CurrentUser.OpenSubKey(sKey, true);
-                    key.DeleteSubKey(subKey);
-                    key.Close();
-                }
+                return string.Empty;
             }
+
+            RegistryKey key = null;
+            switch (baseKey)
+            {
+                case "HKEY_LOCAL_MACHINE":
+                    key = Registry.LocalMachine.OpenSubKey(sKey);
+                    break;
+                case "HKEY_CURRENT_USER":
+                    key = Registry.CurrentUser.OpenSubKey(sKey);
+                    break;
+                case "HKEY_USERS":
+                    key = Registry.Users.OpenSubKey(sKey);
+                    break;
+            }
+
+            if(key != null)
+            {
+                return key.GetValue(subKey).ToString();
+            }
+            else
+            {
+                return null;
+            }   
         }
 
         public void EditRegKey(string baseKey, string sKey, string subKey, object value, RegType regType)
@@ -1016,53 +1053,60 @@ namespace Nucleus.Gaming
             //String = 1,
             //Unknown = 0
 
+            if ((baseKey != "HKEY_LOCAL_MACHINE" && baseKey != "HKEY_CURRENT_USER" && baseKey != "HKEY_USERS") || value == null)
+            {
+                return;
+            }
+
+            string val = value.ToString();
+
+            RegistryKey key = null;
+            switch (baseKey)
+            {
+                case "HKEY_LOCAL_MACHINE":
+                    key = Registry.LocalMachine.OpenSubKey(sKey, true);
+                    break;
+                case "HKEY_CURRENT_USER":
+                    key = Registry.CurrentUser.OpenSubKey(sKey, true);
+                    break;
+                case "HKEY_USERS":
+                    key = Registry.Users.OpenSubKey(sKey, true);
+                    break;
+            }
+
             string fullKeyPath = baseKey + "\\" + sKey;
-            if(!regKeyPaths.Contains(fullKeyPath))
+            if (!regKeyPaths.Contains(fullKeyPath) && key != null)
             {
                 regKeyPaths.Add(fullKeyPath);
                 ExportRegistry(baseKey + "\\" + sKey, Directory.GetCurrentDirectory() + "\\utils\\backup\\" + sKey.Substring(sKey.LastIndexOf('\\') + 1) + ".reg");
             }
 
+            if(key == null)
+            {
+                switch (baseKey)
+                {
+                    case "HKEY_LOCAL_MACHINE":
+                        key = Registry.LocalMachine.CreateSubKey(sKey, true);
+                        break;
+                    case "HKEY_CURRENT_USER":
+                        key = Registry.CurrentUser.CreateSubKey(sKey, true);
+                        break;
+                    case "HKEY_USERS":
+                        key = Registry.Users.CreateSubKey(sKey, true);
+                        break;
+                }
+            }
+
             if (regType == RegType.Binary)
             {
-                string val = value.ToString();
                 byte[] bytes = Encoding.UTF8.GetBytes(val);
-                if (baseKey == "HKEY_LOCAL_MACHINE" || baseKey == "HKEY_CURRENT_USER")
-                {
-                    if (baseKey == "HKEY_LOCAL_MACHINE")
-                    {
-                        RegistryKey key = Registry.LocalMachine.OpenSubKey(sKey, true);
-                        key.SetValue(subKey, bytes, (RegistryValueKind)(int)regType);
-                        key.Close();
-                    }
-                    else
-                    {
-                        RegistryKey key = Registry.CurrentUser.OpenSubKey(sKey, true);
-                        key.SetValue(subKey, bytes, (RegistryValueKind)(int)regType);
-                        key.Close();
-                    }
-
-                }
+                key.SetValue(subKey, bytes, (RegistryValueKind)(int)regType);
             }
             else
             {
-                if (baseKey == "HKEY_LOCAL_MACHINE" || baseKey == "HKEY_CURRENT_USER")
-                {
-                    if (baseKey == "HKEY_LOCAL_MACHINE")
-                    {
-                        RegistryKey key = Registry.LocalMachine.OpenSubKey(sKey, true);
-                        key.SetValue(subKey, value, (RegistryValueKind)(int)regType);
-                        key.Close();
-                    }
-                    else
-                    {
-                        RegistryKey key = Registry.CurrentUser.OpenSubKey(sKey, true);
-                        key.SetValue(subKey, value, (RegistryValueKind)(int)regType);
-                        key.Close();
-                    }
-
-                }
+                key.SetValue(subKey, value, (RegistryValueKind)(int)regType);
             }
+            key.Close();
         }
 
         public void KillProcessesMatchingWindowName(string name)
