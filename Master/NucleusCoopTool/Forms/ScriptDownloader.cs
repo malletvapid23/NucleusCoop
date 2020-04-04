@@ -471,6 +471,8 @@ namespace Nucleus.Coop.Forms
             entryIndex -= entriesPerPage;
             if (entryIndex < 0)
                 entryIndex = 0;
+
+            chkBox_Verified.Checked = false;
             FetchHandlers(entryIndex);
         }
             
@@ -480,6 +482,8 @@ namespace Nucleus.Coop.Forms
             entryIndex += entriesPerPage;
             if (entryIndex > handlers.Count)
                 entryIndex = handlers.Count - entriesPerPage;
+
+            chkBox_Verified.Checked = false;
             FetchHandlers(entryIndex);
         }
 
@@ -496,6 +500,7 @@ namespace Nucleus.Coop.Forms
 
             if (handlers != null && handlers.Count > 0)
             {
+                chkBox_Verified.Checked = false;
                 FetchHandlers(entryIndex);
             }
         }
