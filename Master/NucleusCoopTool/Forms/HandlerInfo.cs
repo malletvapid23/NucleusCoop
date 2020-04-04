@@ -53,17 +53,24 @@ namespace Nucleus.Coop.Forms
             
             txt_AuthDesc.Text = Handler.Description;
 
+            Bitmap bmp = new Bitmap(Properties.Resources.no_image);
             string _cover = $@"https://images.igdb.com/igdb/image/upload/t_cover_small/{Handler.GameCover}.jpg";
             ServicePointManager.Expect100Continue = true;
             ServicePointManager.SecurityProtocol = (SecurityProtocolType)3072;
 
-            WebRequest request = WebRequest.Create(_cover);
-            WebResponse resp = request.GetResponse();
-            Stream respStream = resp.GetResponseStream();
-            Bitmap bmp = new Bitmap(respStream);
-            respStream.Dispose();
 
+            try
+            {
+                WebRequest request = WebRequest.Create(_cover);
+                WebResponse resp = request.GetResponse();
+                Stream respStream = resp.GetResponseStream();
+                bmp = new Bitmap(respStream);
+                respStream.Dispose();
+            }
+            catch (Exception) { }
+                
             pic_GameCover.Image = bmp;
+            
 
             string rawComments = Get(api + "comments/" + Handler.Id);
             if (rawComments != "{}")

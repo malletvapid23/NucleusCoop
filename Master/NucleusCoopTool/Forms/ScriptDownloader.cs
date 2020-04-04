@@ -214,13 +214,18 @@ namespace Nucleus.Coop.Forms
                     vSymb = string.Empty;
                 }
 
+                Bitmap bmp = new Bitmap(Properties.Resources.no_image);
                 string _cover = $@"https://images.igdb.com/igdb/image/upload/t_micro/{handler.GameCover}.jpg";
 
-                WebRequest request = WebRequest.Create(_cover);
-                WebResponse resp = request.GetResponse();
-                Stream respStream = resp.GetResponseStream();
-                Bitmap bmp = new Bitmap(respStream);
-                respStream.Dispose();
+                try
+                {
+                    WebRequest request = WebRequest.Create(_cover);
+                    WebResponse resp = request.GetResponse();
+                    Stream respStream = resp.GetResponseStream();
+                    bmp = new Bitmap(respStream);
+                    respStream.Dispose();
+                }
+                catch (Exception) { }
 
                 imageList.Images.Add(bmp);
                 list_Games.SmallImageList = imageList;
