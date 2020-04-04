@@ -1098,7 +1098,7 @@ namespace Nucleus.Gaming
                 }
                 
 
-                if (i > 0 && (gen.HookFocus || gen.SetWindowHook || gen.HideCursor || gen.PreventWindowDeactivation || gen.SupportsMultipleKeyboardsAndMice))
+                if (i > 0 && !gen.ProcessChangesAtEnd && (gen.HookFocus || gen.SetWindowHook || gen.HideCursor || gen.PreventWindowDeactivation || gen.SupportsMultipleKeyboardsAndMice))
                 {
                     if(gen.PreventWindowDeactivation && !isPrevent)
                     {
