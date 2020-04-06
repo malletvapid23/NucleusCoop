@@ -1014,6 +1014,15 @@ void installFindMutexHooks(LPCWSTR targets)
 		while ((endIndex = target_s.find(splitter, startIndex)) < target_s.size())
 		{
 			std::wstring sub = target_s.substr(startIndex, endIndex - startIndex);
+
+			size_t found = sub.find('|');
+
+			if (found != std::string::npos) {
+				startIndex += found + 1;
+			}
+
+			sub = target_s.substr(startIndex, endIndex - startIndex);
+
 			if (IsDebug)
 			{
 				outfile.open(nucleusFolder + logFile, std::ios_base::app);
@@ -1028,6 +1037,14 @@ void installFindMutexHooks(LPCWSTR targets)
 		{
 			//No splitters in string
 			std::wstring sub = target_s.substr(startIndex);
+
+			size_t found = sub.find('|');
+			if (found != std::string::npos) {
+				startIndex += found + 1;
+			}
+
+			sub = target_s.substr(startIndex, endIndex - startIndex);
+
 			if (IsDebug)
 			{
 				outfile.open(nucleusFolder + logFile, std::ios_base::app);
