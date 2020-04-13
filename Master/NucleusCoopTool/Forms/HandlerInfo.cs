@@ -55,9 +55,13 @@ namespace Nucleus.Coop.Forms
 
             Bitmap bmp = new Bitmap(Properties.Resources.no_image);
             string _cover = $@"https://images.igdb.com/igdb/image/upload/t_cover_small/{Handler.GameCover}.jpg";
-            ServicePointManager.Expect100Continue = true;
-            ServicePointManager.SecurityProtocol = (SecurityProtocolType)3072;
 
+            ServicePointManager.Expect100Continue = true;
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls
+                    | SecurityProtocolType.Tls11
+                    | SecurityProtocolType.Tls12
+                    | SecurityProtocolType.Ssl3;
+            ServicePointManager.ServerCertificateValidationCallback = (snder, cert, chain, error) => true;
 
             try
             {

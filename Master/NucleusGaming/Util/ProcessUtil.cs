@@ -190,6 +190,7 @@ namespace Nucleus
                     Log(string.Format("The mutex '{0}' was not found in the process '{1}'", mutexName, process.MainWindowTitle));
                 }
             }
+            Log(string.Format("The mutex '{0}' was not found in the process '{1}'", mutexName, process.MainWindowTitle));
             return false;
         }
 

@@ -30,6 +30,7 @@
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Settings));
             this.groupBox4 = new System.Windows.Forms.GroupBox();
+            this.statusCheck = new System.Windows.Forms.CheckBox();
             this.cmb_Lang = new System.Windows.Forms.ComboBox();
             this.label34 = new System.Windows.Forms.Label();
             this.cmb_Network = new System.Windows.Forms.ComboBox();
@@ -135,6 +136,7 @@
             // 
             // groupBox4
             // 
+            this.groupBox4.Controls.Add(this.statusCheck);
             this.groupBox4.Controls.Add(this.cmb_Lang);
             this.groupBox4.Controls.Add(this.label34);
             this.groupBox4.Controls.Add(this.cmb_Network);
@@ -144,10 +146,20 @@
             this.groupBox4.ForeColor = System.Drawing.Color.White;
             this.groupBox4.Location = new System.Drawing.Point(422, 490);
             this.groupBox4.Name = "groupBox4";
-            this.groupBox4.Size = new System.Drawing.Size(403, 165);
+            this.groupBox4.Size = new System.Drawing.Size(403, 219);
             this.groupBox4.TabIndex = 23;
             this.groupBox4.TabStop = false;
             this.groupBox4.Text = "Miscellaneous";
+            // 
+            // statusCheck
+            // 
+            this.statusCheck.AutoSize = true;
+            this.statusCheck.Location = new System.Drawing.Point(19, 169);
+            this.statusCheck.Name = "statusCheck";
+            this.statusCheck.Size = new System.Drawing.Size(176, 25);
+            this.statusCheck.TabIndex = 65;
+            this.statusCheck.Text = "Show Status Window";
+            this.statusCheck.UseVisualStyleBackColor = true;
             // 
             // cmb_Lang
             // 
@@ -182,7 +194,7 @@
             "Thai",
             "Turkish",
             "Ukrainian"});
-            this.cmb_Lang.Location = new System.Drawing.Point(149, 27);
+            this.cmb_Lang.Location = new System.Drawing.Point(149, 39);
             this.cmb_Lang.MaxDropDownItems = 10;
             this.cmb_Lang.Name = "cmb_Lang";
             this.cmb_Lang.Size = new System.Drawing.Size(232, 29);
@@ -191,7 +203,7 @@
             // label34
             // 
             this.label34.AutoSize = true;
-            this.label34.Location = new System.Drawing.Point(15, 30);
+            this.label34.Location = new System.Drawing.Point(15, 42);
             this.label34.Name = "label34";
             this.label34.Size = new System.Drawing.Size(128, 21);
             this.label34.TabIndex = 63;
@@ -204,7 +216,7 @@
             this.cmb_Network.FormattingEnabled = true;
             this.cmb_Network.Items.AddRange(new object[] {
             "Automatic"});
-            this.cmb_Network.Location = new System.Drawing.Point(102, 121);
+            this.cmb_Network.Location = new System.Drawing.Point(102, 72);
             this.cmb_Network.MaxDropDownItems = 10;
             this.cmb_Network.Name = "cmb_Network";
             this.cmb_Network.Size = new System.Drawing.Size(279, 29);
@@ -215,7 +227,7 @@
             // label32
             // 
             this.label32.AutoSize = true;
-            this.label32.Location = new System.Drawing.Point(15, 124);
+            this.label32.Location = new System.Drawing.Point(15, 75);
             this.label32.Name = "label32";
             this.label32.Size = new System.Drawing.Size(73, 21);
             this.label32.TabIndex = 61;
@@ -225,7 +237,7 @@
             // debugLogCheck
             // 
             this.debugLogCheck.AutoSize = true;
-            this.debugLogCheck.Location = new System.Drawing.Point(19, 93);
+            this.debugLogCheck.Location = new System.Drawing.Point(19, 138);
             this.debugLogCheck.Name = "debugLogCheck";
             this.debugLogCheck.Size = new System.Drawing.Size(155, 25);
             this.debugLogCheck.TabIndex = 0;
@@ -235,7 +247,7 @@
             // useNicksCheck
             // 
             this.useNicksCheck.AutoSize = true;
-            this.useNicksCheck.Location = new System.Drawing.Point(19, 62);
+            this.useNicksCheck.Location = new System.Drawing.Point(19, 107);
             this.useNicksCheck.Name = "useNicksCheck";
             this.useNicksCheck.Size = new System.Drawing.Size(200, 25);
             this.useNicksCheck.TabIndex = 20;
@@ -374,7 +386,7 @@
             this.btn_credits.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.btn_credits.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btn_credits.ForeColor = System.Drawing.Color.White;
-            this.btn_credits.Location = new System.Drawing.Point(358, 694);
+            this.btn_credits.Location = new System.Drawing.Point(358, 758);
             this.btn_credits.Name = "btn_credits";
             this.btn_credits.Size = new System.Drawing.Size(120, 35);
             this.btn_credits.TabIndex = 21;
@@ -391,14 +403,14 @@
             this.groupBox2.ForeColor = System.Drawing.Color.White;
             this.groupBox2.Location = new System.Drawing.Point(12, 182);
             this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(403, 473);
+            this.groupBox2.Size = new System.Drawing.Size(403, 527);
             this.groupBox2.TabIndex = 20;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Controllers";
             // 
             // keyboardNick
             // 
-            this.keyboardNick.Location = new System.Drawing.Point(265, 382);
+            this.keyboardNick.Location = new System.Drawing.Point(265, 404);
             this.keyboardNick.MaxLength = 9;
             this.keyboardNick.Name = "keyboardNick";
             this.keyboardNick.Size = new System.Drawing.Size(102, 29);
@@ -407,7 +419,7 @@
             // label31
             // 
             this.label31.AutoSize = true;
-            this.label31.Location = new System.Drawing.Point(59, 385);
+            this.label31.Location = new System.Drawing.Point(59, 407);
             this.label31.Name = "label31";
             this.label31.Size = new System.Drawing.Size(200, 21);
             this.label31.TabIndex = 60;
@@ -418,7 +430,7 @@
             // 
             this.tabControl1.Controls.Add(this.tabPage1);
             this.tabControl1.Controls.Add(this.tabPage2);
-            this.tabControl1.Location = new System.Drawing.Point(8, 28);
+            this.tabControl1.Location = new System.Drawing.Point(8, 50);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
             this.tabControl1.Size = new System.Drawing.Size(387, 342);
@@ -971,7 +983,7 @@
             this.btn_Refresh.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.btn_Refresh.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btn_Refresh.ForeColor = System.Drawing.Color.White;
-            this.btn_Refresh.Location = new System.Drawing.Point(139, 419);
+            this.btn_Refresh.Location = new System.Drawing.Point(139, 473);
             this.btn_Refresh.Name = "btn_Refresh";
             this.btn_Refresh.Size = new System.Drawing.Size(120, 37);
             this.btn_Refresh.TabIndex = 16;
@@ -1148,7 +1160,7 @@
             this.settingsCloseBtn.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.settingsCloseBtn.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.settingsCloseBtn.ForeColor = System.Drawing.Color.White;
-            this.settingsCloseBtn.Location = new System.Drawing.Point(499, 694);
+            this.settingsCloseBtn.Location = new System.Drawing.Point(499, 758);
             this.settingsCloseBtn.Name = "settingsCloseBtn";
             this.settingsCloseBtn.Size = new System.Drawing.Size(120, 35);
             this.settingsCloseBtn.TabIndex = 9;
@@ -1161,7 +1173,7 @@
             this.settingsSaveBtn.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.settingsSaveBtn.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.settingsSaveBtn.ForeColor = System.Drawing.Color.White;
-            this.settingsSaveBtn.Location = new System.Drawing.Point(217, 694);
+            this.settingsSaveBtn.Location = new System.Drawing.Point(217, 758);
             this.settingsSaveBtn.Name = "settingsSaveBtn";
             this.settingsSaveBtn.Size = new System.Drawing.Size(120, 35);
             this.settingsSaveBtn.TabIndex = 8;
@@ -1172,7 +1184,7 @@
             // label33
             // 
             this.label33.Font = new System.Drawing.Font("Segoe UI", 10F);
-            this.label33.Location = new System.Drawing.Point(213, 658);
+            this.label33.Location = new System.Drawing.Point(213, 712);
             this.label33.Name = "label33";
             this.label33.Size = new System.Drawing.Size(406, 33);
             this.label33.TabIndex = 62;
@@ -1184,7 +1196,7 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(50)))), ((int)(((byte)(50)))), ((int)(((byte)(50)))));
-            this.ClientSize = new System.Drawing.Size(839, 741);
+            this.ClientSize = new System.Drawing.Size(839, 805);
             this.Controls.Add(this.label33);
             this.Controls.Add(this.groupBox4);
             this.Controls.Add(this.groupBox3);
@@ -1313,5 +1325,6 @@
         private System.Windows.Forms.Label label33;
         private System.Windows.Forms.Label label34;
         private System.Windows.Forms.ComboBox cmb_Lang;
+        private System.Windows.Forms.CheckBox statusCheck;
     }
 }

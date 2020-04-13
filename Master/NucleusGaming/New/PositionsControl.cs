@@ -5,13 +5,12 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
-using SlimDX.DirectInput;
-using SlimDX.XInput;
+using SharpDX.DirectInput;
+using SharpDX.XInput;
 using Nucleus.Gaming.Coop;
 using System.IO;
 using Nucleus.Gaming.Coop.InputManagement;
 using System.Drawing.Imaging;
-using System.Diagnostics;
 
 namespace Nucleus.Coop
 {
@@ -77,7 +76,7 @@ namespace Nucleus.Coop
         }
 
         // dinput
-        private DirectInput dinput;
+        //private DirectInput dinput;
         //private List<Joystick> dinputJoysticks;
 
         // xinput
@@ -111,11 +110,11 @@ namespace Nucleus.Coop
             }
 
             gamepadTimer = new Timer();
-            gamepadTimer.Interval = 100;
+            gamepadTimer.Interval = 1000;
             gamepadTimer.Tick += GamepadTimer_Tick;
 
             gamepadPollTimer = new Timer();
-            gamepadPollTimer.Interval = 200;
+            gamepadPollTimer.Interval = 1001;
             gamepadPollTimer.Tick += GamepadPollTimer_Tick;
 
             playerFont = new Font("Segoe UI", 40);
@@ -168,13 +167,12 @@ namespace Nucleus.Coop
         {
             base.Dispose(disposing);
 
-            if (dinput != null)
-            {
-                dinput.Dispose();
-                dinput = null;
-            }
+            //if (dinput != null)
+            //{
+            //    dinput.Dispose();
+            //    dinput = null;
+            //}
 
-            
             if (profile != null && profile.PlayerData != null)
             {
                 List<PlayerInfo> data = profile.PlayerData;
@@ -202,11 +200,11 @@ namespace Nucleus.Coop
                 }
             }
 
-            if (dinput != null)
-            {
-                dinput.Dispose();
-                dinput = null;
-            }
+            //if (dinput != null)
+            //{
+            //    dinput.Dispose();
+            //    dinput = null;
+            //}
 
             gamepadTimer.Enabled = false;
             gamepadPollTimer.Enabled = false;
@@ -243,22 +241,21 @@ namespace Nucleus.Coop
 
             try
             {
-                if (player.DInputJoystick.Acquire().IsFailure)
+                if (player.DInputJoystick.IsDisposed)
                 {
                     //player.DInputJoystick.Dispose();
                     return;
                 }
 
-                if (player.DInputJoystick.Poll().IsFailure)
-                {
-                    //player.DInputJoystick.Dispose();
-                    return;
-                }
-
+                //if (player.DInputJoystick.Poll().IsFailure)
+                //{
+                //    //player.DInputJoystick.Dispose();
+                //    return;
+                //}
 
                 JoystickState state = player.DInputJoystick.GetCurrentState();
 
-                bool[] buttonsPressed = state.GetButtons();
+                bool[] buttonsPressed = state.Buttons;
 
                 bool btnPressed = false;
                 for (int b = 0; b < buttonsPressed.Length; b++)
@@ -281,7 +278,7 @@ namespace Nucleus.Coop
                     this.Invalidate();
                 }
             }
-            catch(DirectInputException e)
+            catch(Exception e)
             {
                 UpdatePlayers();
                 Refresh();
@@ -299,12 +296,12 @@ namespace Nucleus.Coop
 
             GenericGameInfo g = game.Game;
 
-            dinput = new DirectInput();
+            DirectInput dinput = new DirectInput();
 
             if (g.Hook.DInputEnabled || g.Hook.XInputReroute)
             {
                 
-                IList<DeviceInstance> devices = dinput.GetDevices(DeviceClass.GameController /*SlimDX.DirectInput.DeviceType.Gamepad*/, DeviceEnumerationFlags.AttachedOnly);
+                IList<DeviceInstance> devices = dinput.GetDevices(DeviceClass.GameControl /*SlimDX.DirectInput.DeviceType.Gamepad*/, DeviceEnumerationFlags.AllDevices);
 
                 // first search for disconnected gamepads
                 for (int j = 0; j < data.Count; j++)
@@ -326,8 +323,8 @@ namespace Nucleus.Coop
                     bool foundGamepad = false;
                     for (int i = 0; i < devices.Count; i++)
                     {
-                        DeviceInstance device = devices[i];
-                        if (device.InstanceGuid == p.GamepadGuid && i == data[j].GamepadId)
+                        //DeviceInstance device = devices[i];
+                        if (devices[i].InstanceGuid == p.GamepadGuid && i == data[j].GamepadId)
                         {
                             foundGamepad = true;
                             break;
@@ -337,7 +334,6 @@ namespace Nucleus.Coop
                     if (!foundGamepad)
                     {
                         data[j].DInputJoystick.Unacquire();
-                        data[j].DInputJoystick.Dispose();
                         changed = true;
                         data.RemoveAt(j);
                         j--;
@@ -347,20 +343,19 @@ namespace Nucleus.Coop
 
                 for (int i = 0; i < devices.Count; i++)
                 {
-                    DeviceInstance device = devices[i];
+                    //DeviceInstance device = devices[i];
                     bool already = false;
 
                     // see if this gamepad is already on a player
                     for (int j = 0; j < data.Count; j++)
                     {
                         PlayerInfo p = data[j];
-                        if (p.GamepadGuid == device.InstanceGuid)
+                        if (p.GamepadGuid == devices[i].InstanceGuid)
                         {
                             already = true;
                             break;
                         }
                     }
-
 
                     if (already)
                     {
@@ -372,19 +367,16 @@ namespace Nucleus.Coop
                     // new gamepad
                     PlayerInfo player = new PlayerInfo();
 
-                    using (DirectInput dinput = new DirectInput())
-                    {
-                        player.DInputJoystick = new Joystick(dinput, device.InstanceGuid);
-                    }
+                    player.DInputJoystick = new Joystick(dinput, devices[i].InstanceGuid);
 
-                    if (player.DInputJoystick.Properties.InterfacePath.ToUpper().Contains("IG_") && !g.Hook.XInputReroute)
+                    if (player.DInputJoystick.Properties.InterfacePath.ToUpper().Contains("IG_") && !g.Hook.XInputReroute && g.Hook.XInputEnabled)
                     {
                         continue;
                     }
-                    player.GamepadProductGuid = device.ProductGuid;
-                    player.GamepadGuid = device.InstanceGuid;
+                    player.GamepadProductGuid = devices[i].ProductGuid;
+                    player.GamepadGuid = devices[i].InstanceGuid;
                     //instanceIds.Add(device.InstanceGuid.ToString());
-                    player.GamepadName = device.InstanceName;
+                    player.GamepadName = devices[i].InstanceName;
                     player.IsDInput = true;
                     player.GamepadId = i;
                     string hid = player.DInputJoystick.Properties.InterfacePath;
@@ -399,8 +391,6 @@ namespace Nucleus.Coop
                     }
                     player.DInputJoystick.Acquire();
 
-                    dinput.Dispose();
-                    //data.Insert(0, player);
                     data.Add(player);
                 }
 
@@ -422,7 +412,6 @@ namespace Nucleus.Coop
                         if (!c.IsConnected)
                         {
                             data[j].DInputJoystick.Unacquire();
-                            data[j].DInputJoystick.Dispose();
                             changed = true;
                             data.RemoveAt(j);
                             j--;
@@ -466,10 +455,8 @@ namespace Nucleus.Coop
 
                         changed = true;
 
-                        DirectInput dinput = new DirectInput();
-
                         PlayerInfo player = new PlayerInfo();
-                        IList<DeviceInstance> devices = dinput.GetDevices(SlimDX.DirectInput.DeviceType.Gamepad /*DeviceClass.GameController*/, DeviceEnumerationFlags.AttachedOnly);
+                        IList<DeviceInstance> devices = dinput.GetDevices(SharpDX.DirectInput.DeviceType.Gamepad/*SlimDX.DirectInput.DeviceType.Gamepad*/ /*DeviceClass.GameController*/, DeviceEnumerationFlags.AttachedOnly);
                         for (int x = 0; x < devices.Count; x++)
                         {
                             DeviceInstance device = devices[x];
@@ -493,7 +480,7 @@ namespace Nucleus.Coop
                                 }
                                 player.DInputJoystick.Acquire();
                                 
-                                dinput.Dispose();
+                                //dinput.Dispose();
                                 break;
                             }
                             else
@@ -524,7 +511,6 @@ namespace Nucleus.Coop
             if (dinput != null)
             {
                 dinput.Dispose();
-                dinput = null;
             }
 
         }
@@ -1273,7 +1259,7 @@ namespace Nucleus.Coop
             base.OnPaint(e);
 
             Graphics g = e.Graphics;
-            
+
 #if DEBUG
             //g.FillRectangle(Brushes.Green, playersArea);
             //g.FillRectangle(Brushes.CornflowerBlue, screensArea);
@@ -1324,7 +1310,6 @@ namespace Nucleus.Coop
             }
             else
             {
-                
                 for (int i = 0; i < players.Count; i++)
                 {
                     
@@ -1340,11 +1325,16 @@ namespace Nucleus.Coop
                     string str = (i + 1).ToString();
                     SizeF size = g.MeasureString(str, playerFont);
                     PointF loc = RectangleUtil.Center(size, s);
-                    if(gamePadPressed == info.GamepadId)
+                    if (gamePadPressed == info.GamepadId)
                     {
-                        g.FillRectangle(Brushes.Green, gamepadRect);
+                        g.FillEllipse(Brushes.Green, gamepadRect);
                         gamePadPressed = -1;
                     }
+                    else
+                    {
+                        g.ResetClip();
+                    }
+
                     if (info.IsXInput)
                     {
 
@@ -1417,6 +1407,11 @@ namespace Nucleus.Coop
                         g.Clip = new Region(new RectangleF(s.X, s.Y, s.Width + 1, s.Height + 1));
                         g.DrawRectangle(Pens.Green, s);
                     }
+
+                    if (gamePadPressed != info.GamepadId)
+                    {
+                        g.FillEllipse(Brushes.Transparent, gamepadRect);
+                    }
                 }
             }
             g.ResetClip();
@@ -1432,39 +1427,6 @@ namespace Nucleus.Coop
             string dragEachGamepad = $"Drag each {((game.Game.SupportsMultipleKeyboardsAndMice || game.Game.SupportsKeyboard) ? "input device" : "gamepad")} to a screen\nClick top-left corner to change layout\nRight click player to change size";
             dragEachGamepad = StringUtil.WrapString(Width /** 0.3f*/, dragEachGamepad, g, extraSmallTextFont, out dragEachGamepadSize);
             g.DrawString(dragEachGamepad, extraSmallTextFont, Brushes.White, new PointF(Width - dragEachGamepadSize.Width, 4/*playersArea.Y - 50*/));
-
-            //string bottomText = "";
-            //GenericGameInfo ggi = game.Game;
-            //if (ggi.Description?.Length > 0)
-            //{
-            //    bottomText = "Script Author Notes: " + ggi.Description;
-            //    SizeF bottomTextSize;
-            //    //string bottomText = ggi.Description; //"Click on screen's top-left corner to change players on that screen. (4-player only) Right click player to change size";
-            //    bottomText = StringUtil.WrapString(Width - 20, bottomText, g, smallTextFont, out bottomTextSize);
-            //    g.DrawString(bottomText, smallTextFont, Brushes.White, new PointF(10, (Height * 0.95f)));
-
-            //    // make text smaller
-            //    //int charSize = TextRenderer.MeasureText("g", title.Font).Width;
-            //    //int toRemove = (int)((reservedSpaceLabel - labelSize.Width) / (float)charSize);
-            //    //toRemove = Math.Max(toRemove + 3, 7);
-            //    //title.Text = TitleText.Remove(TitleText.Length - toRemove, toRemove) + "...";
-            //}
-
-            
-            
         }
-
-        //private void InitializeComponent()
-        //{
-        //    this.SuspendLayout();
-        //    // 
-        //    // PositionsControl
-        //    // 
-        //    this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
-        //    this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-        //    this.Name = "PositionsControl";
-        //    this.ResumeLayout(false);
-
-        //}
     }
 }

@@ -1,17 +1,14 @@
 ﻿using Nucleus.Gaming.Windows.Interop;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Windows.Forms;
 using Nucleus.Gaming;
 using System.Text.RegularExpressions;
-using SlimDX.DirectInput;
-using System.Runtime.InteropServices;
+using SharpDX.DirectInput;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using Nucleus.Gaming.Coop.InputManagement;
@@ -144,6 +141,11 @@ namespace Nucleus.Coop
                 debugLogCheck.Checked = Boolean.Parse(ini.IniReadValue("Misc", "DebugLog"));
             }
 
+            if (ini.IniReadValue("Misc", "ShowStatus") != "")
+            {
+                statusCheck.Checked = Boolean.Parse(ini.IniReadValue("Misc", "ShowStatus"));
+            }
+
             //if (ini.IniReadValue("Misc", "VibrateOpen") != "")
             //{
             //    check_Vibrate.Checked = Boolean.Parse(ini.IniReadValue("Misc", "VibrateOpen"));
@@ -179,7 +181,7 @@ namespace Nucleus.Coop
 
 
             dinput = new DirectInput();
-            IList<DeviceInstance> devices = dinput.GetDevices(DeviceClass.GameController, DeviceEnumerationFlags.AttachedOnly);
+            IList<DeviceInstance> devices = dinput.GetDevices(DeviceClass.GameControl, DeviceEnumerationFlags.AttachedOnly);
             int gcDevicesCnt = devices.Count;
             for (int i = 0; i < devices.Count; i++)
             {
@@ -265,6 +267,7 @@ namespace Nucleus.Coop
                 ini.IniWriteValue("Misc", "DebugLog", debugLogCheck.Checked.ToString());
                 ini.IniWriteValue("Misc", "Network", cmb_Network.SelectedItem.ToString());
                 ini.IniWriteValue("Misc", "SteamLang", cmb_Lang.SelectedItem.ToString());
+                ini.IniWriteValue("Misc", "ShowStatus", statusCheck.Checked.ToString());
 
                 //ini.IniWriteValue("CustomLayout", "Enabled", enableCustomCheckbox.Checked.ToString());
                 ini.IniWriteValue("CustomLayout", "HorizontalLines", numHorDiv.Value.ToString());

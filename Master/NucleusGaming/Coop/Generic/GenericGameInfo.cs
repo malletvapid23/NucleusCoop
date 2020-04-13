@@ -196,7 +196,12 @@ namespace Nucleus.Gaming
         public int PauseBetweenContextAndLaunch;
         public bool DirSymlinkCopyInsteadIncludeSubFolders;
         public bool LaunchAsDifferentUsersAlt;
+        public bool ChangeIPPerInstanceAlt;
         public bool GamePlayAfterLaunch;
+        public bool UserProfileConfigPathNoCopy;
+        public bool UserProfileSavePathNoCopy;
+        public bool LauncherExeIgnoreFileCheck;
+
 
         // -- From USS
         //Effectively a switch for all of USS features

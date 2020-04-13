@@ -44,6 +44,13 @@ namespace Nucleus.Coop.Forms
         {
             InitializeComponent();
 
+            ServicePointManager.Expect100Continue = true;
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls
+                   | SecurityProtocolType.Tls11
+                   | SecurityProtocolType.Tls12
+                   | SecurityProtocolType.Ssl3;
+            ServicePointManager.ServerCertificateValidationCallback = (snder, cert, chain, error) => true;
+
             lvwColumnSorter = new ListViewColumnSorter();
             list_Games.ListViewItemSorter = lvwColumnSorter;
 
@@ -83,7 +90,11 @@ namespace Nucleus.Coop.Forms
                 lbl_Status.Text = "";
 
                 ServicePointManager.Expect100Continue = true;
-                ServicePointManager.SecurityProtocol = (SecurityProtocolType)3072;
+                ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls
+                       | SecurityProtocolType.Tls11
+                       | SecurityProtocolType.Tls12
+                       | SecurityProtocolType.Ssl3;
+                ServicePointManager.ServerCertificateValidationCallback = (snder, cert, chain, error) => true;
 
                 string searchParam = Uri.EscapeDataString(txt_Search.Text);
                 string rawHandlers = null;

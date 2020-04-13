@@ -6,7 +6,8 @@ using System.Drawing;
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
-using SlimDX.DirectInput;
+//using SlimDX.DirectInput;
+using SharpDX.DirectInput;
 using Nucleus.Gaming.Coop;
 using Nucleus.Coop;
 using Nucleus.Gaming.Coop.InputManagement.Logging;
@@ -53,6 +54,10 @@ namespace Nucleus.Gaming.Coop
         public string Nickname;
         public string InstanceId;
         public string RawHID;
+
+        public string SID;
+        public string Adapter;
+        public string UserProfile;
 
         // Serialized
 

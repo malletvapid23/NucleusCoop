@@ -93,8 +93,7 @@ namespace Nucleus.Gaming
 
         private List<string> regKeyPaths = new List<string>();
 
-        [DllImport("iphlpapi.dll", CharSet = CharSet.Auto)]
-        private static extern int GetBestInterface(UInt32 destAddr, out UInt32 bestIfIndex);
+
 
         public Type HandlerType
         {
@@ -263,12 +262,14 @@ namespace Nucleus.Gaming
                 //    IPEndPoint endPoint = socket.LocalEndPoint as IPEndPoint;
                 //    localIP = endPoint.Address.ToString();
                 //}
-                
-                var dadada = GetBestInterface(BitConverter.ToUInt32(IPAddress.Parse("8.8.8.8").GetAddressBytes(), 0), out uint interfaceIndex);
-                IPAddress xxxd = NetworkInterface.GetAllNetworkInterfaces()
-                                .Where(netInterface => netInterface.GetIPProperties().GetIPv4Properties().Index == BitConverter.ToInt32(BitConverter.GetBytes(interfaceIndex), 0)).First().GetIPProperties().UnicastAddresses.Where(ipAdd => ipAdd.Address.AddressFamily == AddressFamily.InterNetwork).First().Address;
 
-                return xxxd.ToString();
+                //var dadada = GetBestInterface(BitConverter.ToUInt32(IPAddress.Parse("8.8.8.8").GetAddressBytes(), 0), out uint interfaceIndex);
+                //IPAddress xxxd = NetworkInterface.GetAllNetworkInterfaces()
+                //                .Where(netInterface => netInterface.GetIPProperties().GetIPv4Properties().Index == BitConverter.ToInt32(BitConverter.GetBytes(interfaceIndex), 0)).First().GetIPProperties().UnicastAddresses.Where(ipAdd => ipAdd.Address.AddressFamily == AddressFamily.InterNetwork).First().Address;
+
+                //return xxxd.ToString();
+
+                return parent.GetLocalIP();
             }
         }
 
