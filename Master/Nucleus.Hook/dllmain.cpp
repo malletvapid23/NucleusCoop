@@ -1,5 +1,8 @@
 // dllmain.cpp : Defines the entry point for the DLL application.
 #include "pch.h"
+#include "Globals.h"
+
+HMODULE Globals::DllHandle;
 
 BOOL APIENTRY DllMain( HMODULE hModule,
                        DWORD  ul_reason_for_call,
@@ -14,6 +17,9 @@ BOOL APIENTRY DllMain( HMODULE hModule,
     case DLL_PROCESS_DETACH:
         break;
     }
+
+    Globals::DllHandle = hModule;
+	
     return TRUE;
 }
 

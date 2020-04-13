@@ -44,7 +44,7 @@ namespace FakeMouse
 	
 	void updateAbsoluteCursorCheck()
 	{
-		if (options.legacyInput && !useAbsoluteCursorPos && ++useAbsoluteCursorPosCounter == REQUIRED_ABS_COUNT)
+		if (Globals::options.legacyInput && !useAbsoluteCursorPos && ++useAbsoluteCursorPosCounter == REQUIRED_ABS_COUNT)
 		{
 			//We assume we're in a menu and need absolute cursor pos
 			useAbsoluteCursorPos = true;
@@ -78,7 +78,7 @@ namespace FakeMouse
 
 	void InternalGetCursorPosition(LPPOINT lpPoint)
 	{
-		if (!options.legacyInput || useAbsoluteCursorPos)
+		if (!Globals::options.legacyInput || useAbsoluteCursorPos)
 		{
 			//Absolute mouse position (always do this if legacy input is off)
 			lpPoint->x = *(Piping::memBuf);
@@ -91,6 +91,6 @@ namespace FakeMouse
 			lpPoint->y = getAndUpdateFakeY();
 		}
 
-		ClientToScreen(hWnd, lpPoint);
+		ClientToScreen(Globals::hWnd, lpPoint);
 	}
 }

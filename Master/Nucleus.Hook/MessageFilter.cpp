@@ -28,7 +28,7 @@ BOOL filterMessage(const LPMSG lpMsg)
 		DEBUGLOG("First filter message call.\n");
 	}
 	
-	if (!ReRegisterRawInput::hasReRegisteredRawInput && options.reRegisterRawInput && (((msg & WM_INPUT) == WM_INPUT) || (msg == WM_INPUT)))
+	if (!ReRegisterRawInput::hasReRegisteredRawInput && Globals::options.reRegisterRawInput && (((msg & WM_INPUT) == WM_INPUT) || (msg == WM_INPUT)))
 	{
 		ReRegisterRawInput::hasReRegisteredRawInput = true;
 
@@ -39,7 +39,7 @@ BOOL filterMessage(const LPMSG lpMsg)
 	}
 	
 	//Filter raw input
-	if (msg == WM_INPUT && options.filterRawInput)
+	if (msg == WM_INPUT && Globals::options.filterRawInput)
 	{
 		lpMsg->wParam = RIM_INPUT;//While in foreground
 
@@ -81,7 +81,7 @@ BOOL filterMessage(const LPMSG lpMsg)
 	}
 
 	//Legacy input filter
-	if (options.legacyInput)
+	if (Globals::options.legacyInput)
 	{
 		if (msg == WM_MOUSEMOVE)
 		{
@@ -89,7 +89,7 @@ BOOL filterMessage(const LPMSG lpMsg)
 			{
 				if (FakeMouse::useAbsoluteCursorPos == false)
 				{
-					if (options.updateAbsoluteFlagInMouseMessage)
+					if (Globals::options.updateAbsoluteFlagInMouseMessage)
 					{
 						const int x = GET_X_LPARAM(lParam);
 						const int y = GET_Y_LPARAM(lParam);
@@ -121,13 +121,13 @@ BOOL filterMessage(const LPMSG lpMsg)
 		}
 	}
 
-	if(msg == WM_KILLFOCUS && options.preventWindowDeactivation)
+	if(msg == WM_KILLFOCUS && Globals::options.preventWindowDeactivation)
 	{
 		BLOCK;
 	}
 	
 	//USS signature is 1 << 7 or 0b10000000 for WM_MOUSEMOVE(0x0200). If this is detected, allow event to pass
-	if (options.filterMouseMessages)
+	if (Globals::options.filterMouseMessages)
 	{
 		FakeMouse::InternalGetCursorPosition(&(lpMsg->pt));
 		
@@ -138,7 +138,7 @@ BOOL filterMessage(const LPMSG lpMsg)
 		
 		if (msg == WM_MOUSEMOVE && (static_cast<int>(wParam) & 0b10000000) > 0)
 		{
-			if (!options.legacyInput)
+			if (!Globals::options.legacyInput)
 			{
 				lpMsg->lParam = MAKELPARAM(*(Piping::memBuf), *(Piping::memBuf + 1));
 			}
@@ -155,7 +155,7 @@ BOOL filterMessage(const LPMSG lpMsg)
 		
 		if (msg == WM_MOUSEACTIVATE)
 		{
-			lpMsg->wParam = reinterpret_cast<WPARAM>(hWnd);
+			lpMsg->wParam = reinterpret_cast<WPARAM>(Globals::hWnd);
 			lpMsg->lParam = 1;
 			ALLOW;
 		}
@@ -270,7 +270,7 @@ UINT WINAPI GetRawInputData_Hook(
 
 void installMessageFilterHooks()
 {
-	if (options.filterRawInput)
+	if (Globals::options.filterRawInput)
 	{
 		installHook(TEXT("user32"), "GetRawInputData", GetRawInputData_Hook);
 	}
@@ -285,11 +285,11 @@ void installMessageFilterHooks()
 	//TODO: filterMessage doesn't work for PreventWindowDeactivation?
 	//TODO: This method seems to cause CSGO/Minecraft to not respond? "Hook Injection Complete" is never printed to the log. API Monitor shows calls being repeated infinitely?
 	//Using original method instead:
-	if (options.preventWindowDeactivation)
+	if (Globals::options.preventWindowDeactivation)
 	{
 		DEBUGLOG("Injecting WndProc message filter\n");
 		//originalWndProc = reinterpret_cast<WNDPROC>(GetWindowLongPtr(hWnd, GWLP_WNDPROC));
 		
-		SetWindowLongPtr(hWnd, GWLP_WNDPROC, (LONG_PTR)WndProc_Hook);
+		SetWindowLongPtr(Globals::hWnd, GWLP_WNDPROC, (LONG_PTR)WndProc_Hook);
 	}
 }

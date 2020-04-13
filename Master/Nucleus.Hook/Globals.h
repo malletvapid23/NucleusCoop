@@ -1,6 +1,11 @@
 #pragma once
 #include "Options.h"
 
-extern HWND hWnd;
+namespace Globals
+{
+	extern HWND hWnd;
 
-extern Options options;
+	extern Options options;
+
+	extern HMODULE DllHandle;
+}

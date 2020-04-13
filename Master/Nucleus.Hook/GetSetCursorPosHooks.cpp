@@ -24,12 +24,12 @@ BOOL WINAPI SetCursorPos_Hook(int X, int Y)
 	p.y = Y;
 
 	//SetCursorPos require screen coordinates (relative to 0,0 of monitor)
-	ScreenToClient(hWnd, &p);
+	ScreenToClient(Globals::hWnd, &p);
 
 	originX = p.x;
 	originY = p.y;
 
-	if (!options.legacyInput)
+	if (!Globals::options.legacyInput)
 	{
 		*(Piping::memBuf) = p.x;
 		*(Piping::memBuf + 1) = p.y;

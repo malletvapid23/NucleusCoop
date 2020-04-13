@@ -3,6 +3,7 @@
 #include <easyhook.h>
 
 NTSTATUS installHook(LPCSTR moduleHandle, LPCSTR proc, void* callBack);
+NTSTATUS installHookEx(LPCSTR moduleHandle, LPCSTR proc, void* callBack, bool isOrdinal);
 
 void installSetWindowHook(int width, int height, int posx, int posy);
 
@@ -18,3 +19,5 @@ void installGetKeyStateHook();
 void installGetKeyboardStateHook();
 
 void installMessageFilterHooks();
+
+void installXInputHooks();

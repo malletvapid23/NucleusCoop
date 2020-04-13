@@ -10,6 +10,7 @@
 #include "Piping.h"
 #include "FakeMouse.h"
 #include "ReRegisterRawInput.h"
+#include "Controller.h"
 
 #ifdef _DEBUG
 bool IsDebug = false;
@@ -18,8 +19,11 @@ bool IsDebug = true;
 #endif
 
 //Globals.h
-Options options;
-HWND hWnd = nullptr;
+namespace Globals
+{
+	Options options;
+	HWND hWnd = nullptr;
+}
 
 // Structure used to communicate data from and to enumeration procedure
 struct EnumData {
@@ -63,7 +67,7 @@ HWND FindWindowFromProcess(HANDLE hProcess) {
 	return FindWindowFromProcessId(GetProcessId(hProcess));
 }
 
-NTSTATUS installHook(const LPCSTR moduleHandle, const LPCSTR proc, void* callBack)
+NTSTATUS installHookEx(const LPCSTR moduleHandle, const LPCSTR proc, void* callBack, const bool isOrdinal)
 {
 	// Perform hooking
 	HOOK_TRACE_INFO hHook = { NULL }; // keep track of our hook
@@ -74,10 +78,13 @@ NTSTATUS installHook(const LPCSTR moduleHandle, const LPCSTR proc, void* callBac
 		callBack,
 		NULL,
 		&hHook);
+
+	// Don't treat proc as an actual pointer to a string if it used as an ordinal.
+	const LPCSTR name = isOrdinal ? "ORDINAL" : proc;
 	
 	if (FAILED(result))
 	{
-		DEBUGLOG("Error installing " << proc << " hook, error msg: " << RtlGetLastErrorString() << "\n")
+		DEBUGLOG("Error installing " << name << " hook, error msg: " << RtlGetLastErrorString() << "\n")
 	}
 	else
 	{
@@ -90,15 +97,20 @@ NTSTATUS installHook(const LPCSTR moduleHandle, const LPCSTR proc, void* callBac
 
 		if (FAILED(ACLres))
 		{
-			DEBUGLOG("Error setting ACL for " << proc << " hook, ACLres = " << ACLres << ", error msg: " << RtlGetLastErrorString() << "\n");
+			DEBUGLOG("Error setting ACL for " << name << " hook, ACLres = " << ACLres << ", error msg: " << RtlGetLastErrorString() << "\n");
 		}
 		else
 		{
-			DEBUGLOG("Successfully installed " << proc << " hook, in module: " << moduleHandle << ", result: " << result << "\n");
+			DEBUGLOG("Successfully installed " << name << " hook, in module: " << moduleHandle << ", result: " << result << "\n");
 		}
 	}
 
 	return result;
+}
+
+NTSTATUS installHook(const LPCSTR moduleHandle, const LPCSTR proc, void* callBack)
+{
+	return installHookEx(moduleHandle, proc, callBack, false);
 }
 
 // EasyHook will be looking for this export to support DLL injection. If not found then 
@@ -109,15 +121,15 @@ void __stdcall NativeInjectionEntryPoint(REMOTE_ENTRY_INFO* inRemoteInfo)
 {
 	const auto pid = GetCurrentProcessId();
 
-	//TODO: RENABLE
-	hWnd = FindWindowFromProcessId(pid);
-	
+	Globals::hWnd = FindWindowFromProcessId(pid);
+
+#pragma region Get data from UserData
 	BYTE* data = inRemoteInfo->UserData;
 	auto p = data;
 
-	if (reinterpret_cast<INT>(hWnd) == 0)
+	if (reinterpret_cast<INT>(Globals::hWnd) == 0)
 	{
-		hWnd = reinterpret_cast<HWND>(bytesToInt(p));
+		Globals::hWnd = reinterpret_cast<HWND>(bytesToInt(p));
 	}
 	p += 4;
 
@@ -128,37 +140,39 @@ void __stdcall NativeInjectionEntryPoint(REMOTE_ENTRY_INFO* inRemoteInfo)
 	p += 4;
 
 #define NEXTBOOL *(p++) == 1
-	options.preventWindowDeactivation = NEXTBOOL;
-	options.setWindow = NEXTBOOL;
+	Globals::options.preventWindowDeactivation = NEXTBOOL;
+	Globals::options.setWindow = NEXTBOOL;
 	IsDebug = NEXTBOOL;
-	options.hideCursor = NEXTBOOL;
-	options.hookFocus = NEXTBOOL;
-	options.setCursorPos = NEXTBOOL;
-	options.getCursorPos = NEXTBOOL;
-	options.getKeyState = NEXTBOOL;
-	options.getAsyncKeyState = NEXTBOOL;
-	options.getKeyboardState = NEXTBOOL;
-	options.filterRawInput = NEXTBOOL;
-	options.filterMouseMessages = NEXTBOOL;
-	options.legacyInput = NEXTBOOL;
-	options.updateAbsoluteFlagInMouseMessage = NEXTBOOL;
-	options.mouseVisibilitySendBack = NEXTBOOL;
-	options.reRegisterRawInput = NEXTBOOL;
-	options.reRegisterRawInputMouse = NEXTBOOL;
-	options.reRegisterRawInputKeyboard = NEXTBOOL;
+	Globals::options.hideCursor = NEXTBOOL;
+	Globals::options.hookFocus = NEXTBOOL;
+	Globals::options.setCursorPos = NEXTBOOL;
+	Globals::options.getCursorPos = NEXTBOOL;
+	Globals::options.getKeyState = NEXTBOOL;
+	Globals::options.getAsyncKeyState = NEXTBOOL;
+	Globals::options.getKeyboardState = NEXTBOOL;
+	Globals::options.filterRawInput = NEXTBOOL;
+	Globals::options.filterMouseMessages = NEXTBOOL;
+	Globals::options.legacyInput = NEXTBOOL;
+	Globals::options.updateAbsoluteFlagInMouseMessage = NEXTBOOL;
+	Globals::options.mouseVisibilitySendBack = NEXTBOOL;
+	Globals::options.reRegisterRawInput = NEXTBOOL;
+	Globals::options.reRegisterRawInputMouse = NEXTBOOL;
+	Globals::options.reRegisterRawInputKeyboard = NEXTBOOL;
+	Globals::options.HookXInput = NEXTBOOL;
+	Globals::options.DinputToXinputTranslation = NEXTBOOL;
 #undef NEXTBOOL
 
-	const auto pathLength = static_cast<size_t>(bytesToInt(p));
-	const auto writePipeNameLength = static_cast<size_t>(bytesToInt(p + 4));
-	const auto readPipeNameLength = static_cast<size_t>(bytesToInt(p + 8));
+	const auto pathLength = static_cast<size_t>(bytesToInt(p)); p += 4;
+	const auto writePipeNameLength = static_cast<size_t>(bytesToInt(p)); p += 4;
+	const auto readPipeNameLength = static_cast<size_t>(bytesToInt(p)); p += 4;
 
-	const int width = bytesToInt(p + 12);
-	const int height = bytesToInt(p + 16);
-	const int posx = bytesToInt(p + 20);
-	const int posy = bytesToInt(p + 24);
+	const int windowWidth = bytesToInt(p); p += 4;
+	const int windowHeight = bytesToInt(p); p += 4;
+	const int windowPosX = bytesToInt(p); p += 4;
+	const int windowPosY = bytesToInt(p); p += 4;
 
-	p += 28;
-
+	Controller::controllerIndex = bytesToInt(p); p += 4;
+	
 	//C# gives number of bytes without null termination
 	const auto nucleusFolderPath = static_cast<PWSTR>(malloc(pathLength + sizeof(WCHAR)));
 	memcpy(nucleusFolderPath, p, pathLength);
@@ -172,73 +186,82 @@ void __stdcall NativeInjectionEntryPoint(REMOTE_ENTRY_INFO* inRemoteInfo)
 	Piping::readPipeName = std::wstring(reinterpret_cast<wchar_t*>(p), readPipeNameLength/2);
 	Piping::sharedMemName = Piping::readPipeName + L"_mem";
 	p += readPipeNameLength;
+#pragma endregion 
 
 	//Should be before hooks start to avoid errors
 	Piping::startSharedMem();
 
 	DEBUGLOG("Starting hook injection," <<
-		" hWnd: " << hWnd <<
+		" hWnd: " << Globals::hWnd <<
 		" WritePipeName: " << std::string(Piping::writePipeName.begin(), Piping::writePipeName.end()) <<
 		" ReadPipeName: " << std::string(Piping::readPipeName.begin(), Piping::readPipeName.end()) <<
 		" AllowedRawMouseHandle: " << FakeMouse::allowedMouseHandle <<
 		" AllowedRawKeyboardHandle: " << FakeMouse::allowedKeyboardHandle <<
-		" preventWindowDeactivation: " << options.preventWindowDeactivation <<
-		" setCursorPos: " << options.setCursorPos <<
-		" getCursorPos: " << options.getCursorPos <<
-		" getKeyState: " << options.getKeyState <<
-		" getAsyncKeyState: " << options.getAsyncKeyState <<
-		" getKeyboardState: " << options.getKeyboardState <<
-		" filterRawInput: " << options.filterRawInput <<
-		" filterMouseMessages: " << options.filterMouseMessages <<
-		" legacyInput: " << options.legacyInput <<
-		" updateAbsoluteFlagInMouseMessage: " << options.updateAbsoluteFlagInMouseMessage <<
-		" setWindow: " << options.setWindow <<
-		" hideCursor: " << options.hideCursor <<
-		" hookFocus: " << options.hookFocus <<
-		" mouseVisibilitySendBack: " << options.mouseVisibilitySendBack <<
-		" reRegisterRawInput: " << options.reRegisterRawInput <<
-		" reRegisterRawInputMouse: " << options.reRegisterRawInputMouse <<
-		" reRegisterRawInputKeyboard: " << options.reRegisterRawInputKeyboard <<
-		" width: " << width <<
-		" height: " << height <<
-		" posx: " << posx <<
-		" posy: " << posy <<
+		" preventWindowDeactivation: " << Globals::options.preventWindowDeactivation <<
+		" setCursorPos: " << Globals::options.setCursorPos <<
+		" getCursorPos: " << Globals::options.getCursorPos <<
+		" getKeyState: " << Globals::options.getKeyState <<
+		" getAsyncKeyState: " << Globals::options.getAsyncKeyState <<
+		" getKeyboardState: " << Globals::options.getKeyboardState <<
+		" filterRawInput: " << Globals::options.filterRawInput <<
+		" filterMouseMessages: " << Globals::options.filterMouseMessages <<
+		" legacyInput: " << Globals::options.legacyInput <<
+		" updateAbsoluteFlagInMouseMessage: " << Globals::options.updateAbsoluteFlagInMouseMessage <<
+		" setWindow: " << Globals::options.setWindow <<
+		" hideCursor: " << Globals::options.hideCursor <<
+		" hookFocus: " << Globals::options.hookFocus <<
+		" mouseVisibilitySendBack: " << Globals::options.mouseVisibilitySendBack <<
+		" reRegisterRawInput: " << Globals::options.reRegisterRawInput <<
+		" reRegisterRawInputMouse: " << Globals::options.reRegisterRawInputMouse <<
+		" reRegisterRawInputKeyboard: " << Globals::options.reRegisterRawInputKeyboard <<
+		" hookXinput: " << Globals::options.HookXInput <<
+		" DinputToXinputTranslation: " << Globals::options.DinputToXinputTranslation <<
+		" controllerIndex: " << Controller::controllerIndex <<
+		" windowWidth: " << windowWidth <<
+		" windowHeight: " << windowHeight <<
+		" windowPosX: " << windowPosX <<
+		" windowPosY: " << windowPosY <<
 		"\n");
-	
-	if (options.setWindow)
-		installSetWindowHook(width, height, posx, posy);
 
-	if (options.hookFocus)
+#pragma region Inject hooks
+	if (Globals::options.setWindow)
+		installSetWindowHook(windowWidth, windowHeight, windowPosX, windowPosY);
+
+	if (Globals::options.hookFocus)
 		installFocusHooks();
 
-	if (options.hideCursor || options.mouseVisibilitySendBack)
+	if (Globals::options.hideCursor || Globals::options.mouseVisibilitySendBack)
 		installHideCursorHooks();
 
-	if (options.getCursorPos)
+	if (Globals::options.getCursorPos)
 		installGetCursorPosHook();
 
-	if (options.setCursorPos)
+	if (Globals::options.setCursorPos)
 		installSetCursorPosHook();
 
-	if (options.getAsyncKeyState)
+	if (Globals::options.getAsyncKeyState)
 		installGetAsyncKeyStateHook();
 
-	if (options.getKeyState)
+	if (Globals::options.getKeyState)
 		installGetKeyStateHook();
 
-	if (options.getKeyboardState)
+	if (Globals::options.getKeyboardState)
 		installGetKeyboardStateHook();
 
-	if (options.reRegisterRawInput)
+	if (Globals::options.HookXInput)
+		installXInputHooks();
+
+	if (Globals::options.reRegisterRawInput)
 	{
 		//Needs to be before message filter.
 		ReRegisterRawInput::SetupReRegisterRawInput();
 	}
 	
-	if (options.filterRawInput || options.filterMouseMessages || options.legacyInput || options.preventWindowDeactivation || options.reRegisterRawInput)
+	if (Globals::options.filterRawInput || Globals::options.filterMouseMessages || Globals::options.legacyInput || Globals::options.preventWindowDeactivation || Globals::options.reRegisterRawInput)
 	{
 		installMessageFilterHooks();
 	}
+#pragma endregion
 	
 	DEBUGLOG("Hook injection complete\n");
 

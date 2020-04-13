@@ -129,7 +129,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
-      <AdditionalDependencies>EasyHook32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>EasyHook32.lib;Xinput9_1_0.lib;Dinput8.lib;dxguid.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(SolutionDir)ThirdParty\easyhook;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <Manifest>
@@ -160,7 +160,7 @@ copy $(SolutionDir)$(PlatformTarget)\$(Configuration)\$(TargetName).dll $(Soluti
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
       <AdditionalLibraryDirectories>$(SolutionDir)ThirdParty\easyhook;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>EasyHook32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>EasyHook32.lib;Xinput9_1_0.lib;Dinput8.lib;dxguid.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>mkdir $(SolutionDir)NucleusCoopTool\bin\$(Configuration)
@@ -184,7 +184,7 @@ copy $(SolutionDir)$(PlatformTarget)\$(Configuration)\$(TargetName).dll $(Soluti
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
       <AdditionalLibraryDirectories>$(SolutionDir)ThirdParty\easyhook;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>EasyHook64.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>EasyHook64.lib;Xinput9_1_0.lib;Dinput8.lib;dxguid.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>mkdir $(SolutionDir)NucleusCoopTool\bin\$(Configuration)
@@ -218,7 +218,7 @@ copy $(SolutionDir)$(PlatformTarget)\$(Configuration)\$(TargetName).dll $(Soluti
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
-      <AdditionalDependencies>EasyHook64.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>EasyHook64.lib;Xinput9_1_0.lib;Dinput8.lib;dxguid.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(SolutionDir)ThirdParty\easyhook;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
@@ -227,6 +227,7 @@ copy $(SolutionDir)$(PlatformTarget)\$(Configuration)\$(TargetName).dll $(Soluti
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Controller.h" />
     <ClInclude Include="FakeMouse.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="Globals.h" />
@@ -239,6 +240,7 @@ copy $(SolutionDir)$(PlatformTarget)\$(Configuration)\$(TargetName).dll $(Soluti
     <ClInclude Include="ReRegisterRawInput.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Controller.cpp" />
     <ClCompile Include="dllmain.cpp">
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</CompileAsManaged>
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</CompileAsManaged>
@@ -267,6 +269,7 @@ copy $(SolutionDir)$(PlatformTarget)\$(Configuration)\$(TargetName).dll $(Soluti
     <ClCompile Include="Piping.cpp" />
     <ClCompile Include="RawInputReRegister.cpp" />
     <ClCompile Include="SetWindowHook.cpp" />
+    <ClCompile Include="XInputHooks.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets" />

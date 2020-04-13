@@ -6,7 +6,7 @@
 
 int WINAPI ShowCursor_Hook(BOOL bShow)
 {
-	if (options.hideCursor)
+	if (Globals::options.hideCursor)
 	{
 		return ShowCursor(FALSE);
 	}
@@ -18,7 +18,7 @@ int WINAPI ShowCursor_Hook(BOOL bShow)
 
 HCURSOR WINAPI SetCursor_Hook(HCURSOR hCursor)
 {
-	if (options.hideCursor)
+	if (Globals::options.hideCursor)
 	{
 		return SetCursor(nullptr);
 	}
