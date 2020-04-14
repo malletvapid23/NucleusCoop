@@ -1,17 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Net;
-using System.Text;
 using System.Windows.Forms;
-using System.Web;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using System.Text.RegularExpressions;
 using ListViewSorter;
 
 namespace Nucleus.Coop.Forms
@@ -37,6 +33,10 @@ namespace Nucleus.Coop.Forms
         private int entryIndex = 0;
 
         private int sortColumn = 0;
+
+        private int verCount = 0;
+
+        private int lastVer = 0;
 
         private SortOrder sortOrder = SortOrder.Ascending;
 
@@ -183,34 +183,69 @@ namespace Nucleus.Coop.Forms
                 entriesToView = handlers.Count - startIndex;
             }
 
+            int vo = 0;
+            if (chkBox_Verified.Checked)
+            {
+                verCount = 0;
+                foreach (JToken jtoken in handlers)
+                {
+                    if (Boolean.Parse(jtoken["verified"].ToString()))
+                    {
+                        verCount++;
+                    }
+                }
+
+                if ((startIndex + entriesPerPage) > verCount)
+                {
+                    entriesToView = verCount - startIndex;
+                }
+
+                if(startIndex == 0)
+                {
+                    lastVer = 0;
+                }
+            }
+           
             for (int i = 0; i < entriesToView; i++)
             {
                 lbl_Status.Text = string.Format("Fetching {0}/{1} handlers", (i+1), entriesToView);
                 Handler handler = new Handler();
 
-                handler.Id = handlers[i+startIndex]["_id"].ToString();
-                handler.Owner = handlers[i+startIndex]["owner"].ToString();
-                handler.OwnerName = handlers[i+startIndex]["ownerName"].ToString();
-                handler.Description = handlers[i+startIndex]["description"].ToString();
-                handler.Title = handlers[i+startIndex]["title"].ToString();
-                handler.GameName = handlers[i+startIndex]["gameName"].ToString();
-                handler.GameDescription = handlers[i+startIndex]["gameDescription"].ToString();
-                handler.GameCover = handlers[i+startIndex]["gameCover"].ToString();
-                handler.GameId = handlers[i+startIndex]["gameId"].ToString();
-                handler.GameUrl = handlers[i+startIndex]["gameUrl"].ToString();
-                handler.CreatedAt = handlers[i+startIndex]["createdAt"].ToString();
-                handler.UpdatedAt = handlers[i+startIndex]["updatedAt"].ToString();
-                handler.Stars = handlers[i+startIndex]["stars"].ToString();
-                handler.DownloadCount = handlers[i+startIndex]["downloadCount"].ToString();
-                handler.Verified = handlers[i+startIndex]["verified"].ToString();
-                handler.Private = handlers[i+startIndex]["private"].ToString();
-                handler.CommentCount = handlers[i+startIndex]["commentCount"].ToString();
-                handler.CurrentVersion = handlers[i+startIndex]["currentVersion"].ToString();
-                handler.CurrentPackage = handlers[i+startIndex]["currentPackage"].ToString();
+                int offset = startIndex;
+                if(chkBox_Verified.Checked)
+                {
+                    offset = lastVer;
+                }
+
+                handler.Id = handlers[vo+i+offset]["_id"].ToString();
+                handler.Owner = handlers[vo+i+offset]["owner"].ToString();
+                handler.OwnerName = handlers[vo+i+offset]["ownerName"].ToString();
+                handler.Description = handlers[vo+i+offset]["description"].ToString();
+                handler.Title = handlers[vo+i+offset]["title"].ToString();
+                handler.GameName = handlers[vo+i+offset]["gameName"].ToString();
+                handler.GameDescription = handlers[vo+i+offset]["gameDescription"].ToString();
+                handler.GameCover = handlers[vo+i+offset]["gameCover"].ToString();
+                handler.GameId = handlers[vo+i+offset]["gameId"].ToString();
+                handler.GameUrl = handlers[vo+i+offset]["gameUrl"].ToString();
+                handler.CreatedAt = handlers[vo+i+offset]["createdAt"].ToString();
+                handler.UpdatedAt = handlers[vo+i+offset]["updatedAt"].ToString();
+                handler.Stars = handlers[vo+i+offset]["stars"].ToString();
+                handler.DownloadCount = handlers[vo+i+offset]["downloadCount"].ToString();
+                handler.Verified = handlers[vo+i+offset]["verified"].ToString();
+                handler.Private = handlers[vo+i+offset]["private"].ToString();
+                handler.CommentCount = handlers[vo+i+offset]["commentCount"].ToString();
+                handler.CurrentVersion = handlers[vo+i+offset]["currentVersion"].ToString();
+                handler.CurrentPackage = handlers[vo+i+offset]["currentPackage"].ToString();
 
                 if (chkBox_Verified.Checked && !Boolean.Parse(handler.Verified))
                 {
+                    i--;
+                    vo++;
                     continue;
+                }
+                else if(chkBox_Verified.Checked && Boolean.Parse(handler.Verified) && (i+1) == entriesToView)
+                {
+                    lastVer = vo + i + startIndex + 1;
                 }
 
                 searchHandlers.Add(handler);
@@ -231,6 +266,7 @@ namespace Nucleus.Coop.Forms
                 try
                 {
                     WebRequest request = WebRequest.Create(_cover);
+                    request.Timeout = 10;
                     WebResponse resp = request.GetResponse();
                     Stream respStream = resp.GetResponseStream();
                     bmp = new Bitmap(respStream);
@@ -243,28 +279,28 @@ namespace Nucleus.Coop.Forms
 
                 string[] handlerDisplayCols = { handler.OwnerName, vSymb, handler.DownloadCount, handler.Stars, handler.CreatedAt, handler.UpdatedAt, handler.Description, handler.Id };
                 list_Games.Items.Add(" " + handler.GameName).SubItems.AddRange(handlerDisplayCols);
-                list_Games.Items[i].ImageIndex = i;
+                list_Games.Items[(list_Games.Items.Count - 1)].ImageIndex = (list_Games.Items.Count - 1);
 
-                if(list_Games.Items[i].SubItems[5].Text.Contains(" "))
+                if(list_Games.Items[(list_Games.Items.Count - 1)].SubItems[5].Text.Contains(" "))
                 {
-                    list_Games.Items[i].SubItems[5].Text = list_Games.Items[i].SubItems[5].Text.Substring(0, list_Games.Items[i].SubItems[5].Text.IndexOf(' '));
+                    list_Games.Items[(list_Games.Items.Count - 1)].SubItems[5].Text = list_Games.Items[(list_Games.Items.Count - 1)].SubItems[5].Text.Substring(0, list_Games.Items[(list_Games.Items.Count - 1)].SubItems[5].Text.IndexOf(' '));
                 }
 
                 if (int.Parse(handler.CurrentVersion) > 1)
                 {
-                    if (list_Games.Items[i].SubItems[6].Text.Contains(" "))
+                    if (list_Games.Items[(list_Games.Items.Count - 1)].SubItems[6].Text.Contains(" "))
                     {
-                        list_Games.Items[i].SubItems[6].Text = list_Games.Items[i].SubItems[6].Text.Substring(0, list_Games.Items[i].SubItems[6].Text.IndexOf(' '));
+                        list_Games.Items[(list_Games.Items.Count - 1)].SubItems[6].Text = list_Games.Items[(list_Games.Items.Count - 1)].SubItems[6].Text.Substring(0, list_Games.Items[(list_Games.Items.Count - 1)].SubItems[6].Text.IndexOf(' '));
                     }  
                 }
                 else
                 {
-                    list_Games.Items[i].SubItems[6].Text = string.Empty;
+                    list_Games.Items[(list_Games.Items.Count - 1)].SubItems[6].Text = string.Empty;
                 }
 
-                if (list_Games.Items[i].SubItems[7].Text.Length > 50)
+                if (list_Games.Items[(list_Games.Items.Count - 1)].SubItems[7].Text.Length > 50)
                 {
-                    list_Games.Items[i].SubItems[7].Text = list_Games.Items[i].SubItems[7].Text.Substring(0, 50) + "...";
+                    list_Games.Items[(list_Games.Items.Count - 1)].SubItems[7].Text = list_Games.Items[(list_Games.Items.Count - 1)].SubItems[7].Text.Substring(0, 50) + "...";
                 }
 
                 foreach (ListViewItem lvi in list_Games.Items)
@@ -272,8 +308,8 @@ namespace Nucleus.Coop.Forms
                     lvi.UseItemStyleForSubItems = false;
                 }
 
-                list_Games.Items[i].SubItems[2].Font = new Font(new FontFamily("Wingdings"), 10, FontStyle.Bold);
-                list_Games.Items[i].SubItems[2].ForeColor = Color.Green;
+                list_Games.Items[(list_Games.Items.Count - 1)].SubItems[2].Font = new Font(new FontFamily("Wingdings"), 10, FontStyle.Bold);
+                list_Games.Items[(list_Games.Items.Count - 1)].SubItems[2].ForeColor = Color.Green;
 
 
             }
@@ -290,7 +326,7 @@ namespace Nucleus.Coop.Forms
 
             list_Games.EndUpdate();
 
-            if(startIndex + entriesToView == handlers.Count)
+            if(startIndex + entriesToView == handlers.Count || startIndex + entriesToView == verCount)
                 btn_Next.Enabled = false;
             else
                 btn_Next.Enabled = true;
@@ -301,7 +337,12 @@ namespace Nucleus.Coop.Forms
 
             Cursor.Current = Cursors.Default;
 
-            lbl_Status.Text = string.Format("Viewing results {0}-{1}. Total: {2}", (startIndex + 1), entriesToView + startIndex, handlers.Count);
+            int tot = handlers.Count;
+            if(chkBox_Verified.Checked)
+            {
+                tot = verCount;
+            }
+            lbl_Status.Text = string.Format("Viewing results {0}-{1}. Total: {2}", (startIndex + 1), entriesToView + startIndex, tot);
         }
 
         public string Get(string uri)
@@ -309,6 +350,7 @@ namespace Nucleus.Coop.Forms
             try
             {
                 HttpWebRequest request = (HttpWebRequest)WebRequest.Create(uri);
+                request.Timeout = 10;
                 //request.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
 
                 using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
@@ -466,7 +508,14 @@ namespace Nucleus.Coop.Forms
             }
             else
             {
-                txt_Search.Text = lastSearch;
+                if(lastSearch == string.Empty)
+                {
+                    grabAll = true;
+                }
+                else
+                {
+                    txt_Search.Text = lastSearch;
+                }
                 btn_Search.PerformClick();
             }
         }
@@ -483,18 +532,24 @@ namespace Nucleus.Coop.Forms
             if (entryIndex < 0)
                 entryIndex = 0;
 
-            chkBox_Verified.Checked = false;
+            //chkBox_Verified.Checked = false;
             FetchHandlers(entryIndex);
         }
             
 
         private void btn_Next_Click(object sender, EventArgs e)
         {
-            entryIndex += entriesPerPage;
-            if (entryIndex > handlers.Count)
-                entryIndex = handlers.Count - entriesPerPage;
+            int tot = handlers.Count;
+            if(chkBox_Verified.Checked)
+            {
+                tot = verCount;
+            }
 
-            chkBox_Verified.Checked = false;
+            entryIndex += entriesPerPage;
+            if (entryIndex > tot)
+                entryIndex = tot - entriesPerPage;
+
+            //chkBox_Verified.Checked = false;
             FetchHandlers(entryIndex);
         }
 
