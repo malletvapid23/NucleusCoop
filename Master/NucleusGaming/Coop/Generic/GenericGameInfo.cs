@@ -201,7 +201,7 @@ namespace Nucleus.Gaming
         public bool UserProfileConfigPathNoCopy;
         public bool UserProfileSavePathNoCopy;
         public bool LauncherExeIgnoreFileCheck;
-
+        public bool ForceBindIPDelay;
 
         // -- From USS
         //Effectively a switch for all of USS features
