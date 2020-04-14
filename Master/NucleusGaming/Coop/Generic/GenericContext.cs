@@ -144,6 +144,8 @@ namespace Nucleus.Gaming
         public string RootInstallFolder;
         [Dynamic(AutoHandles = true)]
         public string RootFolder;
+        [Dynamic(AutoHandles = true)]
+        public string OrigRootFolder;
 
         private GameProfile profile;
         private PlayerInfo pInfo;

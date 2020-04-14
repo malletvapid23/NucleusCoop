@@ -1899,6 +1899,7 @@ namespace Nucleus.Gaming
                 context.ExePath = exePath;
                 context.RootInstallFolder = exeFolder;
                 context.RootFolder = linkFolder;
+                context.OrigRootFolder = rootFolder;
                 context.UserProfileConfigPath = gen.UserProfileConfigPath;
                 context.UserProfileSavePath = gen.UserProfileSavePath;
 
