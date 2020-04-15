@@ -1895,7 +1895,7 @@ namespace Nucleus.Gaming
                 context = gen.CreateContext(profile, player, this, hasKeyboardPlayer);
                 context.PlayerID = player.PlayerID;
                 context.IsFullscreen = isFullscreen;
-
+                
                 context.ExePath = exePath;
                 context.RootInstallFolder = exeFolder;
                 context.RootFolder = linkFolder;
@@ -5270,11 +5270,6 @@ namespace Nucleus.Gaming
             //MessageBox.Show("Going to attempt to reposition and resize instance " + (i - 1));
             try
             {
-                if(!gen.DontReposition)
-                    processData.HWnd.Location = new Point(x, y);
-                if(!gen.DontResize)
-                    processData.HWnd.Size = new Size(w, h);
-
                 uint lStyle = User32Interop.GetWindowLong(processData.HWnd.NativePtr, User32_WS.GWL_STYLE);
                 if (gen.WindowStyleValues?.Length > 0)
                 {
@@ -5329,6 +5324,11 @@ namespace Nucleus.Gaming
                 User32Interop.SetWindowLong(processData.HWnd.NativePtr, User32_WS.GWL_EXSTYLE, lStyle);
                 User32Interop.SetWindowPos(processData.HWnd.NativePtr, IntPtr.Zero, 0, 0, 0, 0, (uint)(PositioningFlags.SWP_FRAMECHANGED | PositioningFlags.SWP_NOMOVE | PositioningFlags.SWP_NOSIZE | PositioningFlags.SWP_NOZORDER | PositioningFlags.SWP_NOOWNERZORDER));
 
+
+                if (!gen.DontReposition)
+                    processData.HWnd.Location = new Point(x, y);
+                if (!gen.DontResize)
+                    processData.HWnd.Size = new Size(w, h);
             }
             catch (Exception ex)
             {
