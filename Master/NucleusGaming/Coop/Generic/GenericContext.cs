@@ -10,6 +10,7 @@ using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -193,11 +194,11 @@ namespace Nucleus.Gaming
             }
         }
 
-        public double OrigAspectRatioDecimal
+        public float OrigAspectRatioDecimal
         {
             get
             {
-                return (double)profile.Screens[pInfo.PlayerID].display.Width / profile.Screens[pInfo.PlayerID].display.Height;
+                return (float)profile.Screens[pInfo.PlayerID].display.Width / profile.Screens[pInfo.PlayerID].display.Height;
             }
         }
 
@@ -212,11 +213,11 @@ namespace Nucleus.Gaming
             }
         }
 
-        public double AspectRatioDecimal
+        public float AspectRatioDecimal
         {
             get
             {
-                return (double)Width / Height;
+                return (float)Width / Height;
             }
         }
 
@@ -311,6 +312,21 @@ namespace Nucleus.Gaming
             //set { }
 
             get; set;
+        }
+
+        public byte[] ConvertToBytes(float num)
+        {
+            return BitConverter.GetBytes(num);
+        }
+
+        public byte[] ConvertToBytes(int num)
+        {
+            return BitConverter.GetBytes(num);
+        }
+
+        public byte[] ConvertToBytes(string str)
+        {
+            return Encoding.ASCII.GetBytes(str);
         }
 
         public void RunAdditionalFiles(string[] filePaths, bool changeWorkingDir, int secondsToPauseInbetween)
