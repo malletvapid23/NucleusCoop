@@ -3442,6 +3442,21 @@ namespace Nucleus.Gaming
 					}
 
 				}
+                    if(gen.SendFakeFocusMsg)
+                    {
+                        foreach (PlayerInfo plyr in players)
+                        {
+                            Thread.Sleep(1000);
+
+                            Process plyrProc = plyr.ProcessData.Process;
+
+                            User32Interop.SendMessage(plyrProc.MainWindowHandle, (int)FocusMessages.WM_ACTIVATE, (IntPtr)0x00000002, IntPtr.Zero);
+                            User32Interop.SendMessage(plyrProc.MainWindowHandle, (int)FocusMessages.WM_ACTIVATEAPP, (IntPtr)1, IntPtr.Zero);
+                            User32Interop.SendMessage(plyrProc.MainWindowHandle, (int)FocusMessages.WM_NCACTIVATE, (IntPtr)0x00000001, IntPtr.Zero);
+                            User32Interop.SendMessage(plyrProc.MainWindowHandle, (int)FocusMessages.WM_SETFOCUS, IntPtr.Zero, IntPtr.Zero);
+                            User32Interop.SendMessage(plyrProc.MainWindowHandle, (int)FocusMessages.WM_MOUSEACTIVATE, (IntPtr)plyrProc.MainWindowHandle, (IntPtr)1);
+                        }
+                    }
             }
 
             return string.Empty;

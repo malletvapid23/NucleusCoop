@@ -55,6 +55,7 @@ namespace Nucleus.Gaming
         public bool FakeFocus;
         public int FakeFocusInterval = 1000;//TODO: high CPU usage with low value?
         public bool FakeFocusSendActivate = true;
+        public bool SendFakeFocusMsg;
 
 
 		public void AddOption(string name, string desc, string key, object value, object defaultValue)
