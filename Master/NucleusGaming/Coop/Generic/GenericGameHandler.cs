@@ -2390,6 +2390,11 @@ namespace Nucleus.Gaming
                                 //cmd.StartInfo.CreateNoWindow = true;
                                 cmd.StartInfo.UseShellExecute = false;
 
+                                if(gen.UseForceBindIP)
+                                {
+                                    cmd.StartInfo.WorkingDirectory = Path.GetDirectoryName(exePath);
+                                }
+
                                 cmd.Start();
 
                                 if (gen.CMDLaunch)
@@ -2554,7 +2559,7 @@ namespace Nucleus.Gaming
                                     {
                                         iParam = "-i ";
                                     }
-                                    string cmdLine = "\"" + Path.Combine(GameManager.Instance.GetUtilsPath(), "ForceBindIP\\" + forceBindexe) + "\" " + iParam + "127.0.0." + (i + 2) + " \"" + exePath + "\" " + startArgs;
+                                    string cmdLine = "\"" + Path.Combine(GameManager.Instance.GetUtilsPath(), "ForceBindIP\\" + forceBindexe) + "\" " + iParam + "127.0.0." + (i + 2) + " \"" + exePath + "\" dummy" + startArgs;
                                     Log(string.Format("Launching game using ForceBindIP command line argument: {0}", cmdLine));
                                     cmd.StandardInput.WriteLine(cmdLine);
 
