@@ -75,12 +75,12 @@
     <Compile Include="Util.cs" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="x64\AutoHotkey.dll">
+    <Content Include="x64\AutoHotkey.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </EmbeddedResource>
-    <EmbeddedResource Include="x86\AutoHotkey.dll">
+    </Content>
+    <Content Include="x86\AutoHotkey.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </EmbeddedResource>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <None Include="AutoHotkeyInteropNC.snk" />

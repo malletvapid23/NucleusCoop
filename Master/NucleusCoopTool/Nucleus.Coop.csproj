@@ -539,6 +539,8 @@
     <PostBuildEvent>echo.&gt;Built.flag
 copy $(SolutionDir)ThirdParty\easyhook\*.dll $(TargetPath)\..
 copy $(SolutionDir)ThirdParty\easyhook\*.exe $(TargetPath)\..
+xcopy $(SolutionDir)ThirdParty\AutoHotkey.Interop\x64\*.dll $(TargetDir)x64\
+xcopy $(SolutionDir)ThirdParty\AutoHotkey.Interop\x86\*.dll $(TargetDir)x86\
 xcopy $(ProjectDir)copyoutput $(TargetPath)\.. /s/h/e/k/f/c/Y</PostBuildEvent>
   </PropertyGroup>
   <PropertyGroup>
