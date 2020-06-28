@@ -3462,6 +3462,24 @@ namespace Nucleus.Gaming
 
                 Log(string.Format("Process details; Name: {0}, ID: {1}, MainWindowtitle: {2}, MainWindowHandle: {3}", proc.ProcessName, proc.Id, proc.MainWindowTitle, proc.MainWindowHandle));
 
+                if(gen.WriteToProcessMemory?.Length > 0)
+                {
+                    if(gen.WriteToProcessMemory.Contains('|'))
+                    {
+                        string[] writeSplit = gen.WriteToProcessMemory.Split('|');
+                        long baseAddr = long.Parse(writeSplit[0], NumberStyles.HexNumber);
+
+                        List<byte> bytesConv = new List<byte>();
+                        for (int s = 0; s < writeSplit[1].Length; s += 2)
+                        {
+                            bytesConv.Add(Convert.ToByte(writeSplit[1].Substring(s, 2), 16));
+                        }
+                        byte[] bArray = bytesConv.ToArray();
+
+                        bool result = WriteProcessMemory(proc.MainWindowHandle, baseAddr, bArray, (ulong)bArray.Length, out _);
+                        Log(string.Format("WriteToProcessMemory - baseaddr: {0} result: {1}", baseAddr, result));
+                    }
+                }
 
                 if (gen.GoldbergLobbyConnect && i == 0)
                 {

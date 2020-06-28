@@ -223,6 +223,7 @@ namespace Nucleus.Gaming
         public bool GoldbergWriteSteamIDAndAccount;
         public bool ForceProcessSearch;
         public bool IgnoreWindowBorderCheck;
+        public string WriteToProcessMemory;
         public bool UseNemirtingasEpicEmu;
         public bool EpicEmuArgs;
         public bool PromptAfterFirstInstance;
