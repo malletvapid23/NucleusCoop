@@ -433,19 +433,20 @@ namespace Nucleus.Gaming
 
             if (ini.IniReadValue("Misc", "ShowStatus") == "True")
             {
-                //if (statusForm != null)
-                //{
-                //    statusForm.Close();
-                //}
-                foreach(Form frm in Application.OpenForms)
+                if (statusForm != null)
                 {
-                    if(frm.Name == "Nucleus Coop - Status")
-                    {
-                        frm.Close();
-                        Thread.Sleep(200);
-                        break;
-                    }
+                    statusForm.Close();
+                    Thread.Sleep(200);
                 }
+                //foreach(Form frm in Application.OpenForms)
+                //{
+                //    if(frm.Name == "Nucleus Coop - Status")
+                //    {
+                //        frm.Close();
+                //        Thread.Sleep(200);
+                //        break;
+                //    }
+                //}
                 ShowStatus();
             }
             Log("----------------- SHUTTING DOWN -----------------");
@@ -788,20 +789,21 @@ namespace Nucleus.Gaming
             }
 #endif
             Log("All done closing operations. Exiting Nucleus.");
-            //if(statusForm != null)
-            //{
-            //    processingExit = true;
-            //    statusForm.Close();
-            //}
-            foreach(Form frm in Application.OpenForms)
+            if (statusForm != null)
             {
-                if (frm.Name == "Nucleus Coop - Status")
-                {
-                    frm.Close();
-                    Thread.Sleep(200);
-                    break;
-                }
+                processingExit = true;
+                statusForm.Close();
+                Thread.Sleep(200);
             }
+            //foreach(Form frm in Application.OpenForms)
+            //{
+            //    if (frm.Name == "Nucleus Coop - Status")
+            //    {
+            //        frm.Close();
+            //        Thread.Sleep(200);
+            //        break;
+            //    }
+            //}
 
             Ended?.Invoke();
         }
@@ -3738,6 +3740,10 @@ namespace Nucleus.Gaming
                             User32Interop.SendMessage(plyrProc.MainWindowHandle, (int)FocusMessages.WM_MOUSEACTIVATE, (IntPtr)plyrProc.MainWindowHandle, (IntPtr)1);
                         }
                     }
+            if(statusForm != null)
+            {
+                statusForm.Close();
+                Thread.Sleep(200);
             }
 
             return string.Empty;
@@ -5192,7 +5198,22 @@ namespace Nucleus.Gaming
                                 {
                                     //last screen setuped
                                     Log("Finished!");
-                                    statusForm.Close();
+                                    Thread.Sleep(1000);
+                                    //FormCollection fc = Application.OpenForms;
+
+                                    //foreach (Form frm in fc)
+                                    //{
+                                    //    //iterate through
+                                    //    if (frm.Name == "Nucleus Coop - Status")
+                                    //    {
+                                    //        statusForm.Close();
+                                    //    }
+                                    //}
+                                    if (statusForm != null)
+                                    {
+                                        statusForm.Close();
+                                    }
+
 
                                     if(gen.LockMouse)
                                     {
