@@ -216,6 +216,7 @@ namespace Nucleus.Gaming
         public string[] WindowStyleEndChanges;
         public string[] ExtWindowStyleEndChanges;
         public bool UseDInputBlocker;
+        public bool IgnoreThirdPartyPrompt;
         public string ExecutableToLaunch;
         public bool GoldbergWriteSteamIDAndAccount;
         public bool ForceProcessSearch;

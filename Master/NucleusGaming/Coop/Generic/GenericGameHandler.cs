@@ -2985,8 +2985,11 @@ namespace Nucleus.Gaming
                     {
                         Log("Skipping launching of game via Nucleus for third party launch");
                         //MessageBox.Show("Press Ok when game has launched.", "Nucleus - Third Party Launch");
-                        Forms.Prompt prompt = new Forms.Prompt("Press OK when game has launched.");
-                        prompt.ShowDialog();
+                        if(!gen.IgnoreThirdPartyPrompt)
+                        {
+                            Forms.Prompt prompt = new Forms.Prompt("Press OK when game has launched.");
+                            prompt.ShowDialog();
+                        }
                     }
 
                     if (gen.LauncherExe?.Length > 0)
