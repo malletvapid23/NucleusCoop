@@ -156,6 +156,10 @@ namespace Nucleus.Gaming
         [DllImport("userenv.dll", CharSet = CharSet.Unicode, ExactSpelling = false, SetLastError = true)]
         public static extern bool DeleteProfile(string sidString, string profilePath, string omputerName);
 
+        [DllImport("user32.dll")]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        static extern bool EnableWindow(IntPtr hWnd, bool bEnable);
+
 
         private bool gameIs64 = false;
 
@@ -3703,6 +3707,80 @@ namespace Nucleus.Gaming
 						}
 					}
 
+                    if(!gen.IgnoreWindowBorderCheck)
+                    {
+                        foreach (PlayerInfo plyr in players)
+                        {
+                            Thread.Sleep(1000);
+
+                            Process plyrProc = plyr.ProcessData.Process;
+
+                            const int flip = 0x00C00000 | 0x00080000 | 0x00040000; //WS_BORDER | WS_SYSMENU
+
+                            var x = (int)User32Interop.GetWindowLong(plyrProc.MainWindowHandle, User32_WS.GWL_STYLE);
+                            if ((x & flip) > 0)//has a border
+                            {
+                                Log("Process id " + plyrProc.Id + ", still has or regained a border, trying to remove it (again)");
+                                x &= (~flip);
+                                ResetWindows(plyr.ProcessData, plyr.ProcessData.Position.X, plyr.ProcessData.Position.Y, plyr.ProcessData.Size.Width, plyr.ProcessData.Size.Height, plyr.PlayerID + 1);
+                            }
+
+                            if (gen.WindowStyleEndChanges?.Length > 0 || gen.ExtWindowStyleEndChanges?.Length > 0)
+                            {
+                                Thread.Sleep(1000);
+                                WindowStyleChanges(plyr.ProcessData, i);
+                            }
+
+                            if (gen.EnableWindows)
+                                EnableWindow(plyr.ProcessData.HWnd.NativePtr, true);
+                        }
+                    }
+
+                    // Fake mouse cursors
+                    if (gen.DrawFakeMouseCursor)//&& gen.SupportsMultipleKeyboardsAndMice)
+					{
+						RawInputManager.CreateCursorsOnWindowThread(gen.UpdateFakeMouseWithInternalInput, gen.DrawFakeMouseCursorForControllers);
+					}
+
+                    //Window setup
+                    foreach (var window in RawInputManager.windows)
+                    {
+                        var hWnd = window.hWnd;
+
+                        //Logger.WriteLine($"hWnd={hWnd}, mouse={window.MouseAttached}, kb={window.KeyboardAttached}");
+
+                        //Borderlands 2 (and some other games) requires WM_INPUT to be sent to a window named DIEmWin, not the main hWnd.
+                        foreach (ProcessThread thread in Process.GetProcessById(window.pid).Threads)
+                        {
+
+                            int WindowEnum(IntPtr _hWnd, int lParam)
+                            {
+                                var threadId = WinApi.GetWindowThreadProcessId(_hWnd, out int pid);
+                                if (threadId == lParam)
+                                {
+                                    string windowText = WinApi.GetWindowText(_hWnd);
+                                    //Logger.WriteLine($" - thread id=0x{threadId:x}, _hWnd=0x{_hWnd:x}, window text={windowText}");
+
+                                    if (windowText != null && windowText.ToLower().Contains("DIEmWin".ToLower()))
+                                    {
+                                        window.DIEmWin_hWnd = _hWnd;
+                                    }
+                                }
+
+                                return 1;
+                            }
+
+                            WinApi.EnumWindows(WindowEnum, thread.Id);
+                        }
+                    }
+
+                    RawInputProcessor.Start();
+
+                    if (gen.SupportsMultipleKeyboardsAndMice && gen.LockInputAtStart)
+					{
+						LockInput.Lock();
+					}
+
                     if (gen.SetForegroundWindowElsewhere)
                     {
                         Log("Setting the foreground window to Nucleus");
@@ -3718,69 +3796,6 @@ namespace Nucleus.Gaming
                         }
                     }
 
-                    foreach (PlayerInfo plyr in players)
-                    {
-                        Thread.Sleep(1000);
-
-                        Process plyrProc = plyr.ProcessData.Process;
-
-                        const int flip = 0x00C00000 | 0x00080000 | 0x00040000; //WS_BORDER | WS_SYSMENU
-
-                        var x = (int)User32Interop.GetWindowLong(plyrProc.MainWindowHandle, User32_WS.GWL_STYLE);
-                        if ((x & flip) > 0)//has a border
-                        {
-                            Log("Process id " + plyrProc.Id + ", still has or regained a border, trying to remove it (again)");
-                            x &= (~flip);
-                            ResetWindows(plyr.ProcessData, plyr.ProcessData.Position.X, plyr.ProcessData.Position.Y, plyr.ProcessData.Size.Width, plyr.ProcessData.Size.Height, plyr.PlayerID + 1);
-                        }
-                    }
-
-					// Fake mouse cursors
-					if (gen.DrawFakeMouseCursor)//&& gen.SupportsMultipleKeyboardsAndMice)
-					{
-						RawInputManager.CreateCursorsOnWindowThread(gen.UpdateFakeMouseWithInternalInput, gen.DrawFakeMouseCursorForControllers);
-					}
-
-					//Window setup
-					foreach (var window in RawInputManager.windows)
-					{
-						var hWnd = window.hWnd;
-
-						//Logger.WriteLine($"hWnd={hWnd}, mouse={window.MouseAttached}, kb={window.KeyboardAttached}");
-						
-						//Borderlands 2 (and some other games) requires WM_INPUT to be sent to a window named DIEmWin, not the main hWnd.
-						foreach (ProcessThread thread in Process.GetProcessById(window.pid).Threads)
-						{
-
-							int WindowEnum(IntPtr _hWnd, int lParam)
-							{
-								var threadId = WinApi.GetWindowThreadProcessId(_hWnd, out int pid);
-								if (threadId == lParam)
-								{
-									string windowText = WinApi.GetWindowText(_hWnd);
-									//Logger.WriteLine($" - thread id=0x{threadId:x}, _hWnd=0x{_hWnd:x}, window text={windowText}");
-
-									if (windowText != null && windowText.ToLower().Contains("DIEmWin".ToLower()))
-									{
-										window.DIEmWin_hWnd = _hWnd;
-									}
-								}
-
-								return 1;
-							}
-
-							WinApi.EnumWindows(WindowEnum, thread.Id);
-						}
-					}
-
-					RawInputProcessor.Start();
-
-					if (gen.SupportsMultipleKeyboardsAndMice && gen.LockInputAtStart)
-					{
-						LockInput.Lock();
-					}
-
-				}
                     if(gen.SendFakeFocusMsg)
                     {
                         foreach (PlayerInfo plyr in players)
@@ -3796,6 +3811,9 @@ namespace Nucleus.Gaming
                             User32Interop.SendMessage(plyrProc.MainWindowHandle, (int)FocusMessages.WM_MOUSEACTIVATE, (IntPtr)plyrProc.MainWindowHandle, (IntPtr)1);
                         }
                     }
+                }
+            }
+
             if(statusForm != null)
             {
                 statusForm.Close();
@@ -3803,6 +3821,56 @@ namespace Nucleus.Gaming
             }
 
             return string.Empty;
+        }
+
+        private void WindowStyleChanges(ProcessData processData, int i)
+        {
+            try
+            {
+                
+                if (gen.WindowStyleEndChanges?.Length > 0)
+                {
+                    uint lStyle = User32Interop.GetWindowLong(processData.HWnd.NativePtr, User32_WS.GWL_STYLE);
+                    Log("Using user custom window style");
+                    foreach (string val in gen.WindowStyleEndChanges)
+                    {
+                        if (val.StartsWith("~"))
+                        {
+                            lStyle &= ~Convert.ToUInt32(val.Substring(1), 16);
+                        }
+                        else
+                        {
+                            lStyle |= Convert.ToUInt32(val, 16);
+                        }
+                    }
+                    User32Interop.SetWindowLong(processData.HWnd.NativePtr, User32_WS.GWL_STYLE, lStyle);
+                }
+
+                if (gen.ExtWindowStyleEndChanges?.Length > 0)
+                {
+                    uint lStyle = User32Interop.GetWindowLong(processData.HWnd.NativePtr, User32_WS.GWL_EXSTYLE);
+                    Log("Using user custom extended window style");
+                    foreach (string val in gen.ExtWindowStyleEndChanges)
+                    {
+                        if (val.StartsWith("~"))
+                        {
+                            lStyle &= ~Convert.ToUInt32(val.Substring(1), 16);
+                        }
+                        else
+                        {
+                            lStyle |= Convert.ToUInt32(val, 16);
+                        }
+                    }
+                    User32Interop.SetWindowLong(processData.HWnd.NativePtr, User32_WS.GWL_EXSTYLE, lStyle);
+                }
+
+                
+                User32Interop.SetWindowPos(processData.HWnd.NativePtr, IntPtr.Zero, 0, 0, 0, 0, (uint)(PositioningFlags.SWP_FRAMECHANGED | PositioningFlags.SWP_NOMOVE | PositioningFlags.SWP_NOSIZE | PositioningFlags.SWP_NOZORDER | PositioningFlags.SWP_NOOWNERZORDER));
+            }
+            catch (Exception ex)
+            {
+                Log("ERROR - Exception in WindowStyleChanges for instance " + i + ". " + ex.Message);
+            }
         }
 
         private Window CreateRawInputWindow(Process proc, PlayerInfo player)
@@ -5233,12 +5301,21 @@ namespace Nucleus.Gaming
                                 User32Interop.SetWindowPos(data.HWnd.NativePtr, IntPtr.Zero, 0, 0, 0, 0, (uint)(PositioningFlags.SWP_FRAMECHANGED | PositioningFlags.SWP_NOMOVE | PositioningFlags.SWP_NOSIZE | PositioningFlags.SWP_NOZORDER | PositioningFlags.SWP_NOOWNERZORDER));
                                 //User32Interop.SetForegroundWindow(data.HWnd.NativePtr);
                                 //User32Interop.SetWindowPos(data.HWnd.NativePtr, new IntPtr(-2), 0, 0, 0, 0, (uint)(PositioningFlags.SWP_NOSIZE | PositioningFlags.SWP_NOMOVE));
-                                
+
+                                if (gen.EnableWindows)
+                                    EnableWindow(data.HWnd.NativePtr, true);
+
                                 //Minimise and un-minimise the window. Fixes black borders in Minecraft, but causing stretching issues in games like Minecraft.
                                 if (gen.RefreshWindowAfterStart)
                                 {
 	                                ShowWindow(data.HWnd.NativePtr, 6);
 	                                ShowWindow(data.HWnd.NativePtr, 9);
+                                }
+
+                                if (gen.WindowStyleEndChanges?.Length > 0 || gen.ExtWindowStyleEndChanges?.Length > 0)
+                                {
+                                    Thread.Sleep(1000);
+                                    WindowStyleChanges(data, i);
                                 }
 
 

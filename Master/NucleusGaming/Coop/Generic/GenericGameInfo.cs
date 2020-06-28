@@ -212,10 +212,14 @@ namespace Nucleus.Gaming
         public bool SaveAndEditCustomUserGeneralValues;
         public bool SaveAndEditCustomUserPlayerValues;
         public bool SaveAndEditCustomInstanceValues;
+        public bool EnableWindows;
+        public string[] WindowStyleEndChanges;
+        public string[] ExtWindowStyleEndChanges;
         public bool UseDInputBlocker;
         public string ExecutableToLaunch;
         public bool GoldbergWriteSteamIDAndAccount;
         public bool ForceProcessSearch;
+        public bool IgnoreWindowBorderCheck;
         public bool UseNemirtingasEpicEmu;
         public bool EpicEmuArgs;
         public bool PromptAfterFirstInstance;
