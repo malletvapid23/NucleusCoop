@@ -160,6 +160,7 @@ namespace Nucleus.Gaming
         [return: MarshalAs(UnmanagedType.Bool)]
         static extern bool EnableWindow(IntPtr hWnd, bool bEnable);
 
+        public string NucleusEnvironmentRoot = $@"C:\Users\{Environment.UserName}\";
 
         private bool gameIs64 = false;
 
@@ -1963,7 +1964,7 @@ namespace Nucleus.Gaming
 
                 if(gen.DeleteFilesInConfigPath?.Length > 0)
                 {
-                    string path = Path.Combine($@"C:\Users\{Environment.UserName}\NucleusCoop\{player.Nickname}\", gen.UserProfileConfigPath);
+                    string path = Path.Combine(NucleusEnvironmentRoot + $@"\NucleusCoop\{player.Nickname}\", gen.UserProfileConfigPath);
                     //string realConfigPath = Path.Combine(Environment.GetEnvironmentVariable("userprofile"), gen.UserProfileConfigPath);
                     foreach(string fileName in gen.DeleteFilesInConfigPath)
                     {
@@ -1986,7 +1987,7 @@ namespace Nucleus.Gaming
 
                 if (gen.DeleteFilesInSavePath?.Length > 0)
                 {
-                    string path = Path.Combine($@"C:\Users\{Environment.UserName}\NucleusCoop\{player.Nickname}\", gen.UserProfileConfigPath);
+                    string path = Path.Combine(NucleusEnvironmentRoot + $@"\NucleusCoop\{player.Nickname}\", gen.UserProfileConfigPath);
                     //string realConfigPath = Path.Combine(Environment.GetEnvironmentVariable("userprofile"), gen.UserProfileSavePath);
                     foreach (string fileName in gen.DeleteFilesInSavePath)
                     {
@@ -2736,16 +2737,29 @@ namespace Nucleus.Gaming
                                 if(gen.UseNucleusEnvironment)
                                 {
                                     var username = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile).Replace(@"C:\Users\", "");
-                                    cmd.StartInfo.EnvironmentVariables["APPDATA"] = $@"C:\Users\{username}\NucleusCoop\{player.Nickname}\AppData\Roaming";
-                                    cmd.StartInfo.EnvironmentVariables["LOCALAPPDATA"] = $@"C:\Users\{username}\NucleusCoop\{player.Nickname}\AppData\Local";
-                                    cmd.StartInfo.EnvironmentVariables["USERPROFILE"] = $@"C:\Users\{username}\NucleusCoop\{player.Nickname}";
+                                    cmd.StartInfo.EnvironmentVariables["APPDATA"] = NucleusEnvironmentRoot + $@"\NucleusCoop\{player.Nickname}\AppData\Roaming";
+                                    cmd.StartInfo.EnvironmentVariables["LOCALAPPDATA"] = NucleusEnvironmentRoot + $@"\NucleusCoop\{player.Nickname}\AppData\Local";
+                                    cmd.StartInfo.EnvironmentVariables["USERPROFILE"] = NucleusEnvironmentRoot + $@"\NucleusCoop\{player.Nickname}";
                                     cmd.StartInfo.EnvironmentVariables["HOMEPATH"] = $@"\Users\{username}\NucleusCoop\{player.Nickname}";
 
-                                    Directory.CreateDirectory($@"C:\Users\{username}\NucleusCoop");
-                                    Directory.CreateDirectory($@"C:\Users\{username}\NucleusCoop\{player.Nickname}");
-                                    Directory.CreateDirectory($@"C:\Users\{username}\NucleusCoop\{player.Nickname}\Documents");
-                                    Directory.CreateDirectory($@"C:\Users\{username}\NucleusCoop\{player.Nickname}\AppData\Roaming");
-                                    Directory.CreateDirectory($@"C:\Users\{username}\NucleusCoop\{player.Nickname}\AppData\Local");
+                                    Directory.CreateDirectory(NucleusEnvironmentRoot + $@"\NucleusCoop");
+                                    Directory.CreateDirectory(NucleusEnvironmentRoot + $@"\NucleusCoop\{player.Nickname}");
+                                    Directory.CreateDirectory(NucleusEnvironmentRoot + $@"\NucleusCoop\{player.Nickname}\Documents");
+                                    Directory.CreateDirectory(NucleusEnvironmentRoot + $@"\NucleusCoop\{player.Nickname}\AppData\Roaming");
+                                    Directory.CreateDirectory(NucleusEnvironmentRoot + $@"\NucleusCoop\{player.Nickname}\AppData\Local");
+                                }
+                                else if (gen.UseCurrentUserEnvironment)
+                                {
+                                    var username = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile).Replace(@"C:\Users\", "");
+                                    cmd.StartInfo.EnvironmentVariables["APPDATA"] = $@"C:\Users\{username}\AppData\Roaming";
+                                    cmd.StartInfo.EnvironmentVariables["LOCALAPPDATA"] = $@"C:\Users\{username}\AppData\Local";
+                                    cmd.StartInfo.EnvironmentVariables["USERPROFILE"] = $@"C:\Users\{username}\";
+                                    cmd.StartInfo.EnvironmentVariables["HOMEPATH"] = $@"\Users\{username}\";
+
+                                    Directory.CreateDirectory($@"C:\Users\{username}");
+                                    Directory.CreateDirectory($@"C:\Users\{username}\Documents");
+                                    Directory.CreateDirectory($@"C:\Users\{username}\AppData\Roaming");
+                                    Directory.CreateDirectory($@"C:\Users\{username}\AppData\Local");
                                 }
 
                                 Log(string.Format("Launching game as user: nucleusplayer{0}, using command: {1}", (i+1), cmdLine));
@@ -2762,21 +2776,21 @@ namespace Nucleus.Gaming
                             {
                                 IntPtr envPtr = IntPtr.Zero;
 
+                                var username = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile).Replace(@"C:\Users\", "");
+
+                                var sb = new StringBuilder();
+                                IDictionary envVars = Environment.GetEnvironmentVariables();
+
                                 if (gen.UseNucleusEnvironment)
                                 {
                                     Log("Setting up Nucleus environment");
-                                    var username = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile).Replace(@"C:\Users\", "");
-
-                                    var sb = new StringBuilder();
-                                    IDictionary envVars = Environment.GetEnvironmentVariables();
-                                    
-                                    envVars["USERPROFILE"] = $@"C:\Users\{username}\NucleusCoop\{player.Nickname}";
+                                    envVars["USERPROFILE"] = NucleusEnvironmentRoot + $@"\NucleusCoop\{player.Nickname}";
                                     envVars["HOMEPATH"] = $@"\Users\{username}\NucleusCoop\{player.Nickname}";
-                                    envVars["APPDATA"] = $@"C:\Users\{username}\NucleusCoop\{player.Nickname}\AppData\Roaming";
-                                    envVars["LOCALAPPDATA"] = $@"C:\Users\{username}\NucleusCoop\{player.Nickname}\AppData\Local";
+                                    envVars["APPDATA"] = NucleusEnvironmentRoot + $@"\NucleusCoop\{player.Nickname}\AppData\Roaming";
+                                    envVars["LOCALAPPDATA"] = NucleusEnvironmentRoot + $@"\NucleusCoop\{player.Nickname}\AppData\Local";
 
                                     //Some games will crash if the directories don't exist
-                                    Directory.CreateDirectory($@"C:\Users\{username}\NucleusCoop");
+                                    Directory.CreateDirectory(NucleusEnvironmentRoot + $@"\NucleusCoop");
                                     Directory.CreateDirectory(envVars["USERPROFILE"].ToString());
                                     Directory.CreateDirectory(Path.Combine(envVars["USERPROFILE"].ToString(), "Documents"));
                                     Directory.CreateDirectory(envVars["APPDATA"].ToString());
@@ -2801,7 +2815,39 @@ namespace Nucleus.Gaming
                                     byte[] envBytes = Encoding.Unicode.GetBytes(sb.ToString());
                                     envPtr = Marshal.AllocHGlobal(envBytes.Length);
                                     Marshal.Copy(envBytes, 0, envPtr, envBytes.Length);
+                                }
+                                else if(gen.UseCurrentUserEnvironment)
+                                {
+                                    Log("Setting environment to current user");
+                                    envVars["APPDATA"] = $@"C:\Users\{username}\AppData\Roaming";
+                                    envVars["LOCALAPPDATA"] = $@"C:\Users\{username}\AppData\Local";
+                                    envVars["USERPROFILE"] = $@"C:\Users\{username}\";
+                                    envVars["HOMEPATH"] = $@"\Users\{username}\";
 
+                                    Directory.CreateDirectory($@"C:\Users\{username}");
+                                    Directory.CreateDirectory($@"C:\Users\{username}\Documents");
+                                    Directory.CreateDirectory($@"C:\Users\{username}\AppData\Roaming");
+                                    Directory.CreateDirectory($@"C:\Users\{username}\AppData\Local");
+
+                                    foreach (object envVarKey in envVars.Keys)
+                                    {
+                                        if (envVarKey != null)
+                                        {
+                                            string key = envVarKey.ToString();
+                                            string value = envVars[envVarKey].ToString();
+
+                                            sb.Append(key);
+                                            sb.Append("=");
+                                            sb.Append(value);
+                                            sb.Append("\0");
+                                        }
+                                    }
+
+                                    sb.Append("\0");
+
+                                    byte[] envBytes = Encoding.Unicode.GetBytes(sb.ToString());
+                                    envPtr = Marshal.AllocHGlobal(envBytes.Length);
+                                    Marshal.Copy(envBytes, 0, envPtr, envBytes.Length);
                                 }
 
                                 STARTUPINFO startup = new STARTUPINFO();
@@ -2844,18 +2890,18 @@ namespace Nucleus.Gaming
                                     {
                                         Log("Setting up Nucleus environment");
                                         var username = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile).Replace(@"C:\Users\", "");
-                                        cmd.StandardInput.WriteLine($@"set APPDATA=C:\Users\{username}\NucleusCoop\{player.Nickname}\AppData\Roaming");
-                                        cmd.StandardInput.WriteLine($@"set LOCALAPPDATA=C:\Users\{username}\NucleusCoop\{player.Nickname}\AppData\Local");
-                                        cmd.StandardInput.WriteLine($@"set USERPROFILE=C:\Users\{username}\NucleusCoop\{player.Nickname}");
+                                        cmd.StandardInput.WriteLine($@"set APPDATA={NucleusEnvironmentRoot}\NucleusCoop\{player.Nickname}\AppData\Roaming");
+                                        cmd.StandardInput.WriteLine($@"set LOCALAPPDATA={NucleusEnvironmentRoot}\NucleusCoop\{player.Nickname}\AppData\Local");
+                                        cmd.StandardInput.WriteLine($@"set USERPROFILE={NucleusEnvironmentRoot}\NucleusCoop\{player.Nickname}");
                                         cmd.StandardInput.WriteLine($@"set HOMEPATH=\Users\{username}\NucleusCoop\{player.Nickname}");
 
                                         //Some games will crash if the directories don't exist
-                                        Directory.CreateDirectory($@"C:\Users\{username}\NucleusCoop");
-                                        Directory.CreateDirectory($@"C:\Users\{username}\NucleusCoop\{player.Nickname}\AppData\Roaming");
-                                        Directory.CreateDirectory($@"C:\Users\{username}\NucleusCoop\{player.Nickname}\AppData\Local");
-                                        Directory.CreateDirectory($@"C:\Users\{username}\NucleusCoop\{player.Nickname}");
+                                        Directory.CreateDirectory($@"{NucleusEnvironmentRoot}\NucleusCoop");
+                                        Directory.CreateDirectory($@"{NucleusEnvironmentRoot}\NucleusCoop\{player.Nickname}\AppData\Roaming");
+                                        Directory.CreateDirectory($@"{NucleusEnvironmentRoot}\NucleusCoop\{player.Nickname}\AppData\Local");
+                                        Directory.CreateDirectory($@"{NucleusEnvironmentRoot}\NucleusCoop\{player.Nickname}");
                                         Directory.CreateDirectory($@"\Users\{username}\NucleusCoop\{player.Nickname}");
-                                        Directory.CreateDirectory($@"C:\Users\{username}\NucleusCoop\{player.Nickname}\Documents");
+                                        Directory.CreateDirectory($@"{NucleusEnvironmentRoot}\NucleusCoop\{player.Nickname}\Documents");
                                     }
 
                                     if (gen.CMDBatchBefore?.Length > 0 || gen.CMDBatchAfter?.Length > 0)
@@ -2932,6 +2978,7 @@ namespace Nucleus.Gaming
                                 else
                                 {
                                     string forceBindexe = string.Empty;
+                                    
 
                                     if (gameIs64)
                                     {
@@ -2949,18 +2996,18 @@ namespace Nucleus.Gaming
                                     {
                                         Log("Setting up Nucleus environment");
                                         var username = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile).Replace(@"C:\Users\", "");
-                                        cmd.StandardInput.WriteLine($@"set APPDATA=C:\Users\{username}\NucleusCoop\{player.Nickname}\AppData\Roaming");
-                                        cmd.StandardInput.WriteLine($@"set LOCALAPPDATA=C:\Users\{username}\NucleusCoop\{player.Nickname}\AppData\Local");
-                                        cmd.StandardInput.WriteLine($@"set USERPROFILE=C:\Users\{username}\NucleusCoop\{player.Nickname}");
+                                        cmd.StandardInput.WriteLine($@"set APPDATA={NucleusEnvironmentRoot}\NucleusCoop\{player.Nickname}\AppData\Roaming");
+                                        cmd.StandardInput.WriteLine($@"set LOCALAPPDATA={NucleusEnvironmentRoot}\NucleusCoop\{player.Nickname}\AppData\Local");
+                                        cmd.StandardInput.WriteLine($@"set USERPROFILE={NucleusEnvironmentRoot}\NucleusCoop\{player.Nickname}");
                                         cmd.StandardInput.WriteLine($@"set HOMEPATH=\Users\{username}\NucleusCoop\{player.Nickname}");
 
                                         //Some games will crash if the directories don't exist
-                                        Directory.CreateDirectory($@"C:\Users\{username}\NucleusCoop");
-                                        Directory.CreateDirectory($@"C:\Users\{username}\NucleusCoop\{player.Nickname}\AppData\Roaming");
-                                        Directory.CreateDirectory($@"C:\Users\{username}\NucleusCoop\{player.Nickname}\AppData\Local");
-                                        Directory.CreateDirectory($@"C:\Users\{username}\NucleusCoop\{player.Nickname}");
+                                        Directory.CreateDirectory($@"{NucleusEnvironmentRoot}\NucleusCoop");
+                                        Directory.CreateDirectory($@"{NucleusEnvironmentRoot}\NucleusCoop\{player.Nickname}\AppData\Roaming");
+                                        Directory.CreateDirectory($@"{NucleusEnvironmentRoot}\NucleusCoop\{player.Nickname}\AppData\Local");
+                                        Directory.CreateDirectory($@"{NucleusEnvironmentRoot}\NucleusCoop\{player.Nickname}");
                                         Directory.CreateDirectory($@"\Users\{username}\NucleusCoop\{player.Nickname}");
-                                        Directory.CreateDirectory($@"C:\Users\{username}\NucleusCoop\{player.Nickname}\Documents");
+                                        Directory.CreateDirectory($@"{NucleusEnvironmentRoot}\NucleusCoop\{player.Nickname}\Documents");
                                     }
 
                                     if (gen.CMDBatchBefore?.Length > 0 || gen.CMDBatchAfter?.Length > 0)
@@ -3050,13 +3097,13 @@ namespace Nucleus.Gaming
                                     var sb = new StringBuilder();
                                     IDictionary envVars = Environment.GetEnvironmentVariables();
                                     var username = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile).Replace(@"C:\Users\", "");
-                                    envVars["USERPROFILE"] = $@"C:\Users\{username}\NucleusCoop\{player.Nickname}";
+                                    envVars["USERPROFILE"] = $@"{NucleusEnvironmentRoot}\NucleusCoop\{player.Nickname}";
                                     envVars["HOMEPATH"] = $@"\Users\{username}\NucleusCoop\{player.Nickname}";
-                                    envVars["APPDATA"] = $@"C:\Users\{username}\NucleusCoop\{player.Nickname}\AppData\Roaming";
-                                    envVars["LOCALAPPDATA"] = $@"C:\Users\{username}\NucleusCoop\{player.Nickname}\AppData\Local";
+                                    envVars["APPDATA"] = $@"{NucleusEnvironmentRoot}\NucleusCoop\{player.Nickname}\AppData\Roaming";
+                                    envVars["LOCALAPPDATA"] = $@"{NucleusEnvironmentRoot}\NucleusCoop\{player.Nickname}\AppData\Local";
 
                                     //Some games will crash if the directories don't exist
-                                    Directory.CreateDirectory($@"C:\Users\{username}\NucleusCoop");
+                                    Directory.CreateDirectory($@"{NucleusEnvironmentRoot}\NucleusCoop");
                                     Directory.CreateDirectory(envVars["USERPROFILE"].ToString());
                                     Directory.CreateDirectory(Path.Combine(envVars["USERPROFILE"].ToString(), "Documents"));
                                     Directory.CreateDirectory(envVars["APPDATA"].ToString());
@@ -6800,7 +6847,7 @@ namespace Nucleus.Gaming
 
                 if (gen.UseNucleusEnvironment && gen.GoldbergNoLocalSave)
                 {
-                    instanceSteamSettingsFolder = $@"C:\Users\{Environment.UserName}\NucleusCoop\{player.Nickname}\AppData\Roaming\Goldberg SteamEmu Saves\settings\";
+                    instanceSteamSettingsFolder = $@"{NucleusEnvironmentRoot}\NucleusCoop\{player.Nickname}\AppData\Roaming\Goldberg SteamEmu Saves\settings\";
                 }
                 else
                 {
@@ -7482,7 +7529,7 @@ namespace Nucleus.Gaming
         private void UserProfileConfigCopy(PlayerInfo player)
         {
             //UserProfileConfigPath = gen.UserProfileConfigPath;
-            string nucConfigPath = Path.Combine($@"C:\Users\{Environment.UserName}\NucleusCoop\{player.Nickname}\", gen.UserProfileConfigPath);
+            string nucConfigPath = Path.Combine($@"{NucleusEnvironmentRoot}\NucleusCoop\{player.Nickname}\", gen.UserProfileConfigPath);
             string realConfigPath = Path.Combine(Environment.GetEnvironmentVariable("userprofile"), gen.UserProfileConfigPath);
             if ((!Directory.Exists(nucConfigPath) && Directory.Exists(realConfigPath)) || (Directory.Exists(realConfigPath) && gen.ForceUserProfileConfigCopy))
             {
@@ -7514,7 +7561,7 @@ namespace Nucleus.Gaming
         private void UserProfileSaveCopy(PlayerInfo player)
         {
             //UserProfileSavePath = gen.UserProfileSavePath;
-            string nucSavePath = Path.Combine($@"C:\Users\{Environment.UserName}\NucleusCoop\{player.Nickname}\", gen.UserProfileSavePath);
+            string nucSavePath = Path.Combine($@"{NucleusEnvironmentRoot}\NucleusCoop\{player.Nickname}\", gen.UserProfileSavePath);
             string realSavePath = Path.Combine(Environment.GetEnvironmentVariable("userprofile"), gen.UserProfileSavePath);
             if ((!Directory.Exists(nucSavePath) && Directory.Exists(realSavePath)) || (Directory.Exists(realSavePath) && gen.ForceUserProfileSaveCopy))
             {
