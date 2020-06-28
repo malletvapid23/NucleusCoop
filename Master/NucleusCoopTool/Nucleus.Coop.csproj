@@ -349,6 +349,8 @@
     <Content Include="copyoutput\utils\devreorder\DeviceLister.exe" />
     <Content Include="copyoutput\utils\devreorder\x64\dinput8.dll" />
     <Content Include="copyoutput\utils\devreorder\x86\dinput8.dll" />
+    <Content Include="copyoutput\utils\dinput8.blocker\x64\dinput8.dll" />
+    <Content Include="copyoutput\utils\dinput8.blocker\x86\dinput8.dll" />
     <Content Include="copyoutput\utils\DirectXWrapper\d3d9.dll" />
     <Content Include="copyoutput\utils\Do NOT change file or folder names.txt" />
     <Content Include="copyoutput\utils\EAC Bypass\EasyAntiCheat_x64.dll" />

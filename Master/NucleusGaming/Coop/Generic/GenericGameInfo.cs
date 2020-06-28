@@ -203,6 +203,7 @@ namespace Nucleus.Gaming
         public bool UserProfileSavePathNoCopy;
         public bool LauncherExeIgnoreFileCheck;
         public bool ForceBindIPDelay;
+        public bool UseDInputBlocker;
         public bool UseNemirtingasEpicEmu;
         public bool EpicEmuArgs;
 

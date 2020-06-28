@@ -1979,6 +1979,11 @@ namespace Nucleus.Gaming
                     UseDevReorder(garch, player, players, i, setupDll);
                 }
 
+                if(gen.UseDInputBlocker)
+                {
+                    UseDInputBlocker(garch, setupDll);
+                }
+
                 if (gen.UseX360ce && !gen.ProcessChangesAtEnd)
                 {
                     UseX360ce(i, players, player, context, setupDll);
@@ -5876,6 +5881,39 @@ namespace Nucleus.Gaming
                 addedFiles.Add(Path.Combine(instanceExeFolder, "x360ce.ini"));
             }
             Log("x360ce setup complete");
+        }
+
+        private void UseDInputBlocker(string garch, bool setupDll)
+        {
+            Log("Setting up DInput blocker");
+            string utilFolder = Path.Combine(Directory.GetCurrentDirectory(), "utils\\dinput8.blocker");
+            //string arch = string.Empty;
+            //if (Is64Bit(exePath) == true)
+            //{
+            //    arch = "x64";
+            //}
+            //else if (Is64Bit(exePath) == false)
+            //{
+            //    arch = "x86";
+            //}
+            //else
+            //{
+            //    Log(string.Format("ERROR - Machine type {0} not implemented", GetDllMachineType(exePath)));
+            //}
+
+            if (setupDll)
+            {
+                if (File.Exists(Path.Combine(instanceExeFolder, "dinput8.dll")))
+                {
+                    File.Delete(Path.Combine(instanceExeFolder, "dinput8.dll"));
+                }
+                Log("Copying dinput8.dll");
+                File.Copy(Path.Combine(utilFolder, garch + "\\dinput8.dll"), Path.Combine(instanceExeFolder, "dinput8.dll"), true);
+                if (File.Exists(Path.Combine(instanceExeFolder, "dinput8.dll")))
+                {
+                    addedFiles.Add(Path.Combine(instanceExeFolder, "dinput8.dll"));
+                }
+            }
         }
 
         private void UseDevReorder(string garch, PlayerInfo player, List<PlayerInfo> players, int i, bool setupDll)
