@@ -2296,14 +2296,18 @@ namespace Nucleus.Gaming
                     CustomDllEnabled(context, player, playerBounds, i);
                 }
 
-                if (!gen.UseGoldberg && ini.IniReadValue("Misc", "UseNicksInGame") == "True")
+                if (!gen.UseGoldberg && ini.IniReadValue("Misc", "UseNicksInGame") == "True" || gen.GoldbergWriteSteamIDAndAccount)
                 {
-
-                    string[] files = Directory.GetFiles(linkFolder, "account_name.txt", SearchOption.AllDirectories);
-                    if(files.Length > 0)
+                    string[] saFiles = Directory.GetFiles(linkFolder, "account_name.txt", SearchOption.AllDirectories);
+                    List<string> files = saFiles.ToList();
+                    if(saFiles.Length > 0)
                     {
-                        Log("Goldberg is not enabled in script, however account_name.txt file(s) were found in folder. Will update nicknames");
+                        Log("Goldberg: account_name.txt file(s) were found in folder. Will update nicknames");
                     }
+                    string goldbergNoLocal = $@"C:\Users\{Environment.UserName}\AppData\Roaming\Goldberg SteamEmu Saves\settings\account_name.txt";
+                    if(File.Exists(goldbergNoLocal))
+                        files.Add(goldbergNoLocal);
+
                     foreach (string nameFile in files)
                     {
                         if (!string.IsNullOrEmpty(player.Nickname))
@@ -2328,6 +2332,33 @@ namespace Nucleus.Gaming
                                 File.WriteAllText(nameFile, "Player " + (i + 1));
                             }
                         }
+                    }
+
+                    saFiles = Directory.GetFiles(linkFolder, "user_steam_id.txt", SearchOption.AllDirectories);
+                    files = saFiles.ToList();
+                    if (saFiles.Length > 0)
+                    {
+                        Log("Goldberg: account_name.txt file(s) were found in folder. Will update nicknames");
+                    }
+                    goldbergNoLocal = $@"C:\Users\{Environment.UserName}\AppData\Roaming\Goldberg SteamEmu Saves\settings\user_steam_id.txt";
+                    if (File.Exists(goldbergNoLocal))
+                        files.Add(goldbergNoLocal);
+
+                    foreach (string nameFile in files)
+                    {
+                        long steamID = random_steam_id + i;
+                        if (gen.PlayerSteamIDs != null)
+                        {
+                            if (i < gen.PlayerSteamIDs.Length && !string.IsNullOrEmpty(gen.PlayerSteamIDs[i]))
+                            {
+                                Log("Using a manually entered steam ID");
+                                steamID = long.Parse(gen.PlayerSteamIDs[i]);
+                            }
+                        }
+
+                        Log("Generating user_steam_id.txt with random user steam ID " + (steamID).ToString());
+                        File.Delete(Path.Combine(nameFile));
+                        File.WriteAllText(nameFile, (steamID).ToString());
                     }
                 }
 
@@ -2492,6 +2523,12 @@ namespace Nucleus.Gaming
                 {
                     if (!gen.ThirdPartyLaunch)
                     {
+                        if (gen.ExecutableToLaunch?.Length > 0)
+                        {
+                            Log("Different executable provided to launch");
+                            exePath = Path.Combine(linkFolder, gen.ExecutableToLaunch);
+                        }
+
                         if (/*context.KillMutex?.Length > 0 || */(gen.HookInit || (gen.RenameNotKillMutex && context.KillMutex?.Length > 0) || gen.SetWindowHookStart || gen.BlockRawInput || gen.CreateSingleDeviceFile) && !gen.CMDLaunch && !gen.UseForceBindIP && !gen.LaunchAsDifferentUsers && !gen.LaunchAsDifferentUsersAlt) /*|| (gen.CMDLaunch && i==0))*/
                         {
 
@@ -3135,7 +3172,7 @@ namespace Nucleus.Gaming
                     Thread.Sleep(10000);
                 }
 
-                if (gen.NeedsSteamEmulation || gen.ForceProcessPick || proc == null || gen.CMDLaunch || gen.UseForceBindIP || gen.GameName == "Halo Custom Edition" || (proc != null && !IsRunning(proc)) /*|| gen.LauncherExe?.Length > 0*/)
+                if (gen.ForceProcessSearch || gen.NeedsSteamEmulation || gen.ForceProcessPick || proc == null || gen.CMDLaunch || gen.UseForceBindIP || gen.GameName == "Halo Custom Edition" || (proc != null && !IsRunning(proc)) /*|| gen.LauncherExe?.Length > 0*/)
                 {
                     Log("Searching for game process");
 
@@ -3172,7 +3209,7 @@ namespace Nucleus.Gaming
                                 {
                                     if (!attachedIds.Contains(p.Id)) //&& (int)p.MainWindowHandle > 0)
                                     {
-                                        if (p.ProcessName == "javaw" || p.ProcessName == "GRW")
+                                        if (p.ProcessName == "javaw" || p.ProcessName == "GRW" || p.ProcessName == "steamclient_loader")
                                         {
                                             if ((int)p.MainWindowHandle == 0)
                                             {
