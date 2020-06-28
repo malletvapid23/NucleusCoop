@@ -215,6 +215,7 @@ namespace Nucleus.Gaming
         public bool UseDInputBlocker;
         public bool UseNemirtingasEpicEmu;
         public bool EpicEmuArgs;
+        public bool PromptAfterFirstInstance;
 
         // -- From USS
         //Effectively a switch for all of USS features

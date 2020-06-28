@@ -3007,7 +3007,17 @@ namespace Nucleus.Gaming
                     }
                     else
                     {
-                        if (gen.PromptBetweenInstances)
+                        if(gen.PromptAfterFirstInstance)
+                        {
+                            if (i == 0)
+                            {
+                                Log(string.Format("Prompted user after first instance", (i + 2)));
+                                Forms.Prompt prompt = new Forms.Prompt("Press OK when ready to launch the rest of the instances.");
+                                prompt.ShowDialog();
+                            }
+
+                        }
+                        else if (gen.PromptBetweenInstances)
                         {
                             if (gen.PauseBetweenStarts > 0)
                             {
@@ -3393,7 +3403,16 @@ namespace Nucleus.Gaming
                     }
                 }
 
-                if (gen.PromptBetweenInstances && i < (players.Count - 1))
+                if (gen.PromptAfterFirstInstance)
+                {
+                    if (i == 0)
+                    {
+                        Log(string.Format("Prompted user after first instance", (i + 2)));
+                        Forms.Prompt prompt = new Forms.Prompt("Press OK when ready to launch the rest of the instances.");
+                        prompt.ShowDialog();
+                    }
+                }
+                else if (gen.PromptBetweenInstances && i < (players.Count - 1))
                 {
                     if (gen.PauseBetweenStarts > 0)
                     {
