@@ -203,6 +203,8 @@ namespace Nucleus.Gaming
         public bool UserProfileSavePathNoCopy;
         public bool LauncherExeIgnoreFileCheck;
         public bool ForceBindIPDelay;
+        public bool UseNemirtingasEpicEmu;
+        public bool EpicEmuArgs;
 
         // -- From USS
         //Effectively a switch for all of USS features

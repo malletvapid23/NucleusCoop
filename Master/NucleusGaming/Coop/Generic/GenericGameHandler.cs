@@ -1959,6 +1959,11 @@ namespace Nucleus.Gaming
                     UseGoldberg(rootFolder, nucleusRootFolder, linkFolder, i, player, players);
                 }
 
+                if (gen.UseNemirtingasEpicEmu)
+                {
+                    UseNemirtingasEpicEmu(rootFolder, linkFolder, player);
+                }
+
                 if (gen.CreateSteamAppIdByExe)
                 {
                     CreateSteamAppIdByExe();
@@ -2005,6 +2010,15 @@ namespace Nucleus.Gaming
                     Thread.Sleep(TimeSpan.FromSeconds(gen.PauseBetweenContextAndLaunch));
                 }
 
+                if (gen.EpicEmuArgs)
+                {
+                    Log("Using pre-defined epic emu params");
+                    if (!context.StartArguments.Contains("-AUTH_LOGIN"))
+                    {
+                        Log("Epic Emu parameters not found in arguments. Adding the necessary parameters to existing starting arguments");
+                        context.StartArguments += " -AUTH_LOGIN=unused -AUTH_PASSWORD=bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb -AUTH_TYPE=exchangecode -epicapp=CrabTest -epicenv=Prod -EpicPortal -epicusername=\"" + player.Nickname + "\" -epicuserid=AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA -epiclocale=en";
+                    }
+                }
                 string startArgs = context.StartArguments;
 
                 if (!string.IsNullOrEmpty(lobbyConnectArg) && i > 0)
@@ -6067,6 +6081,106 @@ namespace Nucleus.Gaming
                 File.Delete(nameFile);
                 File.Copy(Path.Combine(utilFolder, "EasyAntiCheat_x86.dll"), Path.Combine(dir, "EasyAntiCheat_x86.dll"), true);
             }
+        }
+
+        private void UseNemirtingasEpicEmu(string rootFolder, string linkFolder, PlayerInfo player)
+        {
+            Log("Starting Nemirtingas Epic Emu setup");
+            string utilFolder = Path.Combine(Directory.GetCurrentDirectory(), "utils\\NemirtingasEpicEmu");
+            string x86dll = "EOSSDK-Win32-Shipping.dll";
+            string x64dll = "EOSSDK-Win64-Shipping.dll";
+
+            string dllrootFolder = string.Empty;
+            string dllFolder = string.Empty;
+            string instanceDllFolder = string.Empty;
+
+            string[] steamDllFiles = Directory.GetFiles(rootFolder, "EOSSDK-Win*.dll", SearchOption.AllDirectories);
+            foreach (string nameFile in steamDllFiles)
+            {
+                Log("Found " + nameFile);
+                dllrootFolder = Path.GetDirectoryName(nameFile);
+                string tempRootFolder = rootFolder;
+                if (tempRootFolder.EndsWith("\\"))
+                {
+                    tempRootFolder = tempRootFolder.Substring(0, tempRootFolder.Length - 1);
+                }
+                dllFolder = dllrootFolder.Remove(0, (tempRootFolder.Length));
+
+                instanceDllFolder = linkFolder.TrimEnd('\\') + "\\" + dllFolder.TrimStart('\\');
+
+                if (nameFile.EndsWith(x64dll, true, null))
+                {
+                    try
+                    {
+                        if (File.Exists(Path.Combine(instanceDllFolder, x64dll)))
+                        {
+                            File.Delete(Path.Combine(instanceDllFolder, x64dll));
+                        }
+                        Log("Placing Epic Emu " + x64dll + " in instance dll folder " + instanceDllFolder);
+                        File.Copy(Path.Combine(utilFolder, "x64\\" + x64dll), Path.Combine(instanceDllFolder, x64dll), true);
+                    }
+                    catch (Exception ex)
+                    {
+                        Log("ERROR - " + ex.Message);
+                        Log("Using alternative copy method for " + x64dll);
+                        CmdUtil.ExecuteCommand(utilFolder, out int exitCode, "copy \"" + Path.Combine(utilFolder, "x64\\" + x64dll) + "\" \"" + Path.Combine(instanceDllFolder, x64dll) + "\"");
+                    }
+                }
+
+                if (nameFile.EndsWith(x86dll, true, null))
+                {
+                    try
+                    {
+                        if (File.Exists(Path.Combine(instanceDllFolder, x86dll)))
+                        {
+                            File.Delete(Path.Combine(instanceDllFolder, x86dll));
+                        }
+                        Log("Placing Epic Emu " + x86dll + " in instance steam dll folder " + instanceDllFolder);
+                        File.Copy(Path.Combine(utilFolder, "x86\\" + x86dll), Path.Combine(instanceDllFolder, x86dll), true);
+                    }
+                    catch (Exception ex)
+                    {
+                        Log("ERROR - " + ex.Message);
+                        Log("Using alternative copy method for " + x86dll);
+                        CmdUtil.ExecuteCommand(utilFolder, out int exitCode, "copy \"" + Path.Combine(utilFolder, "x86\\" + x86dll) + "\" \"" + Path.Combine(instanceDllFolder, x86dll) + "\"");
+                    }
+                }
+            }
+
+            string lang = "english";
+            //if (ini.IniReadValue("Misc", "SteamLang") != "" && ini.IniReadValue("Misc", "SteamLang") != "Automatic")
+            //{
+            //    lang = ini.IniReadValue("Misc", "SteamLang").ToLower();
+            //}
+            //if (gen.GoldbergLanguage?.Length > 0)
+            //{
+            //    lang = gen.GoldbergLanguage;
+            //}
+            //else
+            //{
+            //    lang = gen.GetSteamLanguage();
+            //}
+            
+            JObject emuSettings = new JObject(
+                //new JProperty("enable_overlay", true),
+                //new JProperty("gamename", gen.GameName),
+                //new JProperty("language", lang),
+                //new JProperty("languages", lang),
+                //new JProperty("savepath", "appdata"),
+                //new JProperty("unlock_dlcs", true),
+                new JProperty("username", player.Nickname)
+            );
+
+            string jsonPath = Path.Combine(instanceExeFolder, "NemirtingasEpicEmu.json");
+            if (File.Exists(jsonPath))
+            {
+                Log("Deleting existing NemirtingasEpicEmu.json");
+                File.Delete(jsonPath);
+            }
+            Log("Writing emulator settings NemirtingasEpicEmu.json");
+            File.WriteAllText(jsonPath, emuSettings.ToString());
+
+            Log("Epic Emu setup complete");
         }
 
         private void UseGoldberg(string rootFolder, string nucleusRootFolder, string linkFolder, int i, PlayerInfo player, List<PlayerInfo> players)

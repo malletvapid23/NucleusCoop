@@ -488,6 +488,8 @@
     <None Include="Resources\no_image.jpg" />
     <None Include="Resources\setting.png" />
     <Content Include="copyoutput\utils\LaunchUsers\PsExec.exe" />
+    <Content Include="copyoutput\utils\NemirtingasEpicEmu\x64\EOSSDK-Win64-Shipping.dll" />
+    <Content Include="copyoutput\utils\NemirtingasEpicEmu\x86\EOSSDK-Win32-Shipping.dll" />
     <Content Include="copyoutput\utils\SmartSteamEmu\SmartSteamEmu.dll" />
     <Content Include="copyoutput\utils\SmartSteamEmu\SmartSteamEmu.txt" />
     <Content Include="copyoutput\utils\SmartSteamEmu\SmartSteamEmu64.dll" />
