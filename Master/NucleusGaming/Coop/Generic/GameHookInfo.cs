@@ -82,5 +82,7 @@ namespace Nucleus.Gaming
         public int WindowY = 0;
         public int ResWidth = 0;
         public int ResHeight = 0;
+
+        public bool EnableMKBInput = false;
     }
 }
