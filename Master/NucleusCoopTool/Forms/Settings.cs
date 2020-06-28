@@ -146,6 +146,11 @@ namespace Nucleus.Coop
                 statusCheck.Checked = Boolean.Parse(ini.IniReadValue("Misc", "ShowStatus"));
             }
 
+            if (ini.IniReadValue("Misc", "KeepAccounts") != "")
+            {
+                statusCheck.Checked = Boolean.Parse(ini.IniReadValue("Misc", "KeepAccounts"));
+            }
+
             //if (ini.IniReadValue("Misc", "VibrateOpen") != "")
             //{
             //    check_Vibrate.Checked = Boolean.Parse(ini.IniReadValue("Misc", "VibrateOpen"));
@@ -268,6 +273,7 @@ namespace Nucleus.Coop
                 ini.IniWriteValue("Misc", "Network", cmb_Network.SelectedItem.ToString());
                 ini.IniWriteValue("Misc", "SteamLang", cmb_Lang.SelectedItem.ToString());
                 ini.IniWriteValue("Misc", "ShowStatus", statusCheck.Checked.ToString());
+                ini.IniWriteValue("Misc", "KeepAccounts", statusCheck.Checked.ToString());
 
                 //ini.IniWriteValue("CustomLayout", "Enabled", enableCustomCheckbox.Checked.ToString());
                 ini.IniWriteValue("CustomLayout", "HorizontalLines", numHorDiv.Value.ToString());
@@ -502,6 +508,23 @@ namespace Nucleus.Coop
             {
                 cmb_Network.SelectedIndex = 0;
             }
+        }
+
+        private void keepAccountsCheck_Click(object sender, EventArgs e)
+        {
+            if (!keepAccountsCheck.Checked)
+            {
+                DialogResult res = MessageBox.Show("Warning: by disabling this feature, the next time you run a game that uses different user accounts, all Nucleus-made user accounts (and their files, saves) will be deleted. Do you wish to proceed?", "Confirmation", MessageBoxButtons.OKCancel, MessageBoxIcon.Warning);
+                if (res != DialogResult.OK)
+                {
+                    keepAccountsCheck.Checked = true;
+                }
+            }
+        }
+
+        private void groupBox1_Enter(object sender, EventArgs e)
+        {
+
         }
     }
 }

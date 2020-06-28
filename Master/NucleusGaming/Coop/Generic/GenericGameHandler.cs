@@ -511,93 +511,146 @@ namespace Nucleus.Gaming
             if (!earlyExit)
             {
                 string[] folderUsers = Directory.GetDirectories("C:\\Users");
-                
-                if (gen.LaunchAsDifferentUsers || gen.LaunchAsDifferentUsersAlt)
-                {
-                    Log("Deleting temporary user accounts");
 
-                    foreach(string folder in folderUsers)
+                if (gen.TransferNucleusUserAccountProfiles)
+                {
+                    Log("Transfer Nucleus user account profiles is enabled");
+                    foreach (PlayerInfo player in data)
                     {
-                        string username = folder.Substring(9);
-                        if(username.StartsWith("nucleusplayer"))
+                        Log("Backing up AppData and Documents from " + Path.Combine($@"C:\Users\{player.UserProfile}") + " to " + Path.Combine(NucleusEnvironmentRoot + $@"\NucleusCoop\UserAccounts"));
+                        string subFolder;
+                        for (int fol = 0; fol < 2; fol++)
                         {
-                            nucUsers.Add(username);
+                            if (fol == 0)
+                            {
+                                subFolder = "AppData";
+                            }
+                            else
+                            {
+                                subFolder = "Documents";
+                            }
+
+                            string SourcePath = Path.Combine($@"C:\Users\{player.UserProfile}\{subFolder}");
+                            string DestinationPath = Path.Combine(NucleusEnvironmentRoot + $@"\NucleusCoop\UserAccounts\{player.UserProfile}\{subFolder}");
+
                             try
                             {
-                                //string username = $"nucleusplayer{pc}";
-                                PrincipalContext principalContext = new PrincipalContext(ContextType.Machine);
-                                UserPrincipal userPrincipal = UserPrincipal.FindByIdentity(principalContext, username);
-                                if (userPrincipal != null)
+                                if (Directory.Exists(SourcePath))
                                 {
-                                    SecurityIdentifier userSid = userPrincipal.Sid;
-                                    nucSIDs.Add(userSid.ToString());
-                                    DeleteProfile(userSid.ToString(), null, null);
-                                    userPrincipal.Delete();
-                                    //context.DeleteRegKey("HKEY_LOCAL_MACHINE", "SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\ProfileList", userSid.ToString());
+                                    Directory.CreateDirectory(DestinationPath);
 
-                                    string keyName = @"SOFTWARE\Microsoft\Windows NT\CurrentVersion\ProfileList";
-                                    using (RegistryKey key = Registry.LocalMachine.OpenSubKey(keyName, true))
-                                    {
-                                        key.DeleteSubKeyTree(userSid.ToString(), false);
-                                    }
+                                    //foreach (string dirPath in Directory.GetDirectories(SourcePath, "*",
+                                    //    SearchOption.AllDirectories))
+                                    //    Directory.CreateDirectory(dirPath.Replace(SourcePath, DestinationPath));
 
-                                    Thread.Sleep(250);
+                                    //foreach (string newPath in Directory.GetFiles(SourcePath, "*.*",
+                                    //    SearchOption.AllDirectories))
+                                    //    File.Copy(newPath, newPath.Replace(SourcePath, DestinationPath), true);
 
-                                    using (RegistryKey key = Registry.Users)
-                                    {
-                                        key.DeleteSubKeyTree(userSid.ToString(), false);
-                                        key.DeleteSubKeyTree(userSid.ToString() + "_Classes", false);
-                                    }
+                                    CmdUtil.ExecuteCommand(SourcePath, out int exitCode, "xcopy \"" + SourcePath + "\\*\" \"" + DestinationPath + "\" /s /E /i /Y", true);
+                                    Log(string.Format("Copying {0}, exit code {1}", subFolder, exitCode));
                                 }
-                                else
-                                {
-                                    //MessageBox.Show("ERROR! User: {0} not found!", username);
-                                }
+
                             }
-                            catch (Exception exception)
+                            catch (Exception ex)
                             {
-                                //MessageBox.Show(exception.Message);
+                                Log("ERROR - " + ex.Message);
                             }
 
-                            Thread.Sleep(1000);
                         }
+                        Thread.Sleep(1000);
                     }
+                }
 
-                    string deleteUserBatPath = Path.Combine(Directory.GetCurrentDirectory(), "utils\\LaunchUsers\\delete_users.bat");
-                    if (File.Exists(deleteUserBatPath))
+                if (ini.IniReadValue("Misc", "KeepAccounts") != "True")
+                {
+                    if (gen.LaunchAsDifferentUsers || gen.LaunchAsDifferentUsersAlt)
                     {
-                        File.Delete(deleteUserBatPath);
-                    }
+                        Log("Deleting temporary user accounts");
 
-
-                    using (StreamWriter sw = new StreamWriter(deleteUserBatPath))
-                    {
-                        sw.WriteLine("@echo off");
-                        //for (int pc = 1; pc <= numPlayers; pc++)
-                        //{
-                        //    sw.WriteLine($"net user nucleusplayer{pc} /delete");
-                        //}
-                        
-                        foreach(string nucUser in nucUsers)
+                        foreach (string folder in folderUsers)
                         {
-                            sw.WriteLine($"net user {nucUser} /delete");
+                            string username = folder.Substring(9);
+                            if (username.StartsWith("nucleusplayer"))
+                            {
+                                nucUsers.Add(username);
+                                try
+                                {
+                                    //string username = $"nucleusplayer{pc}";
+                                    PrincipalContext principalContext = new PrincipalContext(ContextType.Machine);
+                                    UserPrincipal userPrincipal = UserPrincipal.FindByIdentity(principalContext, username);
+                                    if (userPrincipal != null)
+                                    {
+                                        SecurityIdentifier userSid = userPrincipal.Sid;
+                                        nucSIDs.Add(userSid.ToString());
+                                        DeleteProfile(userSid.ToString(), null, null);
+                                        userPrincipal.Delete();
+                                        //context.DeleteRegKey("HKEY_LOCAL_MACHINE", "SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\ProfileList", userSid.ToString());
+
+                                        string keyName = @"SOFTWARE\Microsoft\Windows NT\CurrentVersion\ProfileList";
+                                        using (RegistryKey key = Registry.LocalMachine.OpenSubKey(keyName, true))
+                                        {
+                                            key.DeleteSubKeyTree(userSid.ToString(), false);
+                                        }
+
+                                        Thread.Sleep(250);
+
+                                        using (RegistryKey key = Registry.Users)
+                                        {
+                                            key.DeleteSubKeyTree(userSid.ToString(), false);
+                                            key.DeleteSubKeyTree(userSid.ToString() + "_Classes", false);
+                                        }
+                                    }
+                                    else
+                                    {
+                                        //MessageBox.Show("ERROR! User: {0} not found!", username);
+                                    }
+                                }
+                                catch (Exception exception)
+                                {
+                                    //MessageBox.Show(exception.Message);
+                                }
+
+                                Thread.Sleep(1000);
+                            }
                         }
+
+                        string deleteUserBatPath = Path.Combine(Directory.GetCurrentDirectory(), "utils\\LaunchUsers\\delete_users.bat");
+                        if (File.Exists(deleteUserBatPath))
+                        {
+                            File.Delete(deleteUserBatPath);
+                        }
+
+
+                        using (StreamWriter sw = new StreamWriter(deleteUserBatPath))
+                        {
+                            sw.WriteLine("@echo off");
+                            //for (int pc = 1; pc <= numPlayers; pc++)
+                            //{
+                            //    sw.WriteLine($"net user nucleusplayer{pc} /delete");
+                            //}
+
+                            foreach (string nucUser in nucUsers)
+                            {
+                                sw.WriteLine($"net user {nucUser} /delete");
+                            }
+                        }
+
+                        Process user = new Process();
+                        user.StartInfo.FileName = "utils\\LaunchUsers\\delete_users.bat";
+                        user.StartInfo.Verb = "runas";
+                        user.StartInfo.UseShellExecute = true;
+                        user.Start();
+                        user.WaitForExit();
+
+
+                        if (File.Exists(deleteUserBatPath))
+                        {
+                            File.Delete(deleteUserBatPath);
+                        }
+
+                        Thread.Sleep(1000);
                     }
-
-                    Process user = new Process();
-                    user.StartInfo.FileName = "utils\\LaunchUsers\\delete_users.bat";
-                    user.StartInfo.Verb = "runas";
-                    user.StartInfo.UseShellExecute = true;
-                    user.Start();
-                    user.WaitForExit();
-
-
-                    if (File.Exists(deleteUserBatPath))
-                    {
-                        File.Delete(deleteUserBatPath);
-                    }
-
-                    Thread.Sleep(1000);
                 }
 
                 if (gen.ChangeIPPerInstanceAlt)
@@ -787,10 +840,15 @@ namespace Nucleus.Gaming
             //    }
             //}
             //string[] nucUsers = Directory.GetDirectories("C:\\Users");
-            foreach (string nucUser in nucUsers)
+
+            if (ini.IniReadValue("Misc", "KeepAccounts") != "True")
             {
-                DeleteProfileFolder($@"C:\Users\{nucUser}");
+                foreach (string nucUser in nucUsers)
+                {
+                    DeleteProfileFolder($@"C:\Users\{nucUser}");
+                }
             }
+
 #endif
             Log("All done closing operations. Exiting Nucleus.");
             if (statusForm != null)
@@ -1762,30 +1820,44 @@ namespace Nucleus.Gaming
                             File.Delete(createUserBatPath);
                         }
 
-
-
-                        using (StreamWriter sw = new StreamWriter(createUserBatPath))
+                        bool createNeeded = false;
+                        for (int pc = 1; pc <= numPlayers; pc++)
                         {
-                            sw.WriteLine(@"@echo off");
-                            for (int pc = 1; pc <= numPlayers; pc++)
+                            bool UserExists = false;
+                            using (PrincipalContext princ = new PrincipalContext(ContextType.Machine))
                             {
-                                sw.WriteLine($@"net user nucleusplayer{pc} 12345 /add && net user nucleusplayer{pc} 12345 && net localgroup " + adminLocalGroup + $" nucleusplayer{pc} /add");
-                                players[pc - 1].SID = GetUserSID($"nucleusplayer{pc}");
-                                players[pc - 1].UserProfile = $"nucleusplayer{pc}";
+                                UserPrincipal up = UserPrincipal.FindByIdentity(
+                                    princ,
+                                    IdentityType.SamAccountName,
+                                    $"nucleusplayer{pc}");
+
+                                UserExists = (up != null);
+                            }
+                            if(!UserExists)
+                            {
+                                createNeeded = true;
+                                using (StreamWriter sw = new StreamWriter(createUserBatPath))
+                                {
+                                    sw.WriteLine(@"@echo off");
+                                    sw.WriteLine($@"net user nucleusplayer{pc} 12345 /add && net user nucleusplayer{pc} 12345 && net localgroup " + adminLocalGroup + $" nucleusplayer{pc} /add");
+                                }
                             }
                         }
 
-                        Process user = new Process();
-                        user.StartInfo.FileName = createUserBatPath;
-                        user.StartInfo.Verb = "runas";
-                        user.StartInfo.UseShellExecute = true;
-                        //user.StartInfo.RedirectStandardOutput = true;
-                        user.Start();
+                        if(createNeeded)
+                        {
+                            Process user = new Process();
+                            user.StartInfo.FileName = createUserBatPath;
+                            user.StartInfo.Verb = "runas";
+                            user.StartInfo.UseShellExecute = true;
+                            //user.StartInfo.RedirectStandardOutput = true;
+                            user.Start();
 
-                        //string stdOut = user.StandardOutput.ReadToEnd();
-                        //Log("LaunchAsDifferentUsers(Alt) create users output " + stdOut);
+                            //string stdOut = user.StandardOutput.ReadToEnd();
+                            //Log("LaunchAsDifferentUsers(Alt) create users output " + stdOut);
 
-                        user.WaitForExit();
+                            user.WaitForExit();
+                        }
 
                         if (File.Exists(createUserBatPath))
                         {
@@ -1795,6 +1867,7 @@ namespace Nucleus.Gaming
                         for (int pc = 1; pc <= numPlayers; pc++)
                         {
                             players[pc - 1].SID = GetUserSID($"nucleusplayer{pc}");
+                            players[pc - 1].UserProfile = $"nucleusplayer{pc}";
                         }
                     }
 
@@ -1826,6 +1899,55 @@ namespace Nucleus.Gaming
                     }
 
                     launchProc = Process.GetProcessById(processInformation.dwProcessId);
+
+                    if (gen.TransferNucleusUserAccountProfiles)
+                    {
+                        Thread.Sleep(1000);
+                        Log("Transfer Nucleus user account profiles is enabled");
+                        //for (int pc = 1; pc <= numPlayers; pc++)
+                        //{
+                            
+                            //string subFolder;
+                            //for (int fol = 0; fol < 2; fol++)
+                            //{
+                            //if(fol == 0)
+                            //{
+                            //    subFolder = "AppData";
+                            //}
+                            //else
+                            //{
+                            //    subFolder = "Documents";
+                            //}
+
+                            string SourcePath = Path.Combine(NucleusEnvironmentRoot + $@"\NucleusCoop\UserAccounts\{player.UserProfile}\");
+                            string DestinationPath = Path.Combine($@"C:\Users\{player.UserProfile}\");
+                            Log("Copying " + SourcePath + " to " + DestinationPath);
+                            try
+                            {
+
+                                if (Directory.Exists(SourcePath))
+                                {
+                                    Directory.CreateDirectory(DestinationPath);
+
+                                    //foreach (string dirPath in Directory.GetDirectories(SourcePath, "*",
+                                    //    SearchOption.AllDirectories))
+                                    //    Directory.CreateDirectory(dirPath.Replace(SourcePath, DestinationPath));
+
+                                    //foreach (string newPath in Directory.GetFiles(SourcePath, "*.*",
+                                    //    SearchOption.AllDirectories))
+                                    //    File.Copy(newPath, newPath.Replace(SourcePath, DestinationPath), true);
+
+                                    CmdUtil.ExecuteCommand(SourcePath, out int exitCode, "xcopy \"" + SourcePath + "\\*\" \"" + DestinationPath + "\" /s /E /i /Y", true);
+                                }
+
+                            }
+                            catch (Exception ex)
+                            {
+                                Log("ERROR - " + ex.Message);
+                            }
+                            //}
+                        //}
+                    }
 
                 }
 
@@ -2686,7 +2808,7 @@ namespace Nucleus.Gaming
                                 startup.cb = Marshal.SizeOf(startup);
 
                                 bool success = CreateProcessWithLogonW($"nucleusplayer{i + 1}", Environment.UserDomainName, "12345", LogonFlags.LOGON_WITH_PROFILE, null, exePath + " " + startArgs, ProcessCreationFlags.CREATE_UNICODE_ENVIRONMENT, (uint)envPtr, Path.GetDirectoryName(exePath), ref startup, out PROCESS_INFORMATION processInformation);
-                                Log(string.Format("Launching game directly at {0} as user: nucleusplayer{1}", exePath, (i + 1)));
+                                Log(string.Format("Launching game directly at {0} with args {1} as user: nucleusplayer{2}", exePath, startArgs, (i + 1)));
 
                                 if (!success)
                                 {

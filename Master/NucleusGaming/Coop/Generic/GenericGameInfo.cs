@@ -212,6 +212,7 @@ namespace Nucleus.Gaming
         public bool SaveAndEditCustomUserGeneralValues;
         public bool SaveAndEditCustomUserPlayerValues;
         public bool SaveAndEditCustomInstanceValues;
+        public bool TransferNucleusUserAccountProfiles;
         public bool EnableWindows;
         public string[] WindowStyleEndChanges;
         public string[] ExtWindowStyleEndChanges;
