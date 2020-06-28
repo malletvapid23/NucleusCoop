@@ -380,7 +380,7 @@ namespace Nucleus.Coop
                 "\nWebsite & handler API: r-mach" +
                 "\n" +
                 "\nAdditional credits to all original developers of third party utilities Nucleus uses:" +
-                "\nMr_Goldberg (Goldberg Emulator), syahmixp (SmartSteamEmu), EJocys (x360ce), 0dd14 Lab (Xinput Plus), r1ch (ForceBindIP), HaYDeN (Flawless Widescreen), briankendall (devreorder), VerGreeneyes (DirectXWrapper)" +
+                "\nMr_Goldberg (Goldberg Emulator), syahmixp (SmartSteamEmu), EJocys (x360ce), 0dd14 Lab (Xinput Plus), r1ch (ForceBindIP), HaYDeN (Flawless Widescreen), briankendall (devreorder), VerGreeneyes (DirectXWrapper), wizark952 (dinput8 blocker), Nemirtinga (Epic Emulator)" +
                 "\n" +
                 "\nThis mod brings further enhancements to NucleusCoop, such as:" +
                 "\n- Huge increase to the amount of compabitle games" +
@@ -398,10 +398,11 @@ namespace Nucleus.Coop
 
         private void NumHorDiv_ValueChanged(object sender, EventArgs e)
         {
-            groupBox3.Invalidate();
+            tabPage4.Invalidate();
+            tabControl2.TabPages[1].Invalidate();
             //if (numHorDiv.Value > 0 && numVerDiv.Value > 0)
             //{
-                numMaxPlyrs.Value = (numHorDiv.Value + 1) * (numVerDiv.Value + 1);
+            numMaxPlyrs.Value = (numHorDiv.Value + 1) * (numVerDiv.Value + 1);
             //}
             //else
             //{
@@ -411,10 +412,11 @@ namespace Nucleus.Coop
 
         private void NumVerDiv_ValueChanged(object sender, EventArgs e)
         {
-            groupBox3.Invalidate();
+            tabPage4.Invalidate();
+            tabControl2.TabPages[1].Invalidate();
             //if (numHorDiv.Value > 0 && numVerDiv.Value > 0)
             //{
-                numMaxPlyrs.Value = (numHorDiv.Value + 1) * (numVerDiv.Value + 1);
+            numMaxPlyrs.Value = (numHorDiv.Value + 1) * (numVerDiv.Value + 1);
             //}
             //else
             //{
@@ -422,15 +424,15 @@ namespace Nucleus.Coop
             //}
         }
 
-        private void GroupBox3_Paint(object sender, PaintEventArgs e)
+        private void tabPage4_Paint(object sender, PaintEventArgs e)
         {
             base.OnPaint(e);
 
             Graphics gs = e.Graphics;
 
-            Pen p = new Pen(new SolidBrush(Color.White));
+            Pen p = new Pen(new SolidBrush(Color.Black));
 
-            Rectangle outline = new Rectangle(20, 220, 360, 240);
+            Rectangle outline = new Rectangle(370, 45, 360, 240);
             gs.DrawRectangle(p, outline);
 
             int[] hlines = new int[(int)numHorDiv.Value];
@@ -440,17 +442,17 @@ namespace Nucleus.Coop
             {
                 int divisions = (int)numHorDiv.Value + 1;
 
-                //20-380
+                //370-380
                 int y = (240 / divisions);
                 if (i == 0)
                 {
-                    hlines[i] = y + 220;
+                    hlines[i] = y + 45;
                 }
                 else
                 {
                     hlines[i] = y + hlines[i - 1];
                 }
-                gs.DrawLine(p, 20, hlines[i], 20 + 360, hlines[i]);
+                gs.DrawLine(p, 370, hlines[i], 370 + 360, hlines[i]);
             }
 
             for (int i = 0; i < (int)numVerDiv.Value; i++)
@@ -458,17 +460,17 @@ namespace Nucleus.Coop
 
                 int divisions = (int)numVerDiv.Value + 1;
 
-                //220-460
+                //45-460
                 int x = (360 / divisions);
                 if (i == 0)
                 {
-                    vlines[i] = x + 20;
+                    vlines[i] = x + 370;
                 }
                 else
                 {
                     vlines[i] = x + vlines[i - 1];
                 }
-                gs.DrawLine(p, vlines[i], 220, vlines[i], 220 + 240);
+                gs.DrawLine(p, vlines[i], 45, vlines[i], 45 + 240);
             }
 
             p.Dispose();
