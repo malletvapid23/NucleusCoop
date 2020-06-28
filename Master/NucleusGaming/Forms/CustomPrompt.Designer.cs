@@ -1,6 +1,6 @@
 ﻿namespace Nucleus.Gaming.Forms
 {
-    partial class Prompt
+    partial class CustomPrompt
     {
         /// <summary>
         /// Required designer variable.
@@ -29,22 +29,23 @@
         private void InitializeComponent()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(CustomPrompt));
-            this.lbl_Msg = new System.Windows.Forms.Label();
+            this.lbl_Desc = new System.Windows.Forms.Label();
             this.btn_Ok = new System.Windows.Forms.Button();
+            this.txt_UserInput = new System.Windows.Forms.TextBox();
             this.SuspendLayout();
             // 
-            // lbl_Msg
+            // lbl_Desc
             // 
-            this.lbl_Msg.Location = new System.Drawing.Point(12, 9);
-            this.lbl_Msg.Name = "lbl_Msg";
-            this.lbl_Msg.Size = new System.Drawing.Size(386, 75);
-            this.lbl_Msg.TabIndex = 0;
-            this.lbl_Msg.Text = "Message";
-            this.lbl_Msg.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.lbl_Desc.Location = new System.Drawing.Point(12, 9);
+            this.lbl_Desc.Name = "lbl_Desc";
+            this.lbl_Desc.Size = new System.Drawing.Size(386, 115);
+            this.lbl_Desc.TabIndex = 0;
+            this.lbl_Desc.Text = "Message";
+            this.lbl_Desc.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // btn_Ok
             // 
-            this.btn_Ok.Location = new System.Drawing.Point(167, 87);
+            this.btn_Ok.Location = new System.Drawing.Point(167, 153);
             this.btn_Ok.Name = "btn_Ok";
             this.btn_Ok.Size = new System.Drawing.Size(75, 23);
             this.btn_Ok.TabIndex = 1;
@@ -52,28 +53,38 @@
             this.btn_Ok.UseVisualStyleBackColor = true;
             this.btn_Ok.Click += new System.EventHandler(this.btn_Ok_Click);
             // 
-            // Prompt
+            // txt_UserInput
+            // 
+            this.txt_UserInput.Location = new System.Drawing.Point(15, 127);
+            this.txt_UserInput.Name = "txt_UserInput";
+            this.txt_UserInput.Size = new System.Drawing.Size(383, 20);
+            this.txt_UserInput.TabIndex = 2;
+            // 
+            // CustomPrompt
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(410, 120);
+            this.ClientSize = new System.Drawing.Size(410, 188);
+            this.Controls.Add(this.txt_UserInput);
             this.Controls.Add(this.btn_Ok);
-            this.Controls.Add(this.lbl_Msg);
+            this.Controls.Add(this.lbl_Desc);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MaximizeBox = false;
             this.MinimizeBox = false;
-            this.Name = "Prompt";
+            this.Name = "CustomPrompt";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "NucleusCoop - Prompt";
+            this.Text = "NucleusCoop - Custom Prompt";
             this.TopMost = true;
             this.ResumeLayout(false);
+            this.PerformLayout();
 
         }
 
         #endregion
 
-        private System.Windows.Forms.Label lbl_Msg;
+        private System.Windows.Forms.Label lbl_Desc;
         private System.Windows.Forms.Button btn_Ok;
+        private System.Windows.Forms.TextBox txt_UserInput;
     }
 }

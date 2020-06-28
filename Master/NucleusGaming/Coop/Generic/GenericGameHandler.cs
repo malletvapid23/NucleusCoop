@@ -238,6 +238,8 @@ namespace Nucleus.Gaming
         private bool isPrevent;
         private string adminLocalGroup;
 
+        public static string[] customValue;
+
         private Form statusForm;
         private Label statusLbl;
 
@@ -1902,6 +1904,261 @@ namespace Nucleus.Gaming
                 context.OrigRootFolder = rootFolder;
                 context.UserProfileConfigPath = gen.UserProfileConfigPath;
                 context.UserProfileSavePath = gen.UserProfileSavePath;
+
+                if(gen.CustomUserGeneralValues?.Length > 0 && i == 0)
+                {
+                    context.CustomUserGeneralValues = new string[gen.CustomUserGeneralValues.Length];
+                    customValue = new string[gen.CustomUserGeneralValues.Length];
+                    string valueFile = Path.Combine(GameManager.Instance.GetJsScriptsPath(), Path.GetFileNameWithoutExtension(gen.JsFileName) + "\\custom_gen_values.txt");
+
+                    int counter = 0;
+                    if (gen.SaveCustomUserGeneralValues)
+                    {
+                        Log("Script uses customer general values");
+                        if (File.Exists(valueFile))
+                        {
+                            Log("custom_gen_values.txt already exists for this script, setting values accordingly");
+                            
+                            string line;
+
+                            StreamReader file = new StreamReader(valueFile);
+                            while ((line = file.ReadLine()) != null)
+                            {
+                                Log(string.Format("Custom value {0}: {1}", counter, line));
+                                customValue[counter] = line;
+                                context.CustomUserGeneralValues[counter] = line;
+                                counter++;
+                            }
+
+                            file.Close();
+
+                            if(counter != gen.CustomUserGeneralValues.Length)
+                            {
+                                Log("Number of lines in file do not match number of prompts. Overwriting file");
+                            }
+                        }
+                        else
+                        {
+                            Log("custom_gen_values.txt does not exist. Creating new file at " + valueFile);
+                        }
+                    }
+
+                    if(!File.Exists(valueFile) || !gen.SaveCustomUserGeneralValues || gen.SaveAndEditCustomUserGeneralValues || (File.Exists(valueFile) && counter != gen.CustomUserGeneralValues.Length))
+                    {
+                        List<string> lines = new List<string>();
+                        if (File.Exists(valueFile))
+                        {
+                            string line;
+                            StreamReader file = new StreamReader(valueFile);
+                            while ((line = file.ReadLine()) != null)
+                            {
+                                lines.Add(line);
+                            }
+
+                            file.Close();
+
+
+                            File.Delete(valueFile);
+                        }
+
+                        if (!Directory.Exists(Path.Combine(GameManager.Instance.GetJsScriptsPath(), Path.GetFileNameWithoutExtension(gen.JsFileName))))
+                        {
+                            Directory.CreateDirectory(Path.Combine(GameManager.Instance.GetJsScriptsPath(), Path.GetFileNameWithoutExtension(gen.JsFileName)));
+                        }
+
+                        for (int d = 0; d < gen.CustomUserGeneralValues.Length; d++)
+                        {
+                            Log(string.Format("Prompt {0}/{1}: {2}", (d + 1), gen.CustomUserGeneralValues.Length, gen.CustomUserGeneralValues[d]));
+                            string prevAnswer = "";
+                            if (d <= lines.Count)
+                            {
+                                prevAnswer = lines[d];
+                            }
+                            Forms.CustomPrompt prompt = new Forms.CustomPrompt(gen.CustomUserGeneralValues[d], prevAnswer, d);
+                            prompt.ShowDialog();
+                            context.CustomUserGeneralValues[d] = customValue[d];
+                            Log("User entered: " + customValue[d]);
+                        }
+
+                        using (StreamWriter outputFile = new StreamWriter(valueFile))
+                        {
+                            foreach (string line in customValue)
+                            {
+                                outputFile.WriteLine(line);
+                            }
+                        }
+                    }
+
+                }
+
+                if (gen.CustomUserPlayerValues?.Length > 0)
+                {
+                    context.CustomUserPlayerValues = new string[gen.CustomUserPlayerValues.Length];
+                    customValue = new string[gen.CustomUserPlayerValues.Length];
+                    string valueFile = Path.Combine(GameManager.Instance.GetJsScriptsPath(), Path.GetFileNameWithoutExtension(gen.JsFileName) + "\\" + player.Nickname + "\\custom_plyr_values.txt");
+
+                    int counter = 0;
+                    if (gen.SaveCustomUserPlayerValues)
+                    {
+                        Log("Script uses customer player values");
+                        if (File.Exists(valueFile))
+                        {
+                            Log("custom_plyr_values.txt already exists for this player, setting values accordingly");
+
+                            string line;
+
+                            StreamReader file = new StreamReader(valueFile);
+                            while ((line = file.ReadLine()) != null)
+                            {
+                                Log(string.Format("Custom value {0}: {1}", counter, line));
+                                customValue[counter] = line;
+                                context.CustomUserPlayerValues[counter] = line;
+                                counter++;
+                            }
+
+                            file.Close();
+
+                            if (counter != gen.CustomUserPlayerValues.Length)
+                            {
+                                Log("Number of lines in file do not match number of prompts. Overwriting file");
+                            }
+                        }
+                        else
+                        {
+                            Log("custom_plyr_values.txt does not exist for player " + player.Nickname + ". Creating new file at " + valueFile);
+                        }
+                    }
+
+                    if (!File.Exists(valueFile) || !gen.SaveCustomUserPlayerValues || gen.SaveAndEditCustomUserPlayerValues || (File.Exists(valueFile) && counter != gen.CustomUserPlayerValues.Length))
+                    {
+                        List<string> lines = new List<string>();
+                        if (File.Exists(valueFile))
+                        {
+                            string line;
+                            StreamReader file = new StreamReader(valueFile);
+                            while ((line = file.ReadLine()) != null)
+                            {
+                                lines.Add(line);
+                            }
+
+                            file.Close();
+
+                            File.Delete(valueFile);
+                        }
+
+                        if (!Directory.Exists(Path.Combine(GameManager.Instance.GetJsScriptsPath(), Path.GetFileNameWithoutExtension(gen.JsFileName))))
+                        {
+                            Directory.CreateDirectory(Path.Combine(GameManager.Instance.GetJsScriptsPath(), Path.GetFileNameWithoutExtension(gen.JsFileName)));
+                        }
+
+                        for (int d = 0; d < gen.CustomUserPlayerValues.Length; d++)
+                        {
+                            Log(string.Format("Prompt {0}/{1}: {2}", (d + 1), gen.CustomUserPlayerValues.Length, gen.CustomUserPlayerValues[d]));
+                            string prevAnswer = "";
+                            if (d <= lines.Count)
+                            {
+                                prevAnswer = lines[d];
+                            }
+                            Forms.CustomPrompt prompt = new Forms.CustomPrompt(gen.CustomUserPlayerValues[d], prevAnswer, d);
+                            prompt.ShowDialog();
+                            context.CustomUserPlayerValues[d] = customValue[d];
+                            Log("User entered: " + customValue[d]);
+                        }
+                        
+                        using (StreamWriter outputFile = new StreamWriter(valueFile))
+                        {
+                            foreach (string line in customValue)
+                            {
+                                outputFile.WriteLine(line);
+                            }
+                        }
+                    }
+
+                }
+
+                if (gen.CustomUserInstanceValues?.Length > 0)
+                {
+                    context.CustomUserInstanceValues = new string[gen.CustomUserInstanceValues.Length];
+                    customValue = new string[gen.CustomUserInstanceValues.Length];
+                    string valueFile = Path.Combine(GameManager.Instance.GetJsScriptsPath(), Path.GetFileNameWithoutExtension(gen.JsFileName) + "\\instance " + i + "\\custom_inst_values.txt");
+
+                    int counter = 0;
+                    if (gen.SaveCustomUserInstanceValues)
+                    {
+                        Log("Script uses customer instance values");
+                        if (File.Exists(valueFile))
+                        {
+                            Log("custom_inst_values.txt already exists for this player, setting values accordingly");
+
+                            string line;
+
+                            StreamReader file = new StreamReader(valueFile);
+                            while ((line = file.ReadLine()) != null)
+                            {
+                                Log(string.Format("Custom value {0}: {1}", counter, line));
+                                customValue[counter] = line;
+                                context.CustomUserInstanceValues[counter] = line;
+                                counter++;
+                            }
+
+                            file.Close();
+
+                            if (counter != gen.CustomUserInstanceValues.Length)
+                            {
+                                Log("Number of lines in file do not match number of prompts. Overwriting file");
+                            }
+                        }
+                        else
+                        {
+                            Log("custom_inst_values.txt does not exist for player " + player.Nickname + ". Creating new file at " + valueFile);
+                        }
+                    }
+
+                    if (!File.Exists(valueFile) || !gen.SaveCustomUserInstanceValues || gen.SaveAndEditCustomInstanceValues || (File.Exists(valueFile) && counter != gen.CustomUserInstanceValues.Length))
+                    {
+                        List<string> lines = new List<string>();
+                        if (File.Exists(valueFile))
+                        {
+                            string line;
+                            StreamReader file = new StreamReader(valueFile);
+                            while ((line = file.ReadLine()) != null)
+                            {
+                                lines.Add(line);
+                            }
+
+                            file.Close();
+                            File.Delete(valueFile);
+                        }
+
+                        if (!Directory.Exists(Path.Combine(GameManager.Instance.GetJsScriptsPath(), Path.GetFileNameWithoutExtension(gen.JsFileName))))
+                        {
+                            Directory.CreateDirectory(Path.Combine(GameManager.Instance.GetJsScriptsPath(), Path.GetFileNameWithoutExtension(gen.JsFileName)));
+                        }
+
+                        for (int d = 0; d < gen.CustomUserInstanceValues.Length; d++)
+                        {
+                            Log(string.Format("Prompt {0}/{1}: {2}", (d + 1), gen.CustomUserInstanceValues.Length, gen.CustomUserInstanceValues[d]));
+                            string prevAnswer = "";
+                            if (d <= lines.Count)
+                            {
+                                prevAnswer = lines[d];
+                            }
+                            Forms.CustomPrompt prompt = new Forms.CustomPrompt(gen.CustomUserInstanceValues[d], prevAnswer, d);
+                            prompt.ShowDialog();
+                            context.CustomUserInstanceValues[d] = customValue[d];
+                            Log("User entered: " + customValue[d]);
+                        }
+
+                        using (StreamWriter outputFile = new StreamWriter(valueFile))
+                        {
+                            foreach (string line in customValue)
+                            {
+                                outputFile.WriteLine(line);
+                            }
+                        }
+                    }
+
+                }
 
                 bool setupDll = true;
                 if (!gen.SymlinkGame && !gen.HardlinkGame && !gen.HardcopyGame && i > 0)

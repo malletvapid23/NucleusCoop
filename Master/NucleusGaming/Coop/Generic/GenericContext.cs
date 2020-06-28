@@ -91,6 +91,9 @@ namespace Nucleus.Gaming
         public string[] CopyCustomUtils;
         public int PlayersPerInstance;
         public bool UseDevReorder;
+        public string[] CustomUserGeneralValues;
+        public string[] CustomUserPlayerValues;
+        public string[] CustomUserInstanceValues;
 
         private List<string> regKeyPaths = new List<string>();
 

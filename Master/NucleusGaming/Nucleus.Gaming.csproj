@@ -203,6 +203,12 @@
     <Compile Include="DPI\DPIManager.cs" />
     <Compile Include="DPI\DPIMonitor.cs" />
     <Compile Include="DPI\IDynamicSized.cs" />
+    <Compile Include="Forms\CustomPrompt.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\CustomPrompt.Designer.cs">
+      <DependentUpon>CustomPrompt.cs</DependentUpon>
+    </Compile>
     <Compile Include="Forms\Prompt.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -305,6 +311,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Controls\TextMessageBox.resx">
       <DependentUpon>TextMessageBox.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\CustomPrompt.resx">
+      <DependentUpon>CustomPrompt.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\Prompt.resx">
       <DependentUpon>Prompt.cs</DependentUpon>
