@@ -2,6 +2,7 @@
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Runtime.InteropServices;
 
 namespace Nucleus.Gaming.Platform.Windows.IO
 {
@@ -107,7 +108,7 @@ namespace Nucleus.Gaming.Platform.Windows.IO
                     //CmdUtil.MkLinkFile(file.FullName, linkPath, out exitCode);
                     if(hardLink)
                     {
-                        Kernel32Interop.CreateHardLink(linkPath, file.FullName, IntPtr.Zero);
+                        Kernel32Interop.CreateHardLink(linkPath, file.FullName, IntPtr.Zero);                   
                     }
                     else
                     {

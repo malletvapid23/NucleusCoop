@@ -33,6 +33,8 @@ using System.Net;
 using System.Security.Principal;
 using System.DirectoryServices.AccountManagement;
 using System.Security;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace Nucleus.Gaming
 {
@@ -60,6 +62,14 @@ namespace Nucleus.Gaming
            String currentDirectory,
            ref STARTUPINFO startupInfo,
            out PROCESS_INFORMATION processInformation);
+
+        [DllImport("kernel32.dll", SetLastError = true)]
+        internal static extern bool WriteProcessMemory(
+            IntPtr hProcess,
+            Int64 lpBaseAddress,
+            [In, Out] Byte[] lpBuffer,
+            UInt64 dwSize,
+            out IntPtr lpNumberOfBytesWritten);
 
         [Flags]
         enum LogonFlags
@@ -174,7 +184,7 @@ namespace Nucleus.Gaming
         private int prevWindowX = 0;
         private int prevWindowY = 0;
         private ProcessData prevProcessData;
-
+        
         private int prevProcId = 0;
 
         private int plyrIndex = 0;
@@ -216,7 +226,7 @@ namespace Nucleus.Gaming
 
         private bool symlinkNeeded;
 
-        private int numPlayers = 0;
+        public int numPlayers = 0;
 
         private bool dllResize = false;
         private bool dllRepos = false;
@@ -254,6 +264,9 @@ namespace Nucleus.Gaming
         private Process launchProc;
 
         private List<string> addedFiles = new List<string>();
+
+        public string JsFilename;
+        public string HandlerGUID;
 
         private readonly IniFile ini = new Gaming.IniFile(Path.Combine(Directory.GetCurrentDirectory(), "Settings.ini"));
         bool isDebug;
@@ -945,6 +958,9 @@ namespace Nucleus.Gaming
 
             LogManager.RegisterForLogCallback(this);
 
+            JsFilename = gen.JsFileName;
+            HandlerGUID = gen.GUID;
+
             return true;
         }
 
@@ -1059,10 +1075,10 @@ namespace Nucleus.Gaming
             WindowsIdentity identity = WindowsIdentity.GetCurrent();
             WindowsPrincipal principal = new WindowsPrincipal(identity);
 
-            if ((gen.LaunchAsDifferentUsersAlt || gen.LaunchAsDifferentUsers) && !principal.IsInRole(WindowsBuiltInRole.Administrator))
+            if ((gen.LaunchAsDifferentUsersAlt || gen.LaunchAsDifferentUsers || gen.ChangeIPPerInstanceAlt) && !principal.IsInRole(WindowsBuiltInRole.Administrator))
             {
                 earlyExit = true;
-                MessageBox.Show("When launching processes as different users, you must run Nucleus as administrator.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("This script requires you to run Nucleus as administrator.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 Application.Exit();
             }
 
@@ -1099,7 +1115,7 @@ namespace Nucleus.Gaming
                     Log(string.Format("Mutexes - Handle(s): ({0}), KillMutexDelay: {1}, KillMutexType: {2}, RenameNotKillMutex: {3}, PartialMutexSearch: {4}", mutexList, gen.KillMutexDelay, gen.KillMutexType, gen.RenameNotKillMutex, gen.PartialMutexSearch));
                 }
 
-                Log("NucleusCoop mod version: 0.9.9.9 r4");
+                Log("NucleusCoop mod version: 0.9.9.9 r5");
                 string pcSpecs = "PC Info - ";
                 var name = (from x in new ManagementObjectSearcher("SELECT Caption FROM Win32_OperatingSystem").Get().Cast<ManagementObject>()
                             select x.GetPropertyValue("Caption")).FirstOrDefault();
@@ -1634,7 +1650,7 @@ namespace Nucleus.Gaming
                         {
                             if (i == 0)
                             {
-                                Log(string.Format("Symlinking game folder and files at {0} to {1}, for each instance", rootFolder, tempDir));
+                                Log(string.Format("Symlinking game folder and files at {0} to {1}, for each instance", rootFolder, linkFolder));
                                 int exitCode;
                                 //CmdUtil.LinkDirectory(rootFolder, new DirectoryInfo(rootFolder), linkFolder, out exitCode, dirExclusions.ToArray(), fileExclusionsArr, fileCopiesArr, true, true);
                                 //Nucleus.Gaming.Platform.Windows.IO.WinDirectoryUtil.LinkDirectory(rootFolder, new DirectoryInfo(rootFolder), linkFolder, out exitCode, dirExclusions.ToArray(), fileExclusionsArr, fileCopiesArr, true);
@@ -3135,7 +3151,7 @@ namespace Nucleus.Gaming
                                 startup.cb = Marshal.SizeOf(startup);
 
                                 bool success = CreateProcess(null, exePath + " " + startArgs, IntPtr.Zero, IntPtr.Zero, false, (uint)ProcessCreationFlags.CREATE_UNICODE_ENVIRONMENT, envPtr, Path.GetDirectoryName(exePath), ref startup, out PROCESS_INFORMATION processInformation);
-                                Log(string.Format("Launching game directly at {0}", exePath));
+                                Log(string.Format("Launching game directly at {0} with args {1}", exePath, startArgs));
 
                                 if (!success)
                                 {
@@ -4954,9 +4970,12 @@ namespace Nucleus.Gaming
 
             var process = new Process
             {
-                StartInfo = new ProcessStartInfo("netsh", args) { Verb = "runas" }
+                StartInfo = new ProcessStartInfo("netsh", args) { Verb = "runas", UseShellExecute = false, RedirectStandardOutput = true }
             };
+
             process.Start();
+            string stdOut = process.StandardOutput.ReadToEnd();
+            Log("SetIP output " + stdOut);
             process.WaitForExit();
             var successful = process.ExitCode == 0;
             process.Dispose();
@@ -5538,7 +5557,7 @@ namespace Nucleus.Gaming
                                     }
 
 
-                                    if(gen.LockMouse)
+                                    if (gen.LockMouse)
                                     {
                                         _cursorModule.SetActiveWindow();
                                     }
@@ -5906,7 +5925,7 @@ namespace Nucleus.Gaming
 
         private void ResetWindows(ProcessData processData, int x, int y, int w, int h, int i)
         {
-            Log("Attempting to repoisition, resize and strip borders for instance " + (i - 1));
+            Log("Attempting to reposition, resize and strip borders for instance " + (i - 1));
             //MessageBox.Show("Going to attempt to reposition and resize instance " + (i - 1));
             try
             {
@@ -5972,7 +5991,7 @@ namespace Nucleus.Gaming
             }
             catch (Exception ex)
             {
-                Log("ERROR - ResetWindows was unsuccessful for instance " + (i - 1) + ". " + ex.Message);
+                Log("ERROR - Exception in ResetWindows for instance " + (i - 1) + ". " + ex.Message);
             }
 
             try
