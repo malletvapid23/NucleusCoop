@@ -6,6 +6,7 @@ using System.Drawing;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using static Nucleus.Gaming.Windows.Interop.User32Interop;
 
@@ -13,6 +14,46 @@ namespace Nucleus.Gaming.Windows
 {
     public static class User32Util
     {
+        [Flags()]
+        public enum DisplayDeviceStateFlags : int
+        {
+            /// <summary>The device is part of the desktop.</summary>
+            AttachedToDesktop = 0x1,
+            MultiDriver = 0x2,
+            /// <summary>The device is part of the desktop.</summary>
+            PrimaryDevice = 0x4,
+            /// <summary>Represents a pseudo device used to mirror application drawing for remoting or other purposes.</summary>
+            MirroringDriver = 0x8,
+            /// <summary>The device is VGA compatible.</summary>
+            VGACompatible = 0x10,
+            /// <summary>The device is removable; it cannot be the primary display.</summary>
+            Removable = 0x20,
+            /// <summary>The device has more display modes than its output devices support.</summary>
+            ModesPruned = 0x8000000,
+            Remote = 0x4000000,
+            Disconnect = 0x2000000
+        }
+
+        [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Auto)]
+        public struct DISPLAY_DEVICE
+        {
+            [MarshalAs(UnmanagedType.U4)]
+            public int cb;
+            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 32)]
+            public string DeviceName;
+            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 128)]
+            public string DeviceString;
+            [MarshalAs(UnmanagedType.U4)]
+            public DisplayDeviceStateFlags StateFlags;
+            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 128)]
+            public string DeviceID;
+            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 128)]
+            public string DeviceKey;
+        }
+        [DllImport("user32.dll", CharSet = CharSet.Auto)]
+        static extern bool EnumDisplayDevices(string lpDevice, uint iDevNum, ref DISPLAY_DEVICE lpDisplayDevice, uint dwFlags);
+
+
         public enum DeviceCap
         {
             VERTRES = 10,
@@ -50,10 +91,10 @@ namespace Nucleus.Gaming.Windows
             {
                 uint dpiX = 0;
                 uint dpiY = 0;
-                bool result = User32Interop.GetDpiForMonitor(display.Handle, MonitorDpiType.RawDPI, ref dpiX, ref dpiY);
+                User32Interop.GetDpiForMonitor(display.Handle, User32Interop.DpiType.Effective /*MonitorDpiType.RawDPI*/, out dpiX, out dpiY);
 
                 dpi = new Point((int)dpiX, (int)dpiY);
-                return result;
+                return true;
             }
             else
             {
@@ -94,11 +135,52 @@ namespace Nucleus.Gaming.Windows
                 if (User32Interop.GetMonitorInfo(hMonitor, ref info))
                 {
                     Rectangle r = lprcMonitor.ToRectangle();
-                    Display display = new Display(hMonitor, r, info.DeviceName, true);
+
+                    DISPLAY_DEVICE displayDevice = new DISPLAY_DEVICE();
+                    displayDevice.cb = Marshal.SizeOf(displayDevice);
+
+                    const int EDD_GET_DEVICE_INTERFACE_NAME = 0x1;
+
+                    uint deviceIndex = 0;
+                    string deviceID = string.Empty;
+                    string deviceString = string.Empty;
+                    string monitorID = string.Empty;
+                    int displayIndex = -1;
+                    int monitorIndex = -1;
+
+                    while (EnumDisplayDevices(null, deviceIndex, ref displayDevice, 0))
+                    {
+                        if(info.DeviceName == displayDevice.DeviceName)
+                        {
+                            DISPLAY_DEVICE monDisplayDevice = new DISPLAY_DEVICE();
+                            monDisplayDevice.cb = Marshal.SizeOf(monDisplayDevice);
+                            uint monitorNum = 0;
+                            EnumDisplayDevices(displayDevice.DeviceName, monitorNum, ref monDisplayDevice, EDD_GET_DEVICE_INTERFACE_NAME);
+                            
+                                deviceID = monDisplayDevice.DeviceID;
+                                deviceString = monDisplayDevice.DeviceString;
+                                monitorID = deviceID.Substring(deviceID.IndexOf("DISPLAY#") + 8, 7);
+                                Int32.TryParse(info.DeviceName.Substring(info.DeviceName.IndexOf("DISPLAY") + 7), out displayIndex);
+                                Int32.TryParse(monDisplayDevice.DeviceName.Substring(monDisplayDevice.DeviceName.IndexOf("Monitor") + 7), out monitorIndex);
+
+                                monitorNum++;
+                            break;
+                        }
+                        deviceIndex++;
+                    }
+
+                    Display display = new Display(hMonitor, r, info.DeviceName, true, deviceID, deviceString, monitorID, displayIndex, monitorIndex);
                     displays.Add(display);
                 }
                 return true;
             };
+
+            //deviceIndex = 0;
+            //while()
+            //{
+            //    LogManager.Log(displayDevice.DeviceID);
+            //    deviceIndex++;
+            //}
 
             bool result = User32Interop.EnumDisplayMonitors(IntPtr.Zero, IntPtr.Zero, callback, 0);
 

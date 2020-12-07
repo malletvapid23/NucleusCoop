@@ -117,9 +117,53 @@ namespace Nucleus.Gaming
         public void LogExceptionFile(Exception ex)
         {
             Log("ERROR - " + ex.Message + " | Stacktrace: " + ex.StackTrace);
+
             string local = GetAppDataPath();
             DateTime now = DateTime.Now;
             string file = string.Format("{0}{1}{2}_{3}{4}{5}", now.Day.ToString("00"), now.Month.ToString("00"), now.Year.ToString("0000"), now.Hour.ToString("00"), now.Minute.ToString("00"), now.Second.ToString("00")) + ".log";
+            MessageBox.Show($"Nucleus has crashed unexpectedly. An attempt to clean up will be made.\n\n[Type]\n{ex.GetType().Name}\n\n[Message]\n{ex.Message}\n\n[Stacktrace]\n{ex.StackTrace}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+
+            Log("Attempting shut-down procedures in order to clean-up");
+
+            string[] regFiles = Directory.GetFiles(Path.Combine(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location), "utils\\backup"), "*.reg", SearchOption.AllDirectories);
+            if (regFiles.Length > 0)
+            {
+                LogManager.Log("TEMP: ALT2 Restoring backed up registry files");
+                foreach (string regFilePath in regFiles)
+                {
+                    System.Diagnostics.Process proc = new System.Diagnostics.Process();
+
+                    try
+                    {
+                        proc.StartInfo.FileName = "reg.exe";
+                        proc.StartInfo.WindowStyle = System.Diagnostics.ProcessWindowStyle.Hidden;
+                        proc.StartInfo.CreateNoWindow = true;
+                        proc.StartInfo.UseShellExecute = false;
+
+                        string command = "import \"" + regFilePath + "\"";
+                        proc.StartInfo.Arguments = command;
+                        proc.Start();
+
+                        proc.WaitForExit();
+                        LogManager.Log($"Imported {Path.GetFileName(regFilePath)}");
+                    }
+                    catch (Exception)
+                    {
+                        proc.Dispose();
+                    }
+
+                    File.Delete(regFilePath);
+                }
+            }
+
+            GenericGameHandler.Instance.End(false);
+            while (!GenericGameHandler.Instance.HasEnded)
+            {
+                Thread.Sleep(1000);
+            }
+
+            Thread.Sleep(1000);
+
             string path = Path.Combine(local, file);
 
             using (Stream stream = File.OpenWrite(path))
@@ -149,9 +193,11 @@ namespace Nucleus.Gaming
                     }
                 }
             }
-            Nucleus.Gaming.Windows.User32Util.ShowTaskBar();
 
-            MessageBox.Show("Application crash. Log generated at Data/" + file);
+            Windows.User32Util.ShowTaskBar();
+
+            Log("High-level error log generated at content/" + file);
+
             Application.Exit();
         }
 

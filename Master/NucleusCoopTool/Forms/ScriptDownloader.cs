@@ -9,6 +9,9 @@ using System.Windows.Forms;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using ListViewSorter;
+using System.Diagnostics;
+using System.Security.Cryptography.X509Certificates;
+using System.Text;
 
 namespace Nucleus.Coop.Forms
 {
@@ -45,11 +48,9 @@ namespace Nucleus.Coop.Forms
             InitializeComponent();
 
             ServicePointManager.Expect100Continue = true;
-            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls
-                   | SecurityProtocolType.Tls11
-                   | SecurityProtocolType.Tls12
-                   | SecurityProtocolType.Ssl3;
-            ServicePointManager.ServerCertificateValidationCallback = (snder, cert, chain, error) => true;
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+            ServicePointManager.ServerCertificateValidationCallback = delegate { return true; };
+            ServicePointManager.DefaultConnectionLimit = 9999;
 
             lvwColumnSorter = new ListViewColumnSorter();
             list_Games.ListViewItemSorter = lvwColumnSorter;
@@ -90,11 +91,13 @@ namespace Nucleus.Coop.Forms
                 lbl_Status.Text = "";
 
                 ServicePointManager.Expect100Continue = true;
-                ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls
-                       | SecurityProtocolType.Tls11
-                       | SecurityProtocolType.Tls12
-                       | SecurityProtocolType.Ssl3;
-                ServicePointManager.ServerCertificateValidationCallback = (snder, cert, chain, error) => true;
+                ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+                ServicePointManager.ServerCertificateValidationCallback = delegate { return true; };
+                ServicePointManager.DefaultConnectionLimit = 9999;
+
+                //ServicePointManager.SecurityProtocol = SecurityProtocolType.Ssl3;
+                //ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls12;
+                //ServicePointManager.ServerCertificateValidationCallback = (snder, cert, chain, error) => true;
 
                 string searchParam = Uri.EscapeDataString(txt_Search.Text);
                 string rawHandlers = null;
@@ -162,6 +165,15 @@ namespace Nucleus.Coop.Forms
                     btn_Next.Enabled = true;
                 }
             }
+        }
+        private static Stream GenerateStreamFromString(string s)
+        {
+            var stream = new MemoryStream();
+            var writer = new StreamWriter(stream);
+            writer.Write(s);
+            writer.Flush();
+            stream.Position = 0;
+            return stream;
         }
 
         private void FetchHandlers(int startIndex)
@@ -265,8 +277,9 @@ namespace Nucleus.Coop.Forms
 
                 try
                 {
-                    WebRequest request = WebRequest.Create(_cover);
-                    request.Timeout = 10;
+                    HttpWebRequest request = (HttpWebRequest)WebRequest.Create(_cover);
+                    //request.ClientCertificates.Add(X509Certificate.CreateFromCertFile(Path.Combine(Path.GetDirectoryName(System.Reflection.Assembly.GetEntryAssembly().Location), "hub_cert.cer")));
+                    //request.Timeout = 10;
                     WebResponse resp = request.GetResponse();
                     Stream respStream = resp.GetResponseStream();
                     bmp = new Bitmap(respStream);
@@ -347,10 +360,19 @@ namespace Nucleus.Coop.Forms
 
         public string Get(string uri)
         {
+            ServicePointManager.Expect100Continue = true;
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+            ServicePointManager.ServerCertificateValidationCallback = delegate { return true; };
+            ServicePointManager.DefaultConnectionLimit = 9999;
+
+
             try
             {
+                //X509Certificate2Collection certificates = new X509Certificate2Collection();
+                //certificates.Import(certName, password, X509KeyStorageFlags.MachineKeySet | X509KeyStorageFlags.PersistKeySet);
                 HttpWebRequest request = (HttpWebRequest)WebRequest.Create(uri);
-                request.Timeout = 10;
+                //request.ClientCertificates.Add(X509Certificate.CreateFromCertFile(Path.Combine(Path.GetDirectoryName(System.Reflection.Assembly.GetEntryAssembly().Location), "hub_cert.cer")));
+                //request.Timeout = 10;
                 //request.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
 
                 using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())

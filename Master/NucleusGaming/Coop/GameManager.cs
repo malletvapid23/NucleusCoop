@@ -546,7 +546,7 @@ namespace Nucleus.Gaming
             if (!IsSaving)
             {
                 isSaving = true;
-                LogManager.Log("> Saving user profile....");
+                //LogManager.Log("> Saving user profile....");
                 ThreadPool.QueueUserWorkItem(saveUser, path);
             }
         }
@@ -568,7 +568,7 @@ namespace Nucleus.Gaming
                             stream.Flush();
                         }
                     }
-                    LogManager.Log("Saved user profile");
+                    //LogManager.Log("Saved user profile");
                 }
                 catch { }
                 isSaving = false;
@@ -593,7 +593,7 @@ namespace Nucleus.Gaming
 
                         GenericGameInfo info = new GenericGameInfo(f.Name, pathBlock, str);
 
-                        LogManager.Log("Found game info: " + info.GameName);
+                        //LogManager.Log("Found game info: " + info.GameName);
                         if (games.Any(c => c.Value.GUID == info.GUID))
                         {
                             games.Remove(info.GUID);
@@ -685,6 +685,37 @@ namespace Nucleus.Gaming
                 error = ex.Message;
                 try
                 {
+                    string[] regFiles = Directory.GetFiles(Path.Combine(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location), "utils\\backup"), "*.reg", SearchOption.AllDirectories);
+                    if (regFiles.Length > 0)
+                    {
+                        LogManager.Log("TEMP: ALT1 Restoring backed up registry files");
+                        foreach (string regFilePath in regFiles)
+                        {
+                            Process proc = new Process();
+
+                            try
+                            {
+                                proc.StartInfo.FileName = "reg.exe";
+                                proc.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
+                                proc.StartInfo.CreateNoWindow = true;
+                                proc.StartInfo.UseShellExecute = false;
+
+                                string command = "import \"" + regFilePath + "\"";
+                                proc.StartInfo.Arguments = command;
+                                proc.Start();
+
+                                proc.WaitForExit();
+                                LogManager.Log($"Imported {Path.GetFileName(regFilePath)}");
+                            }
+                            catch (Exception)
+                            {
+                                proc.Dispose();
+                            }
+
+                            File.Delete(regFilePath);
+                        }
+                    }
+
                     // try to save the exception
                     LogManager.Instance.LogExceptionFile(ex);
                 }

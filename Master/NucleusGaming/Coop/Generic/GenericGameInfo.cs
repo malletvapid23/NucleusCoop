@@ -203,17 +203,17 @@ namespace Nucleus.Gaming
         public bool UserProfileSavePathNoCopy;
         public bool LauncherExeIgnoreFileCheck;
         public bool ForceBindIPDelay;
-        public string[] CustomUserGeneralValues;
+        public string[] CustomUserGeneralPrompts;
         public bool SaveCustomUserGeneralValues;
-        public string[] CustomUserPlayerValues;
+        public string[] CustomUserPlayerPrompts;
         public bool SaveCustomUserPlayerValues;
-        public string[] CustomUserInstanceValues;
+        public string[] CustomUserInstancePrompts;
         public bool SaveCustomUserInstanceValues;
         public bool SaveAndEditCustomUserGeneralValues;
         public bool SaveAndEditCustomUserPlayerValues;
         public bool SaveAndEditCustomInstanceValues;
         public bool TransferNucleusUserAccountProfiles;
-        public bool UseCurrentUserEnvironment = true;
+        public bool UseCurrentUserEnvironment = false;
         public bool EnableWindows;
         public string[] WindowStyleEndChanges;
         public string[] ExtWindowStyleEndChanges;
@@ -227,6 +227,35 @@ namespace Nucleus.Gaming
         public bool UseNemirtingasEpicEmu;
         public bool EpicEmuArgs;
         public bool PromptAfterFirstInstance;
+        public bool FakeFocusSendActivateIgnoreKB;
+        public string[] CopyEnvFoldersToNucleusAccounts;
+        public string[] CopyFoldersTo;
+        public string[] SymlinkFoldersTo;
+        public string[] HardlinkFoldersTo;
+        public bool GamePlayBeforeGameSetup;
+        public bool RequiresAdmin;
+        public int PauseCMDBatchBefore;
+        public int PauseCMDBatchAfter;
+        public bool DontRemoveBorders;
+        public string[] KillMutexProcess;
+        public string MutexProcessExe;
+        public bool PartialMutexSearchProcess;
+        public string KillMutexTypeProcess = "Mutant";
+        public bool GoldbergExperimentalSteamClient;
+        public int PauseBeforeMutexKilling;
+        public int KillMutexDelayProcess;
+        public bool GoldbergIgnoreFileCheck;
+        public bool XInputPlusNoIni;
+        public string DocumentsConfigPath;
+        public string DocumentsSavePath;
+        public bool ForceDocumentsConfigCopy;
+        public bool ForceDocumentsSaveCopy;
+        public bool DocumentsConfigPathNoCopy;
+        public bool DocumentsSavePathNoCopy;
+        public string FlawlessWidescreenPluginPath;
+        public bool XInputPlusOldDll;
+        public bool FlawlessWidescreenOverrideDisplay;
+        public string[] CMDBatchClose;
 
         // -- From USS
         //Effectively a switch for all of USS features

@@ -54,10 +54,13 @@ namespace Nucleus.Gaming.Coop
         public string Nickname;
         public string InstanceId;
         public string RawHID;
+        public int ProcessID;
 
         public string SID;
         public string Adapter;
         public string UserProfile;
+
+        public Display Display;
 
         // Serialized
 

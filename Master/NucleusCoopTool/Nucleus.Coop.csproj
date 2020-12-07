@@ -41,7 +41,7 @@
     <ApplicationManifest>app.manifest</ApplicationManifest>
   </PropertyGroup>
   <PropertyGroup>
-    <SignAssembly>true</SignAssembly>
+    <SignAssembly>false</SignAssembly>
   </PropertyGroup>
   <PropertyGroup>
     <AssemblyOriginatorKeyFile>SplitKey.snk</AssemblyOriginatorKeyFile>
@@ -83,6 +83,9 @@
     <Reference Include="DotNetZip, Version=1.13.7.0, Culture=neutral, PublicKeyToken=6583c7c814667745, processorArchitecture=MSIL">
       <HintPath>..\packages\DotNetZip.1.13.7\lib\net40\DotNetZip.dll</HintPath>
     </Reference>
+    <Reference Include="NAudio, Version=1.10.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\NAudio.1.10.0\lib\net35\NAudio.dll</HintPath>
+    </Reference>
     <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\Newtonsoft.Json.12.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
@@ -97,6 +100,7 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Management" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -229,6 +233,8 @@
     <None Include="copyoutput\utils\SmartSteamEmu\SmartSteamEmu\Plugins\SSEFirewall.ini" />
     <None Include="copyoutput\utils\SmartSteamEmu\SmartSteamEmu\Plugins\SSEOverlay\Language.ini" />
     <None Include="copyoutput\utils\x360ce\x360ce.ini" />
+    <None Include="copyoutput\utils\XInputPlus\old\XInputPlus.ini" />
+    <None Include="copyoutput\utils\XInputPlus\old\XInputPlus_Default.ini" />
     <None Include="copyoutput\utils\XInputPlus\x64\Dinput.dl_" />
     <None Include="copyoutput\utils\XInputPlus\x64\Dinput8.dl_" />
     <None Include="copyoutput\utils\XInputPlus\x64\xinput1_3.dl_" />
@@ -424,6 +430,8 @@
     <Content Include="copyoutput\utils\ForceBindIP\BindIP64.dll" />
     <Content Include="copyoutput\utils\ForceBindIP\ForceBindIP.exe" />
     <Content Include="copyoutput\utils\ForceBindIP\ForceBindIP64.exe" />
+    <None Include="Resources\no_image.jpg" />
+    <None Include="Resources\setting.png" />
     <Content Include="copyoutput\utils\GoldbergEmu\debug_experimental\Readme.txt" />
     <Content Include="copyoutput\utils\GoldbergEmu\debug_experimental\steam_api.dll" />
     <Content Include="copyoutput\utils\GoldbergEmu\debug_experimental\steam_api64.dll" />
@@ -441,8 +449,6 @@
     <Content Include="copyoutput\utils\GoldbergEmu\lobby_connect\lobby_connect.exe" />
     <Content Include="copyoutput\utils\GoldbergEmu\lobby_connect\Readme.txt" />
     <Content Include="copyoutput\utils\GoldbergEmu\Readme.txt" />
-    <Content Include="copyoutput\utils\GoldbergEmu\settings\account_name.txt" />
-    <Content Include="copyoutput\utils\GoldbergEmu\settings\user_steam_id.txt" />
     <Content Include="copyoutput\utils\GoldbergEmu\source_code\Readme.txt" />
     <Content Include="copyoutput\utils\GoldbergEmu\steam_api.dll" />
     <Content Include="copyoutput\utils\GoldbergEmu\steam_api64.dll" />
@@ -481,14 +487,16 @@
     <Content Include="copyoutput\utils\GoldbergEmu\steam_settings.EXAMPLE\disable_networking.EXAMPLE.txt" />
     <Content Include="copyoutput\utils\GoldbergEmu\steam_settings.EXAMPLE\disable_overlay.EXAMPLE.txt" />
     <Content Include="copyoutput\utils\GoldbergEmu\steam_settings.EXAMPLE\DLC.EXAMPLE.txt" />
+    <Content Include="copyoutput\utils\GoldbergEmu\steam_settings.EXAMPLE\force_account_name.EXAMPLE.txt" />
+    <Content Include="copyoutput\utils\GoldbergEmu\steam_settings.EXAMPLE\force_language.EXAMPLE.txt" />
+    <Content Include="copyoutput\utils\GoldbergEmu\steam_settings.EXAMPLE\force_steamid.EXAMPLE.txt" />
     <Content Include="copyoutput\utils\GoldbergEmu\steam_settings.EXAMPLE\leaderboards.EXAMPLE.txt" />
     <Content Include="copyoutput\utils\GoldbergEmu\steam_settings.EXAMPLE\mods.EXAMPLE\12345\Readme.txt" />
     <Content Include="copyoutput\utils\GoldbergEmu\steam_settings.EXAMPLE\offline.EXAMPLE.txt" />
     <Content Include="copyoutput\utils\GoldbergEmu\steam_settings.EXAMPLE\stats.EXAMPLE.txt" />
+    <Content Include="copyoutput\utils\GoldbergEmu\steam_settings.EXAMPLE\subscribed_groups.EXAMPLE.txt" />
     <Content Include="copyoutput\utils\GoldbergEmu\tools\generate_interfaces_file.exe" />
     <Content Include="copyoutput\utils\GoldbergEmu\tools\Readme_generate_interfaces.txt" />
-    <None Include="Resources\no_image.jpg" />
-    <None Include="Resources\setting.png" />
     <Content Include="copyoutput\utils\LaunchUsers\PsExec.exe" />
     <Content Include="copyoutput\utils\NemirtingasEpicEmu\x64\EOSSDK-Win64-Shipping.dll" />
     <Content Include="copyoutput\utils\NemirtingasEpicEmu\x86\EOSSDK-Win32-Shipping.dll" />
@@ -519,7 +527,14 @@
     <Content Include="copyoutput\utils\XInputPlus\Loader\XInputPlusInjector.dll" />
     <Content Include="copyoutput\utils\XInputPlus\Loader\XInputPlusInjector64.dll" />
     <Content Include="copyoutput\utils\XInputPlus\Loader\XInputPlusLoader.exe" />
+    <Content Include="copyoutput\utils\XInputPlus\old\DI8dotNET.dll" />
+    <Content Include="copyoutput\utils\XInputPlus\old\ReadMe_en.txt" />
+    <Content Include="copyoutput\utils\XInputPlus\old\XInputPlus.exe" />
+    <Content Include="copyoutput\utils\XInputPlus\old\ìXÉVùÜù=.txt" />
+    <Content Include="copyoutput\utils\XInputPlus\old\òKé+é¿ô¦é¦é¡é+é¦éó.txt" />
     <Content Include="copyoutput\utils\XInputPlus\ReadMe_en.txt" />
+    <Content Include="copyoutput\utils\XInputPlus\winmm\Readme.txt" />
+    <Content Include="copyoutput\utils\XInputPlus\winmm\Winmm.dll" />
     <Content Include="copyoutput\utils\XInputPlus\XInputPlus.exe" />
     <Content Include="copyoutput\utils\XInputPlus\ìXÉVùÜù=.txt" />
     <Content Include="copyoutput\utils\XInputPlus\òKé+é¿ô¦é¦é¡é+é¦éó.txt" />
@@ -527,6 +542,7 @@
     <Content Include="Resources\icon.ico" />
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="bin\Release\utils\" />
     <Folder Include="copyoutput\utils\backup\" />
     <Folder Include="copyoutput\utils\FlawlessWidescreen\x64\PluginCache\FWS_Plugins\Modules\" />
     <Folder Include="copyoutput\utils\User\" />

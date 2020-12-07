@@ -16,6 +16,8 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Microsoft.Win32;
 using System.Text;
+using System.Runtime.ExceptionServices;
+using System.Reflection;
 
 namespace Nucleus.Coop
 {
@@ -24,7 +26,7 @@ namespace Nucleus.Coop
     /// </summary>
     public partial class MainForm : BaseForm
     {
-        public string version = "v0.9.9.9 r4";
+        public string version = "vR5 (Final)";
 
         private Settings settingsForm = null;
 
@@ -62,7 +64,10 @@ namespace Nucleus.Coop
 
         private bool TopMostToggle = true;
 
-		public Action<IntPtr> RawInputAction { get; set; }
+        private string NucleusEnvironmentRoot = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+        private string DocumentsRoot = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+
+        public Action<IntPtr> RawInputAction { get; set; }
 
         public enum MachineType : ushort
         {
@@ -631,7 +636,11 @@ namespace Nucleus.Coop
             if (handler != null)
             {
                 Log("OnFormClosed method calling Handler End function");
-                handler.End(false);
+                try
+                {
+                    handler.End(false);
+                }
+                catch { }
             }
             User32Util.ShowTaskBar();
         }
@@ -724,6 +733,7 @@ namespace Nucleus.Coop
 
         private void handler_Ended()
         {
+            Log("TEMP: handler_Ended called");
             User32Util.ShowTaskBar();
             handler = null;
             if (handlerThread != null)
@@ -748,10 +758,41 @@ namespace Nucleus.Coop
                     string error = gameManager.Error;
                     if (!string.IsNullOrEmpty(error))
                     {
-                        MessageBox.Show(error, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        //MessageBox.Show(error, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+
+                        LogManager.Log("TEMP: ALT3 Restoring backed up registry files");
+                        string[] regFiles = Directory.GetFiles(Path.Combine(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location), "utils\\backup"), "*.reg", SearchOption.AllDirectories);
+                        foreach (string regFilePath in regFiles)
+                        {
+                            System.Diagnostics.Process proc = new System.Diagnostics.Process();
+
+                            try
+                            {
+                                proc.StartInfo.FileName = "reg.exe";
+                                proc.StartInfo.WindowStyle = System.Diagnostics.ProcessWindowStyle.Hidden;
+                                proc.StartInfo.CreateNoWindow = true;
+                                proc.StartInfo.UseShellExecute = false;
+
+                                string command = "import \"" + regFilePath + "\"";
+                                proc.StartInfo.Arguments = command;
+                                proc.Start();
+
+                                proc.WaitForExit();
+                                LogManager.Log($"Imported {Path.GetFileName(regFilePath)}");
+                            }
+                            catch (Exception)
+                            {
+                                proc.Dispose();
+                            }
+
+                            File.Delete(regFilePath);
+                        }
+
                         handler_Ended();
                         return;
                     }
+
+                    User32Util.ShowTaskBar();
 
                     handler.Update(handler.TimerInterval);
                     Thread.Sleep(TimeSpan.FromMilliseconds(handler.TimerInterval));
@@ -1057,7 +1098,7 @@ namespace Nucleus.Coop
                             profilePaths.Add(Environment.GetEnvironmentVariable("userprofile"));
                             if (currentGameInfo.Game.UseNucleusEnvironment)
                             {
-                                string targetDirectory = $@"C:\Users\{Environment.UserName}\NucleusCoop\";
+                                string targetDirectory = $@"{NucleusEnvironmentRoot}\NucleusCoop\";
 
                                 if (Directory.Exists(targetDirectory))
                                 {
@@ -1191,7 +1232,7 @@ namespace Nucleus.Coop
             string path;
             if (item.Text.StartsWith("Nucleus: "))
             {
-                path = Path.Combine($@"C:\Users\{Environment.UserName}\NucleusCoop\{item.Text.Substring("Nucleus: ".Length)}\", pathSuffix);
+                path = Path.Combine($@"{NucleusEnvironmentRoot}\NucleusCoop\{item.Text.Substring("Nucleus: ".Length)}\", pathSuffix);
             }
             else
             {
@@ -1222,7 +1263,7 @@ namespace Nucleus.Coop
             string path;
             if (item.Text.StartsWith("Nucleus: "))
             {
-                path = Path.Combine($@"C:\Users\{Environment.UserName}\NucleusCoop\{item.Text.Substring("Nucleus: ".Length)}\", pathSuffix);
+                path = Path.Combine($@"{NucleusEnvironmentRoot}\NucleusCoop\{item.Text.Substring("Nucleus: ".Length)}\", pathSuffix);
             }
             else
             {

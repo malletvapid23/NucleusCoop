@@ -1,11 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace Nucleus.Gaming.Forms
@@ -18,6 +11,7 @@ namespace Nucleus.Gaming.Forms
         {
             InitializeComponent();
             lbl_Desc.Text = message;
+            txt_UserInput.Text = prevAnswer;
 
             index = i;
 

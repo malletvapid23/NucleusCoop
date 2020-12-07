@@ -12,6 +12,8 @@ using SharpDX.DirectInput;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using Nucleus.Gaming.Coop.InputManagement;
+using System.Management;
+using NAudio.CoreAudioApi;
 
 namespace Nucleus.Coop
 {
@@ -29,6 +31,9 @@ namespace Nucleus.Coop
         private TextBox[] controllerGuids;
         private TextBox[] controllerNicks;
 
+        //private List<string> audioDevices;
+        private IDictionary<string, string> audioDevices;
+
         private DirectInput dinput;
 
         public Settings(MainForm mf, PositionsControl pc)
@@ -40,8 +45,8 @@ namespace Nucleus.Coop
 
             Invalidate();
 
-            controllerGuids = new TextBox[]{ controllerOneGuid, controllerTwoGuid, controllerThreeGuid, controllerFourGuid, controllerFiveGuid, controllerSixGuid, controllerSevenGuid, controllerEightGuid, controllerNineGuid, controllerTenGuid, controllerElevenGuid, controllerTwelveGuid, controllerThirteenGuid, controllerFourteenGuid, controllerFifteenGuid, controllerSixteenGuid };
-            controllerNicks = new TextBox[]{ controllerOneNick, controllerTwoNick, controllerThreeNick, controllerFourNick, controllerFiveNick, controllerSixNick, controllerSevenNick, controllerEightNick, controllerNineNick, controllerTenNick, controllerElevenNick, controllerTwelveNick, controllerThirteenNick, controllerFourteenNick, controllerFifteenNick, controllerSixteenNick };
+            controllerGuids = new TextBox[] { controllerOneGuid, controllerTwoGuid, controllerThreeGuid, controllerFourGuid, controllerFiveGuid, controllerSixGuid, controllerSevenGuid, controllerEightGuid, controllerNineGuid, controllerTenGuid, controllerElevenGuid, controllerTwelveGuid, controllerThirteenGuid, controllerFourteenGuid, controllerFifteenGuid, controllerSixteenGuid };
+            controllerNicks = new TextBox[] { controllerOneNick, controllerTwoNick, controllerThreeNick, controllerFourNick, controllerFiveNick, controllerSixNick, controllerSevenNick, controllerEightNick, controllerNineNick, controllerTenNick, controllerElevenNick, controllerTwelveNick, controllerThirteenNick, controllerFourteenNick, controllerFifteenNick, controllerSixteenNick };
 
             mainForm = mf as MainForm;
             positionsControl = pc;
@@ -69,7 +74,7 @@ namespace Nucleus.Coop
             if (ini.IniReadValue("Hotkeys", "Close").Contains('+'))
             {
                 string[] closeHk = ini.IniReadValue("Hotkeys", "Close").Split('+');
-                if((closeHk[0] == "Ctrl" || closeHk[0] == "Alt" || closeHk[0] == "Shift") && closeHk[1].Length == 1 && Regex.IsMatch(closeHk[1], @"^[a-zA-Z0-9]+$"))
+                if ((closeHk[0] == "Ctrl" || closeHk[0] == "Alt" || closeHk[0] == "Shift") && closeHk[1].Length == 1 && Regex.IsMatch(closeHk[1], @"^[a-zA-Z0-9]+$"))
                 {
                     settingsCloseCmb.SelectedItem = closeHk[0];
                     settingsCloseHKTxt.Text = closeHk[1];
@@ -148,7 +153,22 @@ namespace Nucleus.Coop
 
             if (ini.IniReadValue("Misc", "KeepAccounts") != "")
             {
-                statusCheck.Checked = Boolean.Parse(ini.IniReadValue("Misc", "KeepAccounts"));
+                keepAccountsCheck.Checked = Boolean.Parse(ini.IniReadValue("Misc", "KeepAccounts"));
+            }
+
+            if (ini.IniReadValue("Misc", "NucleusAccountPassword") != "")
+            {
+                nucUserPassTxt.Text = ini.IniReadValue("Misc", "NucleusAccountPassword");
+            }
+
+            if (ini.IniReadValue("Audio", "Custom") == "0")
+            {
+                audioDefaultSettingsRadio.Checked = true;
+                audioCustomSettingsBox.Enabled = false;
+            }
+            else
+            {
+                audioCustomSettingsRadio.Checked = true;
             }
 
             //if (ini.IniReadValue("Misc", "VibrateOpen") != "")
@@ -156,6 +176,7 @@ namespace Nucleus.Coop
             //    check_Vibrate.Checked = Boolean.Parse(ini.IniReadValue("Misc", "VibrateOpen"));
             //}
 
+            RefreshAudioList();
         }
 
         public Settings()
@@ -273,16 +294,36 @@ namespace Nucleus.Coop
                 ini.IniWriteValue("Misc", "Network", cmb_Network.SelectedItem.ToString());
                 ini.IniWriteValue("Misc", "SteamLang", cmb_Lang.SelectedItem.ToString());
                 ini.IniWriteValue("Misc", "ShowStatus", statusCheck.Checked.ToString());
-                ini.IniWriteValue("Misc", "KeepAccounts", statusCheck.Checked.ToString());
+                ini.IniWriteValue("Misc", "KeepAccounts", keepAccountsCheck.Checked.ToString());
+                ini.IniWriteValue("Misc", "NucleusAccountPassword", nucUserPassTxt.Text);
 
                 //ini.IniWriteValue("CustomLayout", "Enabled", enableCustomCheckbox.Checked.ToString());
                 ini.IniWriteValue("CustomLayout", "HorizontalLines", numHorDiv.Value.ToString());
                 ini.IniWriteValue("CustomLayout", "VerticalLines", numVerDiv.Value.ToString());
                 ini.IniWriteValue("CustomLayout", "MaxPlayers", numMaxPlyrs.Value.ToString());
 
+                if(audioDefaultSettingsRadio.Checked)
+                {
+                    ini.IniWriteValue("Audio", "Custom", 0.ToString());
+                }
+                else
+                {
+                    ini.IniWriteValue("Audio", "Custom", 1.ToString());
+                }
                 
-
                 //ini.IniWriteValue("Misc", "VibrateOpen", check_Vibrate.Checked.ToString());
+
+                foreach (Control ctrl in audioCustomSettingsBox.Controls)
+                {
+                    if (ctrl is ComboBox)
+                    {
+                        var cmb = (ComboBox)ctrl;
+                        if(audioDevices?.Count > 0 && audioDevices.Keys.Contains(cmb.Text))
+                        {
+                            ini.IniWriteValue("Audio", cmb.Name, audioDevices[cmb.Text]);
+                        }
+                    }
+                }
 
                 MessageBox.Show("Settings saved succesfully!", "Saved", MessageBoxButtons.OK, MessageBoxIcon.None);
             }
@@ -524,9 +565,88 @@ namespace Nucleus.Coop
             }
         }
 
-        private void groupBox1_Enter(object sender, EventArgs e)
+        private void audioCustomSettingsRadio_CheckedChanged(object sender, EventArgs e)
         {
+            if (audioCustomSettingsRadio.Checked)
+            {
+                audioCustomSettingsBox.Enabled = true;
+            }
+            else
+            {
+                audioCustomSettingsBox.Enabled = false;
+            }
+        }
 
+        private void audioBox_DropDown(object sender, EventArgs e)
+        {
+            //var cmb = (ComboBox)sender;
+            //cmb.Items.Clear();
+            //cmb.Items.Add("Default");
+            //cmb.SelectedItem = "Default";
+
+
+        }
+
+        private void tabControl2_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if(tabControl2.SelectedTab.Text == "Audio")
+            {
+                RefreshAudioList();
+                var enumerator = new MMDeviceEnumerator();
+                MMDevice audioDefault = enumerator.GetDefaultAudioEndpoint(DataFlow.Render, Role.Console);
+                audioDefaultDevice.Text = "Default: " + audioDefault.FriendlyName;
+            }
+        }
+
+
+
+        private void RefreshAudioList()
+        {
+            audioDevices = new Dictionary<string, string>();
+            audioDevices.Add("Default", "Default");
+
+            //ManagementObjectSearcher objSearcher = new ManagementObjectSearcher("SELECT * FROM Win32_SoundDevice");
+
+            //ManagementObjectCollection objCollection = objSearcher.Get();
+
+            //foreach (ManagementObject obj in objCollection)
+            //{
+            //    audioDevices.Add(obj["Caption"].ToString(), obj["DeviceID"].ToString());
+            //}
+
+            var enumerator = new MMDeviceEnumerator();
+            foreach (var endpoint in enumerator.EnumerateAudioEndPoints(DataFlow.Render, DeviceState.Active))
+            {
+                audioDevices.Add(endpoint.FriendlyName, endpoint.ID);
+            }          
+
+            foreach (Control ctrl in audioCustomSettingsBox.Controls)
+            {
+                if (ctrl is ComboBox)
+                {
+                    var cmb = (ComboBox)ctrl;
+                    string lastItem = cmb.Text;
+                    cmb.Items.Clear();
+                    cmb.Items.AddRange(audioDevices.Keys.ToArray());
+                    if(cmb.Items.Contains(lastItem))
+                    {
+                        cmb.SelectedItem = lastItem;
+                    }
+                    else if (audioDevices.Values.Contains(ini.IniReadValue("Audio", cmb.Name)))
+                    {
+                        cmb.SelectedItem = audioDevices.FirstOrDefault(x => x.Value == ini.IniReadValue("Audio", cmb.Name)).Key;
+                    }
+                    else
+                    {
+                        cmb.SelectedItem = "Default";
+                    }
+                }
+            }
+        }
+
+        private void audioRefresh_Click(object sender, EventArgs e)
+        {
+            RefreshAudioList();
         }
     }
 }

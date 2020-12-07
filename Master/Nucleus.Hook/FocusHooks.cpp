@@ -58,6 +58,13 @@ HWND WINAPI SetFocus_Hook(
 	return input;
 }
 
+BOOL WINAPI SetForegroundWindow_Hook(
+	HWND hWnd
+)
+{
+	return true;
+}
+
 void installFocusHooks()
 {
 	DEBUGLOG("Injecting Focus hooks\n");
@@ -71,4 +78,6 @@ void installFocusHooks()
 	installHook("user32", "ReleaseCapture", ReleaseCapture_Hook);
 	installHook("user32", "SetActiveWindow", SetActiveWindow_Hook);
 	installHook("user32", "SetFocus", SetFocus_Hook);
+
+	installHook("user32", "SetForegroundWindow", SetForegroundWindow_Hook);
 }

@@ -62,10 +62,12 @@ namespace Nucleus.Coop.Forms
                     | SecurityProtocolType.Tls12
                     | SecurityProtocolType.Ssl3;
             ServicePointManager.ServerCertificateValidationCallback = (snder, cert, chain, error) => true;
+            ServicePointManager.DefaultConnectionLimit = 9999;
 
             try
             {
                 WebRequest request = WebRequest.Create(_cover);
+                //request.Timeout = 10;
                 WebResponse resp = request.GetResponse();
                 Stream respStream = resp.GetResponseStream();
                 bmp = new Bitmap(respStream);
@@ -104,6 +106,7 @@ namespace Nucleus.Coop.Forms
         public string Get(string uri)
         {
             HttpWebRequest request = (HttpWebRequest)WebRequest.Create(uri);
+            //request.Timeout = 10;
 
             using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
             using (Stream stream = response.GetResponseStream())

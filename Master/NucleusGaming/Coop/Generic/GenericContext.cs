@@ -89,16 +89,40 @@ namespace Nucleus.Gaming
         public bool XboxOneControllerFix;
         public bool UseForceBindIP;
         public string[] XInputPlusDll;
+        public bool XInputPlusOldDll;
         public string[] CopyCustomUtils;
         public int PlayersPerInstance;
         public bool UseDevReorder;
         public string[] CustomUserGeneralValues;
         public string[] CustomUserPlayerValues;
         public string[] CustomUserInstanceValues;
+        public bool InjectHookXinput;
+        public bool InjectDinputToXinputTranslation;
+        public bool UseDInputBlocker;
+        public bool BlockRawInput;
+        public bool PreventWindowDeactivation;
+        public string[] X360ceDll;
+        public string PostHookInstances;
+        public string StartHookInstances;
+        public string FakeFocusInstances;
+        public string[] CMDBatchBefore;
+        public string[] CMDBatchAfter;
+        public string[] CMDBatchClose;
+        public bool CMDStartArgsInside;
+        public string LauncherFolder;
+        public string[] PlayerSteamIDs;
+        public int NumControllers = 0;
+        public int NumKeyboards = 0;
+        //public int OrigWidth;
+        //public int OrigHeight;
 
         private List<string> regKeyPaths = new List<string>();
 
+        public string NucleusEnvironmentRoot = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
 
+        public string NucleusDocumentsRoot = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+
+        public string UtilFolder = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location) + "\\utils";
 
         public Type HandlerType
         {
@@ -108,6 +132,14 @@ namespace Nucleus.Gaming
         public Dictionary<string, object> Options
         {
             get { return profile.Options; }
+        }
+
+        public string Arch
+        {
+            get
+            {
+                return GenericGameHandler.Instance.garch;
+            }
         }
 
         public int Width
@@ -126,6 +158,7 @@ namespace Nucleus.Gaming
                 }
             }
         }
+
         public int Height
         {
             get
@@ -140,6 +173,38 @@ namespace Nucleus.Gaming
                     default:
                         return pInfo.MonitorBounds.Height;
                 }
+            }
+        }
+
+        public int PosX
+        {
+            get
+            {
+                return pInfo.MonitorBounds.X;
+            }
+        }
+
+        public int PosY
+        {
+            get
+            {
+                return pInfo.MonitorBounds.Y;
+            }
+        }
+
+        public int MonitorWidth
+        {
+            get
+            {
+                return pInfo.Display.Bounds.Width;
+            }
+        }
+
+        public int MonitorHeight
+        {
+            get
+            {
+                return pInfo.Display.Bounds.Height;
             }
         }
 
@@ -162,6 +227,37 @@ namespace Nucleus.Gaming
             parent = handler;
 
             bHasKeyboardPlayer = hasKeyboard;
+        }
+
+        public void Log(string msg)
+        {
+            LogManager.Log(msg);
+        }
+
+        public void Log(string msg, string val)
+        {
+            LogManager.Log(msg + ": " + val);
+        }
+
+        public void Log(string msg, int val)
+        {
+            LogManager.Log(msg + ": " + val.ToString());
+        }
+
+        public void Log(string msg, bool val)
+        {
+            LogManager.Log(msg + ": " + val.ToString());
+        }
+
+        public void Log(string msg, double val)
+        {
+            LogManager.Log(msg + ": " + val.ToString());
+        }
+
+        public void Log(string msg, string[] vals)
+        {
+            string val = String.Join(",", vals);
+            LogManager.Log(msg + ": " + val.ToString());
         }
 
         public string HandlerGUID
@@ -188,9 +284,20 @@ namespace Nucleus.Gaming
             }
         }
 
-        public bool HasKeyboardPlayer()
+        public int ProcessID
         {
-            return bHasKeyboardPlayer;
+            get
+            {
+                return pInfo.ProcessID;
+            }
+        }
+
+        public bool HasKeyboardPlayer
+        {
+            get
+            {
+                return bHasKeyboardPlayer;
+            }
         }
 
         public string GetFolder(Folder folder)
@@ -258,21 +365,21 @@ namespace Nucleus.Gaming
             }
         }
 
-        public int OrigWidth
-        {
-            get
-            {
-                return pInfo.ProcessData.HWnd.Size.Width;
-            }
-        }
+        //public int OrigWidth
+        //{
+        //    get
+        //    {
+        //        return pInfo.ProcessData.HWnd.Size.Width;
+        //    }
+        //}
 
-        public int OrigHeight
-        {
-            get
-            {
-                return profile.Screens[pInfo.PlayerID].display.Height;
-            }
-        }
+        //public int OrigHeight
+        //{
+        //    get
+        //    {
+        //        return profile.Screens[pInfo.PlayerID].display.Height;
+        //    }
+        //}
 
         public string Nickname
         {
@@ -308,7 +415,7 @@ namespace Nucleus.Gaming
         {
             get
             {
-                return $@"C:\Users\{Environment.UserName}\NucleusCoop\{Nickname}\";
+                return $@"{NucleusEnvironmentRoot}\NucleusCoop\{Nickname}\";
             }
         }
 
@@ -316,7 +423,24 @@ namespace Nucleus.Gaming
         {
             get
             {
-                return $@"C:\Users\{Environment.UserName}\NucleusCoop\";
+                return $@"{NucleusEnvironmentRoot}\NucleusCoop\";
+            }
+        }
+
+        public string DocumentsPlayer
+        {
+            get
+            {
+                Log($"TEMP: NucleusDocumentsRoot={NucleusDocumentsRoot}, Nuclues.Folder.Documents={Folder.Documents}, GetFolderPath={Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments)}");
+                return $@"{Path.GetDirectoryName(NucleusDocumentsRoot)}\NucleusCoop\{Nickname}\Documents";
+            }
+        }
+
+        public string DocumentsRoot
+        {
+            get
+            {
+                return $@"{Path.GetDirectoryName(NucleusDocumentsRoot)}\NucleusCoop\";
             }
         }
 
@@ -342,11 +466,40 @@ namespace Nucleus.Gaming
             get; set;
         }
 
+        public string DocumentsConfigPath
+        {
+            get; set;
+        }
+
+        public string DocumentsSavePath
+        {
+            get; set;
+        }
+
         public string ScriptFolder
         {
             get
             {
                 return GameManager.Instance.GetJsScriptsPath() + "\\" + Path.GetFileNameWithoutExtension(parent.JsFilename);
+            }
+        }
+
+        public void BackupFile(string filePath, bool overwrite)
+        {
+            if(pInfo.PlayerID == 0)
+            {
+                if (File.Exists(filePath))
+                {
+                    Log($"Backing up {filePath}");
+                    string backupFileName = Path.GetDirectoryName(filePath) + "\\" + Path.GetFileNameWithoutExtension(filePath) + "_NUCLEUS_BACKUP" + Path.GetExtension(filePath);
+                    File.Copy(filePath, backupFileName, overwrite);
+                    //BackupAndRestoreFiles.Add(backupFileName);
+                    parent.userBackedFiles.Add(backupFileName);
+                }
+                else
+                {
+                    Log($"Unable to backup {filePath}, file does not exist");
+                }
             }
         }
 
@@ -366,8 +519,52 @@ namespace Nucleus.Gaming
                     File.Copy(newPath, newPath.Replace(SourcePath, DestinationPath), true);
             }
             catch
-            {                
+            {
             }
+        }
+
+        public int RandomInt(int min, int max)
+        {
+            Random _random = new Random();  
+            return _random.Next(min, max); 
+        }
+
+        public string RandomString(int size, bool lowerCase = false)
+        {
+            Random _random = new Random();
+            var builder = new StringBuilder(size);
+
+            // Unicode/ASCII Letters are divided into two blocks
+            // (Letters 65–90 / 97–122):
+            // The first group containing the uppercase letters and
+            // the second group containing the lowercase.  
+
+            // char is a single Unicode character  
+            char offset = lowerCase ? 'a' : 'A';
+            const int lettersOffset = 26; // A...Z or a..z: length=26  
+
+            for (var i = 0; i < size; i++)
+            {
+                var @char = (char)_random.Next(offset, offset + lettersOffset);
+                builder.Append(@char);
+            }
+
+            return lowerCase ? builder.ToString().ToLower() : builder.ToString();
+        }
+
+        public int ConvertToInt(string num)
+        {
+            return Convert.ToInt32(num);
+        }
+
+        public int ConvertToInt(object num)
+        {
+            return Convert.ToInt32(num);
+        }
+
+        public string ConvertToString(object str)
+        {
+            return str.ToString();
         }
 
         public byte[] ConvertToBytes(float num)
@@ -457,12 +654,6 @@ namespace Nucleus.Gaming
                     }
                 }
 
-                if (promptBetween)
-                {
-                    Forms.Prompt prompt = new Forms.Prompt("Press OK when ready to launch " + filePaths[fileIndex]);
-                    prompt.ShowDialog();
-                }
-
                 ProcessStartInfo psi = new ProcessStartInfo();
                 psi.FileName = fileName;
                 psi.UseShellExecute = false;
@@ -481,6 +672,20 @@ namespace Nucleus.Gaming
                 }
 
                 Process.Start(psi);
+
+                if (promptBetween)
+                {
+                    if (fileIndex < (filePaths.Length - 1))
+                    {
+                        Forms.Prompt prompt = new Forms.Prompt("Press OK when ready to launch " + filePaths[fileIndex]);
+                        prompt.ShowDialog();
+                    }
+                    else
+                    {
+                        Forms.Prompt prompt = new Forms.Prompt("Press OK when ready to proceed with launching the game instance " + filePaths[fileIndex]);
+                        prompt.ShowDialog();
+                    }
+                }
 
                 if (fileIndex < (filePaths.Length - 1) && secondsToPauseInbetween > 0)
                 {
@@ -741,7 +946,7 @@ namespace Nucleus.Gaming
                 string lineNum = splitString[0];
                 string newValue = splitString[1];
 
-                if (int.Parse(lineNum) > 0 && int.Parse(lineNum) < lines.Length)
+                if (int.Parse(lineNum) > 0 && int.Parse(lineNum) <= lines.Length)
                 {
                     lines[int.Parse(lineNum) - 1] = newValue;
                 }
@@ -767,7 +972,7 @@ namespace Nucleus.Gaming
                 string[] splitString = line.Split('|');
                 string lineNum = splitString[0];
                 string newValue = splitString[1];
-                if (int.Parse(lineNum) > 0 && int.Parse(lineNum) < lines.Length)
+                if (int.Parse(lineNum) > 0 && int.Parse(lineNum) <= lines.Length)
                 {
                     lines[int.Parse(lineNum) - 1] = newValue;
                 }
@@ -795,7 +1000,7 @@ namespace Nucleus.Gaming
                 string regexPtrn = data[1];
                 string newValue = data[2];
 
-                if (int.Parse(lineNum) > 0 && int.Parse(lineNum) < lines.Length)
+                if (int.Parse(lineNum) > 0 && int.Parse(lineNum) <= lines.Length)
                 {
                     lines[int.Parse(lineNum) - 1] = Regex.Replace(lines[int.Parse(lineNum) - 1], regexPtrn, newValue);
                 }
@@ -823,7 +1028,7 @@ namespace Nucleus.Gaming
                 string regexPtrn = data[1];
                 string newValue = data[2];
 
-                if (int.Parse(lineNum) > 0 && int.Parse(lineNum) < lines.Length)
+                if (int.Parse(lineNum) > 0 && int.Parse(lineNum) <= lines.Length)
                 {
                     lines[int.Parse(lineNum) - 1] = Regex.Replace(lines[int.Parse(lineNum) - 1], regexPtrn, newValue);
                 }

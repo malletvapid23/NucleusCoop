@@ -11,6 +11,8 @@ using System.Runtime.InteropServices;
 using System.Collections;
 using System.Linq;
 using System.Windows.Forms;
+using System.Security.Principal;
+using Microsoft.Win32;
 
 namespace StartGame
 {
@@ -60,6 +62,9 @@ namespace StartGame
         private static bool useNucleusEnvironment;
         private static bool injectFailed;
         private static bool useStartupHooks = true;
+
+        private static string NucleusEnvironmentRoot = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+        private static string DocumentsRoot = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
 
         private static int width;
         private static int height;
@@ -280,18 +285,30 @@ namespace StartGame
                     Log("Setting up Nucleus environment");
                     var sb = new StringBuilder();
                     IDictionary envVars = Environment.GetEnvironmentVariables();
-                    var username = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile).Replace(@"C:\Users\", "");
-                    envVars["USERPROFILE"] = $@"C:\Users\{username}\NucleusCoop\{playerNick}";
+                    //var username = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile).Replace(@"C:\Users\", "");
+                    string username = WindowsIdentity.GetCurrent().Name.Split('\\')[1];
+                    envVars["USERPROFILE"] = $@"{NucleusEnvironmentRoot}\NucleusCoop\{playerNick}";
                     envVars["HOMEPATH"] = $@"\Users\{username}\NucleusCoop\{playerNick}";
-                    envVars["APPDATA"] = $@"C:\Users\{username}\NucleusCoop\{playerNick}\AppData\Roaming";
-                    envVars["LOCALAPPDATA"] = $@"C:\Users\{username}\NucleusCoop\{playerNick}\AppData\Local";
+                    envVars["APPDATA"] = $@"{NucleusEnvironmentRoot}\NucleusCoop\{playerNick}\AppData\Roaming";
+                    envVars["LOCALAPPDATA"] = $@"{NucleusEnvironmentRoot}\NucleusCoop\{playerNick}\AppData\Local";
 
                     //Some games will crash if the directories don't exist
-                    Directory.CreateDirectory($@"C:\Users\{username}\NucleusCoop");
+                    Directory.CreateDirectory($@"{NucleusEnvironmentRoot}\NucleusCoop");
                     Directory.CreateDirectory(envVars["USERPROFILE"].ToString());
                     Directory.CreateDirectory(Path.Combine(envVars["USERPROFILE"].ToString(), "Documents"));
                     Directory.CreateDirectory(envVars["APPDATA"].ToString());
                     Directory.CreateDirectory(envVars["LOCALAPPDATA"].ToString());
+
+                    Directory.CreateDirectory(Path.GetDirectoryName(DocumentsRoot) + $@"\NucleusCoop\{playerNick}\Documents");
+
+                    if (!File.Exists(Path.Combine(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location), @"utils\backup\User Shell Folders.reg")))
+                    {
+                        //string mydocPath = key.GetValue("Personal").ToString();
+                        ExportRegistry(@"HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders", Path.Combine(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location), @"utils\backup\User Shell Folders.reg"));
+                    }
+
+                    RegistryKey dkey = Registry.CurrentUser.OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders", true);
+                    dkey.SetValue("Personal", Path.GetDirectoryName(DocumentsRoot) + $@"\NucleusCoop\{playerNick}\Documents", (RegistryValueKind)(int)RegType.ExpandString);
 
                     foreach (object envVarKey in envVars.Keys)
                     {
@@ -574,6 +591,30 @@ namespace StartGame
                 {
                     MessageBox.Show("Nucleus was unable to launch and/or find the proper process for this instance. Please close Nucleus and try again.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
+            }
+        }
+
+        private static void ExportRegistry(string strKey, string filepath)
+        {
+            try
+            {
+                using (Process proc = new Process())
+                {
+                    proc.StartInfo.FileName = "reg.exe";
+                    proc.StartInfo.UseShellExecute = false;
+                    proc.StartInfo.RedirectStandardOutput = true;
+                    proc.StartInfo.RedirectStandardError = true;
+                    proc.StartInfo.CreateNoWindow = true;
+                    proc.StartInfo.Arguments = "export \"" + strKey + "\" \"" + filepath + "\" /y";
+                    proc.Start();
+                    string stdout = proc.StandardOutput.ReadToEnd();
+                    string stderr = proc.StandardError.ReadToEnd();
+                    proc.WaitForExit();
+                }
+            }
+            catch (Exception ex)
+            {
+                // handle exception
             }
         }
 

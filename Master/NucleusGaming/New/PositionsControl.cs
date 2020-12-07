@@ -58,7 +58,7 @@ namespace Nucleus.Coop
         public bool isDisconnected;
         private int dinputPressed = -1;
 		
-		private readonly IniFile ini = new Gaming.IniFile(Path.Combine(Directory.GetCurrentDirectory(), "Settings.ini"));
+		private readonly IniFile ini = new IniFile(Path.Combine(Directory.GetCurrentDirectory(), "Settings.ini"));
 
 		private ImageAttributes flashImageAttributes;
 
@@ -82,13 +82,18 @@ namespace Nucleus.Coop
         // xinput
         private List<Controller> xinputControllers;
 
-        private Timer gamepadTimer;
-        private Timer gamepadPollTimer;
+        //private Timer gamepadTimer;
+        //private Timer gamepadPollTimer;
+        private System.Threading.Timer gamepadTimer;
+        private System.Threading.Timer gamepadPollTimer;
+        //private System.Threading.Thread pollThread;
 
         private int gamePadPressed = -1;
 
         private int testDinputPlayers = -1;// 16;
         private int testXinputPlayers = -1;// 16;
+
+        
 
         public PositionsControl()
         {
@@ -109,13 +114,20 @@ namespace Nucleus.Coop
                 xinputControllers.Add(new Controller((UserIndex)i));
             }
 
-            gamepadTimer = new Timer();
-            gamepadTimer.Interval = 1000;
-            gamepadTimer.Tick += GamepadTimer_Tick;
+            //gamepadTimer = new System.Threading.Timer(GamepadTimer_Tick, null, 0, 200);
+            //gamepadTimer = new Timer();
+            //gamepadTimer.Interval = 1000;
+            //gamepadTimer.Tick += GamepadTimer_Tick;
 
-            gamepadPollTimer = new Timer();
-            gamepadPollTimer.Interval = 1001;
-            gamepadPollTimer.Tick += GamepadPollTimer_Tick;
+            //gamepadPollTimer = new System.Threading.Timer(GamepadPollTimer_Tick, null, 0, 299);
+            //gamepadPollTimer = new Timer();
+            //gamepadPollTimer.Interval = 1001;
+            //gamepadPollTimer.Tick += GamepadPollTimer_Tick;
+
+            if (gamepadTimer == null)
+                gamepadTimer = new System.Threading.Timer(GamepadTimer_Tick, null, 0, 1000);
+            if (gamepadPollTimer == null)
+                gamepadPollTimer = new System.Threading.Timer(GamepadPollTimer_Tick, null, 0, 1001);
 
             playerFont = new Font("Segoe UI", 40);
             playerCustomFont = new Font("Segoe UI", 16);
@@ -206,12 +218,14 @@ namespace Nucleus.Coop
             //    dinput = null;
             //}
 
-            gamepadTimer.Enabled = false;
-            gamepadPollTimer.Enabled = false;
+            //gamepadTimer.Enabled = false;
+            //gamepadPollTimer.Enabled = false;
+            gamepadTimer.Dispose();
+            gamepadPollTimer.Dispose();
         }
 
 
-        private void GamepadPollTimer_Tick(object sender, EventArgs e)
+        private void GamepadPollTimer_Tick(Object state)/* object sender, EventArgs e)*/
         {
             gamePadPressed = -1;
             try
@@ -221,14 +235,19 @@ namespace Nucleus.Coop
                 {
                     if(!player.IsKeyboardPlayer && !player.IsRawKeyboard && !player.IsRawMouse)
                     {
-                        PollGamepad(player);
+                        Invoke(new Action(() => PollGamepad(player)));
                     }
                 }
             }
             catch (Exception ex)
             {
-                UpdatePlayers();
-                Refresh();
+                //UpdatePlayers();
+                if (InvokeRequired)
+                {
+                    Invoke(new MethodInvoker(UpdatePlayers));
+                    Invoke(new MethodInvoker(Refresh));
+                    return;
+                }
                 gamePadPressed = -1;
             }
 
@@ -287,9 +306,11 @@ namespace Nucleus.Coop
         }
 
 
-        private void GamepadTimer_Tick(object sender, EventArgs e)
+        private void GamepadTimer_Tick(Object state)/* object sender, EventArgs e)*/
         {
             gamePadPressed = -1;
+            if (profile == null)
+                return;
             List<PlayerInfo> data = profile.PlayerData;
             //List<string> instanceIds = new List<string>();
             bool changed = false;
@@ -504,8 +525,13 @@ namespace Nucleus.Coop
 
             if (changed)
             {
-                UpdatePlayers();
-                Refresh();
+                //UpdatePlayers();
+                if (InvokeRequired)
+                {
+                    Invoke(new MethodInvoker(UpdatePlayers));
+                    Invoke(new MethodInvoker(Refresh));
+                    return;
+                }
             }
 
             if (dinput != null)
@@ -609,8 +635,14 @@ namespace Nucleus.Coop
         {
             base.Initialize(game, profile);
 
-            gamepadTimer.Enabled = true;
-            gamepadPollTimer.Enabled = true;
+            //gamepadTimer.Enabled = true;
+            //gamepadPollTimer.Enabled = true;
+
+            if(gamepadTimer == null)
+                gamepadTimer = new System.Threading.Timer(GamepadTimer_Tick, null, 0, 1000);
+            if(gamepadPollTimer == null)
+                gamepadPollTimer = new System.Threading.Timer(GamepadPollTimer_Tick, null, 0, 1001);
+
             UpdatePlayers();
         }
 
@@ -788,6 +820,13 @@ namespace Nucleus.Coop
 			        int verLines = int.Parse(ini.IniReadValue("CustomLayout", "VerticalLines"));
 			        int maxPlayers = int.Parse(ini.IniReadValue("CustomLayout", "MaxPlayers"));
 
+                        //if (horLines == 0)
+                        //    horLines = 1;
+                        //if (verLines == 0)
+                        //    verLines = 1;
+                        horLines++;
+                        verLines++;
+
 			        if (index >= maxPlayers) return false;
 
 			        return Regular(verLines, horLines, out monitorBounds, out editorBounds);
@@ -821,8 +860,8 @@ namespace Nucleus.Coop
 					!playersInDiv.Any())
 				{
 					monitorBounds = divMonitorBounds;
-					editorBounds = divEditorBounds;
-					return true;
+                    editorBounds = divEditorBounds;
+                    return true;
 				}
 			}
 

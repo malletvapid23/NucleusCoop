@@ -1,6 +1,6 @@
-XInput Plus (ver4.15.0)
+XInput Plus (ver4.15.2)
 
-(c) 0dd14Lab 2011-2017
+(c) 0dd14Lab 2011-2019
 https://sites.google.com/site/0dd14lab/
 * Redistribution of this program without permission is prohibited.
 
@@ -51,6 +51,11 @@ XInputPlusLoader is a launcher program which injects XInputPlus to a target prog
 
 *********************************************************************************
 ** Changes
+01-12-2019  Ver4.15.2
+			Fix:
+			 Change the recovery process after the controller connection is lost
+ 			 Changed to use XInput1_4.dll if XInput1_3.dll does not exist in the system
+			etc
 01-10-2017  Ver4.15
 			Add:
 			 [Switch Settings] Function (Buttons -> Switch Settings )

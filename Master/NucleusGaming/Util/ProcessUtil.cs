@@ -9,25 +9,112 @@ using System.Threading;
 using System.Management;
 using System.IO;
 using Nucleus.Gaming;
+using System.Security.Principal;
+using Microsoft.Win32;
+using System.Reflection;
 
 namespace Nucleus
 {
     public static class ProcessUtil
     {
         private static readonly IniFile ini = new Gaming.IniFile(Path.Combine(Directory.GetCurrentDirectory(), "Settings.ini"));
+        private static string NucleusEnvironmentRoot = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+        private static string DocumentsRoot = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
 
-        public static Process RunOrphanProcess(string path, /*bool runAdmin,*/ string arguments = "")
+        public static bool RunOrphanProcess(string path, /*bool runAdmin,*/ bool useNucleusEnvironment, string playerNickname, string arguments = "")
         {
-            ProcessStartInfo psi = new System.Diagnostics.ProcessStartInfo();
-            psi.FileName = @"cmd.exe";
-            psi.Arguments = "/C \"" + path + "\" " + arguments;
-            //if (runAdmin)
-            //{
-            //    psi.Verb = "runas";
-            //}
-            return Process.Start(psi);
-            //ThreadPool.QueueUserWorkItem(KillParent, p);
+            Process cmd = new Process();
+            cmd.StartInfo.FileName = "cmd.exe";
+            cmd.StartInfo.RedirectStandardInput = true;
+            //cmd.StartInfo.RedirectStandardOutput = true;
+            //cmd.StartInfo.CreateNoWindow = true;
+            cmd.StartInfo.UseShellExecute = false;
+            cmd.Start();
+
+            if (useNucleusEnvironment)
+            {
+                Log("Setting up Nucleus environment");
+                //var username = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile).Replace(@"C:\Users\", "");
+                string username = Environment.UserName;
+                try
+                {
+                    username = WindowsIdentity.GetCurrent().Name.Split('\\')[1];
+                }
+                catch (Exception e)
+                {
+                    Log("ERROR - getting current user's username, defaulting to using environment's username");
+                }
+
+                cmd.StandardInput.WriteLine($@"set APPDATA={NucleusEnvironmentRoot}\NucleusCoop\{playerNickname}\AppData\Roaming");
+                cmd.StandardInput.WriteLine($@"set LOCALAPPDATA={NucleusEnvironmentRoot}\NucleusCoop\{playerNickname}\AppData\Local");
+                cmd.StandardInput.WriteLine($@"set USERPROFILE={NucleusEnvironmentRoot}\NucleusCoop\{playerNickname}");
+                cmd.StandardInput.WriteLine($@"set HOMEPATH=\Users\{username}\NucleusCoop\{playerNickname}");
+
+                //Some games will crash if the directories don't exist
+                Directory.CreateDirectory($@"{NucleusEnvironmentRoot}\NucleusCoop");
+                Directory.CreateDirectory($@"{NucleusEnvironmentRoot}\NucleusCoop\{playerNickname}");
+                Directory.CreateDirectory($@"{NucleusEnvironmentRoot}\NucleusCoop\{playerNickname}\AppData\Roaming");
+                Directory.CreateDirectory($@"{NucleusEnvironmentRoot}\NucleusCoop\{playerNickname}\AppData\Local");
+
+                //Directory.CreateDirectory($@"\Users\{username}\NucleusCoop\{playerNickname}");
+                Directory.CreateDirectory($@"{NucleusEnvironmentRoot}\NucleusCoop\{playerNickname}\Documents");
+
+                Directory.CreateDirectory(Path.GetDirectoryName(DocumentsRoot) + $@"\NucleusCoop\{playerNickname}\Documents");
+
+                if (!File.Exists(Path.Combine(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location), @"utils\backup\User Shell Folders.reg")))
+                {
+                    //string mydocPath = key.GetValue("Personal").ToString();
+                    ExportRegistry(@"HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders", Path.Combine(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location), @"utils\backup\User Shell Folders.reg"));
+                }
+
+                RegistryKey key = Registry.CurrentUser.OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders", true);
+                key.SetValue("Personal", Path.GetDirectoryName(DocumentsRoot) + $@"\NucleusCoop\{playerNickname}\Documents", (RegistryValueKind)(int)RegType.ExpandString);
+            }
+
+            cmd.StandardInput.WriteLine("\"" + path + "\" " + arguments);
+
+            cmd.StandardInput.Flush();
+            cmd.StandardInput.Close();
+
+            cmd.WaitForExit();
+
+            return true;
+
+            //ProcessStartInfo psi = new ProcessStartInfo();
+            //psi.FileName = @"cmd.exe";
+            //psi.Arguments = "/C \"" + path + "\" " + arguments;
+            ////if (runAdmin)
+            ////{
+            ////    psi.Verb = "runas";
+            ////}
+            //return Process.Start(psi);
+            ////ThreadPool.QueueUserWorkItem(KillParent, p);
         }
+
+        private static void ExportRegistry(string strKey, string filepath)
+        {
+            try
+            {
+                using (Process proc = new Process())
+                {
+                    proc.StartInfo.FileName = "reg.exe";
+                    proc.StartInfo.UseShellExecute = false;
+                    proc.StartInfo.RedirectStandardOutput = true;
+                    proc.StartInfo.RedirectStandardError = true;
+                    proc.StartInfo.CreateNoWindow = true;
+                    proc.StartInfo.Arguments = "export \"" + strKey + "\" \"" + filepath + "\" /y";
+                    proc.Start();
+                    string stdout = proc.StandardOutput.ReadToEnd();
+                    string stderr = proc.StandardError.ReadToEnd();
+                    proc.WaitForExit();
+                }
+            }
+            catch (Exception ex)
+            {
+                // handle exception
+            }
+        }
+
         private static void KillParent(object state)
         {
             Process p = (Process)state;
@@ -137,7 +224,7 @@ namespace Nucleus
             }
 
 
-            Log(string.Format("Checking if mutex '{0}' of type '{1}' exists in process '{2} (pid {3})'", mutexName,mutexType,process.MainWindowTitle,process.Id));
+            Log(string.Format("Checking if mutex '{0}' of type '{1}' exists in process '{2} (pid {3})'", mutexName,mutexType,process.ProcessName,process.Id));
             // 4 tries
             for (int i = 0; i < 4; i++)
             {

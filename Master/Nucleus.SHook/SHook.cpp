@@ -878,6 +878,13 @@ HWND FindWindowFromProcess(HANDLE hProcess) {
 	return FindWindowFromProcessId(GetProcessId(hProcess));
 }
 
+string ExePath() {
+	char buffer[MAX_PATH];
+	GetModuleFileName(NULL, buffer, MAX_PATH);
+	string::size_type pos = string(buffer).find_last_of("\\/");
+	return string(buffer).substr(0, pos);
+}
+
 NTSTATUS installHook(LPCSTR moduleHandle, LPCSTR proc, void* callBack)
 {
 	// Perform hooking
@@ -920,79 +927,143 @@ NTSTATUS installHook(LPCSTR moduleHandle, LPCSTR proc, void* callBack)
 
 HMODULE WINAPI LoadLibraryA_Hook(LPCSTR lpLibFileName)
 {
-	HMODULE result = LoadLibraryA(lpLibFileName);
+	//HMODULE result = LoadLibraryA(lpLibFileName);
 
 	string str(lpLibFileName);
 
-	if (IsDebug)
+	// convert string to back to lower case
+	std::for_each(str.begin(), str.end(), [](char& c) {
+		c = ::tolower(c);
+		});
+
+	//if (IsDebug)
+	//{
+	//	outfile.open(nucleusFolder + logFile, std::ios_base::app);
+	//	outfile << date_string() << "SHOOK: LOADLIBRARYA " << lpLibFileName << " str " << str << "\n";
+	//	outfile.close();
+	//}
+
+	size_t found = str.find("xinput");
+
+	//if (hasEnding(str, "system32\\xinput1_3.dll") || hasEnding(str, "system32\\xinput1_4.dll") || hasEnding(str, "system32\\xinput9_1_0.dll"))
+	if (found != std::string::npos)
 	{
-		outfile.open(nucleusFolder + logFile, std::ios_base::app);
-		outfile << date_string() << "SHOOK: LOADLIBRARYA " << lpLibFileName << " str " << str << "\n";
-		outfile.close();
+		std::string path;
+		//char buffer[MAX_PATH];
+		//GetModuleFileName(NULL, buffer, MAX_PATH);
+		path.append(ExePath());
+		path.append("\\");
+		path.append(str);
+
+		if (IsDebug)
+		{
+			outfile.open(nucleusFolder + logFile, std::ios_base::app);
+			outfile << date_string() << "SHOOK: LOADLIBRARYA HOOK " << path << "\n";
+			outfile.close();
+		}
+
+		return LoadLibraryA(path.c_str());
 	}
 
-	if (hasEnding(str, "xinput9_1_0.dll"))
+	return LoadLibraryA(lpLibFileName);
+}
+
+HMODULE WINAPI LoadLibraryExA_Hook(LPCSTR lpLibFileName, HANDLE hFile, DWORD dwFlags)
+{
+	//HMODULE result = LoadLibraryExA(lpLibFileName, hFile, dwFlags);
+
+	string str(lpLibFileName);
+
+	//if (IsDebug)
+	//{
+	//	outfile.open(nucleusFolder + logFile, std::ios_base::app);
+	//	outfile << date_string() << "SHOOK: LOADLIBRARYEXA " << lpLibFileName << " str " << str << "\n";
+	//	outfile.close();
+	//}
+
+		// convert string to back to lower case
+	//std::for_each(str.begin(), str.end(), [](char& c) {
+	//	c = ::tolower(c);
+	//	});
+
+	if (hasEnding(str, "xinput1_3.dll") || hasEnding(str, "xinput1_4.dll") || hasEnding(str, "XInput9_1_0.dll"))
 	{
 		if (IsDebug)
 		{
 			outfile.open(nucleusFolder + logFile, std::ios_base::app);
-			outfile << date_string() << "SHOOK: LOADLIBRARYA HOOK\n";
+			outfile << date_string() << "SHOOK: LOADLIBRARYEXA HOOK\n";
 			outfile.close();
 		}
 		return NULL;
 	}
 
-	return result;
-}
-
-HMODULE WINAPI LoadLibraryExA_Hook(LPCSTR lpLibFileName, HANDLE hFile, DWORD dwFlags)
-{
-	HMODULE result = LoadLibraryExA(lpLibFileName, hFile, dwFlags);
-
-	string str(lpLibFileName);
-
-	if (IsDebug)
-	{
-		outfile.open(nucleusFolder + logFile, std::ios_base::app);
-		outfile << date_string() << "SHOOK: LOADLIBRARYEXA " << lpLibFileName << " str " << str << "\n";
-		outfile.close();
-	}
-
-	return result;
+	return LoadLibraryExA(lpLibFileName, hFile, dwFlags);
 }
 
 HMODULE WINAPI LoadLibraryW_Hook(LPCWSTR lpLibFileName)
 {
-	HMODULE result = LoadLibraryW(lpLibFileName);
+	//HMODULE result = LoadLibraryW(lpLibFileName);
 
 	wstring fileNameWstring(lpLibFileName);
 	string str(fileNameWstring.begin(), fileNameWstring.end());
 
-	if (IsDebug)
+	//if (IsDebug)
+	//{
+	//	outfile.open(nucleusFolder + logFile, std::ios_base::app);
+	//	outfile << date_string() << "SHOOK: LOADLIBRARYW " << lpLibFileName << " str " << str << "\n";
+	//	outfile.close();
+	//}
+
+			// convert string to back to lower case
+	//std::for_each(str.begin(), str.end(), [](char& c) {
+	//	c = ::tolower(c);
+	//	});
+
+	if (hasEnding(str, "xinput1_3.dll") || hasEnding(str, "xinput1_4.dll") || hasEnding(str, "XInput9_1_0.dll"))
 	{
-		outfile.open(nucleusFolder + logFile, std::ios_base::app);
-		outfile << date_string() << "SHOOK: LOADLIBRARYW " << lpLibFileName << " str " << str << "\n";
-		outfile.close();
+		if (IsDebug)
+		{
+			outfile.open(nucleusFolder + logFile, std::ios_base::app);
+			outfile << date_string() << "SHOOK: LOADLIBRARYW HOOK\n";
+			outfile.close();
+		}
+		return NULL;
 	}
 
-	return result;
+	return LoadLibraryW(lpLibFileName);
 }
 
 HMODULE WINAPI LoadLibraryExW_Hook(LPCWSTR lpLibFileName, HANDLE hFile, DWORD dwFlags)
 {
-	HMODULE result = LoadLibraryExW(lpLibFileName, hFile, dwFlags);
+	//HMODULE result = LoadLibraryExW(lpLibFileName, hFile, dwFlags);
 
 	wstring fileNameWstring(lpLibFileName);
 	string str(fileNameWstring.begin(), fileNameWstring.end());
 
-	if (IsDebug)
+	//if (IsDebug)
+	//{
+	//	outfile.open(nucleusFolder + logFile, std::ios_base::app);
+	//	outfile << date_string() << "SHOOK: LOADLIBRARYEXW " << lpLibFileName << " str " << str << "\n";
+	//	outfile.close();
+	//}
+
+			// convert string to back to lower case
+	//std::for_each(str.begin(), str.end(), [](char& c) {
+	//	c = ::tolower(c);
+	//	});
+
+	if (hasEnding(str, "xinput1_3.dll") || hasEnding(str, "xinput1_4.dll") || hasEnding(str, "XInput9_1_0.dll"))
 	{
-		outfile.open(nucleusFolder + logFile, std::ios_base::app);
-		outfile << date_string() << "SHOOK: LOADLIBRARYEXW " << lpLibFileName << " str " << str << "\n";
-		outfile.close();
+		if (IsDebug)
+		{
+			outfile.open(nucleusFolder + logFile, std::ios_base::app);
+			outfile << date_string() << "SHOOK: LOADLIBRARYEXW HOOK\n";
+			outfile.close();
+		}
+		return NULL;
 	}
 
-	return result;
+	return LoadLibraryExW(lpLibFileName, hFile, dwFlags);
 }
 
 void installFindMutexHooks(LPCWSTR targets)

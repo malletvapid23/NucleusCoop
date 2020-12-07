@@ -115,6 +115,42 @@ namespace Nucleus.Gaming
 
         bool UseDevReorder { get; }
 
+        string[] CustomUserGeneralValues { get; }
+
+        string[] CustomUserPlayerValues { get; }
+
+        string[] CustomUserInstanceValues { get; }
+
+        bool InjectHookXinput { get; }
+
+        bool InjectDinputToXinputTranslation { get; }
+
+        bool UseDInputBlocker { get; }
+
+        bool BlockRawInput { get; }
+
+        bool PreventWindowDeactivation { get; }
+
+        string[] X360ceDll { get; }
+
+        string PostHookInstances { get; }
+
+        string StartHookInstances { get; }
+
+        string FakeFocusInstances { get; }
+
+        string[] CMDBatchBefore { get; }
+
+        string[] CMDBatchAfter { get; }
+
+        string[] CMDBatchClose { get; }
+
+        bool CMDStartArgsInside { get; }
+
+        string[] PlayerSteamIDs { get; }
+
+        bool XInputPlusOldDll { get; }
+
         //string[] HexEditExe { get; }
 
     }

@@ -31,6 +31,8 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Settings));
             this.tabControl2 = new System.Windows.Forms.TabControl();
             this.tabPage3 = new System.Windows.Forms.TabPage();
+            this.label35 = new System.Windows.Forms.Label();
+            this.nucUserPassTxt = new System.Windows.Forms.TextBox();
             this.keepAccountsCheck = new System.Windows.Forms.CheckBox();
             this.statusCheck = new System.Windows.Forms.CheckBox();
             this.cmb_Lang = new System.Windows.Forms.ComboBox();
@@ -117,6 +119,29 @@
             this.controllerOneNick = new System.Windows.Forms.TextBox();
             this.controllerOneGuid = new System.Windows.Forms.TextBox();
             this.label7 = new System.Windows.Forms.Label();
+            this.tabPage1 = new System.Windows.Forms.TabPage();
+            this.label39 = new System.Windows.Forms.Label();
+            this.audioDefaultDevice = new System.Windows.Forms.Label();
+            this.audioCustomSettingsBox = new System.Windows.Forms.GroupBox();
+            this.AudioInstance8 = new System.Windows.Forms.ComboBox();
+            this.label45 = new System.Windows.Forms.Label();
+            this.AudioInstance7 = new System.Windows.Forms.ComboBox();
+            this.label44 = new System.Windows.Forms.Label();
+            this.AudioInstance6 = new System.Windows.Forms.ComboBox();
+            this.label43 = new System.Windows.Forms.Label();
+            this.AudioInstance5 = new System.Windows.Forms.ComboBox();
+            this.label42 = new System.Windows.Forms.Label();
+            this.AudioInstance4 = new System.Windows.Forms.ComboBox();
+            this.label41 = new System.Windows.Forms.Label();
+            this.AudioInstance3 = new System.Windows.Forms.ComboBox();
+            this.label40 = new System.Windows.Forms.Label();
+            this.audioRefresh = new System.Windows.Forms.Button();
+            this.AudioInstance2 = new System.Windows.Forms.ComboBox();
+            this.AudioInstance1 = new System.Windows.Forms.ComboBox();
+            this.label37 = new System.Windows.Forms.Label();
+            this.label36 = new System.Windows.Forms.Label();
+            this.audioCustomSettingsRadio = new System.Windows.Forms.RadioButton();
+            this.audioDefaultSettingsRadio = new System.Windows.Forms.RadioButton();
             this.label33 = new System.Windows.Forms.Label();
             this.btn_credits = new System.Windows.Forms.Button();
             this.settingsCloseBtn = new System.Windows.Forms.Button();
@@ -129,21 +154,29 @@
             ((System.ComponentModel.ISupportInitialize)(this.numVerDiv)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numHorDiv)).BeginInit();
             this.tabPage5.SuspendLayout();
+            this.tabPage1.SuspendLayout();
+            this.audioCustomSettingsBox.SuspendLayout();
             this.SuspendLayout();
             // 
             // tabControl2
             // 
+            this.tabControl2.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
             this.tabControl2.Controls.Add(this.tabPage3);
             this.tabControl2.Controls.Add(this.tabPage4);
             this.tabControl2.Controls.Add(this.tabPage5);
+            this.tabControl2.Controls.Add(this.tabPage1);
             this.tabControl2.Location = new System.Drawing.Point(12, 12);
             this.tabControl2.Name = "tabControl2";
             this.tabControl2.SelectedIndex = 0;
             this.tabControl2.Size = new System.Drawing.Size(815, 435);
             this.tabControl2.TabIndex = 36;
+            this.tabControl2.Tag = "";
+            this.tabControl2.SelectedIndexChanged += new System.EventHandler(this.tabControl2_SelectedIndexChanged);
             // 
             // tabPage3
             // 
+            this.tabPage3.Controls.Add(this.label35);
+            this.tabPage3.Controls.Add(this.nucUserPassTxt);
             this.tabPage3.Controls.Add(this.keepAccountsCheck);
             this.tabPage3.Controls.Add(this.statusCheck);
             this.tabPage3.Controls.Add(this.cmb_Lang);
@@ -161,15 +194,34 @@
             this.tabPage3.Text = "Settings";
             this.tabPage3.UseVisualStyleBackColor = true;
             // 
+            // label35
+            // 
+            this.label35.AutoSize = true;
+            this.label35.ForeColor = System.Drawing.Color.Black;
+            this.label35.Location = new System.Drawing.Point(26, 241);
+            this.label35.Name = "label35";
+            this.label35.Size = new System.Drawing.Size(235, 21);
+            this.label35.TabIndex = 75;
+            this.label35.Text = "Nucleus User Account Password:";
+            // 
+            // nucUserPassTxt
+            // 
+            this.nucUserPassTxt.Location = new System.Drawing.Point(30, 265);
+            this.nucUserPassTxt.MaxLength = 127;
+            this.nucUserPassTxt.Name = "nucUserPassTxt";
+            this.nucUserPassTxt.PasswordChar = '*';
+            this.nucUserPassTxt.Size = new System.Drawing.Size(238, 29);
+            this.nucUserPassTxt.TabIndex = 74;
+            // 
             // keepAccountsCheck
             // 
             this.keepAccountsCheck.AutoSize = true;
             this.keepAccountsCheck.ForeColor = System.Drawing.Color.Black;
             this.keepAccountsCheck.Location = new System.Drawing.Point(30, 202);
             this.keepAccountsCheck.Name = "keepAccountsCheck";
-            this.keepAccountsCheck.Size = new System.Drawing.Size(271, 25);
+            this.keepAccountsCheck.Size = new System.Drawing.Size(226, 25);
             this.keepAccountsCheck.TabIndex = 73;
-            this.keepAccountsCheck.Text = "Keep Nucleus-Made User Accounts";
+            this.keepAccountsCheck.Text = "Keep Nucleus User Accounts";
             this.keepAccountsCheck.UseVisualStyleBackColor = true;
             this.keepAccountsCheck.Click += new System.EventHandler(this.keepAccountsCheck_Click);
             // 
@@ -294,13 +346,12 @@
             this.groupBox1.Controls.Add(this.label1);
             this.groupBox1.Controls.Add(this.settingsCloseHKTxt);
             this.groupBox1.ForeColor = System.Drawing.Color.Black;
-            this.groupBox1.Location = new System.Drawing.Point(416, 41);
+            this.groupBox1.Location = new System.Drawing.Point(411, 30);
             this.groupBox1.Name = "groupBox1";
             this.groupBox1.Size = new System.Drawing.Size(366, 163);
             this.groupBox1.TabIndex = 20;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Hotkeys";
-            this.groupBox1.Enter += new System.EventHandler(this.groupBox1_Enter);
             // 
             // settingsTopCmb
             // 
@@ -1152,10 +1203,262 @@
             this.label7.Text = "[Slot 1]:";
             this.label7.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             // 
+            // tabPage1
+            // 
+            this.tabPage1.Controls.Add(this.label39);
+            this.tabPage1.Controls.Add(this.audioDefaultDevice);
+            this.tabPage1.Controls.Add(this.audioCustomSettingsBox);
+            this.tabPage1.Controls.Add(this.audioCustomSettingsRadio);
+            this.tabPage1.Controls.Add(this.audioDefaultSettingsRadio);
+            this.tabPage1.Location = new System.Drawing.Point(4, 30);
+            this.tabPage1.Name = "tabPage1";
+            this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPage1.Size = new System.Drawing.Size(807, 401);
+            this.tabPage1.TabIndex = 3;
+            this.tabPage1.Text = "Audio";
+            this.tabPage1.UseVisualStyleBackColor = true;
+            // 
+            // label39
+            // 
+            this.label39.AutoSize = true;
+            this.label39.ForeColor = System.Drawing.Color.Black;
+            this.label39.Location = new System.Drawing.Point(472, 64);
+            this.label39.Name = "label39";
+            this.label39.Size = new System.Drawing.Size(323, 21);
+            this.label39.TabIndex = 7;
+            this.label39.Text = "Note: this feature may not work for all games";
+            // 
+            // audioDefaultDevice
+            // 
+            this.audioDefaultDevice.ForeColor = System.Drawing.Color.Black;
+            this.audioDefaultDevice.Location = new System.Drawing.Point(383, 26);
+            this.audioDefaultDevice.Name = "audioDefaultDevice";
+            this.audioDefaultDevice.Size = new System.Drawing.Size(418, 21);
+            this.audioDefaultDevice.TabIndex = 6;
+            this.audioDefaultDevice.TextAlign = System.Drawing.ContentAlignment.TopRight;
+            // 
+            // audioCustomSettingsBox
+            // 
+            this.audioCustomSettingsBox.Controls.Add(this.AudioInstance8);
+            this.audioCustomSettingsBox.Controls.Add(this.label45);
+            this.audioCustomSettingsBox.Controls.Add(this.AudioInstance7);
+            this.audioCustomSettingsBox.Controls.Add(this.label44);
+            this.audioCustomSettingsBox.Controls.Add(this.AudioInstance6);
+            this.audioCustomSettingsBox.Controls.Add(this.label43);
+            this.audioCustomSettingsBox.Controls.Add(this.AudioInstance5);
+            this.audioCustomSettingsBox.Controls.Add(this.label42);
+            this.audioCustomSettingsBox.Controls.Add(this.AudioInstance4);
+            this.audioCustomSettingsBox.Controls.Add(this.label41);
+            this.audioCustomSettingsBox.Controls.Add(this.AudioInstance3);
+            this.audioCustomSettingsBox.Controls.Add(this.label40);
+            this.audioCustomSettingsBox.Controls.Add(this.audioRefresh);
+            this.audioCustomSettingsBox.Controls.Add(this.AudioInstance2);
+            this.audioCustomSettingsBox.Controls.Add(this.AudioInstance1);
+            this.audioCustomSettingsBox.Controls.Add(this.label37);
+            this.audioCustomSettingsBox.Controls.Add(this.label36);
+            this.audioCustomSettingsBox.Location = new System.Drawing.Point(6, 88);
+            this.audioCustomSettingsBox.Name = "audioCustomSettingsBox";
+            this.audioCustomSettingsBox.Size = new System.Drawing.Size(795, 307);
+            this.audioCustomSettingsBox.TabIndex = 4;
+            this.audioCustomSettingsBox.TabStop = false;
+            // 
+            // AudioInstance8
+            // 
+            this.AudioInstance8.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.AudioInstance8.FormattingEnabled = true;
+            this.AudioInstance8.Location = new System.Drawing.Point(494, 133);
+            this.AudioInstance8.Name = "AudioInstance8";
+            this.AudioInstance8.Size = new System.Drawing.Size(292, 29);
+            this.AudioInstance8.TabIndex = 29;
+            // 
+            // label45
+            // 
+            this.label45.AutoSize = true;
+            this.label45.ForeColor = System.Drawing.Color.Black;
+            this.label45.Location = new System.Drawing.Point(405, 136);
+            this.label45.Name = "label45";
+            this.label45.Size = new System.Drawing.Size(83, 21);
+            this.label45.TabIndex = 28;
+            this.label45.Text = "Instance 8:";
+            // 
+            // AudioInstance7
+            // 
+            this.AudioInstance7.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.AudioInstance7.FormattingEnabled = true;
+            this.AudioInstance7.Location = new System.Drawing.Point(494, 98);
+            this.AudioInstance7.Name = "AudioInstance7";
+            this.AudioInstance7.Size = new System.Drawing.Size(292, 29);
+            this.AudioInstance7.TabIndex = 27;
+            // 
+            // label44
+            // 
+            this.label44.AutoSize = true;
+            this.label44.ForeColor = System.Drawing.Color.Black;
+            this.label44.Location = new System.Drawing.Point(405, 101);
+            this.label44.Name = "label44";
+            this.label44.Size = new System.Drawing.Size(83, 21);
+            this.label44.TabIndex = 26;
+            this.label44.Text = "Instance 7:";
+            // 
+            // AudioInstance6
+            // 
+            this.AudioInstance6.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.AudioInstance6.FormattingEnabled = true;
+            this.AudioInstance6.Location = new System.Drawing.Point(494, 63);
+            this.AudioInstance6.Name = "AudioInstance6";
+            this.AudioInstance6.Size = new System.Drawing.Size(292, 29);
+            this.AudioInstance6.TabIndex = 25;
+            // 
+            // label43
+            // 
+            this.label43.AutoSize = true;
+            this.label43.ForeColor = System.Drawing.Color.Black;
+            this.label43.Location = new System.Drawing.Point(405, 66);
+            this.label43.Name = "label43";
+            this.label43.Size = new System.Drawing.Size(83, 21);
+            this.label43.TabIndex = 24;
+            this.label43.Text = "Instance 6:";
+            // 
+            // AudioInstance5
+            // 
+            this.AudioInstance5.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.AudioInstance5.FormattingEnabled = true;
+            this.AudioInstance5.Location = new System.Drawing.Point(494, 28);
+            this.AudioInstance5.Name = "AudioInstance5";
+            this.AudioInstance5.Size = new System.Drawing.Size(292, 29);
+            this.AudioInstance5.TabIndex = 23;
+            // 
+            // label42
+            // 
+            this.label42.AutoSize = true;
+            this.label42.ForeColor = System.Drawing.Color.Black;
+            this.label42.Location = new System.Drawing.Point(405, 31);
+            this.label42.Name = "label42";
+            this.label42.Size = new System.Drawing.Size(83, 21);
+            this.label42.TabIndex = 22;
+            this.label42.Text = "Instance 5:";
+            // 
+            // AudioInstance4
+            // 
+            this.AudioInstance4.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.AudioInstance4.FormattingEnabled = true;
+            this.AudioInstance4.Location = new System.Drawing.Point(98, 133);
+            this.AudioInstance4.Name = "AudioInstance4";
+            this.AudioInstance4.Size = new System.Drawing.Size(292, 29);
+            this.AudioInstance4.TabIndex = 21;
+            // 
+            // label41
+            // 
+            this.label41.AutoSize = true;
+            this.label41.ForeColor = System.Drawing.Color.Black;
+            this.label41.Location = new System.Drawing.Point(9, 136);
+            this.label41.Name = "label41";
+            this.label41.Size = new System.Drawing.Size(83, 21);
+            this.label41.TabIndex = 20;
+            this.label41.Text = "Instance 4:";
+            // 
+            // AudioInstance3
+            // 
+            this.AudioInstance3.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.AudioInstance3.FormattingEnabled = true;
+            this.AudioInstance3.Location = new System.Drawing.Point(98, 98);
+            this.AudioInstance3.Name = "AudioInstance3";
+            this.AudioInstance3.Size = new System.Drawing.Size(292, 29);
+            this.AudioInstance3.TabIndex = 19;
+            // 
+            // label40
+            // 
+            this.label40.AutoSize = true;
+            this.label40.ForeColor = System.Drawing.Color.Black;
+            this.label40.Location = new System.Drawing.Point(9, 101);
+            this.label40.Name = "label40";
+            this.label40.Size = new System.Drawing.Size(83, 21);
+            this.label40.TabIndex = 18;
+            this.label40.Text = "Instance 3:";
+            // 
+            // audioRefresh
+            // 
+            this.audioRefresh.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.audioRefresh.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.audioRefresh.ForeColor = System.Drawing.Color.Black;
+            this.audioRefresh.Location = new System.Drawing.Point(336, 264);
+            this.audioRefresh.Name = "audioRefresh";
+            this.audioRefresh.Size = new System.Drawing.Size(120, 37);
+            this.audioRefresh.TabIndex = 17;
+            this.audioRefresh.Text = "Refresh";
+            this.audioRefresh.UseVisualStyleBackColor = true;
+            this.audioRefresh.Click += new System.EventHandler(this.audioRefresh_Click);
+            // 
+            // AudioInstance2
+            // 
+            this.AudioInstance2.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.AudioInstance2.FormattingEnabled = true;
+            this.AudioInstance2.Location = new System.Drawing.Point(98, 63);
+            this.AudioInstance2.Name = "AudioInstance2";
+            this.AudioInstance2.Size = new System.Drawing.Size(292, 29);
+            this.AudioInstance2.TabIndex = 6;
+            this.AudioInstance2.DropDown += new System.EventHandler(this.audioBox_DropDown);
+            // 
+            // AudioInstance1
+            // 
+            this.AudioInstance1.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.AudioInstance1.FormattingEnabled = true;
+            this.AudioInstance1.Items.AddRange(new object[] {
+            "Default"});
+            this.AudioInstance1.Location = new System.Drawing.Point(98, 28);
+            this.AudioInstance1.Name = "AudioInstance1";
+            this.AudioInstance1.Size = new System.Drawing.Size(292, 29);
+            this.AudioInstance1.TabIndex = 1;
+            this.AudioInstance1.DropDown += new System.EventHandler(this.audioBox_DropDown);
+            // 
+            // label37
+            // 
+            this.label37.AutoSize = true;
+            this.label37.ForeColor = System.Drawing.Color.Black;
+            this.label37.Location = new System.Drawing.Point(9, 66);
+            this.label37.Name = "label37";
+            this.label37.Size = new System.Drawing.Size(83, 21);
+            this.label37.TabIndex = 5;
+            this.label37.Text = "Instance 2:";
+            // 
+            // label36
+            // 
+            this.label36.AutoSize = true;
+            this.label36.ForeColor = System.Drawing.Color.Black;
+            this.label36.Location = new System.Drawing.Point(9, 31);
+            this.label36.Name = "label36";
+            this.label36.Size = new System.Drawing.Size(83, 21);
+            this.label36.TabIndex = 0;
+            this.label36.Text = "Instance 1:";
+            // 
+            // audioCustomSettingsRadio
+            // 
+            this.audioCustomSettingsRadio.AutoSize = true;
+            this.audioCustomSettingsRadio.ForeColor = System.Drawing.Color.Black;
+            this.audioCustomSettingsRadio.Location = new System.Drawing.Point(38, 56);
+            this.audioCustomSettingsRadio.Name = "audioCustomSettingsRadio";
+            this.audioCustomSettingsRadio.Size = new System.Drawing.Size(140, 25);
+            this.audioCustomSettingsRadio.TabIndex = 3;
+            this.audioCustomSettingsRadio.Text = "Custom settings";
+            this.audioCustomSettingsRadio.UseVisualStyleBackColor = true;
+            this.audioCustomSettingsRadio.CheckedChanged += new System.EventHandler(this.audioCustomSettingsRadio_CheckedChanged);
+            // 
+            // audioDefaultSettingsRadio
+            // 
+            this.audioDefaultSettingsRadio.AutoSize = true;
+            this.audioDefaultSettingsRadio.Checked = true;
+            this.audioDefaultSettingsRadio.ForeColor = System.Drawing.Color.Black;
+            this.audioDefaultSettingsRadio.Location = new System.Drawing.Point(38, 24);
+            this.audioDefaultSettingsRadio.Name = "audioDefaultSettingsRadio";
+            this.audioDefaultSettingsRadio.Size = new System.Drawing.Size(306, 25);
+            this.audioDefaultSettingsRadio.TabIndex = 2;
+            this.audioDefaultSettingsRadio.TabStop = true;
+            this.audioDefaultSettingsRadio.Text = "Use default audio playback device for all";
+            this.audioDefaultSettingsRadio.UseVisualStyleBackColor = true;
+            // 
             // label33
             // 
             this.label33.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
-            this.label33.Font = new System.Drawing.Font("Segoe UI", 10F);
             this.label33.Location = new System.Drawing.Point(213, 458);
             this.label33.Name = "label33";
             this.label33.Size = new System.Drawing.Size(406, 33);
@@ -1204,8 +1507,8 @@
             // 
             // Settings
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
+            this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 21F);
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(50)))), ((int)(((byte)(50)))), ((int)(((byte)(50)))));
             this.ClientSize = new System.Drawing.Size(839, 551);
             this.Controls.Add(this.tabControl2);
@@ -1231,6 +1534,10 @@
             ((System.ComponentModel.ISupportInitialize)(this.numHorDiv)).EndInit();
             this.tabPage5.ResumeLayout(false);
             this.tabPage5.PerformLayout();
+            this.tabPage1.ResumeLayout(false);
+            this.tabPage1.PerformLayout();
+            this.audioCustomSettingsBox.ResumeLayout(false);
+            this.audioCustomSettingsBox.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -1329,5 +1636,30 @@
         private System.Windows.Forms.Label label21;
         private System.Windows.Forms.Label label25;
         private System.Windows.Forms.CheckBox keepAccountsCheck;
+        private System.Windows.Forms.Label label35;
+        private System.Windows.Forms.TextBox nucUserPassTxt;
+        private System.Windows.Forms.TabPage tabPage1;
+        private System.Windows.Forms.RadioButton audioCustomSettingsRadio;
+        private System.Windows.Forms.RadioButton audioDefaultSettingsRadio;
+        private System.Windows.Forms.ComboBox AudioInstance1;
+        private System.Windows.Forms.Label label36;
+        private System.Windows.Forms.GroupBox audioCustomSettingsBox;
+        private System.Windows.Forms.ComboBox AudioInstance2;
+        private System.Windows.Forms.Label label37;
+        private System.Windows.Forms.Button audioRefresh;
+        private System.Windows.Forms.Label audioDefaultDevice;
+        private System.Windows.Forms.Label label39;
+        private System.Windows.Forms.ComboBox AudioInstance8;
+        private System.Windows.Forms.Label label45;
+        private System.Windows.Forms.ComboBox AudioInstance7;
+        private System.Windows.Forms.Label label44;
+        private System.Windows.Forms.ComboBox AudioInstance6;
+        private System.Windows.Forms.Label label43;
+        private System.Windows.Forms.ComboBox AudioInstance5;
+        private System.Windows.Forms.Label label42;
+        private System.Windows.Forms.ComboBox AudioInstance4;
+        private System.Windows.Forms.Label label41;
+        private System.Windows.Forms.ComboBox AudioInstance3;
+        private System.Windows.Forms.Label label40;
     }
 }
