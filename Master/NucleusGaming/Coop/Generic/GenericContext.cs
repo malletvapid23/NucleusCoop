@@ -415,7 +415,10 @@ namespace Nucleus.Gaming
         {
             get
             {
-                return $@"{NucleusEnvironmentRoot}\NucleusCoop\{Nickname}\";
+                if (!UserProfileConvertedToDocuments)
+                    return $@"{NucleusEnvironmentRoot}\NucleusCoop\{Nickname}\";
+                else
+                    return DocumentsPlayer;
             }
         }
 
@@ -423,7 +426,10 @@ namespace Nucleus.Gaming
         {
             get
             {
-                return $@"{NucleusEnvironmentRoot}\NucleusCoop\";
+                if (!UserProfileConvertedToDocuments)
+                    return $@"{NucleusEnvironmentRoot}\NucleusCoop\";
+                else
+                    return DocumentsRoot;
             }
         }
 
@@ -431,8 +437,8 @@ namespace Nucleus.Gaming
         {
             get
             {
-                Log($"TEMP: NucleusDocumentsRoot={NucleusDocumentsRoot}, Nuclues.Folder.Documents={Folder.Documents}, GetFolderPath={Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments)}");
-                return $@"{Path.GetDirectoryName(NucleusDocumentsRoot)}\NucleusCoop\{Nickname}\Documents";
+                //Log($"TEMP: NucleusDocumentsRoot={NucleusDocumentsRoot}, Nuclues.Folder.Documents={Folder.Documents}, GetFolderPath={Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments)}");
+                return $@"{Path.GetDirectoryName(NucleusDocumentsRoot)}\NucleusCoop\{Nickname}\Documents\";
             }
         }
 
@@ -472,6 +478,11 @@ namespace Nucleus.Gaming
         }
 
         public string DocumentsSavePath
+        {
+            get; set;
+        }
+
+        public bool UserProfileConvertedToDocuments
         {
             get; set;
         }
@@ -1307,6 +1318,7 @@ namespace Nucleus.Gaming
                     proc.StartInfo.RedirectStandardError = true;
                     proc.StartInfo.CreateNoWindow = true;
                     proc.StartInfo.Arguments = "export \"" + strKey + "\" \"" + filepath + "\" /y";
+                    Log("Export Registry command: " + proc.StartInfo.Arguments);
                     proc.Start();
                     string stdout = proc.StandardOutput.ReadToEnd();
                     string stderr = proc.StandardError.ReadToEnd();
@@ -1315,7 +1327,7 @@ namespace Nucleus.Gaming
             }
             catch (Exception ex)
             {
-                // handle exception
+                Log(string.Format("ERROR: Unable to export {0}. {1}", Path.GetFileName(filepath), ex.Message));
             }
         }
 
@@ -1343,8 +1355,13 @@ namespace Nucleus.Gaming
             string fullKeyPath = baseKey + "\\" + sKey;
             if (!regKeyPaths.Contains(fullKeyPath) && key != null)
             {
-                regKeyPaths.Add(fullKeyPath);
-                ExportRegistry(baseKey + "\\" + sKey, Directory.GetCurrentDirectory() + "\\utils\\backup\\" + sKey.Substring(sKey.LastIndexOf('\\') + 1) + ".reg");
+                string regPath = Directory.GetCurrentDirectory() + "\\utils\\backup\\" + sKey.Substring(sKey.LastIndexOf('\\') + 1) + ".reg";
+                if (!File.Exists(regPath))
+                {
+                    Log(string.Format("{0} not found in backups, exporting registry now", sKey.Substring(sKey.LastIndexOf('\\') + 1) + ".reg"));
+                    regKeyPaths.Add(fullKeyPath);
+                    ExportRegistry(baseKey + "\\" + sKey, regPath);
+                }
             }
 
             key.DeleteSubKey(subKey);
@@ -1418,8 +1435,13 @@ namespace Nucleus.Gaming
             string fullKeyPath = baseKey + "\\" + sKey;
             if (!regKeyPaths.Contains(fullKeyPath) && key != null)
             {
-                regKeyPaths.Add(fullKeyPath);
-                ExportRegistry(baseKey + "\\" + sKey, Directory.GetCurrentDirectory() + "\\utils\\backup\\" + sKey.Substring(sKey.LastIndexOf('\\') + 1) + ".reg");
+                string regPath = Directory.GetCurrentDirectory() + "\\utils\\backup\\" + sKey.Substring(sKey.LastIndexOf('\\') + 1) + ".reg";
+                if (!File.Exists(regPath))
+                {
+                    Log(string.Format("{0} not found in backups, exporting registry now", sKey.Substring(sKey.LastIndexOf('\\') + 1) + ".reg"));
+                    regKeyPaths.Add(fullKeyPath);
+                    ExportRegistry(baseKey + "\\" + sKey, regPath);
+                }
             }
 
             if(key == null)

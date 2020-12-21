@@ -64,6 +64,10 @@
             this.scriptAuthorTxt = new System.Windows.Forms.TextBox();
             this.lblVersion = new System.Windows.Forms.Label();
             this.btn_Download = new System.Windows.Forms.Button();
+            this.openDocumentConfigPathToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.deleteDocumentConfigPathToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.openDocumentSavePathToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.deleteDocumentSavePathToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.gameContextMenuStrip.SuspendLayout();
             this.StepPanel.SuspendLayout();
             this.SuspendLayout();
@@ -98,12 +102,16 @@
             this.deleteUserProfileConfigPathToolStripMenuItem,
             this.openUserProfileSavePathToolStripMenuItem,
             this.deleteUserProfileSavePathToolStripMenuItem,
+            this.openDocumentConfigPathToolStripMenuItem,
+            this.deleteDocumentConfigPathToolStripMenuItem,
+            this.openDocumentSavePathToolStripMenuItem,
+            this.deleteDocumentSavePathToolStripMenuItem,
             this.toolStripMenuItem3,
             this.changeIconToolStripMenuItem,
             this.deleteContentFolderToolStripMenuItem,
             this.deleteToolStripMenuItem});
             this.gameContextMenuStrip.Name = "gameContextMenuStrip";
-            this.gameContextMenuStrip.Size = new System.Drawing.Size(236, 308);
+            this.gameContextMenuStrip.Size = new System.Drawing.Size(236, 418);
             this.gameContextMenuStrip.Opening += new System.ComponentModel.CancelEventHandler(this.GameContextMenuStrip_Opening);
             // 
             // nullToolStripMenuItem
@@ -403,6 +411,34 @@
             this.btn_Download.UseVisualStyleBackColor = true;
             this.btn_Download.Click += new System.EventHandler(this.btn_Download_Click);
             // 
+            // openDocumentConfigPathToolStripMenuItem
+            // 
+            this.openDocumentConfigPathToolStripMenuItem.Name = "openDocumentConfigPathToolStripMenuItem";
+            this.openDocumentConfigPathToolStripMenuItem.Size = new System.Drawing.Size(235, 22);
+            this.openDocumentConfigPathToolStripMenuItem.Text = "Open Document Config Path";
+            this.openDocumentConfigPathToolStripMenuItem.Visible = false;
+            // 
+            // deleteDocumentConfigPathToolStripMenuItem
+            // 
+            this.deleteDocumentConfigPathToolStripMenuItem.Name = "deleteDocumentConfigPathToolStripMenuItem";
+            this.deleteDocumentConfigPathToolStripMenuItem.Size = new System.Drawing.Size(235, 22);
+            this.deleteDocumentConfigPathToolStripMenuItem.Text = "Delete Document Config Path";
+            this.deleteDocumentConfigPathToolStripMenuItem.Visible = false;
+            // 
+            // openDocumentSavePathToolStripMenuItem
+            // 
+            this.openDocumentSavePathToolStripMenuItem.Name = "openDocumentSavePathToolStripMenuItem";
+            this.openDocumentSavePathToolStripMenuItem.Size = new System.Drawing.Size(235, 22);
+            this.openDocumentSavePathToolStripMenuItem.Text = "Open Document Save Path";
+            this.openDocumentSavePathToolStripMenuItem.Visible = false;
+            // 
+            // deleteDocumentSavePathToolStripMenuItem
+            // 
+            this.deleteDocumentSavePathToolStripMenuItem.Name = "deleteDocumentSavePathToolStripMenuItem";
+            this.deleteDocumentSavePathToolStripMenuItem.Size = new System.Drawing.Size(235, 22);
+            this.deleteDocumentSavePathToolStripMenuItem.Text = "Delete Document Save Path";
+            this.deleteDocumentSavePathToolStripMenuItem.Visible = false;
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
@@ -470,5 +506,9 @@
         private System.Windows.Forms.ToolStripMenuItem deleteUserProfileSavePathToolStripMenuItem;
         private System.Windows.Forms.ToolStripSeparator toolStripMenuItem3;
         private System.Windows.Forms.Button btn_Download;
+        private System.Windows.Forms.ToolStripMenuItem openDocumentConfigPathToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem deleteDocumentConfigPathToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem openDocumentSavePathToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem deleteDocumentSavePathToolStripMenuItem;
     }
 }

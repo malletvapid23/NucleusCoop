@@ -1,10 +1,13 @@
 ﻿using System;
 using System.Collections;
+using System.Diagnostics;
 using System.IO;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Security.Principal;
 using System.Text;
 using System.Threading;
+using Microsoft.Win32;
 using Nucleus.Gaming;
 
 namespace Nucleus.Inject
@@ -151,6 +154,7 @@ namespace Nucleus.Inject
 				Log("Setting up Nucleus environment");
 
 				string NucleusEnvironmentRoot = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+				string DocumentsRoot = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
 
 				IDictionary envVars = Environment.GetEnvironmentVariables();
 				var sb = new StringBuilder();
@@ -167,6 +171,17 @@ namespace Nucleus.Inject
 				Directory.CreateDirectory(Path.Combine(envVars["USERPROFILE"].ToString(), "Documents"));
 				Directory.CreateDirectory(envVars["APPDATA"].ToString());
 				Directory.CreateDirectory(envVars["LOCALAPPDATA"].ToString());
+
+				Directory.CreateDirectory(Path.GetDirectoryName(DocumentsRoot) + $@"\NucleusCoop\{playerNick}\Documents");
+
+				if (!File.Exists(Path.Combine(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location), @"utils\backup\User Shell Folders.reg")))
+				{
+					//string mydocPath = key.GetValue("Personal").ToString();
+					ExportRegistry(@"HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders", Path.Combine(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location), @"utils\backup\User Shell Folders.reg"));
+				}
+
+				RegistryKey dkey = Registry.CurrentUser.OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders", true);
+				dkey.SetValue("Personal", Path.GetDirectoryName(DocumentsRoot) + $@"\NucleusCoop\{playerNick}\Documents", (RegistryValueKind)(int)RegType.ExpandString);
 
 				foreach (object envVarKey in envVars.Keys)
 				{
@@ -507,6 +522,30 @@ namespace Nucleus.Inject
 			catch (Exception ex)
 			{
 				Log("ERROR - " + ex.Message);
+			}
+		}
+
+		private static void ExportRegistry(string strKey, string filepath)
+		{
+			try
+			{
+				using (Process proc = new Process())
+				{
+					proc.StartInfo.FileName = "reg.exe";
+					proc.StartInfo.UseShellExecute = false;
+					proc.StartInfo.RedirectStandardOutput = true;
+					proc.StartInfo.RedirectStandardError = true;
+					proc.StartInfo.CreateNoWindow = true;
+					proc.StartInfo.Arguments = "export \"" + strKey + "\" \"" + filepath + "\" /y";
+					proc.Start();
+					string stdout = proc.StandardOutput.ReadToEnd();
+					string stderr = proc.StandardError.ReadToEnd();
+					proc.WaitForExit();
+				}
+			}
+			catch (Exception ex)
+			{
+				// handle exception
 			}
 		}
 	}

@@ -1097,35 +1097,82 @@ namespace Nucleus.Coop
                                         }
 
                                         PlayerInfo other = players[j];
-                                        if (other.ScreenIndex != p.ScreenIndex)
+                                        //if (other.ScreenIndex == p.ScreenIndex)
+                                        //{
+                                        //    continue;
+                                        //}
+
+                                        //if(other.ScreenIndex == -1)
+                                        //{
+                                        //    continue;
+                                        //}
+
+                                        //if (other.MonitorBounds.Y == p.MonitorBounds.Y)
+                                        //{
+                                        //    hasLeftRightSpace = false;
+                                        //}
+                                        //if (other.MonitorBounds.X == p.MonitorBounds.X)
+                                        //{
+                                        //    hasTopBottomSpace = false;
+                                        //}
+
+                                        //if (other.EditBounds.Y <= 50)
+                                        //{
+                                        //    continue;
+                                        //}
+
+                                        //if(p.MonitorBounds.Y == other.MonitorBounds.Y && p.MonitorBounds.Width + other.MonitorBounds.X + other.MonitorBounds.Width > )
+                                        //{
+                                        //    hasLeftRightSpace = false;
+                                        //}
+
+                                        if(other.MonitorBounds == new Rectangle(0, 0, 0, 0))
                                         {
                                             continue;
                                         }
 
-                                        if (other.MonitorBounds.Y == p.MonitorBounds.Y)
+                                        //if(p.MonitorBounds == other.MonitorBounds && (p.IsRawKeyboard && !other.IsRawMouse || p.IsRawMouse && !other.IsRawKeyboard))
+                                        //{
+                                        //if (p.IsRawMouse)
+                                        //{
+                                        //    continue;
+                                        //}
+                                        //}
+
+                                        if ((p.IsXInput || p.IsDInput || (p.IsRawKeyboard && !other.IsRawMouse) || (p.IsRawMouse && !other.IsRawKeyboard)) && (p.MonitorBounds.Y == other.MonitorBounds.Y || (p.MonitorBounds.Y < other.MonitorBounds.Height && p.MonitorBounds.Y > other.MonitorBounds.Y)))
                                         {
                                             hasLeftRightSpace = false;
                                         }
-                                        if (other.MonitorBounds.X == p.MonitorBounds.X)
+                                        if ((p.IsXInput || p.IsDInput || (p.IsRawKeyboard && !other.IsRawMouse) || (p.IsRawMouse && !other.IsRawKeyboard)) && (p.MonitorBounds.X == other.MonitorBounds.X || (p.MonitorBounds.X < other.MonitorBounds.Width && p.MonitorBounds.X > other.MonitorBounds.X)))
                                         {
                                             hasTopBottomSpace = false;
                                         }
 
-                                        if (other.MonitorBounds.X == screen.MonitorBounds.X + halfWidth &&
-                                            other.MonitorBounds.Height == screen.MonitorBounds.Height)
-                                        {
-                                            hasLeftRightSpace = false;
-                                        }
-                                        if (other.MonitorBounds.X == screen.MonitorBounds.X &&
-                                            other.MonitorBounds.Width == screen.MonitorBounds.Width)
-                                        {
-                                            hasTopBottomSpace = false;
-                                        }
+                                        //if (p.EditBounds.Y == other.EditBounds.Y - other.EditBounds.Height || p.EditBounds.Y == other.EditBounds.Y + other.EditBounds.Height)
+                                        //{
+                                        //    hasLeftRightSpace = false;
+                                        //}
+                                        //if (p.EditBounds.X == other.EditBounds.X - other.EditBounds.Width || p.EditBounds.X == other.EditBounds.X + other.EditBounds.Width)
+                                        //{
+                                        //    hasTopBottomSpace = false;
+                                        //}
+
+                                        //if (other.MonitorBounds.X == screen.MonitorBounds.X + halfWidth &&
+                                        //    other.MonitorBounds.Height == screen.MonitorBounds.Height)
+                                        //{
+                                        //    hasLeftRightSpace = false;
+                                        //}
+                                        //if (other.MonitorBounds.X == screen.MonitorBounds.X &&
+                                        //    other.MonitorBounds.Width == screen.MonitorBounds.Width)
+                                        //{
+                                        //    hasTopBottomSpace = false;
+                                        //}
                                     }
 
                                     if (hasLeftRightSpace)
                                     {
                                         Rectangle edit = p.EditBounds;
+
                                         if (bounds.X == screen.MonitorBounds.X + bounds.Width)
                                         {
                                             bounds.X -= bounds.Width;
@@ -1154,6 +1201,7 @@ namespace Nucleus.Coop
 
                                         p.EditBounds = edit;
                                         p.MonitorBounds = bounds;
+
                                         Invalidate();
                                     }
                                 }

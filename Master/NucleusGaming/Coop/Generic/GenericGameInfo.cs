@@ -211,7 +211,7 @@ namespace Nucleus.Gaming
         public bool SaveCustomUserInstanceValues;
         public bool SaveAndEditCustomUserGeneralValues;
         public bool SaveAndEditCustomUserPlayerValues;
-        public bool SaveAndEditCustomInstanceValues;
+        public bool SaveAndEditCustomUserInstanceValues;
         public bool TransferNucleusUserAccountProfiles;
         public bool UseCurrentUserEnvironment = false;
         public bool EnableWindows;
@@ -256,6 +256,9 @@ namespace Nucleus.Gaming
         public bool XInputPlusOldDll;
         public bool FlawlessWidescreenOverrideDisplay;
         public string[] CMDBatchClose;
+        public string ForceGameArch;
+        public string[] SSEAdditionalLines;
+        public string[] DeleteOnClose;
 
         // -- From USS
         //Effectively a switch for all of USS features

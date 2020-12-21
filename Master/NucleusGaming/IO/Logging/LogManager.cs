@@ -128,7 +128,7 @@ namespace Nucleus.Gaming
             string[] regFiles = Directory.GetFiles(Path.Combine(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location), "utils\\backup"), "*.reg", SearchOption.AllDirectories);
             if (regFiles.Length > 0)
             {
-                LogManager.Log("TEMP: ALT2 Restoring backed up registry files");
+                LogManager.Log("Restoring backed up registry files - method 2");
                 foreach (string regFilePath in regFiles)
                 {
                     System.Diagnostics.Process proc = new System.Diagnostics.Process();
