@@ -203,6 +203,7 @@ namespace Nucleus.Inject
 				envPtr = Marshal.AllocHGlobal(envBytes.Length);
 				Marshal.Copy(envBytes, 0, envPtr, envBytes.Length);
 
+				Thread.Sleep(1000);
 			}
 
 			var logPath = Encoding.Unicode.GetBytes(nucleusFolderPath);
@@ -277,8 +278,6 @@ namespace Nucleus.Inject
 			IntPtr ptr = Marshal.AllocHGlobal(size);
 			Marshal.Copy(data, 0, ptr, size);
 
-
-
 			IntPtr pid = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(int)));
 
 			bool isFailed = false;
@@ -304,13 +303,17 @@ namespace Nucleus.Inject
 					//}
 					//else
 					//{
-
 					if (is64)
-						result = Injector64.RhCreateAndInject(InEXEPath, InCommandLine, InProcessCreationFlags, envPtr,
-							InInjectionOptions, "", InLibraryPath_x64, ptr, (uint) size, pid);
+					{
+						//Log("is64 " + InEXEPath + " " + InCommandLine + " " + InProcessCreationFlags + " " + envPtr + " " + InInjectionOptions + " " + InLibraryPath_x64 + " " + ptr + " " + (uint)size + " " + pid);
+						result = Injector64.RhCreateAndInject(InEXEPath, InCommandLine, InProcessCreationFlags, envPtr, InInjectionOptions, "", InLibraryPath_x64, ptr, (uint)size, pid);
+					}
+
 					else
-						result = Injector32.RhCreateAndInject(InEXEPath, InCommandLine, InProcessCreationFlags, envPtr,
-							InInjectionOptions, InLibraryPath_x86, "", ptr, (uint) size, pid);
+					{
+						//Log("isNOT64 " + InEXEPath + " " + InCommandLine + " " + InProcessCreationFlags + " " + envPtr + " " + InInjectionOptions + " " + InLibraryPath_x86 + " " + ptr + " " + (uint)size + " " + pid);
+						result = Injector32.RhCreateAndInject(InEXEPath, InCommandLine, InProcessCreationFlags, envPtr, InInjectionOptions, InLibraryPath_x86, "", ptr, (uint)size, pid);
+					}
 
 					Thread.Sleep(1000);
 

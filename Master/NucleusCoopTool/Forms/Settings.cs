@@ -434,7 +434,7 @@ namespace Nucleus.Coop
                 "\n" +
                 "\nAll this wouldn't have been possible without Lucas. Thank you Lucas <3" +
                 "\n" +
-                "\nSpecial thanks to: Talos91, PoundlandBacon and the rest of the Splitscreen Dreams discord community.", "Credits",MessageBoxButtons.OK,MessageBoxIcon.Information);
+                "\nSpecial thanks to: Talos91, PoundlandBacon, Pizzo, Snailed It and the rest of the Splitscreen Dreams discord community.", "Credits",MessageBoxButtons.OK,MessageBoxIcon.Information);
         }
 
         private void NumHorDiv_ValueChanged(object sender, EventArgs e)
@@ -603,7 +603,9 @@ namespace Nucleus.Coop
         private void RefreshAudioList()
         {
             audioDevices = new Dictionary<string, string>();
-            audioDevices.Add("Default", "Default");
+            audioDevices.Clear();
+            if (!audioDevices.ContainsKey("Default"))
+                audioDevices.Add("Default", "Default");
 
             //ManagementObjectSearcher objSearcher = new ManagementObjectSearcher("SELECT * FROM Win32_SoundDevice");
 
@@ -617,7 +619,10 @@ namespace Nucleus.Coop
             var enumerator = new MMDeviceEnumerator();
             foreach (var endpoint in enumerator.EnumerateAudioEndPoints(DataFlow.Render, DeviceState.Active))
             {
-                audioDevices.Add(endpoint.FriendlyName, endpoint.ID);
+                if (!audioDevices.ContainsKey(endpoint.FriendlyName))
+                {
+                    audioDevices.Add(endpoint.FriendlyName, endpoint.ID);
+                }
             }          
 
             foreach (Control ctrl in audioCustomSettingsBox.Controls)

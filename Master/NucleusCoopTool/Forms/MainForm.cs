@@ -146,48 +146,57 @@ namespace Nucleus.Coop
 
         public MainForm()
         {
-            if (Process.GetProcessesByName(Process.GetCurrentProcess().ProcessName).Length > 1)
+            //if (Process.GetProcessesByName("NucleusCoop"/*Process.GetCurrentProcess().ProcessName*/).Length > 1)
+            //{
+            //    MessageBox.Show(Process.GetCurrentProcess().ProcessName + " is already running.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            //    Application.Exit();
+            //    this.Close();
+            //    return;
+            //}
+            try
             {
-                MessageBox.Show("Nucleus Coop is already running.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                Application.Exit();
-                this.Close();
-                return;
+                InitializeComponent();
+
+                if (ini.IniReadValue("Advanced", "Font") != "")
+                {
+                    btn_gameOptions.Font = new Font("Segoe UI", float.Parse((ini.IniReadValue("Advanced", "Font"))) - 1.75f);
+                }
+
+                sideInfoLbl.Text = "Mod version" + "\n" + version;
+
+                positionsControl = new PositionsControl();
+                Settings settingsForm = new Settings(this, positionsControl);
+
+                positionsControl.Paint += PositionsControl_Paint;
+
+                Log("positions control");
+                settingsForm.RegHotkeys(this);
+
+                Log("referencing controls");
+                controls = new Dictionary<UserGameInfo, GameControl>();
+                gameManager = new GameManager(this);
+
+                optionsControl = new PlayerOptionsControl();
+                jsControl = new JSUserInputControl();
+
+                positionsControl.OnCanPlayUpdated += StepCanPlay;
+                optionsControl.OnCanPlayUpdated += StepCanPlay;
+                jsControl.OnCanPlayUpdated += StepCanPlay;
+
+                // selects the list of games, so the buttons look equal
+                list_Games.Select();
+
+                gameManager.ReorderUserProfile();
+
+                //list_Games.AutoScroll = false;
+                //int vertScrollWidth = SystemInformation.VerticalScrollBarWidth;
+                //list_Games.Padding = new Padding(0, 0, vertScrollWidth, 0);
+            }
+            catch (Exception ex)
+            {
+                Log("ERROR - " + ex.Message + "\n\nSTACKTRACE: " + ex.StackTrace);
             }
 
-            InitializeComponent();
-
-            if (ini.IniReadValue("Advanced", "Font") != "")
-            {
-                btn_gameOptions.Font = new Font("Segoe UI", float.Parse((ini.IniReadValue("Advanced", "Font")))-1.75f);
-            }
-                
-            sideInfoLbl.Text = "Mod version" + "\n" + version;
-
-            positionsControl = new PositionsControl();
-            Settings settingsForm = new Settings(this, positionsControl);
-
-            positionsControl.Paint += PositionsControl_Paint;
-
-            settingsForm.RegHotkeys(this);
-
-            controls = new Dictionary<UserGameInfo, GameControl>();
-            gameManager = new GameManager(this);
-
-            optionsControl = new PlayerOptionsControl();
-            jsControl = new JSUserInputControl();
-
-            positionsControl.OnCanPlayUpdated += StepCanPlay;
-            optionsControl.OnCanPlayUpdated += StepCanPlay;
-            jsControl.OnCanPlayUpdated += StepCanPlay;
-
-            // selects the list of games, so the buttons look equal
-            list_Games.Select();
-
-            gameManager.ReorderUserProfile();
-
-            //list_Games.AutoScroll = false;
-            //int vertScrollWidth = SystemInformation.VerticalScrollBarWidth;
-            //list_Games.Padding = new Padding(0, 0, vertScrollWidth, 0);
         }
 
         private void PositionsControl_Paint(object sender, PaintEventArgs e)
@@ -763,7 +772,7 @@ namespace Nucleus.Coop
                     {
                         //MessageBox.Show(error, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
 
-                        LogManager.Log("Restoring backed up registry files - method 3");
+                        Log("Restoring backed up registry files - method 3");
                         string[] regFiles = Directory.GetFiles(Path.Combine(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location), "utils\\backup"), "*.reg", SearchOption.AllDirectories);
                         foreach (string regFilePath in regFiles)
                         {
@@ -781,7 +790,7 @@ namespace Nucleus.Coop
                                 proc.Start();
 
                                 proc.WaitForExit();
-                                LogManager.Log($"Imported {Path.GetFileName(regFilePath)}");
+                                Log($"Imported {Path.GetFileName(regFilePath)}");
                             }
                             catch (Exception)
                             {

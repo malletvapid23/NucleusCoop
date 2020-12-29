@@ -231,9 +231,9 @@
             this.statusCheck.ForeColor = System.Drawing.Color.Black;
             this.statusCheck.Location = new System.Drawing.Point(30, 171);
             this.statusCheck.Name = "statusCheck";
-            this.statusCheck.Size = new System.Drawing.Size(176, 25);
+            this.statusCheck.Size = new System.Drawing.Size(280, 25);
             this.statusCheck.TabIndex = 72;
-            this.statusCheck.Text = "Show Status Window";
+            this.statusCheck.Text = "Show Status Window (Experimental)";
             this.statusCheck.UseVisualStyleBackColor = true;
             // 
             // cmb_Lang

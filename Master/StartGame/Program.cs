@@ -280,7 +280,7 @@ namespace StartGame
                 IntPtr envPtr = IntPtr.Zero;
                 uint pCreationFlags = 0;
 
-                if (useNucleusEnvironment)
+                if (useNucleusEnvironment && !(useStartupHooks && (isHook || renameMutex || setWindow || blockRaw || createSingle)))
                 {
                     Log("Setting up Nucleus environment");
                     var sb = new StringBuilder();
@@ -329,12 +329,14 @@ namespace StartGame
                     byte[] envBytes = Encoding.Unicode.GetBytes(sb.ToString());
                     envPtr = Marshal.AllocHGlobal(envBytes.Length);
                     Marshal.Copy(envBytes, 0, envPtr, envBytes.Length);
-
-                    pCreationFlags += (uint)ProcessCreationFlags.CREATE_UNICODE_ENVIRONMENT;
                 }
+
+                pCreationFlags += (uint)ProcessCreationFlags.CREATE_UNICODE_ENVIRONMENT;
 
                 STARTUPINFO startup = new STARTUPINFO();
                 startup.cb = Marshal.SizeOf(startup);
+
+                Thread.Sleep(1000);
 
                 if (useStartupHooks && (isHook || renameMutex || setWindow || blockRaw || createSingle))
                 {
