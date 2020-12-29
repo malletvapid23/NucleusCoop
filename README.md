@@ -1,5 +1,5 @@
 # Nucleus Co-Op & Unofficial Mod
-Nucles Co-Op is a tool for Windows that allows split-screen play on many games that do not initially support it. Its purpose is to make it as easy as possible for the average user to play games locally.
+Nucleus Co-Op is a free and open source tool for Windows that allows split-screen play on many games that do not initially support it.
 
 This repo is an unofficial mod of the Nucleus Co-Op application. The mod is based off of the official Nucleus Co-Op Alpha 8 build and features enhancements and quality of life changes including:
 - Huge increase to the amount of compabitle games
@@ -12,29 +12,24 @@ This repo is an unofficial mod of the Nucleus Co-Op application. The mod is base
 View the full list of features/changes and changelog in Mod-Readme.txt in releases.
 
 # Disclaimer
-I am NOT associated with the original project or its authors. Nucleus Co-Op was originally created by Lucas Assis. I am merely a fan of split screen gaming and the original project! I wanted to continue this work to continue building upon the already faboulous tool that is NucleusCo-Op.
-
+I am NOT associated with the original project or its authors. Nucleus Co-Op was originally created by Lucas Assis.
 
 Github link to the original project: https://github.com/lucasassislar/nucleuscoop
 
-Subscribe the official Nucleus Co-Op subreddit: https://www.reddit.com/r/nucleuscoop/
+Subscribe the official Nucleus Co-Op subreddit: https://www.reddit.com/r/nucleuscoop/  
+Nucleus Co-Op (Mod) FAQ via subreddit: https://www.reddit.com/r/nucleuscoop/comments/fjdqid/list_of_new_supported_games_and_faq/  
 
-Join the official Nucleus Co-Op Discord: https://discord.gg/jrbPvKW
-
-^ You can certainly find me in those places as well
+Join the official Nucleus Co-Op Discord: https://discord.gg/QDUt8HpCvr
 
 # How does Nucleus Co-Op work?
-For Alpha 8, all games use a generic handler that can handle pretty much all situations.
-To add a new game, you can just create a new *.js file on the games folder, and describe what your game needs to run.
-Now, what the GenericHandler actually does?
+Nucleus Co-Op opens multiple instances of the same game (only 1 copy of the game is required in majority of cases) and connects those instances via LAN or steamworks online multiplayer emulation, but on the same PC. All while making sure all the windows have focus so they can be playable with gamepads or that the instances are playable even in the background. Nucleus then resizes, removes borders and repositions the games windows so you can have synthetic splitscreen to play locally with your friends.
 
-When the user hits play:
-- If the game needs modifications to the save files, we backup them so when the splitscreen session ends we can return all the configurations back to normal.
-- The app symlinks the entire game folder to the Data folder, so we can launch each instance of the game with custom DLLs.
-- Runs the JavaScript engine, so any custom code that needs to be executed by player ID runs
-- We copy a custom xinput dll specific for each gamepad: Each xinput passthroughs a specific gamepad input to the 1st gamepad (xinput1 just passtroughs, xinput2 passes to 2, i.e).
-- If needed, we extract SmartSteamEmu and start the game using it.
-- Now we keep track of the processes, looking for the launcher and the actual game window, so we can position it correctly on the screen.
+# Installation:
+Download the latest release. Extract .rar archive to a non-restrictive folder, that all users have access to (i.e. do NOT extract to Program Files, Desktop, or your Documents folder, to name a few). The root folder that contains majority of your games is a good choice (e.g. C:\).
+
+# Prerequisites:
+.NET Framework 4.7.2 or higher  
+Microsoft Visual C++ 2015-2019 Redistributable (both x86 and x64)
 
 # How can you contribute?
 Please report any bugs you may find and provide any feedback you have regarding the mod. I am always open to suggestions and I want to make split-screen available for every game, for everyone! Don't forget to create game scripts and share!
@@ -51,10 +46,12 @@ You can donate via PayPal through this link:
 Thank you ^_^
 
 # Credits
-Original NucleusCoop Project: Lucas Assis (lucasassislar)
-Mod: ZeroFox
-Multiple keyboards/mice & hooks: Ilyaki
-Website & handler API: r-mach
-
+Original NucleusCoop Project: Lucas Assis (lucasassislar)  
+Mod: ZeroFox  
+Multiple keyboards/mice & hooks: Ilyaki  
+Website & handler API: r-mach  
+  
 Additional credits to all original developers of third party utilities Nucleus uses:
-Mr_Goldberg (Goldberg Emulator), syahmixp (SmartSteamEmu), EJocys (x360ce), 0dd14 Lab (Xinput Plus), r1ch (ForceBindIP), HaYDeN (Flawless Widescreen), briankendall (devreorder), VerGreeneyes (DirectXWrapper)
+Mr_Goldberg (Goldberg Emulator), syahmixp (SmartSteamEmu), EJocys (x360ce), 0dd14 Lab (Xinput Plus), r1ch (ForceBindIP), HaYDeN (Flawless Widescreen), briankendall (devreorder), VerGreeneyes (DirectXWrapper), wizark952 (dinput8 blocker), Nemirtinga (Epic Emulator)
+
+Special thanks to: Talos91, PoundlandBacon, dr.oldboi, Pizzo, Snailed It and the rest of the Splitscreen Dreams discord community.
