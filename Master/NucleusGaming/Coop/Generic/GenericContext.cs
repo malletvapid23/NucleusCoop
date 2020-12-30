@@ -411,6 +411,17 @@ namespace Nucleus.Gaming
             }
         }
 
+        public string NucleusUserRoot
+        {
+            get
+            {
+                if (parent.UsingNucleusAccounts)
+                    return Path.Combine(Path.GetDirectoryName(NucleusEnvironmentRoot), "nucleusplayer" + (pInfo.PlayerID + 1));
+                else
+                    return NucleusEnvironmentRoot;
+            }
+        }
+
         public string EnvironmentPlayer
         {
             get

@@ -45,6 +45,10 @@
             this.deleteUserProfileConfigPathToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.openUserProfileSavePathToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.deleteUserProfileSavePathToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.openDocumentConfigPathToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.deleteDocumentConfigPathToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.openDocumentSavePathToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.deleteDocumentSavePathToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem3 = new System.Windows.Forms.ToolStripSeparator();
             this.changeIconToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.deleteContentFolderToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -64,10 +68,6 @@
             this.scriptAuthorTxt = new System.Windows.Forms.TextBox();
             this.lblVersion = new System.Windows.Forms.Label();
             this.btn_Download = new System.Windows.Forms.Button();
-            this.openDocumentConfigPathToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.deleteDocumentConfigPathToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.openDocumentSavePathToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.deleteDocumentSavePathToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.gameContextMenuStrip.SuspendLayout();
             this.StepPanel.SuspendLayout();
             this.SuspendLayout();
@@ -76,7 +76,7 @@
             // 
             this.settingsBtn.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.settingsBtn.BackColor = System.Drawing.Color.Transparent;
-            this.settingsBtn.BackgroundImage = global::Nucleus.Coop.Properties.Resources.setting1;
+            this.settingsBtn.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("settingsBtn.BackgroundImage")));
             this.settingsBtn.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
             this.settingsBtn.ForeColor = System.Drawing.Color.Transparent;
             this.settingsBtn.Location = new System.Drawing.Point(1006, 12);
@@ -111,7 +111,7 @@
             this.deleteContentFolderToolStripMenuItem,
             this.deleteToolStripMenuItem});
             this.gameContextMenuStrip.Name = "gameContextMenuStrip";
-            this.gameContextMenuStrip.Size = new System.Drawing.Size(236, 418);
+            this.gameContextMenuStrip.Size = new System.Drawing.Size(236, 396);
             this.gameContextMenuStrip.Opening += new System.ComponentModel.CancelEventHandler(this.GameContextMenuStrip_Opening);
             // 
             // nullToolStripMenuItem
@@ -195,6 +195,34 @@
             this.deleteUserProfileSavePathToolStripMenuItem.Text = "Delete UserProfile Save Path";
             this.deleteUserProfileSavePathToolStripMenuItem.Visible = false;
             // 
+            // openDocumentConfigPathToolStripMenuItem
+            // 
+            this.openDocumentConfigPathToolStripMenuItem.Name = "openDocumentConfigPathToolStripMenuItem";
+            this.openDocumentConfigPathToolStripMenuItem.Size = new System.Drawing.Size(235, 22);
+            this.openDocumentConfigPathToolStripMenuItem.Text = "Open Document Config Path";
+            this.openDocumentConfigPathToolStripMenuItem.Visible = false;
+            // 
+            // deleteDocumentConfigPathToolStripMenuItem
+            // 
+            this.deleteDocumentConfigPathToolStripMenuItem.Name = "deleteDocumentConfigPathToolStripMenuItem";
+            this.deleteDocumentConfigPathToolStripMenuItem.Size = new System.Drawing.Size(235, 22);
+            this.deleteDocumentConfigPathToolStripMenuItem.Text = "Delete Document Config Path";
+            this.deleteDocumentConfigPathToolStripMenuItem.Visible = false;
+            // 
+            // openDocumentSavePathToolStripMenuItem
+            // 
+            this.openDocumentSavePathToolStripMenuItem.Name = "openDocumentSavePathToolStripMenuItem";
+            this.openDocumentSavePathToolStripMenuItem.Size = new System.Drawing.Size(235, 22);
+            this.openDocumentSavePathToolStripMenuItem.Text = "Open Document Save Path";
+            this.openDocumentSavePathToolStripMenuItem.Visible = false;
+            // 
+            // deleteDocumentSavePathToolStripMenuItem
+            // 
+            this.deleteDocumentSavePathToolStripMenuItem.Name = "deleteDocumentSavePathToolStripMenuItem";
+            this.deleteDocumentSavePathToolStripMenuItem.Size = new System.Drawing.Size(235, 22);
+            this.deleteDocumentSavePathToolStripMenuItem.Text = "Delete Document Save Path";
+            this.deleteDocumentSavePathToolStripMenuItem.Visible = false;
+            // 
             // toolStripMenuItem3
             // 
             this.toolStripMenuItem3.Name = "toolStripMenuItem3";
@@ -238,7 +266,7 @@
             // 
             this.sideInfoLbl.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.sideInfoLbl.AutoSize = true;
-            this.sideInfoLbl.Location = new System.Drawing.Point(899, 10);
+            this.sideInfoLbl.Location = new System.Drawing.Point(878, 10);
             this.sideInfoLbl.Name = "sideInfoLbl";
             this.sideInfoLbl.Size = new System.Drawing.Size(0, 21);
             this.sideInfoLbl.TabIndex = 14;
@@ -410,34 +438,6 @@
             this.btn_Download.Text = "Download Game Scripts";
             this.btn_Download.UseVisualStyleBackColor = true;
             this.btn_Download.Click += new System.EventHandler(this.btn_Download_Click);
-            // 
-            // openDocumentConfigPathToolStripMenuItem
-            // 
-            this.openDocumentConfigPathToolStripMenuItem.Name = "openDocumentConfigPathToolStripMenuItem";
-            this.openDocumentConfigPathToolStripMenuItem.Size = new System.Drawing.Size(235, 22);
-            this.openDocumentConfigPathToolStripMenuItem.Text = "Open Document Config Path";
-            this.openDocumentConfigPathToolStripMenuItem.Visible = false;
-            // 
-            // deleteDocumentConfigPathToolStripMenuItem
-            // 
-            this.deleteDocumentConfigPathToolStripMenuItem.Name = "deleteDocumentConfigPathToolStripMenuItem";
-            this.deleteDocumentConfigPathToolStripMenuItem.Size = new System.Drawing.Size(235, 22);
-            this.deleteDocumentConfigPathToolStripMenuItem.Text = "Delete Document Config Path";
-            this.deleteDocumentConfigPathToolStripMenuItem.Visible = false;
-            // 
-            // openDocumentSavePathToolStripMenuItem
-            // 
-            this.openDocumentSavePathToolStripMenuItem.Name = "openDocumentSavePathToolStripMenuItem";
-            this.openDocumentSavePathToolStripMenuItem.Size = new System.Drawing.Size(235, 22);
-            this.openDocumentSavePathToolStripMenuItem.Text = "Open Document Save Path";
-            this.openDocumentSavePathToolStripMenuItem.Visible = false;
-            // 
-            // deleteDocumentSavePathToolStripMenuItem
-            // 
-            this.deleteDocumentSavePathToolStripMenuItem.Name = "deleteDocumentSavePathToolStripMenuItem";
-            this.deleteDocumentSavePathToolStripMenuItem.Size = new System.Drawing.Size(235, 22);
-            this.deleteDocumentSavePathToolStripMenuItem.Text = "Delete Document Save Path";
-            this.deleteDocumentSavePathToolStripMenuItem.Visible = false;
             // 
             // MainForm
             // 

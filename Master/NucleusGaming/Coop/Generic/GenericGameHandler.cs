@@ -376,6 +376,7 @@ namespace Nucleus.Gaming
 
         public string JsFilename;
         public string HandlerGUID;
+        public bool UsingNucleusAccounts;
 
         private string startingArgs;
 
@@ -1233,6 +1234,10 @@ namespace Nucleus.Gaming
 
             JsFilename = gen.JsFileName;
             HandlerGUID = gen.GUID;
+            if(gen.LaunchAsDifferentUsers || gen.LaunchAsDifferentUsersAlt)
+            {
+                UsingNucleusAccounts = true;
+            }
 
             return true;
         }
@@ -1733,7 +1738,7 @@ namespace Nucleus.Gaming
 
             if(isDebug)
             {
-                Log("NucleusCoop mod version: 1.0 R5 (Final)");
+                Log("NucleusCoop mod version: 1.0.1 R5 (Final)");
 
                 Log("########## START OF SCRIPT ##########");
                 string line;
@@ -2553,27 +2558,35 @@ namespace Nucleus.Gaming
                         Log("Searching for administrators local group");
                         ArrayList localGroups = GetUserGroups(Environment.UserName);
 
-                        if (localGroups.Contains("Administrators"))
+                        if(localGroups != null && localGroups?.Count > 0)
                         {
-                            adminLocalGroup = "Administrators";
-                            Log("Found local group " + adminLocalGroup + " for current user");
+                            if (localGroups.Contains("Administrators"))
+                            {
+                                adminLocalGroup = "Administrators";
+                                Log("Found local group " + adminLocalGroup + " for current user");
+                            }
+                            else
+                            {
+                                foreach (string localGroup in localGroups)
+                                {
+                                    if (localGroup.ToLower().StartsWith("admin"))
+                                    {
+                                        Log("Found local group " + localGroup + " for current user");
+                                        adminLocalGroup = localGroup;
+                                        break;
+                                    }
+                                }
+                                if (adminLocalGroup == null)
+                                {
+                                    adminLocalGroup = localGroups[0].ToString();
+                                    Log("Unable to find an admin local group for current user, using " + adminLocalGroup);
+                                }
+                            }
                         }
                         else
                         {
-                            foreach (string localGroup in localGroups)
-                            {
-                                if (localGroup.ToLower().StartsWith("admin"))
-                                {
-                                    Log("Found local group " + localGroup + " for current user");
-                                    adminLocalGroup = localGroup;
-                                    break;
-                                }
-                            }
-                            if (adminLocalGroup == null)
-                            {
-                                adminLocalGroup = localGroups[0].ToString();
-                                Log("Unable to find an admin local group for current user, using " + adminLocalGroup);
-                            }
+                            Log("Unable to find any user groups, defaulting user group to Administrators");
+                            adminLocalGroup = "Administrators";
                         }
 
                         Log("Checking if sufficient Nucleus user accounts already exist");
@@ -9634,12 +9647,32 @@ namespace Nucleus.Gaming
             ArrayList myItems = new ArrayList();
             UserPrincipal oUserPrincipal = GetUser(sUserName);
 
-            PrincipalSearchResult<Principal> oPrincipalSearchResult = oUserPrincipal.GetGroups();
-
-            foreach (Principal oResult in oPrincipalSearchResult)
+            if(oUserPrincipal != null)
             {
-                myItems.Add(oResult.Name);
+                PrincipalSearchResult<Principal> oPrincipalSearchResult = oUserPrincipal.GetGroups();
+
+                if (oPrincipalSearchResult != null && oPrincipalSearchResult?.ToList().Count > 0)
+                {
+                    foreach (Principal oResult in oPrincipalSearchResult)
+                    {
+                        myItems.Add(oResult.Name);
+                    }
+                }
+                else
+                {
+                    LogManager.Log("ERROR - Principal Search Result is null");
+                }
             }
+            else
+            {
+                LogManager.Log("ERROR - User Principal is null");
+            }
+
+            if(myItems.Count == 0)
+            {
+                LogManager.Log("Error grabbing user groups for user: " + sUserName);
+            }
+
             return myItems;
         }
 
