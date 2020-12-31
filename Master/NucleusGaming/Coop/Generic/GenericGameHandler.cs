@@ -3756,7 +3756,7 @@ namespace Nucleus.Gaming
                             uint sguOutPID = StartGameUtil.StartGame(/*
                                 GetRelativePath(exePath, nucleusRootFolder)*/exePath, startArgs,
                                 gen.HookInit, gen.HookInitDelay, gen.RenameNotKillMutex, mu, gen.SetWindowHookStart, isDebug, nucleusRootFolder, gen.BlockRawInput, gen.UseNucleusEnvironment, player.Nickname, startupHooksEnabled, gen.CreateSingleDeviceFile, player.RawHID, player.MonitorBounds.Width, player.MonitorBounds.Height, player.MonitorBounds.X
-                                , player.MonitorBounds.Y/*, gen.RunAsAdmin, rawHID,*/ /*GetRelativePath(linkFolder, nucleusRootFolder)*/);
+                                , player.MonitorBounds.Y, DocumentsRoot/*, gen.RunAsAdmin, rawHID,*/ /*GetRelativePath(linkFolder, nucleusRootFolder)*/);
 
                             try
                             {

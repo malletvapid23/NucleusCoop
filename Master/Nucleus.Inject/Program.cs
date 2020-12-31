@@ -143,6 +143,7 @@ namespace Nucleus.Inject
 			int.TryParse(args[i++], out int height);
 			int.TryParse(args[i++], out int posx);
 			int.TryParse(args[i++], out int posy);
+			string docpath = args[i++];
 
 			//IntPtr InPassThruBuffer = Marshal.StringToHGlobalUni(args[i++]);
 			//uint.TryParse(args[i++], out uint InPassThruSize);
@@ -154,7 +155,7 @@ namespace Nucleus.Inject
 				Log("Setting up Nucleus environment");
 
 				string NucleusEnvironmentRoot = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
-				string DocumentsRoot = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+				//string DocumentsRoot = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
 
 				IDictionary envVars = Environment.GetEnvironmentVariables();
 				var sb = new StringBuilder();
@@ -172,7 +173,7 @@ namespace Nucleus.Inject
 				Directory.CreateDirectory(envVars["APPDATA"].ToString());
 				Directory.CreateDirectory(envVars["LOCALAPPDATA"].ToString());
 
-				Directory.CreateDirectory(Path.GetDirectoryName(DocumentsRoot) + $@"\NucleusCoop\{playerNick}\Documents");
+				Directory.CreateDirectory(Path.GetDirectoryName(docpath) + $@"\NucleusCoop\{playerNick}\Documents");
 
 				if (!File.Exists(Path.Combine(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location), @"utils\backup\User Shell Folders.reg")))
 				{
@@ -181,7 +182,7 @@ namespace Nucleus.Inject
 				}
 
 				RegistryKey dkey = Registry.CurrentUser.OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders", true);
-				dkey.SetValue("Personal", Path.GetDirectoryName(DocumentsRoot) + $@"\NucleusCoop\{playerNick}\Documents", (RegistryValueKind)(int)RegType.ExpandString);
+				dkey.SetValue("Personal", Path.GetDirectoryName(docpath) + $@"\NucleusCoop\{playerNick}\Documents", (RegistryValueKind)(int)RegType.ExpandString);
 
 				foreach (object envVarKey in envVars.Keys)
 				{

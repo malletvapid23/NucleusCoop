@@ -64,7 +64,7 @@ namespace StartGame
         private static bool useStartupHooks = true;
 
         private static string NucleusEnvironmentRoot = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
-        private static string DocumentsRoot = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+        private static string DocumentsRoot;// = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
 
         private static int width;
         private static int height;
@@ -415,7 +415,8 @@ namespace StartGame
                             width,
                             height,
                             posx,
-                            posy
+                            posy,
+                            DocumentsRoot
                             };
 
                             var sbArgs = new StringBuilder();
@@ -697,6 +698,7 @@ namespace StartGame
                              //&& !skey.Contains("rawhid")
                              && !skey.Contains("createsingle")
                              && !skey.Contains("rawhid")
+                             && !skey.Contains("docpath")
                              && !skey.Contains("output"))
                              
                                                           
@@ -764,6 +766,10 @@ namespace StartGame
                     {
                         posy = Int32.Parse(splited[1]);
                     }
+                    else if (key.Contains("docpath"))
+                    {
+                        DocumentsRoot = splited[1];
+                    }
                     else if (key.Contains("isdebug"))
                     {
                         isDebug = Boolean.Parse(splited[1]);
@@ -806,7 +812,7 @@ namespace StartGame
                     }
                     else if (key.Contains("destination"))
                     {
-                        destination = splited[1].Substring(0,splited[1].LastIndexOf('\\'));
+                        destination = splited[1].Substring(0, splited[1].LastIndexOf('\\'));
                     }
                     else if (key.Contains("direxclusions"))
                     {
@@ -830,7 +836,7 @@ namespace StartGame
                     }
                     else if (key.Contains("numplayers"))
                     {
-                         numPlayers = int.Parse(splited[1]);
+                        numPlayers = int.Parse(splited[1]);
                     }
                     else if (key.Contains("symlink"))
                     {
@@ -874,7 +880,7 @@ namespace StartGame
                     }
                     else if (key.Contains("mutex"))
                     {
-                        string[] mutex = splited[1].Split(new string[] { "|==|"}, StringSplitOptions.None );
+                        string[] mutex = splited[1].Split(new string[] { "|==|" }, StringSplitOptions.None);
                         ConsoleU.WriteLine("Trying to kill mutexes", Palette.Wait);
                         for (int j = 0; j < mutex.Length; j++)
                         {
@@ -921,7 +927,7 @@ namespace StartGame
                             {
                                 all = false;
                             }
-                            
+
                             Thread.Sleep(500);
                         }
                         Console.WriteLine(all.ToString());
