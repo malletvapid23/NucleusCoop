@@ -62,6 +62,7 @@ namespace StartGame
         private static bool useNucleusEnvironment;
         private static bool injectFailed;
         private static bool useStartupHooks = true;
+        private static bool useDocs;
 
         private static string NucleusEnvironmentRoot = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
         private static string DocumentsRoot;// = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
@@ -301,14 +302,18 @@ namespace StartGame
 
                     Directory.CreateDirectory(Path.GetDirectoryName(DocumentsRoot) + $@"\NucleusCoop\{playerNick}\Documents");
 
-                    if (!File.Exists(Path.Combine(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location), @"utils\backup\User Shell Folders.reg")))
+                    if(useDocs)
                     {
-                        //string mydocPath = key.GetValue("Personal").ToString();
-                        ExportRegistry(@"HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders", Path.Combine(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location), @"utils\backup\User Shell Folders.reg"));
+                        if (!File.Exists(Path.Combine(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location), @"utils\backup\User Shell Folders.reg")))
+                        {
+                            //string mydocPath = key.GetValue("Personal").ToString();
+                            ExportRegistry(@"HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders", Path.Combine(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location), @"utils\backup\User Shell Folders.reg"));
+                        }
+
+                        RegistryKey dkey = Registry.CurrentUser.OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders", true);
+                        dkey.SetValue("Personal", Path.GetDirectoryName(DocumentsRoot) + $@"\NucleusCoop\{playerNick}\Documents", (RegistryValueKind)(int)RegType.ExpandString);
                     }
 
-                    RegistryKey dkey = Registry.CurrentUser.OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders", true);
-                    dkey.SetValue("Personal", Path.GetDirectoryName(DocumentsRoot) + $@"\NucleusCoop\{playerNick}\Documents", (RegistryValueKind)(int)RegType.ExpandString);
 
                     foreach (object envVarKey in envVars.Keys)
                     {
@@ -416,7 +421,8 @@ namespace StartGame
                             height,
                             posx,
                             posy,
-                            DocumentsRoot
+                            DocumentsRoot,
+                            useDocs
                             };
 
                             var sbArgs = new StringBuilder();
@@ -699,6 +705,7 @@ namespace StartGame
                              && !skey.Contains("createsingle")
                              && !skey.Contains("rawhid")
                              && !skey.Contains("docpath")
+                             && !skey.Contains("usedocs")
                              && !skey.Contains("output"))
                              
                                                           
@@ -769,6 +776,10 @@ namespace StartGame
                     else if (key.Contains("docpath"))
                     {
                         DocumentsRoot = splited[1];
+                    }
+                    else if (key.Contains("usedocs"))
+                    {
+                        useDocs = Boolean.Parse(splited[1]);
                     }
                     else if (key.Contains("isdebug"))
                     {

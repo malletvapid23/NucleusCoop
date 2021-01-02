@@ -144,6 +144,7 @@ namespace Nucleus.Inject
 			int.TryParse(args[i++], out int posx);
 			int.TryParse(args[i++], out int posy);
 			string docpath = args[i++];
+			bool.TryParse(args[i++], out bool useDocs);
 
 			//IntPtr InPassThruBuffer = Marshal.StringToHGlobalUni(args[i++]);
 			//uint.TryParse(args[i++], out uint InPassThruSize);
@@ -175,14 +176,18 @@ namespace Nucleus.Inject
 
 				Directory.CreateDirectory(Path.GetDirectoryName(docpath) + $@"\NucleusCoop\{playerNick}\Documents");
 
-				if (!File.Exists(Path.Combine(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location), @"utils\backup\User Shell Folders.reg")))
+				if (useDocs)
 				{
-					//string mydocPath = key.GetValue("Personal").ToString();
-					ExportRegistry(@"HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders", Path.Combine(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location), @"utils\backup\User Shell Folders.reg"));
+					if (!File.Exists(Path.Combine(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location), @"utils\backup\User Shell Folders.reg")))
+					{
+						//string mydocPath = key.GetValue("Personal").ToString();
+						ExportRegistry(@"HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders", Path.Combine(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location), @"utils\backup\User Shell Folders.reg"));
+					}
+
+					RegistryKey dkey = Registry.CurrentUser.OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders", true);
+					dkey.SetValue("Personal", Path.GetDirectoryName(docpath) + $@"\NucleusCoop\{playerNick}\Documents", (RegistryValueKind)(int)RegType.ExpandString);
 				}
 
-				RegistryKey dkey = Registry.CurrentUser.OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders", true);
-				dkey.SetValue("Personal", Path.GetDirectoryName(docpath) + $@"\NucleusCoop\{playerNick}\Documents", (RegistryValueKind)(int)RegType.ExpandString);
 
 				foreach (object envVarKey in envVars.Keys)
 				{
