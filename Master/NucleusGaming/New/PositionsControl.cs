@@ -832,7 +832,7 @@ namespace Nucleus.Coop
 			        return Regular(verLines, horLines, out monitorBounds, out editorBounds);
 				}
 			}
-
+            
 	        return false;
         }
 
@@ -849,8 +849,10 @@ namespace Nucleus.Coop
 			int index = -1;
 			while (GetScreenDivisionBounds(screen.Type, ++index, out var divMonitorBounds, out var divEditorBounds, bounds, ebounds))
 			{
-				var playersInDiv = players.Where(
-					x => x.ScreenIndex == screenIndex && x.MonitorBounds == divMonitorBounds.Value);
+                var playersInDiv = players.Where(
+                    x => x.ScreenIndex == screenIndex && (x.MonitorBounds == divMonitorBounds.Value || (x.MonitorBounds.Width == divMonitorBounds.Value.Width * 2 && x.MonitorBounds.Y == divMonitorBounds.Value.Y && x.MonitorBounds.X == divMonitorBounds.Value.X) || (x.MonitorBounds.Height == divMonitorBounds.Value.Height * 2 && x.MonitorBounds.X == divMonitorBounds.Value.X && x.MonitorBounds.Y == divMonitorBounds.Value.Y)));
+
+
 
 				//Raw mice/keyboards can go as pairs, nothing else can.
 				if (
@@ -1314,6 +1316,7 @@ namespace Nucleus.Coop
                         // return to default position
                         p.Owner = null;
                         p.EditBounds = GetDefaultBounds(draggingIndex);
+                        p.MonitorBounds = new Rectangle(0, 0, 0, 0);
                         p.ScreenIndex = -1;
                     }
 
