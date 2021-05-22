@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 
 namespace Nucleus.Gaming.Coop.InputManagement
 {
+	/*
 	public class InputInterceptor
 	{
 		public static bool InterceptEnabled = false;
@@ -69,7 +70,7 @@ namespace Nucleus.Gaming.Coop.InputManagement
 #if DEBUG
 				Debug.WriteLine("Reclipping mouse cursor");
 #endif
-			}*/
+			} *
 
 			return (IntPtr)1;
 		}
@@ -102,4 +103,5 @@ namespace Nucleus.Gaming.Coop.InputManagement
 			return WinApi.CallNextHookEx(IntPtr.Zero, nCode, wParam, lParam);
 		}
 	}
+	*/
 }

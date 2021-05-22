@@ -36,7 +36,7 @@ namespace Nucleus.Gaming
 		private GameProfile currentProfile;
 
 		private RawInputProcessor rawInputProcessor;
-		private InputInterceptor inputInterceptor;
+		//private InputInterceptor inputInterceptor;
 
 		/// object instance so we can thread-safe save the user profile
 		private object saving = new object();
@@ -74,9 +74,11 @@ namespace Nucleus.Gaming
             string gameJs = GetJsScriptsPath();
             Directory.CreateDirectory(gameJs);
 
-            inputInterceptor = new InputInterceptor();
+            //inputInterceptor = new InputInterceptor();
 
-			//Subscribe to raw input
+//            LockInput.Unlock();
+
+            //Subscribe to raw input
 			//TODO: update isRunningSplitScreen
 			Debug.WriteLine("Registering raw input");
 			rawInputProcessor = new RawInputProcessor(() => LockInput.IsLocked);//TODO: needs more robust method

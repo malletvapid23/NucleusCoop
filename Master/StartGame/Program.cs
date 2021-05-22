@@ -343,7 +343,7 @@ namespace StartGame
 
                 Thread.Sleep(1000);
 
-                if (useStartupHooks && (isHook || renameMutex || setWindow || blockRaw || createSingle))
+				if (useStartupHooks && (isHook || renameMutex || setWindow || blockRaw || createSingle))
                 {
                     Log("Starting game and injecting start up hooks via Nucleus.Inject");
 

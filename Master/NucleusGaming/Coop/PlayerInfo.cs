@@ -62,6 +62,8 @@ namespace Nucleus.Gaming.Coop
 
         public Display Display;
 
+        public uint ProtoInputInstanceHandle = 0;
+
         // Serialized
 
         /// <summary>

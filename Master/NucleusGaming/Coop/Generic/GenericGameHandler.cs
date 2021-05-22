@@ -38,6 +38,7 @@ using Newtonsoft.Json.Linq;
 using System.Text.RegularExpressions;
 using System.Runtime.ExceptionServices;
 using System.Collections.Concurrent;
+using Nucleus.Gaming.Coop.ProtoInput;
 
 namespace Nucleus.Gaming
 {
@@ -600,6 +601,8 @@ namespace Nucleus.Gaming
             }
 
             Log("----------------- SHUTTING DOWN -----------------");
+
+            LockInput.Unlock(false, gen?.ProtoInput);
 
             ForceFinish();
 
@@ -1550,10 +1553,13 @@ namespace Nucleus.Gaming
 
             ForceFinish();
 
-            List<PlayerInfo> players = profile.PlayerData;
+            gen.SetProtoInputValues();
 
-			//Merge raw keyboard/mouse players into one
-			var groupWindows = players.Where(x => x.IsRawKeyboard || x.IsRawMouse).GroupBy(x => x.MonitorBounds).ToList();
+            List<PlayerInfo> players = profile.PlayerData;
+            gen.SetPlayerList(players);
+
+            //Merge raw keyboard/mouse players into one
+            var groupWindows = players.Where(x => x.IsRawKeyboard || x.IsRawMouse).GroupBy(x => x.MonitorBounds).ToList();
 			foreach(var group in groupWindows)
 			{
 				var firstInGroup = group.First();
@@ -1760,7 +1766,6 @@ namespace Nucleus.Gaming
                 nucleusUserAccountsPassword = ini.IniReadValue("Misc", "NucleusAccountPassword");
             }
 
-
             for (int i = 0; i < players.Count; i++)
             {
                 Log("********** Setting up player " + (i + 1) + " **********");
@@ -1954,7 +1959,7 @@ namespace Nucleus.Gaming
                                 {
                                     if (currentProc.ProcessName.ToLower() == Path.GetFileNameWithoutExtension(gen.MutexProcessExe).ToLower())
                                     {
-                                        if (/*(int)currentProc.MainWindowHandle > 0 && !string.IsNullOrEmpty(currentProc.MainWindowTitle) &&*/ !mutexProcs.Contains(currentProc.Id))
+                                        if (/*(int)currentProc.NucleusGetMainWindowHandle() > 0 && !string.IsNullOrEmpty(currentProc.MainWindowTitle) &&*/ !mutexProcs.Contains(currentProc.Id))
                                         {
                                             Log($"Found process {currentProc} (pid {currentProc.Id}) to kill mutexes");
                                             mProc = currentProc;
@@ -2024,7 +2029,7 @@ namespace Nucleus.Gaming
                                 PlayerInfo before = players[i - 1];
                                 Thread.Sleep(1000);
                                 ProcessData pdata = before.ProcessData;
-                                User32Interop.SetForegroundWindow(pdata.Process.MainWindowHandle);
+                                User32Interop.SetForegroundWindow(pdata.Process.NucleusGetMainWindowHandle());
                                 InjectDLLs(pdata.Process, nextWindowToInject, before);
 							}
 						}
@@ -2035,7 +2040,7 @@ namespace Nucleus.Gaming
                         PlayerInfo before = players[i - 1];
                         Thread.Sleep(1000);
                         ProcessData pdata = before.ProcessData;
-                        User32Interop.SetForegroundWindow(pdata.Process.MainWindowHandle);
+                        User32Interop.SetForegroundWindow(pdata.Process.NucleusGetMainWindowHandle());
                         InjectDLLs(pdata.Process, nextWindowToInject, before);
 					}
 				}
@@ -3727,7 +3732,27 @@ namespace Nucleus.Gaming
                             exePath = Path.Combine(linkFolder, gen.ExecutableToLaunch);
                         }
 
-                        if (/*context.KillMutex?.Length > 0 || */(gen.HookInit || (gen.RenameNotKillMutex && context.KillMutex?.Length > 0) || gen.SetWindowHookStart || gen.BlockRawInput || gen.CreateSingleDeviceFile) && !gen.CMDLaunch && !gen.UseForceBindIP && !gen.LaunchAsDifferentUsers && !gen.LaunchAsDifferentUsersAlt) /*|| (gen.CMDLaunch && i==0))*/
+                        if (gen.ProtoInput.InjectStartup)
+						{
+                            Log("Starting game with ProtoInput");
+
+                            ProtoInputLauncher.InjectStartup(exePath, 
+	                            startArgs, 0, nucleusRootFolder, i + 1, gen, player, out uint pid,
+	                            (player.IsRawMouse ? (int)player.RawMouseDeviceHandle : -1),
+	                            (player.IsRawKeyboard ? (int)player.RawKeyboardDeviceHandle : -1),
+	                            (player.IsRawMouse || player.IsRawKeyboard) ? 0 : (player.GamepadId+1));
+
+                            try
+                            {
+                                proc = Process.GetProcessById((int)pid);
+                            }
+                            catch (Exception ex)
+                            {
+                                proc = null;
+                                Log("Process By ID failed, setting process to null and continuing, will try and catch it later");
+                            }
+                        }
+                        else if (/*context.KillMutex?.Length > 0 || */(gen.HookInit || (gen.RenameNotKillMutex && context.KillMutex?.Length > 0) || gen.SetWindowHookStart || gen.BlockRawInput || gen.CreateSingleDeviceFile) && !gen.CMDLaunch && !gen.UseForceBindIP && !gen.LaunchAsDifferentUsers && !gen.LaunchAsDifferentUsersAlt) /*|| (gen.CMDLaunch && i==0))*/
                         {
 
                             string mu = "";
@@ -4392,8 +4417,8 @@ namespace Nucleus.Gaming
                     }
                 }
 
-
-
+                
+                
                 if (gen.GamePlayAfterLaunch && !gen.GamePlayBeforeGameSetup)
                 {
                     gen.PrePlay(context, this, player);
@@ -4529,7 +4554,7 @@ namespace Nucleus.Gaming
                             Process[] processes = Process.GetProcessesByName(Path.GetFileNameWithoutExtension(gen.ExecutableName));
                             foreach (var process in processes)
                             {
-                                if ((int)process.MainWindowHandle > 0 && process.MainWindowTitle == gen.Hook.ForceFocusWindowName && (attachedIds.Count == 0 || (attachedIds.Count > 0 && !attachedIds.Contains(process.Id))))
+                                if ((int)process.NucleusGetMainWindowHandle() > 0 && process.MainWindowTitle == gen.Hook.ForceFocusWindowName && (attachedIds.Count == 0 || (attachedIds.Count > 0 && !attachedIds.Contains(process.Id))))
                                 {
                                     Log("Process found, " + process.ProcessName + " pid (" + process.Id + ") after " + counter + " seconds");
                                     proc = process;
@@ -4537,7 +4562,7 @@ namespace Nucleus.Gaming
                                     attachedIds.Add(process.Id);
                                     player.ProcessID = process.Id;
                                     found = true;
-                                    Log(string.Format("Process details; Name: {0}, ID: {1}, MainWindowtitle: {2}, MainWindowHandle: {3}", process.ProcessName, process.Id, process.MainWindowTitle, process.MainWindowHandle));
+                                    Log(string.Format("Process details; Name: {0}, ID: {1}, MainWindowtitle: {2}, NucleusGetMainWindowHandle(): {3}", process.ProcessName, process.Id, process.MainWindowTitle, process.NucleusGetMainWindowHandle()));
                                     break;
                                 }
                             }
@@ -4557,7 +4582,7 @@ namespace Nucleus.Gaming
                             Process[] processes = Process.GetProcessesByName(Path.GetFileNameWithoutExtension(gen.ExecutableName));
                             foreach (var process in processes)
                             {
-                                if ((int)process.MainWindowHandle > 0 && process.MainWindowTitle == gen.Hook.ForceFocusWindowName && (attachedIds.Count == 0 || (attachedIds.Count > 0 && !attachedIds.Contains(process.Id))))
+                                if ((int)process.NucleusGetMainWindowHandle() > 0 && process.MainWindowTitle == gen.Hook.ForceFocusWindowName && (attachedIds.Count == 0 || (attachedIds.Count > 0 && !attachedIds.Contains(process.Id))))
                                 {
                                     Log("Process found, " + process.ProcessName + " pid (" + process.Id + ") after " + counter + " seconds");
                                     proc = process;
@@ -4565,7 +4590,7 @@ namespace Nucleus.Gaming
                                     attachedIds.Add(process.Id);
                                     player.ProcessID = process.Id;
                                     found = true;
-                                    Log(string.Format("Process details; Name: {0}, ID: {1}, MainWindowtitle: {2}, MainWindowHandle: {3}", process.ProcessName, process.Id, process.MainWindowTitle, process.MainWindowHandle));
+                                    Log(string.Format("Process details; Name: {0}, ID: {1}, MainWindowtitle: {2}, NucleusGetMainWindowHandle(): {3}", process.ProcessName, process.Id, process.MainWindowTitle, process.NucleusGetMainWindowHandle()));
                                     break;
                                 }
                             }
@@ -4621,11 +4646,11 @@ namespace Nucleus.Gaming
 
                                 if (lowerP == proceName) //|| lowerP == launcherName)
                                 {
-                                    if (!attachedIds.Contains(p.Id)) //&& (int)p.MainWindowHandle > 0)
+                                    if (!attachedIds.Contains(p.Id)) //&& (int)p.NucleusGetMainWindowHandle() > 0)
                                     {
-                                        if (/*(int)p.MainWindowHandle == 0 ||*/ p.ProcessName == "javaw" || p.ProcessName == "GRW" || p.ProcessName == "steamclient_loader")
+                                        if (/*(int)p.NucleusGetMainWindowHandle() == 0 ||*/ p.ProcessName == "javaw" || p.ProcessName == "GRW" || p.ProcessName == "steamclient_loader")
                                         {
-                                            if ((int)p.MainWindowHandle == 0)
+                                            if ((int)p.NucleusGetMainWindowHandle() == 0)
                                             {
                                                 continue;
                                             }
@@ -4702,7 +4727,7 @@ namespace Nucleus.Gaming
                     }
                 }
 
-                Log(string.Format("Process details; Name: {0}, ID: {1}, MainWindowtitle: {2}, MainWindowHandle: {3}", proc.ProcessName, proc.Id, proc.MainWindowTitle, proc.MainWindowHandle));
+                Log(string.Format("Process details; Name: {0}, ID: {1}, MainWindowtitle: {2}, NucleusGetMainWindowHandle(): {3}", proc.ProcessName, proc.Id, proc.MainWindowTitle, proc.NucleusGetMainWindowHandle()));
 
                 if(gen.WriteToProcessMemory?.Length > 0)
                 {
@@ -4718,7 +4743,7 @@ namespace Nucleus.Gaming
                         }
                         byte[] bArray = bytesConv.ToArray();
 
-                        bool result = WriteProcessMemory(proc.MainWindowHandle, baseAddr, bArray, (ulong)bArray.Length, out _);
+                        bool result = WriteProcessMemory(proc.NucleusGetMainWindowHandle(), baseAddr, bArray, (ulong)bArray.Length, out _);
                         Log(string.Format("WriteToProcessMemory - baseaddr: {0} result: {1}", baseAddr, result));
                     }
                 }
@@ -4844,23 +4869,23 @@ namespace Nucleus.Gaming
 
                 if (gen.IdInWindowTitle || !string.IsNullOrEmpty(gen.FlawlessWidescreen))
                 {
-                    if ((int)proc.MainWindowHandle == 0)
+                    if ((int)proc.NucleusGetMainWindowHandle() == 0)
                     {
                         for (int times = 0; times < 200; times++)
                         {
                             Thread.Sleep(50);
-                            if ((int)proc.MainWindowHandle > 0)
+                            if ((int)proc.NucleusGetMainWindowHandle() > 0)
                             {
                                 break;
                             }
-                            //if (times == 199 && (int)proc.MainWindowHandle == 0)
+                            //if (times == 199 && (int)proc.NucleusGetMainWindowHandle() == 0)
                             //{
                             //Log(string.Format("ERROR - IdInWindowTitle could not find main window handle for {0} (pid {1})", proc.ProcessName, proc.Id));
                             //MessageBox.Show(string.Format("IdInWindowTitle: Could not find main window handle for {0} (pid:{1})", proc.ProcessName, proc.Id), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                             //}
                         }
                     }
-                    if ((int)proc.MainWindowHandle > 0)
+                    if ((int)proc.NucleusGetMainWindowHandle() > 0)
                     {
                         string windowTitle = proc.MainWindowTitle + "(" + i + ")";
                         if(!string.IsNullOrEmpty(gen.FlawlessWidescreen))
@@ -4868,13 +4893,34 @@ namespace Nucleus.Gaming
                             windowTitle = "Nucleus Instance " + (i + 1) + "(" + gen.Hook.ForceFocusWindowName + ")";
                         }
                         Log(string.Format("Setting window text to {0}", windowTitle));
-                        SetWindowText(proc.MainWindowHandle, windowTitle);
+                        SetWindowText(proc.NucleusGetMainWindowHandle(), windowTitle);
                     }
                     else
                     {
                         Log(string.Format("ERROR - IdInWindowTitle could not find main window handle for {0} (pid {1})", proc.ProcessName, proc.Id));
                         MessageBox.Show(string.Format("IdInWindowTitle: Could not find main window handle for {0} (pid:{1})", proc.ProcessName, proc.Id), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }
+                }
+
+                if (!gen.ProtoInput.InjectStartup &&
+                    (gen.ProtoInput.InjectRuntime_EasyHookMethod ||
+                     gen.ProtoInput.InjectRuntime_EasyHookStealthMethod ||
+                     gen.ProtoInput.InjectRuntime_RemoteLoadMethod))
+                {
+	                Log("Injecting ProtoInput at runtime");
+
+	                ProtoInputLauncher.InjectRuntime(
+		                gen.ProtoInput.InjectRuntime_EasyHookMethod,
+		                gen.ProtoInput.InjectRuntime_EasyHookStealthMethod,
+		                gen.ProtoInput.InjectRuntime_RemoteLoadMethod,
+		                (uint)proc.Id,
+		                nucleusFolderPath,
+		                i + 1,
+		                gen,
+                        player,
+		                (player.IsRawMouse ? (int)player.RawMouseDeviceHandle : -1),
+		                (player.IsRawKeyboard ? (int)player.RawKeyboardDeviceHandle : -1),
+		                (player.IsRawMouse || player.IsRawKeyboard) ? 0 : (player.GamepadId + 1));
                 }
 
                 if (gen.PromptAfterFirstInstance)
@@ -4916,7 +4962,7 @@ namespace Nucleus.Gaming
                         {
                             topMostFlag = new IntPtr(-2);
                         }
-                        User32Interop.SetWindowPos(aproc.MainWindowHandle, topMostFlag, 0, 0, 0, 0, (uint)(PositioningFlags.SWP_NOMOVE | PositioningFlags.SWP_NOSIZE | PositioningFlags.SWP_SHOWWINDOW));
+                        User32Interop.SetWindowPos(aproc.NucleusGetMainWindowHandle(), topMostFlag, 0, 0, 0, 0, (uint)(PositioningFlags.SWP_NOMOVE | PositioningFlags.SWP_NOSIZE | PositioningFlags.SWP_SHOWWINDOW));
                     }
                 }
                 else
@@ -4985,7 +5031,7 @@ namespace Nucleus.Gaming
                             data.KilledMutexes = context.KillMutex?.Length == 0;
                             player.ProcessData = data;
 
-                            Log(string.Format("Process details; Name: {0}, ID: {1}, MainWindowtitle: {2}, MainWindowHandle: {3}", proc.ProcessName, proc.Id, proc.MainWindowTitle, proc.MainWindowHandle));
+                            Log(string.Format("Process details; Name: {0}, ID: {1}, MainWindowtitle: {2}, NucleusGetMainWindowHandle(): {3}", proc.ProcessName, proc.Id, proc.MainWindowTitle, proc.NucleusGetMainWindowHandle()));
                         }
                     }
                 }
@@ -5069,26 +5115,26 @@ namespace Nucleus.Gaming
                     {
                         foreach (Process aproc in attached)
                         {
-                            if ((int)aproc.MainWindowHandle == 0)
+                            if ((int)aproc.NucleusGetMainWindowHandle() == 0)
                             {
                                 for (int times = 0; times < 200; times++)
                                 {
                                     Thread.Sleep(50);
-                                    if ((int)aproc.MainWindowHandle > 0)
+                                    if ((int)aproc.NucleusGetMainWindowHandle() > 0)
                                     {
                                         break;
                                     }
-                                    //if (times == 199 && (int)aproc.MainWindowHandle == 0)
+                                    //if (times == 199 && (int)aproc.NucleusGetMainWindowHandle() == 0)
                                     //{
                                     //    Log(string.Format("ERROR - ChangeWindowTitle could not find main window handle for {0} (pid:{1})", aproc.ProcessName, aproc.Id));
                                     //    MessageBox.Show(string.Format("ChangeWindowTitle: Could not find main window handle for {0} (pid:{1})", aproc.ProcessName, aproc.Id), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                                     //}
                                 }
                             }
-                            if ((int)aproc.MainWindowHandle > 0)
+                            if ((int)aproc.NucleusGetMainWindowHandle() > 0)
                             {
-                                Log(string.Format("Renaming window title {0} to {1} for pid {2}", aproc.MainWindowHandle, gen.Hook.ForceFocusWindowName, aproc.Id));
-                                SetWindowText(aproc.MainWindowHandle, gen.Hook.ForceFocusWindowName);
+                                Log(string.Format("Renaming window title {0} to {1} for pid {2}", aproc.NucleusGetMainWindowHandle(), gen.Hook.ForceFocusWindowName, aproc.Id));
+                                SetWindowText(aproc.NucleusGetMainWindowHandle(), gen.Hook.ForceFocusWindowName);
                             }
                             else
                             {
@@ -5108,7 +5154,7 @@ namespace Nucleus.Gaming
                             if (fwProc.MainWindowTitle != windowTitle)
                             {
                                 Log(string.Format("Resetting window text for pid {0} to {0}", fwProc.Id, windowTitle));
-                                SetWindowText(fwProc.MainWindowHandle, windowTitle);
+                                SetWindowText(fwProc.NucleusGetMainWindowHandle(), windowTitle);
                             }
                         }
                     }
@@ -5143,7 +5189,7 @@ namespace Nucleus.Gaming
                                 if (int.Parse(instanceToHook) == (i + 1))
                                 {
                                     Log("Injecting hook DLL for last instance");
-                                    User32Interop.SetForegroundWindow(data.Process.MainWindowHandle);
+                                    User32Interop.SetForegroundWindow(data.Process.NucleusGetMainWindowHandle());
                                     InjectDLLs(data.Process, nextWindowToInject, players[i]);
                                 }
                             }
@@ -5151,7 +5197,7 @@ namespace Nucleus.Gaming
                         else
                         {
                             Log("Injecting hook DLL for last instance");
-                            User32Interop.SetForegroundWindow(data.Process.MainWindowHandle);
+                            User32Interop.SetForegroundWindow(data.Process.NucleusGetMainWindowHandle());
                             InjectDLLs(data.Process, nextWindowToInject, players[i]);
 						}
 					}
@@ -5168,7 +5214,7 @@ namespace Nucleus.Gaming
                             {
                                 const int flip = 0x00C00000 | 0x00080000 | 0x00040000; //WS_BORDER | WS_SYSMENU
 
-                                var x = (int)User32Interop.GetWindowLong(plyrProc.MainWindowHandle, User32_WS.GWL_STYLE);
+                                var x = (int)User32Interop.GetWindowLong(plyrProc.NucleusGetMainWindowHandle(), User32_WS.GWL_STYLE);
                                 if ((x & flip) > 0)//has a border
                                 {
                                     Log("Process id " + plyrProc.Id + ", still has or regained a border, trying to remove it");
@@ -5230,7 +5276,7 @@ namespace Nucleus.Gaming
 
                     if (gen.SupportsMultipleKeyboardsAndMice && gen.LockInputAtStart)
 					{
-						LockInput.Lock();
+						LockInput.Lock(gen.LockInputSuspendsExplorer, gen.ProtoInput.FreezeExternalInputWhenInputNotLocked, gen?.ProtoInput);
 					}
 
                     if (gen.SetForegroundWindowElsewhere)
@@ -5257,15 +5303,21 @@ namespace Nucleus.Gaming
                             Process plyrProc = plyr.ProcessData.Process;
 
                             if (gen.FakeFocusSendActivate)
-                                User32Interop.SendMessage(plyrProc.MainWindowHandle, (int)FocusMessages.WM_ACTIVATE, (IntPtr)0x00000002, IntPtr.Zero);
-                            User32Interop.SendMessage(plyrProc.MainWindowHandle, (int)FocusMessages.WM_ACTIVATEAPP, (IntPtr)1, IntPtr.Zero);
-                            User32Interop.SendMessage(plyrProc.MainWindowHandle, (int)FocusMessages.WM_NCACTIVATE, (IntPtr)0x00000001, IntPtr.Zero);
-                            User32Interop.SendMessage(plyrProc.MainWindowHandle, (int)FocusMessages.WM_SETFOCUS, IntPtr.Zero, IntPtr.Zero);
-                            User32Interop.SendMessage(plyrProc.MainWindowHandle, (int)FocusMessages.WM_MOUSEACTIVATE, (IntPtr)plyrProc.MainWindowHandle, (IntPtr)1);
+                                User32Interop.SendMessage(plyrProc.NucleusGetMainWindowHandle(), (int)FocusMessages.WM_ACTIVATE, (IntPtr)0x00000002, IntPtr.Zero);
+                            User32Interop.SendMessage(plyrProc.NucleusGetMainWindowHandle(), (int)FocusMessages.WM_ACTIVATEAPP, (IntPtr)1, IntPtr.Zero);
+                            User32Interop.SendMessage(plyrProc.NucleusGetMainWindowHandle(), (int)FocusMessages.WM_NCACTIVATE, (IntPtr)0x00000001, IntPtr.Zero);
+                            User32Interop.SendMessage(plyrProc.NucleusGetMainWindowHandle(), (int)FocusMessages.WM_SETFOCUS, IntPtr.Zero, IntPtr.Zero);
+                            User32Interop.SendMessage(plyrProc.NucleusGetMainWindowHandle(), (int)FocusMessages.WM_MOUSEACTIVATE, (IntPtr)plyrProc.NucleusGetMainWindowHandle(), (IntPtr)1);
                         }
                     }
                 }
             }
+
+            // Call the input lock/unlock callbacks, just in case they haven't been called with the players fully setup
+            if (LockInput.IsLocked)
+	            gen.ProtoInput.OnInputLocked?.Invoke();
+            else
+	            gen.ProtoInput.OnInputUnlocked?.Invoke();
 
             //if(statusForm != null)
             //{
@@ -5656,7 +5708,7 @@ namespace Nucleus.Gaming
                 Log("Flawless Widescreen setup complete");
                 //if (util != null)
                 //{
-                    //ShowWindow(util.MainWindowHandle, SW_MINIMIZE);
+                    //ShowWindow(util.NucleusGetMainWindowHandle(), SW_MINIMIZE);
                 //}
             }
         }
@@ -5901,14 +5953,14 @@ namespace Nucleus.Gaming
                         {
                             if (int.Parse(instanceToHook) == (i + 1))
                             {
-                                User32Interop.SetForegroundWindow(proc.MainWindowHandle);
+                                User32Interop.SetForegroundWindow(proc.NucleusGetMainWindowHandle());
                                 InjectDLLs(proc, window, players[i]);
                             }
                         }
                     }
                     else
                     {
-                        User32Interop.SetForegroundWindow(proc.MainWindowHandle);
+                        User32Interop.SetForegroundWindow(proc.NucleusGetMainWindowHandle());
                         InjectDLLs(proc, window, players[i]);
                     }
                 }
@@ -5963,7 +6015,7 @@ namespace Nucleus.Gaming
                 //Thread.Sleep(1000);
                 //const int flip = 0x00C00000 | 0x00080000 | 0x00040000; //WS_BORDER | WS_SYSMENU
 
-                //var x = (int)User32Interop.GetWindowLong(players[i].ProcessData.Process.MainWindowHandle, User32_WS.GWL_STYLE);
+                //var x = (int)User32Interop.GetWindowLong(players[i].ProcessData.Process.NucleusGetMainWindowHandle(), User32_WS.GWL_STYLE);
 
                 //if (gen.ResetWindows || (x & flip) > 0)
                 //{
@@ -6058,14 +6110,14 @@ namespace Nucleus.Gaming
                     //        {
                     //            if (int.Parse(instanceToHook) == (playerIndex + 1))
                     //            {
-                    //                User32Interop.SetForegroundWindow(proc.MainWindowHandle);
+                    //                User32Interop.SetForegroundWindow(proc.NucleusGetMainWindowHandle());
                     //                InjectDLLs(proc, window, players[playerIndex]);
                     //            }
                     //        }
                     //    }
                     //    else
                     //    {
-                    //        User32Interop.SetForegroundWindow(proc.MainWindowHandle);
+                    //        User32Interop.SetForegroundWindow(proc.NucleusGetMainWindowHandle());
                     //        InjectDLLs(proc, window, players[playerIndex]);
                     //    }
                     //}
@@ -6123,14 +6175,14 @@ namespace Nucleus.Gaming
             //                {
             //                    if (int.Parse(instanceToHook) == (playerIndex + 2))
             //                    {
-            //                        User32Interop.SetForegroundWindow(proc.MainWindowHandle);
+            //                        User32Interop.SetForegroundWindow(proc.NucleusGetMainWindowHandle());
             //                        InjectDLLs(proc, window, players[playerIndex + 1]);
             //                    }
             //                }
             //            }
             //            else
             //            {
-            //                User32Interop.SetForegroundWindow(proc.MainWindowHandle);
+            //                User32Interop.SetForegroundWindow(proc.NucleusGetMainWindowHandle());
             //                InjectDLLs(proc, window, players[playerIndex + 1]);
             //            }
             //        }
@@ -6719,6 +6771,8 @@ namespace Nucleus.Gaming
 
 		private void InjectDLLs(Process proc, Window window, PlayerInfo player)
 		{
+            Log("Injecting hooks DLL");
+
 			WaitForProcWindowHandleNotZero(proc);
 
 			bool is64 = EasyHook.RemoteHooking.IsX64Process(proc.Id);
@@ -6729,7 +6783,7 @@ namespace Nucleus.Gaming
 
             //using (StreamWriter writer = new StreamWriter("important.txt", true))
             //{
-            //    writer.WriteLine("aproc id: {0}, aproc procname: {1}, title: {2}, handle: {3}, handleint: {4}, bytefour: {5}, byteeight: {6}, datatosend[8]: {7}, datatosend[9]: {8}, intptr: {9}", proc.Id, proc.ProcessName, proc.MainWindowTitle, proc.MainWindowHandle, (int)proc.MainWindowHandle, BitConverter.ToUInt32(dataToSend, 0), BitConverter.ToUInt64(dataToSend, 0), dataToSend[8], dataToSend[9], intPtr);
+            //    writer.WriteLine("aproc id: {0}, aproc procname: {1}, title: {2}, handle: {3}, handleint: {4}, bytefour: {5}, byteeight: {6}, datatosend[8]: {7}, datatosend[9]: {8}, intptr: {9}", proc.Id, proc.ProcessName, proc.MainWindowTitle, proc.NucleusGetMainWindowHandle(), (int)proc.NucleusGetMainWindowHandle(), BitConverter.ToUInt32(dataToSend, 0), BitConverter.ToUInt64(dataToSend, 0), dataToSend[8], dataToSend[9], intPtr);
             //}
 
             try
@@ -6746,7 +6800,7 @@ namespace Nucleus.Gaming
 		            0, // InInjectionOptions (EasyHook)
 		            "Nucleus.Hook32.dll", // lib path x86. Inject32/64 will decide which one to use, so pass in both
 		            "Nucleus.Hook64.dll", // lib path x64
-		            proc.MainWindowHandle, // Game hWnd
+		            proc.NucleusGetMainWindowHandle(), // Game hWnd
 		            gen.HookFocus, // Hook GetForegroundWindow/etc
 		            gen.HideCursor,
 					isDebug,
@@ -6861,10 +6915,10 @@ namespace Nucleus.Gaming
 					foreach (Process proc in attached)
 					{
 						//TODO: NCACTIVATE is a bad idea?
-						User32Interop.SendMessage(proc.MainWindowHandle, (int)FocusMessages.WM_ACTIVATEAPP, (IntPtr)1, IntPtr.Zero);
-						User32Interop.SendMessage(proc.MainWindowHandle, (int)FocusMessages.WM_NCACTIVATE, (IntPtr)0x00000001, IntPtr.Zero);
-						User32Interop.SendMessage(proc.MainWindowHandle, (int)FocusMessages.WM_SETFOCUS, IntPtr.Zero, IntPtr.Zero);
-						User32Interop.SendMessage(proc.MainWindowHandle, (int)FocusMessages.WM_MOUSEACTIVATE, (IntPtr)proc.MainWindowHandle, (IntPtr)1);
+						User32Interop.SendMessage(proc.NucleusGetMainWindowHandle(), (int)FocusMessages.WM_ACTIVATEAPP, (IntPtr)1, IntPtr.Zero);
+						User32Interop.SendMessage(proc.NucleusGetMainWindowHandle(), (int)FocusMessages.WM_NCACTIVATE, (IntPtr)0x00000001, IntPtr.Zero);
+						User32Interop.SendMessage(proc.NucleusGetMainWindowHandle(), (int)FocusMessages.WM_SETFOCUS, IntPtr.Zero, IntPtr.Zero);
+						User32Interop.SendMessage(proc.NucleusGetMainWindowHandle(), (int)FocusMessages.WM_MOUSEACTIVATE, (IntPtr)proc.NucleusGetMainWindowHandle(), (IntPtr)1);
 
                         //Deep Rock Galactic doesn't work with this message
                         if (gen.FakeFocusSendActivate)
@@ -6879,8 +6933,8 @@ namespace Nucleus.Gaming
                                     }
                                     else if (players[p].ProcessID == proc.Id)
                                     {
-                                        //User32Interop.SendMessage(proc.MainWindowHandle, (int) FocusMessages.WM_ACTIVATE, (IntPtr) 0x00000001, (IntPtr) proc.MainWindowHandle);
-                                        User32Interop.SendMessage(proc.MainWindowHandle, (int)FocusMessages.WM_ACTIVATE, (IntPtr)0x00000002, IntPtr.Zero);
+                                        //User32Interop.SendMessage(proc.NucleusGetMainWindowHandle(), (int) FocusMessages.WM_ACTIVATE, (IntPtr) 0x00000001, (IntPtr) proc.NucleusGetMainWindowHandle());
+                                        User32Interop.SendMessage(proc.NucleusGetMainWindowHandle(), (int)FocusMessages.WM_ACTIVATE, (IntPtr)0x00000002, IntPtr.Zero);
                                         break;
                                     }
                                 }
@@ -7208,7 +7262,7 @@ namespace Nucleus.Gaming
                                     }
                                     else
                                     {
-                                        _cursorModule.AddOtherGameHandle(data.Process.MainWindowHandle);
+                                        _cursorModule.AddOtherGameHandle(data.Process.NucleusGetMainWindowHandle());
                                     }
                                 }
 
@@ -7241,7 +7295,7 @@ namespace Nucleus.Gaming
                                         }
                                         else
                                         {
-                                            if (GetWindowRect(data.Process.MainWindowHandle, out RECT Rect))
+                                            if (GetWindowRect(data.Process.NucleusGetMainWindowHandle(), out RECT Rect))
                                             {
                                                 origWidth = Rect.Right - Rect.Left;
                                                 origHeight = Rect.Bottom - Rect.Top;
@@ -7397,10 +7451,10 @@ namespace Nucleus.Gaming
                             }
                             else
                             {
-                                if (data.HWNDRetry || data.HWnd == null || data.HWnd.NativePtr != data.Process.MainWindowHandle)
+                                if (data.HWNDRetry || data.HWnd == null || data.HWnd.NativePtr != data.Process.NucleusGetMainWindowHandle())
                                 {
                                     Log("Update data process has not exited");
-                                    data.HWnd = new HwndObject(data.Process.MainWindowHandle);
+                                    data.HWnd = new HwndObject(data.Process.NucleusGetMainWindowHandle());
                                     Point pos = data.HWnd.Location;
 
                                     if (String.IsNullOrEmpty(data.HWnd.Title) ||
@@ -7425,7 +7479,7 @@ namespace Nucleus.Gaming
                                 else
                                 {
                                     Log("Assigning window handle");
-                                    data.HWnd = new HwndObject(data.Process.MainWindowHandle);
+                                    data.HWnd = new HwndObject(data.Process.NucleusGetMainWindowHandle());
                                     Point pos = data.HWnd.Location;
 
                                     Size s = data.Size;
@@ -7486,17 +7540,17 @@ namespace Nucleus.Gaming
 		{
 			try
 			{
-                if ((int)proc.MainWindowHandle == 0)
+                if ((int)proc.NucleusGetMainWindowHandle() == 0)
 				{
 					for (int times = 0; times < 200; times++)
 					{
 						Thread.Sleep(500);
-						if ((int)proc.MainWindowHandle > 0)
+						if ((int)proc.NucleusGetMainWindowHandle() > 0)
 						{
 							break;
 						}
 
-						if (times == 199 && (int)proc.MainWindowHandle == 0)
+						if (times == 199 && (int)proc.NucleusGetMainWindowHandle() == 0)
 						{
 							Log(string.Format(
 								"ERROR - WaitForProcWindowHandleNotZero could not find main window handle for {0} (pid {1})",
@@ -7505,7 +7559,7 @@ namespace Nucleus.Gaming
 					}
 				}
 
-				return proc.MainWindowHandle;
+				return proc.NucleusGetMainWindowHandle();
 			}
 			catch
 			{
