@@ -18,6 +18,7 @@ using Microsoft.Win32;
 using System.Text;
 using System.Runtime.ExceptionServices;
 using System.Reflection;
+using Nucleus.Gaming.Coop.ProtoInput;
 
 namespace Nucleus.Coop
 {
@@ -285,69 +286,87 @@ namespace Nucleus.Coop
 			}
             else if (m.Msg == 0x0312 && m.WParam.ToInt32() == KillProcess_HotkeyID)
             {
-                //System.Diagnostics.Process.GetCurrentProcess().Kill();
-                User32Util.ShowTaskBar();
-                Close();
+	            if (!Gaming.Coop.InputManagement.LockInput.IsLocked)
+	            {
+		            //System.Diagnostics.Process.GetCurrentProcess().Kill();
+		            User32Util.ShowTaskBar();
+		            Close();
+	            }
             }
             else if (m.Msg == 0x0312 && m.WParam.ToInt32() == TopMost_HotkeyID)
             {
-                if (TopMostToggle && handler != null)
-                {
-                    try
-                    {
-                        //Process[] procs = Process.GetProcesses();
-                        //foreach (Process proc in procs)
-                        //{
-                        //    if (proc.ProcessName.ToLower() == Path.GetFileNameWithoutExtension(currentGame.Hook.For gen.ExecutableName.ToLower()) || attachedIds.Contains(proc.Id) || proc.MainWindowTitle == gen.Hook.ForceFocusWindowName)
-                        //    {
-                        //    }
-                        //}
-                        Process[] procs = Process.GetProcessesByName(Path.GetFileNameWithoutExtension(currentGame.ExecutableName.ToLower()));
-                        if (procs.Length > 0)
-                        {
-                            for (int i = 0; i < procs.Length; i++)
-                            {
-                                IntPtr hWnd = procs[i].MainWindowHandle;
-                                User32Interop.SetWindowPos(hWnd, new IntPtr(-2), 0, 0, 0, 0, (uint)(PositioningFlags.SWP_NOSIZE | PositioningFlags.SWP_NOMOVE));
-                                ShowWindow(hWnd, ShowWindowEnum.Minimize);
-                            }
-                        }
-                    }
-                    catch { }
-                    User32Util.ShowTaskBar();
-                    //currentGame.LockMouse = false;
-                    this.Activate();
-                    this.BringToFront();
-                    TopMostToggle = false;
-                }
-                else if (!TopMostToggle && handler != null)
-                {
-                    Process[] procs = Process.GetProcessesByName(Path.GetFileNameWithoutExtension(currentGame.ExecutableName.ToLower()));
-                    if (procs.Length > 0)
-                    {
-                        for (int i = 0; i < procs.Length; i++)
-                        {
-                            IntPtr hWnd = procs[i].MainWindowHandle;
-                            ShowWindow(hWnd, ShowWindowEnum.Restore);
-                            User32Interop.SetWindowPos(hWnd, new IntPtr(-1), 0, 0, 0, 0, (uint)(PositioningFlags.SWP_NOSIZE | PositioningFlags.SWP_NOMOVE));
-                        }
-                    }
-                    User32Util.HideTaskbar();
-                    //currentGame.LockMouse = true;
-                    //this.Activate();
-                    //this.BringToFront();
-                    TopMostToggle = true;
-                }
+	            if (!Gaming.Coop.InputManagement.LockInput.IsLocked)
+	            {
+		            if (TopMostToggle && handler != null)
+		            {
+			            try
+			            {
+				            //Process[] procs = Process.GetProcesses();
+				            //foreach (Process proc in procs)
+				            //{
+				            //    if (proc.ProcessName.ToLower() == Path.GetFileNameWithoutExtension(currentGame.Hook.For gen.ExecutableName.ToLower()) || attachedIds.Contains(proc.Id) || proc.MainWindowTitle == gen.Hook.ForceFocusWindowName)
+				            //    {
+				            //    }
+				            //}
+				            Process[] procs =
+					            Process.GetProcessesByName(
+						            Path.GetFileNameWithoutExtension(currentGame.ExecutableName.ToLower()));
+				            if (procs.Length > 0)
+				            {
+					            for (int i = 0; i < procs.Length; i++)
+					            {
+						            IntPtr hWnd = procs[i].MainWindowHandle;
+						            User32Interop.SetWindowPos(hWnd, new IntPtr(-2), 0, 0, 0, 0,
+							            (uint) (PositioningFlags.SWP_NOSIZE | PositioningFlags.SWP_NOMOVE));
+						            ShowWindow(hWnd, ShowWindowEnum.Minimize);
+					            }
+				            }
+			            }
+			            catch
+			            {
+			            }
+
+			            User32Util.ShowTaskBar();
+			            //currentGame.LockMouse = false;
+			            this.Activate();
+			            this.BringToFront();
+			            TopMostToggle = false;
+		            }
+		            else if (!TopMostToggle && handler != null)
+		            {
+			            Process[] procs =
+				            Process.GetProcessesByName(
+					            Path.GetFileNameWithoutExtension(currentGame.ExecutableName.ToLower()));
+			            if (procs.Length > 0)
+			            {
+				            for (int i = 0; i < procs.Length; i++)
+				            {
+					            IntPtr hWnd = procs[i].MainWindowHandle;
+					            ShowWindow(hWnd, ShowWindowEnum.Restore);
+					            User32Interop.SetWindowPos(hWnd, new IntPtr(-1), 0, 0, 0, 0,
+						            (uint) (PositioningFlags.SWP_NOSIZE | PositioningFlags.SWP_NOMOVE));
+				            }
+			            }
+
+			            User32Util.HideTaskbar();
+			            //currentGame.LockMouse = true;
+			            //this.Activate();
+			            //this.BringToFront();
+			            TopMostToggle = true;
+		            }
+	            }
             }
             else if (m.Msg == 0x0312 && m.WParam.ToInt32() == StopSession_HotkeyID)
             {
-                if (btn_Play.Text == "S T O P")
-                {
-                    WindowState = FormWindowState.Normal;
-                    this.BringToFront();
-                    btn_Play.PerformClick();
-                }
-
+	            if (!Gaming.Coop.InputManagement.LockInput.IsLocked)
+	            {
+		            if (btn_Play.Text == "S T O P")
+		            {
+			            WindowState = FormWindowState.Normal;
+			            this.BringToFront();
+			            btn_Play.PerformClick();
+		            }
+	            }
             }
             base.WndProc(ref m);
         }
@@ -715,6 +734,14 @@ namespace Nucleus.Coop
                 User32Util.HideTaskbar();
             }
 
+            if (currentGame.ProtoInput.AutoHideTaskbar)
+            {
+	            if (ProtoInput.protoInput.GetTaskbarAutohide())
+		            currentGame.ProtoInput.AutoHideTaskbar = false; // If already hidden don't change it, and dont set it unhidden after.
+	            else
+		            ProtoInput.protoInput.SetTaskbarAutohide(true);
+            }
+
             if (currentGame.HideDesktop)
             {
                 foreach (Screen screen in Screen.AllScreens)
@@ -982,7 +1009,7 @@ namespace Nucleus.Coop
                         {
                             arch = "Unknown";
                         }
-                        MessageBox.Show(string.Format("Game Name: {0}\nArchitecture: {1}\nSteam ID: {2}\n\nScript Filename: {3}\nNucleus Game Content Path: {4}\nOrig Exe Path: {5}\n\nMax Players: {6}\nSupports XInput: {7}\nSupports DInput: {8}\nSupports Keyboard: {9}\nSupports multiple keyboards and mice: {10}", currentGameInfo.Game.GameName, arch, currentGameInfo.Game.SteamID, currentGameInfo.Game.JsFileName, Path.Combine(gameManager.GetAppContentPath(), gameGuid), exePath, currentGameInfo.Game.MaxPlayers, currentGameInfo.Game.Hook.XInputEnabled, currentGameInfo.Game.Hook.DInputEnabled, currentGameInfo.Game.SupportsKeyboard, currentGameInfo.Game.SupportsMultipleKeyboardsAndMice), "Game Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        MessageBox.Show(string.Format("Game Name: {0}\nArchitecture: {1}\nSteam ID: {2}\n\nScript Filename: {3}\nNucleus Game Content Path: {4}\nOrig Exe Path: {5}\n\nMax Players: {6}\nSupports XInput: {7}\nSupports DInput: {8}\nSupports Keyboard: {9}\nSupports multiple keyboards and mice: {10}", currentGameInfo.Game.GameName, arch, currentGameInfo.Game.SteamID, currentGameInfo.Game.JsFileName, Path.Combine(gameManager.GetAppContentPath(), gameGuid), exePath, currentGameInfo.Game.MaxPlayers, currentGameInfo.Game.Hook.XInputEnabled || currentGameInfo.Game.ProtoInput.XinputHook, currentGameInfo.Game.Hook.DInputEnabled, currentGameInfo.Game.SupportsKeyboard, currentGameInfo.Game.SupportsMultipleKeyboardsAndMice), "Game Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     }
                 }
             }

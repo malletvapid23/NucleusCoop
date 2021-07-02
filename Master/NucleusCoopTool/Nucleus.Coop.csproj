@@ -332,6 +332,7 @@
     <None Include="Resources\not_found_white.png" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="copyoutput\openxinput1_3.dll" />
     <Content Include="copyoutput\utils\Credits.txt" />
     <Content Include="copyoutput\utils\Custom utils go in User folder.txt" />
     <Content Include="copyoutput\utils\devcon\devcon.exe" />

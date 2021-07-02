@@ -59,9 +59,13 @@ namespace Nucleus.Gaming.Coop.ProtoInput
 
 		public bool UseDinputRedirection;
 
+		public bool UseOpenXinput;
+
 		public bool FreezeExternalInputWhenInputNotLocked;
 
 		public Action OnInputLocked;
 		public Action OnInputUnlocked;
+
+		public bool AutoHideTaskbar;
 	}
 }

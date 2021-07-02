@@ -962,6 +962,11 @@ namespace Nucleus.Gaming
                 }
             }
 
+            if (gen.ProtoInput.AutoHideTaskbar)
+            {
+	            ProtoInput.protoInput.SetTaskbarAutohide(false);
+            }
+
             User32Util.ShowTaskBar();
 
             hasEnded = true;
@@ -6038,6 +6043,11 @@ namespace Nucleus.Gaming
 
                 if (gen.HideTaskbar)
                     User32Util.HideTaskbar();
+
+                if (gen.ProtoInput.AutoHideTaskbar)
+                {
+	                ProtoInput.protoInput.SetTaskbarAutohide(false);
+                }
 
                 if (i == (players.Count - 1))
                 {

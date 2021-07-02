@@ -11,7 +11,7 @@ using Nucleus.Gaming.Coop.ProtoInput;
 
 namespace Nucleus.Gaming.Coop.InputManagement
 {
-	static class LockInput
+	public static class LockInput
 	{
 		private static bool isLocking = false;
 

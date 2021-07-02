@@ -5,7 +5,7 @@ using System.Windows.Forms;
 
 namespace Nucleus.Gaming.Coop.ProtoInput
 {
-	class ProtoInput
+	public class ProtoInput
 	{
 		public static readonly ProtoInput protoInput = new ProtoInput();
 
@@ -141,6 +141,9 @@ namespace Nucleus.Gaming.Coop.ProtoInput
 			[DllImport("ProtoInputLoader32.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
 			public static extern void SetUseDinputRedirection(uint instanceHandle, bool useRedirection);
 
+			[DllImport("ProtoInputLoader32.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
+			public static extern void SetUseOpenXinput(uint instanceHandle, bool useOpenXinput);
+
 			// Both of these functions require RenameHandlesHookHookID hook
 			[DllImport("ProtoInputLoader32.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
 			public static extern void AddHandleToRename(uint instanceHandle, string name);
@@ -156,6 +159,12 @@ namespace Nucleus.Gaming.Coop.ProtoInput
 
 			[DllImport("ProtoInputUtilDynamic32.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
 			public static extern void RestartExplorer();
+
+			[DllImport("ProtoInputUtilDynamic32.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
+			public static extern void SetTaskbarVisibility(bool autoHide, bool alwaysOnTop);
+
+			[DllImport("ProtoInputUtilDynamic32.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
+			public static extern void GetTaskbarVisibility(out bool autoHide, out bool alwaysOnTop);
 		}
 
 		private static class ProtoInput64
@@ -232,6 +241,9 @@ namespace Nucleus.Gaming.Coop.ProtoInput
 			[DllImport("ProtoInputLoader64.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
 			public static extern void SetUseDinputRedirection(uint instanceHandle, bool useRedirection);
 
+			[DllImport("ProtoInputLoader32.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
+			public static extern void SetUseOpenXinput(uint instanceHandle, bool useOpenXinput);
+
 			// Both of these functions require RenameHandlesHookHookID hook
 			[DllImport("ProtoInputLoader64.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
 			public static extern void AddHandleToRename(uint instanceHandle, string name);
@@ -247,6 +259,12 @@ namespace Nucleus.Gaming.Coop.ProtoInput
 
 			[DllImport("ProtoInputUtilDynamic64.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
 			public static extern void RestartExplorer();
+
+			[DllImport("ProtoInputUtilDynamic64.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
+			public static extern void SetTaskbarVisibility(bool autoHide, bool alwaysOnTop);
+
+			[DllImport("ProtoInputUtilDynamic64.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
+			public static extern void GetTaskbarVisibility(out bool autoHide, out bool alwaysOnTop);
 		}
 
 		public uint LockInput(bool lockInput)
@@ -483,6 +501,14 @@ namespace Nucleus.Gaming.Coop.ProtoInput
 				ProtoInput64.SetUseDinputRedirection(instanceHandle, useRedirection);
 		}
 
+		public void SetUseOpenXinput(uint instanceHandle, bool useOpenXinput)
+		{
+			if (IntPtr.Size == 4)
+				ProtoInput32.SetUseOpenXinput(instanceHandle, useOpenXinput);
+			else
+				ProtoInput64.SetUseOpenXinput(instanceHandle, useOpenXinput);
+		}
+
 		/// <summary>
 		/// Require RenameHandlesHookHookID hook
 		/// </summary>
@@ -507,6 +533,26 @@ namespace Nucleus.Gaming.Coop.ProtoInput
 				ProtoInput32.AddNamedPipeToRename(instanceHandle, name);
 			else
 				ProtoInput64.AddNamedPipeToRename(instanceHandle, name);
+		}
+
+		public bool GetTaskbarAutohide()
+		{
+			bool autohide;
+
+			if (IntPtr.Size == 4)
+				ProtoInput32.GetTaskbarVisibility(out autohide, out bool alwaysOnTop);
+			else
+				ProtoInput64.GetTaskbarVisibility(out autohide, out bool alwaysOnTop);
+
+			return autohide;
+		}
+		
+		public void SetTaskbarAutohide(bool autohide)
+		{
+			if (IntPtr.Size == 4)
+				ProtoInput32.SetTaskbarVisibility(autohide, false);
+			else
+				ProtoInput64.SetTaskbarVisibility(autohide, false);
 		}
 	}
 }
