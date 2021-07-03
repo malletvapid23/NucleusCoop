@@ -25,6 +25,7 @@ namespace Nucleus.Gaming.Coop.ProtoInput
 			public uint FocusHooksHookID = (uint)ProtoHookIDs.FocusHooksHookID;
 			public uint RenameHandlesHookID = (uint)ProtoHookIDs.RenameHandlesHookID;
 			public uint XinputHookID = (uint)ProtoHookIDs.XinputHookID;
+			public uint DinputOrderHookID = (uint)ProtoHookIDs.DinputOrderHookID;
 
 			public uint RawInputFilterID = (uint)ProtoMessageFilterIDs.RawInputFilterID;
 			public uint MouseMoveFilterID = (uint)ProtoMessageFilterIDs.MouseMoveFilterID;
@@ -52,7 +53,8 @@ namespace Nucleus.Gaming.Coop.ProtoInput
 			ClipCursorHookID,
 			FocusHooksHookID,
 			RenameHandlesHookID,
-			XinputHookID
+			XinputHookID,
+			DinputOrderHookID
 		};
 
 		public enum ProtoMessageFilterIDs : uint
@@ -150,6 +152,20 @@ namespace Nucleus.Gaming.Coop.ProtoInput
 
 			[DllImport("ProtoInputLoader32.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
 			public static extern void AddNamedPipeToRename(uint instanceHandle, string name);
+
+			[DllImport("ProtoInputLoader32.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
+			public static extern void SetDinputDeviceGUID(uint instanceHandle,
+				uint Data1,
+				ushort Data2,
+				ushort Data3,
+				byte Data4a,
+				byte Data4b,
+				byte Data4c,
+				byte Data4d,
+				byte Data4e,
+				byte Data4f,
+				byte Data4g,
+				byte Data4h);
 
 			[DllImport("ProtoInputUtilDynamic32.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
 			public static extern uint LockInput(bool lockInput);
@@ -250,6 +266,20 @@ namespace Nucleus.Gaming.Coop.ProtoInput
 
 			[DllImport("ProtoInputLoader64.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
 			public static extern void AddNamedPipeToRename(uint instanceHandle, string name);
+
+			[DllImport("ProtoInputLoader64.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
+			public static extern void SetDinputDeviceGUID(uint instanceHandle,
+				uint Data1,
+				ushort Data2,
+				ushort Data3,
+				byte Data4a,
+				byte Data4b,
+				byte Data4c,
+				byte Data4d,
+				byte Data4e,
+				byte Data4f,
+				byte Data4g,
+				byte Data4h);
 
 			[DllImport("ProtoInputUtilDynamic64.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
 			public static extern uint LockInput(bool lockInput);
@@ -533,6 +563,58 @@ namespace Nucleus.Gaming.Coop.ProtoInput
 				ProtoInput32.AddNamedPipeToRename(instanceHandle, name);
 			else
 				ProtoInput64.AddNamedPipeToRename(instanceHandle, name);
+		}
+
+		public void SetDinputDeviceGUID(uint instanceHandle, 
+			uint Data1,
+			ushort Data2,
+			ushort Data3,
+			byte Data4a,
+			byte Data4b,
+			byte Data4c,
+			byte Data4d,
+			byte Data4e,
+			byte Data4f,
+			byte Data4g,
+			byte Data4h)
+		{
+			if (IntPtr.Size == 4)
+				ProtoInput32.SetDinputDeviceGUID(instanceHandle, 
+					Data1,
+					Data2,
+					Data3,
+					Data4a,
+					Data4b,
+					Data4c,
+					Data4d,
+					Data4e,
+					Data4f,
+					Data4g,
+					Data4h);
+			else
+				ProtoInput64.SetDinputDeviceGUID(instanceHandle,
+					Data1,
+					Data2,
+					Data3,
+					Data4a,
+					Data4b,
+					Data4c,
+					Data4d,
+					Data4e,
+					Data4f,
+					Data4g,
+					Data4h);
+		}
+
+		public void SetDinputDeviceGUID(uint instanceHandle, Guid guid)
+		{
+			var a = guid.ToByteArray();
+
+			SetDinputDeviceGUID(instanceHandle,
+				(uint)((a[3] << 24) | (a[2] << 16) | (a[1] << 8) | a[0]),
+				(ushort)((a[5] << 8) | a[4]),
+				(ushort)((a[7] << 8) | a[6]),
+				a[8], a[9], a[10], a[11], a[12], a[13], a[14], a[15]);
 		}
 
 		public bool GetTaskbarAutohide()

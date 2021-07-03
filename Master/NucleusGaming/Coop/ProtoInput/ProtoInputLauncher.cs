@@ -108,6 +108,9 @@ namespace Nucleus.Gaming.Coop.ProtoInput
 			ProtoInput.protoInput.SetUseDinputRedirection(instanceHandle, gen.ProtoInput.UseDinputRedirection);
 			if (gen.ProtoInput.XinputHook) ProtoInput.protoInput.InstallHook(instanceHandle, ProtoInput.ProtoHookIDs.XinputHookID);
 
+			if (player.IsDInput) ProtoInput.protoInput.SetDinputDeviceGUID(instanceHandle, player.GamepadGuid);
+			if (gen.ProtoInput.DinputDeviceHook) ProtoInput.protoInput.InstallHook(instanceHandle, ProtoInput.ProtoHookIDs.DinputOrderHookID);
+
 			if (gen.ProtoInput.RawInputFilter) ProtoInput.protoInput.EnableMessageFilter(instanceHandle, ProtoInput.ProtoMessageFilterIDs.RawInputFilterID);
 			if (gen.ProtoInput.MouseMoveFilter) ProtoInput.protoInput.EnableMessageFilter(instanceHandle, ProtoInput.ProtoMessageFilterIDs.MouseMoveFilterID);
 			if (gen.ProtoInput.MouseActivateFilter) ProtoInput.protoInput.EnableMessageFilter(instanceHandle, ProtoInput.ProtoMessageFilterIDs.MouseActivateFilterID);

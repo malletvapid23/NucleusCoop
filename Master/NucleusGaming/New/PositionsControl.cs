@@ -321,7 +321,7 @@ namespace Nucleus.Coop
 
             // Using OpenXinput with more than 4 players means we can use more than 4 xinput controllers
            
-            if (g.Hook.DInputEnabled || g.Hook.XInputReroute)// || (g.ProtoInput.XinputHook && (g.ProtoInput.UseDinputRedirection || g.ProtoInput.UseOpenXinput)))
+            if (g.Hook.DInputEnabled || g.Hook.XInputReroute || g.ProtoInput.DinputDeviceHook)
             {
                 
                 IList<DeviceInstance> devices = dinput.GetDevices(DeviceClass.GameControl /*SlimDX.DirectInput.DeviceType.Gamepad*/, DeviceEnumerationFlags.AllDevices);
@@ -419,7 +419,7 @@ namespace Nucleus.Coop
 
             }
 
-            if ((g.Hook.XInputEnabled && !g.Hook.XInputReroute) || g.ProtoInput.XinputHook)
+            if ((g.Hook.XInputEnabled && !g.Hook.XInputReroute && !g.ProtoInput.DinputDeviceHook) || g.ProtoInput.XinputHook)
             {
                 // XInput is only really enabled inside Nucleus Coop when
                 // we have 4 or less players, else we need to force DirectInput to grab everything
