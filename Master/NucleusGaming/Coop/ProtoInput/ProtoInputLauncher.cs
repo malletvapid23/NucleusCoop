@@ -109,6 +109,7 @@ namespace Nucleus.Gaming.Coop.ProtoInput
 			if (gen.ProtoInput.XinputHook) ProtoInput.protoInput.InstallHook(instanceHandle, ProtoInput.ProtoHookIDs.XinputHookID);
 
 			if (player.IsDInput) ProtoInput.protoInput.SetDinputDeviceGUID(instanceHandle, player.GamepadGuid);
+			if (gen.ProtoInput.DinputHookAlsoHooksGetDeviceState) ProtoInput.protoInput.SetDinputHookAlsoHooksGetDeviceState(instanceHandle, true);
 			if (gen.ProtoInput.DinputDeviceHook) ProtoInput.protoInput.InstallHook(instanceHandle, ProtoInput.ProtoHookIDs.DinputOrderHookID);
 
 			if (gen.ProtoInput.RawInputFilter) ProtoInput.protoInput.EnableMessageFilter(instanceHandle, ProtoInput.ProtoMessageFilterIDs.RawInputFilterID);

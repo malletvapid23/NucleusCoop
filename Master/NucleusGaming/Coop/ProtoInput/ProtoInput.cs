@@ -167,6 +167,9 @@ namespace Nucleus.Gaming.Coop.ProtoInput
 				byte Data4g,
 				byte Data4h);
 
+			[DllImport("ProtoInputLoader32.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
+			public static extern void DinputHookAlsoHooksGetDeviceState(uint instanceHandle, bool enable);
+
 			[DllImport("ProtoInputUtilDynamic32.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
 			public static extern uint LockInput(bool lockInput);
 
@@ -280,6 +283,9 @@ namespace Nucleus.Gaming.Coop.ProtoInput
 				byte Data4f,
 				byte Data4g,
 				byte Data4h);
+
+			[DllImport("ProtoInputLoader64.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
+			public static extern void DinputHookAlsoHooksGetDeviceState(uint instanceHandle, bool enable);
 
 			[DllImport("ProtoInputUtilDynamic64.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
 			public static extern uint LockInput(bool lockInput);
@@ -615,6 +621,14 @@ namespace Nucleus.Gaming.Coop.ProtoInput
 				(ushort)((a[5] << 8) | a[4]),
 				(ushort)((a[7] << 8) | a[6]),
 				a[8], a[9], a[10], a[11], a[12], a[13], a[14], a[15]);
+		}
+
+		public void SetDinputHookAlsoHooksGetDeviceState(uint instanceHandle, bool enable)
+		{
+			if (IntPtr.Size == 4)
+				ProtoInput32.DinputHookAlsoHooksGetDeviceState(instanceHandle, enable);
+			else
+				ProtoInput64.DinputHookAlsoHooksGetDeviceState(instanceHandle, enable);
 		}
 
 		public bool GetTaskbarAutohide()

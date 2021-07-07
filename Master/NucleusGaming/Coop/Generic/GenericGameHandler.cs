@@ -4912,7 +4912,7 @@ namespace Nucleus.Gaming
                      gen.ProtoInput.InjectRuntime_EasyHookStealthMethod ||
                      gen.ProtoInput.InjectRuntime_RemoteLoadMethod))
                 {
-	                Log("Injecting ProtoInput at runtime");
+	                Log("Injecting ProtoInput at runtime into pid " + (uint)proc.Id);
 
 	                ProtoInputLauncher.InjectRuntime(
 		                gen.ProtoInput.InjectRuntime_EasyHookMethod,
