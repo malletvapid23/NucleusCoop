@@ -22,17 +22,16 @@ namespace Nucleus.Gaming.Coop.ProtoInput
 			GenericGameInfo gen,
 			PlayerInfo player,
 			out uint pid,
+			IntPtr environment,
 			int mouseHandle = -1,
 			int keyboardHandle = -1,
-			int controllerIndex = 0)
+			int controllerIndex = 0
+			)
 		{
-			//TODO: nucleus environment with proto input startup
-
 			if (!dllFolderPath.EndsWith("\\"))
 				dllFolderPath += "\\";
 
-			uint instanceHandle = ProtoInput.protoInput.EasyHookInjectStartup(exePath, commandLine, 0, dllFolderPath, out pid);
-
+			uint instanceHandle = ProtoInput.protoInput.EasyHookInjectStartup(exePath, commandLine, 0, dllFolderPath, out pid, environment);
 
 			if (instanceHandle == 0)
 			{

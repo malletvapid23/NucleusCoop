@@ -3740,10 +3740,66 @@ namespace Nucleus.Gaming
                         if (gen.ProtoInput.InjectStartup)
 						{
                             Log("Starting game with ProtoInput");
+                            
+                            IntPtr envPtr = IntPtr.Zero;
+
+                            if (gen.UseNucleusEnvironment)
+                            {
+                                Log("Setting up Nucleus environment");
+                                var sb = new StringBuilder();
+                                IDictionary envVars = Environment.GetEnvironmentVariables();
+                                //var username = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile).Replace(@"C:\Users\", "");
+                                string username = WindowsIdentity.GetCurrent().Name.Split('\\')[1];
+                                envVars["USERPROFILE"] = $@"{NucleusEnvironmentRoot}\NucleusCoop\{player.Nickname}";
+                                envVars["HOMEPATH"] = $@"\Users\{username}\NucleusCoop\{player.Nickname}";
+                                envVars["APPDATA"] = $@"{NucleusEnvironmentRoot}\NucleusCoop\{player.Nickname}\AppData\Roaming";
+                                envVars["LOCALAPPDATA"] = $@"{NucleusEnvironmentRoot}\NucleusCoop\{player.Nickname}\AppData\Local";
+
+                                //Some games will crash if the directories don't exist
+                                Directory.CreateDirectory($@"{NucleusEnvironmentRoot}\NucleusCoop");
+                                Directory.CreateDirectory(envVars["USERPROFILE"].ToString());
+                                Directory.CreateDirectory(Path.Combine(envVars["USERPROFILE"].ToString(), "Documents"));
+                                Directory.CreateDirectory(envVars["APPDATA"].ToString());
+                                Directory.CreateDirectory(envVars["LOCALAPPDATA"].ToString());
+                                Directory.CreateDirectory(Path.GetDirectoryName(DocumentsRoot) + $@"\NucleusCoop\{player.Nickname}\Documents");
+
+                                if (gen.DocumentsConfigPath?.Length > 0 || gen.DocumentsSavePath?.Length > 0)
+                                {
+                                    if (!File.Exists(Path.Combine(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location), @"utils\backup\User Shell Folders.reg")))
+                                    {
+                                        //string mydocPath = key.GetValue("Personal").ToString();
+                                        ExportRegistry(@"HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders", Path.Combine(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location), @"utils\backup\User Shell Folders.reg"));
+                                    }
+
+                                    RegistryKey dkey = Registry.CurrentUser.OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders", true);
+                                    dkey.SetValue("Personal", Path.GetDirectoryName(DocumentsRoot) + $@"\NucleusCoop\{player.Nickname}\Documents", (RegistryValueKind)(int)RegType.ExpandString);
+                                }
+
+                                foreach (object envVarKey in envVars.Keys)
+                                {
+                                    if (envVarKey != null)
+                                    {
+                                        string key = envVarKey.ToString();
+                                        string value = envVars[envVarKey].ToString();
+
+                                        sb.Append(key);
+                                        sb.Append("=");
+                                        sb.Append(value);
+                                        sb.Append("\0");
+                                    }
+                                }
+
+                                sb.Append("\0");
+
+                                byte[] envBytes = Encoding.Unicode.GetBytes(sb.ToString());
+                                envPtr = Marshal.AllocHGlobal(envBytes.Length);
+                                Marshal.Copy(envBytes, 0, envPtr, envBytes.Length);
+
+                            }
 
                             ProtoInputLauncher.InjectStartup(exePath, 
-	                            startArgs, 0, nucleusRootFolder, i + 1, gen, player, out uint pid,
-	                            (player.IsRawMouse ? (int)player.RawMouseDeviceHandle : -1),
+	                            startArgs, 0, nucleusRootFolder, i + 1, gen, player, out uint pid, envPtr,
+                                (player.IsRawMouse ? (int)player.RawMouseDeviceHandle : -1),
 	                            (player.IsRawKeyboard ? (int)player.RawKeyboardDeviceHandle : -1),
 	                            (player.IsRawMouse || player.IsRawKeyboard) ? 0 : (player.GamepadId+1));
 

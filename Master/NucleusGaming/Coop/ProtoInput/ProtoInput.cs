@@ -81,7 +81,7 @@ namespace Nucleus.Gaming.Coop.ProtoInput
 			public static extern uint EasyHookStealthInjectRuntime(uint pid, string dllFolderPath);
 
 			[DllImport("ProtoInputLoader32.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
-			public static extern uint EasyHookInjectStartup(string exePath, string commandLine, uint processCreationFlags, string dllFolderPath, out uint pid);
+			public static extern uint EasyHookInjectStartup(string exePath, string commandLine, uint processCreationFlags, string dllFolderPath, out uint pid, IntPtr environment);
 
 			[DllImport("ProtoInputLoader32.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
 			public static extern void InstallHook(uint instanceHandle, ProtoHookIDs hookID);
@@ -198,7 +198,7 @@ namespace Nucleus.Gaming.Coop.ProtoInput
 			public static extern uint EasyHookStealthInjectRuntime(uint pid, string dllFolderPath);
 
 			[DllImport("ProtoInputLoader64.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
-			public static extern uint EasyHookInjectStartup(string exePath, string commandLine, uint processCreationFlags, string dllFolderPath, out uint pid);
+			public static extern uint EasyHookInjectStartup(string exePath, string commandLine, uint processCreationFlags, string dllFolderPath, out uint pid, IntPtr environment);
 
 			[DllImport("ProtoInputLoader64.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
 			public static extern void InstallHook(uint instanceHandle, ProtoHookIDs hookID);
@@ -365,12 +365,12 @@ namespace Nucleus.Gaming.Coop.ProtoInput
 				return ProtoInput64.EasyHookStealthInjectRuntime(pid, dllFolderPath);
 		}
 
-		public uint EasyHookInjectStartup(string exePath, string commandLine, uint processCreationFlags, string dllFolderPath, out uint pid)
+		public uint EasyHookInjectStartup(string exePath, string commandLine, uint processCreationFlags, string dllFolderPath, out uint pid, IntPtr environment)
 		{
 			if (IntPtr.Size == 4)
-				return ProtoInput32.EasyHookInjectStartup(exePath, commandLine, processCreationFlags, dllFolderPath, out pid);
+				return ProtoInput32.EasyHookInjectStartup(exePath, commandLine, processCreationFlags, dllFolderPath, out pid, environment);
 			else
-				return ProtoInput64.EasyHookInjectStartup(exePath, commandLine, processCreationFlags, dllFolderPath, out pid);
+				return ProtoInput64.EasyHookInjectStartup(exePath, commandLine, processCreationFlags, dllFolderPath, out pid, environment);
 		}
 		
 		public void InstallHook(uint instanceHandle, ProtoHookIDs hookID)
