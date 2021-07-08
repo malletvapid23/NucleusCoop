@@ -1213,13 +1213,15 @@ namespace Nucleus.Gaming
 
                 if (hasKeyboardPlayer)
                 {
+	                bool IsKeyboard(PlayerInfo p) => p.IsRawKeyboard || p.IsRawMouse || p.IsKeyboardPlayer;
+
                     if (gen.KeyboardPlayerFirst)
                     {
-                        players.Sort((x, y) => y.IsKeyboardPlayer.CompareTo(x.IsKeyboardPlayer));
+                        players.Sort((x, y) => IsKeyboard(y).CompareTo(IsKeyboard(x)));
                     }
                     else
                     {
-                        players.Sort((x, y) => x.IsKeyboardPlayer.CompareTo(y.IsKeyboardPlayer));
+                        players.Sort((x, y) => IsKeyboard(x).CompareTo(IsKeyboard(y)));
                     }
                 }
             }
