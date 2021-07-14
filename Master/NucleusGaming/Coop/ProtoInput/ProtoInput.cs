@@ -26,6 +26,7 @@ namespace Nucleus.Gaming.Coop.ProtoInput
 			public uint RenameHandlesHookID = (uint)ProtoHookIDs.RenameHandlesHookID;
 			public uint XinputHookID = (uint)ProtoHookIDs.XinputHookID;
 			public uint DinputOrderHookID = (uint)ProtoHookIDs.DinputOrderHookID;
+			public uint SetWindowPosHookID = (uint)ProtoHookIDs.SetWindowPosHookID;
 
 			public uint RawInputFilterID = (uint)ProtoMessageFilterIDs.RawInputFilterID;
 			public uint MouseMoveFilterID = (uint)ProtoMessageFilterIDs.MouseMoveFilterID;
@@ -54,7 +55,8 @@ namespace Nucleus.Gaming.Coop.ProtoInput
 			FocusHooksHookID,
 			RenameHandlesHookID,
 			XinputHookID,
-			DinputOrderHookID
+			DinputOrderHookID,
+			SetWindowPosHookID
 		};
 
 		public enum ProtoMessageFilterIDs : uint
@@ -169,6 +171,9 @@ namespace Nucleus.Gaming.Coop.ProtoInput
 
 			[DllImport("ProtoInputLoader32.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
 			public static extern void DinputHookAlsoHooksGetDeviceState(uint instanceHandle, bool enable);
+
+			[DllImport("ProtoInputLoader32.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
+			public static extern void SetSetWindowPosSettings(uint instanceHandle, int posx, int posy, int width, int height);
 
 			[DllImport("ProtoInputUtilDynamic32.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
 			public static extern uint LockInput(bool lockInput);
@@ -286,6 +291,9 @@ namespace Nucleus.Gaming.Coop.ProtoInput
 
 			[DllImport("ProtoInputLoader64.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
 			public static extern void DinputHookAlsoHooksGetDeviceState(uint instanceHandle, bool enable);
+
+			[DllImport("ProtoInputLoader64.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
+			public static extern void SetSetWindowPosSettings(uint instanceHandle, int posx, int posy, int width, int height);
 
 			[DllImport("ProtoInputUtilDynamic64.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
 			public static extern uint LockInput(bool lockInput);
@@ -629,6 +637,14 @@ namespace Nucleus.Gaming.Coop.ProtoInput
 				ProtoInput32.DinputHookAlsoHooksGetDeviceState(instanceHandle, enable);
 			else
 				ProtoInput64.DinputHookAlsoHooksGetDeviceState(instanceHandle, enable);
+		}
+
+		public void SetSetWindowPosSettings(uint instanceHandle, int posx, int posy, int width, int height)
+		{
+			if (IntPtr.Size == 4)
+				ProtoInput32.SetSetWindowPosSettings(instanceHandle, posx, posy, width, height);
+			else
+				ProtoInput64.SetSetWindowPosSettings(instanceHandle, posx, posy, width, height);
 		}
 
 		public bool GetTaskbarAutohide()

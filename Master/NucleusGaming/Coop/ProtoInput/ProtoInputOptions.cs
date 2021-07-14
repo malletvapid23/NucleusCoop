@@ -28,6 +28,7 @@ namespace Nucleus.Gaming.Coop.ProtoInput
 		public bool RenameHandlesHook;
 		public bool XinputHook;
 		public bool DinputDeviceHook;
+		public bool SetWindowPosHook;
 
 		public bool RawInputFilter;
 		public bool MouseMoveFilter;
