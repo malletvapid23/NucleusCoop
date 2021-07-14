@@ -102,9 +102,7 @@ namespace Nucleus.Gaming.Coop.ProtoInput
 			if (gen.ProtoInput.ClipCursorHook) ProtoInput.protoInput.InstallHook(instanceHandle, ProtoInput.ProtoHookIDs.ClipCursorHookID);
 			if (gen.ProtoInput.FocusHooks) ProtoInput.protoInput.InstallHook(instanceHandle, ProtoInput.ProtoHookIDs.FocusHooksHookID);
 			if (gen.ProtoInput.RenameHandlesHook) ProtoInput.protoInput.InstallHook(instanceHandle, ProtoInput.ProtoHookIDs.RenameHandlesHookID);
-
-			ProtoInput.protoInput.SetSetWindowPosSettings(instanceHandle, player.MonitorBounds.X, player.MonitorBounds.Y, player.MonitorBounds.Width, player.MonitorBounds.Height);
-			if (gen.ProtoInput.SetWindowPosHook) ProtoInput.protoInput.InstallHook(instanceHandle, ProtoInput.ProtoHookIDs.SetWindowPosHookID);
+			if (gen.ProtoInput.BlockRawInputHook) ProtoInput.protoInput.InstallHook(instanceHandle, ProtoInput.ProtoHookIDs.BlockRawInputHookID);
 
 			ProtoInput.protoInput.SetUseOpenXinput(instanceHandle, gen.ProtoInput.UseOpenXinput);
 			ProtoInput.protoInput.SetUseDinputRedirection(instanceHandle, gen.ProtoInput.UseDinputRedirection);
@@ -113,6 +111,9 @@ namespace Nucleus.Gaming.Coop.ProtoInput
 			if (player.IsDInput) ProtoInput.protoInput.SetDinputDeviceGUID(instanceHandle, player.GamepadGuid);
 			if (gen.ProtoInput.DinputHookAlsoHooksGetDeviceState) ProtoInput.protoInput.SetDinputHookAlsoHooksGetDeviceState(instanceHandle, true);
 			if (gen.ProtoInput.DinputDeviceHook) ProtoInput.protoInput.InstallHook(instanceHandle, ProtoInput.ProtoHookIDs.DinputOrderHookID);
+
+			ProtoInput.protoInput.SetSetWindowPosSettings(instanceHandle, player.MonitorBounds.X, player.MonitorBounds.Y, player.MonitorBounds.Width, player.MonitorBounds.Height);
+			if (gen.ProtoInput.SetWindowPosHook) ProtoInput.protoInput.InstallHook(instanceHandle, ProtoInput.ProtoHookIDs.SetWindowPosHookID);
 
 			if (gen.ProtoInput.RawInputFilter) ProtoInput.protoInput.EnableMessageFilter(instanceHandle, ProtoInput.ProtoMessageFilterIDs.RawInputFilterID);
 			if (gen.ProtoInput.MouseMoveFilter) ProtoInput.protoInput.EnableMessageFilter(instanceHandle, ProtoInput.ProtoMessageFilterIDs.MouseMoveFilterID);

@@ -27,6 +27,7 @@ namespace Nucleus.Gaming.Coop.ProtoInput
 			public uint XinputHookID = (uint)ProtoHookIDs.XinputHookID;
 			public uint DinputOrderHookID = (uint)ProtoHookIDs.DinputOrderHookID;
 			public uint SetWindowPosHookID = (uint)ProtoHookIDs.SetWindowPosHookID;
+			public uint BlockRawInputHookID = (uint)ProtoHookIDs.BlockRawInputHookID;
 
 			public uint RawInputFilterID = (uint)ProtoMessageFilterIDs.RawInputFilterID;
 			public uint MouseMoveFilterID = (uint)ProtoMessageFilterIDs.MouseMoveFilterID;
@@ -56,7 +57,8 @@ namespace Nucleus.Gaming.Coop.ProtoInput
 			RenameHandlesHookID,
 			XinputHookID,
 			DinputOrderHookID,
-			SetWindowPosHookID
+			SetWindowPosHookID,
+			BlockRawInputHookID
 		};
 
 		public enum ProtoMessageFilterIDs : uint
