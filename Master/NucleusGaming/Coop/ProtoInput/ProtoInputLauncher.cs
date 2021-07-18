@@ -103,6 +103,10 @@ namespace Nucleus.Gaming.Coop.ProtoInput
 			if (gen.ProtoInput.FocusHooks) ProtoInput.protoInput.InstallHook(instanceHandle, ProtoInput.ProtoHookIDs.FocusHooksHookID);
 			if (gen.ProtoInput.RenameHandlesHook) ProtoInput.protoInput.InstallHook(instanceHandle, ProtoInput.ProtoHookIDs.RenameHandlesHookID);
 			if (gen.ProtoInput.BlockRawInputHook) ProtoInput.protoInput.InstallHook(instanceHandle, ProtoInput.ProtoHookIDs.BlockRawInputHookID);
+			if (gen.ProtoInput.FindWindowHook) ProtoInput.protoInput.InstallHook(instanceHandle, ProtoInput.ProtoHookIDs.FindWindowHookID);
+
+			ProtoInput.protoInput.SetCreateSingleHIDName(instanceHandle, player.RawHID);
+			if (gen.ProtoInput.CreateSingleHIDHook) ProtoInput.protoInput.InstallHook(instanceHandle, ProtoInput.ProtoHookIDs.CreateSingleHIDHookID);
 
 			ProtoInput.protoInput.SetUseOpenXinput(instanceHandle, gen.ProtoInput.UseOpenXinput);
 			ProtoInput.protoInput.SetUseDinputRedirection(instanceHandle, gen.ProtoInput.UseDinputRedirection);

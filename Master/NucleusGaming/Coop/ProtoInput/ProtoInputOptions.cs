@@ -30,6 +30,8 @@ namespace Nucleus.Gaming.Coop.ProtoInput
 		public bool DinputDeviceHook;
 		public bool SetWindowPosHook;
 		public bool BlockRawInputHook;
+		public bool FindWindowHook;
+		public bool CreateSingleHIDHook;
 
 		public bool RawInputFilter;
 		public bool MouseMoveFilter;

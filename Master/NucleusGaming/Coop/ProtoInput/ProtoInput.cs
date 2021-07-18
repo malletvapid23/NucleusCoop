@@ -28,6 +28,8 @@ namespace Nucleus.Gaming.Coop.ProtoInput
 			public uint DinputOrderHookID = (uint)ProtoHookIDs.DinputOrderHookID;
 			public uint SetWindowPosHookID = (uint)ProtoHookIDs.SetWindowPosHookID;
 			public uint BlockRawInputHookID = (uint)ProtoHookIDs.BlockRawInputHookID;
+			public uint FindWindowHookID = (uint)ProtoHookIDs.FindWindowHookID;
+			public uint CreateSingleHIDHookID = (uint)ProtoHookIDs.CreateSingleHIDHookID;
 
 			public uint RawInputFilterID = (uint)ProtoMessageFilterIDs.RawInputFilterID;
 			public uint MouseMoveFilterID = (uint)ProtoMessageFilterIDs.MouseMoveFilterID;
@@ -58,7 +60,9 @@ namespace Nucleus.Gaming.Coop.ProtoInput
 			XinputHookID,
 			DinputOrderHookID,
 			SetWindowPosHookID,
-			BlockRawInputHookID
+			BlockRawInputHookID,
+			FindWindowHookID,
+			CreateSingleHIDHookID
 		};
 
 		public enum ProtoMessageFilterIDs : uint
@@ -176,6 +180,9 @@ namespace Nucleus.Gaming.Coop.ProtoInput
 
 			[DllImport("ProtoInputLoader32.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
 			public static extern void SetSetWindowPosSettings(uint instanceHandle, int posx, int posy, int width, int height);
+
+			[DllImport("ProtoInputLoader32.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
+			public static extern void SetCreateSingleHIDName(uint instanceHandle, string name);
 
 			[DllImport("ProtoInputUtilDynamic32.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
 			public static extern uint LockInput(bool lockInput);
@@ -296,6 +303,9 @@ namespace Nucleus.Gaming.Coop.ProtoInput
 
 			[DllImport("ProtoInputLoader64.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
 			public static extern void SetSetWindowPosSettings(uint instanceHandle, int posx, int posy, int width, int height);
+
+			[DllImport("ProtoInputLoader32.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
+			public static extern void SetCreateSingleHIDName(uint instanceHandle, string name);
 
 			[DllImport("ProtoInputUtilDynamic64.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
 			public static extern uint LockInput(bool lockInput);
@@ -647,6 +657,14 @@ namespace Nucleus.Gaming.Coop.ProtoInput
 				ProtoInput32.SetSetWindowPosSettings(instanceHandle, posx, posy, width, height);
 			else
 				ProtoInput64.SetSetWindowPosSettings(instanceHandle, posx, posy, width, height);
+		}
+
+		public void SetCreateSingleHIDName(uint instanceHandle, string name)
+		{
+			if (IntPtr.Size == 4)
+				ProtoInput32.SetCreateSingleHIDName(instanceHandle, name);
+			else
+				ProtoInput64.SetCreateSingleHIDName(instanceHandle, name);
 		}
 
 		public bool GetTaskbarAutohide()
