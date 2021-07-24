@@ -417,7 +417,7 @@ namespace Nucleus.Coop
                 "\n---------------------------------------------------------------------" +
                 "\nOriginal NucleusCoop Project: Lucas Assis (lucasassislar)" +
                 "\nMod: ZeroFox" +
-                "\nMultiple keyboards/mice & hooks: Ilyaki" +
+                "\nProto Input hooks, multiple keyboards/mice: Ilyaki" +
                 "\nWebsite & handler API: r-mach" +
                 "\n" +
                 "\nAdditional credits to all original developers of third party utilities Nucleus uses:" +
