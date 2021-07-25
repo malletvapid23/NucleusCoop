@@ -156,15 +156,24 @@ namespace Nucleus.Gaming.Windows
                             monDisplayDevice.cb = Marshal.SizeOf(monDisplayDevice);
                             uint monitorNum = 0;
                             EnumDisplayDevices(displayDevice.DeviceName, monitorNum, ref monDisplayDevice, EDD_GET_DEVICE_INTERFACE_NAME);
-                            
-                                deviceID = monDisplayDevice.DeviceID;
-                                deviceString = monDisplayDevice.DeviceString;
-                                monitorID = deviceID.Substring(deviceID.IndexOf("DISPLAY#") + 8, 7);
-                                Int32.TryParse(info.DeviceName.Substring(info.DeviceName.IndexOf("DISPLAY") + 7), out displayIndex);
-                                Int32.TryParse(monDisplayDevice.DeviceName.Substring(monDisplayDevice.DeviceName.IndexOf("Monitor") + 7), out monitorIndex);
+                            try
+                            {
+	                            deviceID = monDisplayDevice.DeviceID;
+	                            deviceString = monDisplayDevice.DeviceString;
+	                            monitorID = deviceID.Substring(deviceID.IndexOf("DISPLAY#") + 8, 7);
+	                            Int32.TryParse(info.DeviceName.Substring(info.DeviceName.IndexOf("DISPLAY") + 7),
+		                            out displayIndex);
+	                            Int32.TryParse(
+		                            monDisplayDevice.DeviceName.Substring(
+			                            monDisplayDevice.DeviceName.IndexOf("Monitor") + 7), out monitorIndex);
 
-                                monitorNum++;
-                            break;
+	                            monitorNum++;
+	                            break;
+                            }
+                            catch (Exception)
+                            {
+
+                            }
                         }
                         deviceIndex++;
                     }
