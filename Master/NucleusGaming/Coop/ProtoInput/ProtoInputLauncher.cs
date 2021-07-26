@@ -99,7 +99,10 @@ namespace Nucleus.Gaming.Coop.ProtoInput
 			if (gen.ProtoInput.GetAsyncKeyStateHook) ProtoInput.protoInput.InstallHook(instanceHandle, ProtoInput.ProtoHookIDs.GetAsyncKeyStateHookID);
 			if (gen.ProtoInput.GetKeyboardStateHook) ProtoInput.protoInput.InstallHook(instanceHandle, ProtoInput.ProtoHookIDs.GetKeyboardStateHookID);
 			if (gen.ProtoInput.CursorVisibilityHook) ProtoInput.protoInput.InstallHook(instanceHandle, ProtoInput.ProtoHookIDs.CursorVisibilityStateHookID);
+			
+			ProtoInput.protoInput.SetCursorClipOptions(instanceHandle, gen.ProtoInput.ClipCursorHookCreatesFakeClip);
 			if (gen.ProtoInput.ClipCursorHook) ProtoInput.protoInput.InstallHook(instanceHandle, ProtoInput.ProtoHookIDs.ClipCursorHookID);
+			
 			if (gen.ProtoInput.FocusHooks) ProtoInput.protoInput.InstallHook(instanceHandle, ProtoInput.ProtoHookIDs.FocusHooksHookID);
 			if (gen.ProtoInput.RenameHandlesHook) ProtoInput.protoInput.InstallHook(instanceHandle, ProtoInput.ProtoHookIDs.RenameHandlesHookID);
 			if (gen.ProtoInput.BlockRawInputHook) ProtoInput.protoInput.InstallHook(instanceHandle, ProtoInput.ProtoHookIDs.BlockRawInputHookID);
@@ -152,6 +155,7 @@ namespace Nucleus.Gaming.Coop.ProtoInput
 									  gen.ProtoInput.FocusLoop_WM_MOUSEACTIVATE);
 
 			ProtoInput.protoInput.SetDrawFakeCursor(instanceHandle, gen.ProtoInput.DrawFakeCursor);
+			ProtoInput.protoInput.AllowFakeCursorOutOfBounds(instanceHandle, gen.ProtoInput.AllowFakeCursorOutOfBounds);
 
 			if (gen.ProtoInput.RenameHandles != null)
 			{

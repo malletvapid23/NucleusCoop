@@ -24,6 +24,7 @@ namespace Nucleus.Gaming.Coop.ProtoInput
 		public bool GetKeyboardStateHook;
 		public bool CursorVisibilityHook;
 		public bool ClipCursorHook;
+		public bool ClipCursorHookCreatesFakeClip;
 		public bool FocusHooks;
 		public bool RenameHandlesHook;
 		public bool XinputHook;
@@ -61,6 +62,7 @@ namespace Nucleus.Gaming.Coop.ProtoInput
 		public bool FocusLoop_WM_MOUSEACTIVATE;
 
 		public bool DrawFakeCursor;
+		public bool AllowFakeCursorOutOfBounds;
 
 		public bool UseDinputRedirection;
 

@@ -184,6 +184,12 @@ namespace Nucleus.Gaming.Coop.ProtoInput
 			[DllImport("ProtoInputLoader32.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
 			public static extern void SetCreateSingleHIDName(uint instanceHandle, string name);
 
+			[DllImport("ProtoInputLoader32.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
+			public static extern void SetCursorClipOptions(uint instanceHandle, bool useFakeClipCursor);
+
+			[DllImport("ProtoInputLoader32.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
+			public static extern void AllowFakeCursorOutOfBounds(uint instanceHandle, bool allowOutOfBounds);
+
 			[DllImport("ProtoInputUtilDynamic32.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
 			public static extern uint LockInput(bool lockInput);
 
@@ -304,8 +310,14 @@ namespace Nucleus.Gaming.Coop.ProtoInput
 			[DllImport("ProtoInputLoader64.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
 			public static extern void SetSetWindowPosSettings(uint instanceHandle, int posx, int posy, int width, int height);
 
-			[DllImport("ProtoInputLoader32.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
+			[DllImport("ProtoInputLoader64.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
 			public static extern void SetCreateSingleHIDName(uint instanceHandle, string name);
+
+			[DllImport("ProtoInputLoader64.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
+			public static extern void SetCursorClipOptions(uint instanceHandle, bool useFakeClipCursor);
+
+			[DllImport("ProtoInputLoader64.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
+			public static extern void AllowFakeCursorOutOfBounds(uint instanceHandle, bool allowOutOfBounds);
 
 			[DllImport("ProtoInputUtilDynamic64.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
 			public static extern uint LockInput(bool lockInput);
@@ -665,6 +677,22 @@ namespace Nucleus.Gaming.Coop.ProtoInput
 				ProtoInput32.SetCreateSingleHIDName(instanceHandle, name);
 			else
 				ProtoInput64.SetCreateSingleHIDName(instanceHandle, name);
+		}
+		
+		public void SetCursorClipOptions(uint instanceHandle, bool useFakeClipCursor)
+		{
+			if (IntPtr.Size == 4)
+				ProtoInput32.SetCursorClipOptions(instanceHandle, useFakeClipCursor);
+			else
+				ProtoInput64.SetCursorClipOptions(instanceHandle, useFakeClipCursor);
+		}
+
+		public void AllowFakeCursorOutOfBounds(uint instanceHandle, bool allowOutOfBounds)
+		{
+			if (IntPtr.Size == 4)
+				ProtoInput32.AllowFakeCursorOutOfBounds(instanceHandle, allowOutOfBounds);
+			else
+				ProtoInput64.AllowFakeCursorOutOfBounds(instanceHandle, allowOutOfBounds);
 		}
 
 		public bool GetTaskbarAutohide()
