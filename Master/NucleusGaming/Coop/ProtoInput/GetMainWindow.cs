@@ -51,9 +51,9 @@ namespace Nucleus.Gaming.Coop.ProtoInput
 			              &&
 			              IsWindowVisible(new HandleRef(dummyObject, handle))
 			              &&
-			              !GetWindowName(handle).Contains("ProtoInput")
+			              !(GetWindowName(handle)?.Contains("ProtoInput") ?? false)
 			              &&
-			              !GetWindowName(handle).Contains("Proto Input");
+			              !(GetWindowName(handle)?.Contains("Proto Input") ?? false);
 		}
 
 		private static bool EnumWindowsCallback(IntPtr handle, IntPtr extraParameter)

@@ -190,6 +190,9 @@ namespace Nucleus.Gaming.Coop.ProtoInput
 			[DllImport("ProtoInputLoader32.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
 			public static extern void AllowFakeCursorOutOfBounds(uint instanceHandle, bool allowOutOfBounds);
 
+			[DllImport("ProtoInputLoader32.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
+			public static extern void SetToggleFakeCursorVisibilityShortcut(uint instanceHandle, bool enabled, uint vkey);
+
 			[DllImport("ProtoInputUtilDynamic32.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
 			public static extern uint LockInput(bool lockInput);
 
@@ -280,7 +283,7 @@ namespace Nucleus.Gaming.Coop.ProtoInput
 			[DllImport("ProtoInputLoader64.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
 			public static extern void SetUseDinputRedirection(uint instanceHandle, bool useRedirection);
 
-			[DllImport("ProtoInputLoader32.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
+			[DllImport("ProtoInputLoader64.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
 			public static extern void SetUseOpenXinput(uint instanceHandle, bool useOpenXinput);
 
 			// Both of these functions require RenameHandlesHookHookID hook
@@ -318,6 +321,9 @@ namespace Nucleus.Gaming.Coop.ProtoInput
 
 			[DllImport("ProtoInputLoader64.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
 			public static extern void AllowFakeCursorOutOfBounds(uint instanceHandle, bool allowOutOfBounds);
+
+			[DllImport("ProtoInputLoader64.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
+			public static extern void SetToggleFakeCursorVisibilityShortcut(uint instanceHandle, bool enabled, uint vkey);
 
 			[DllImport("ProtoInputUtilDynamic64.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
 			public static extern uint LockInput(bool lockInput);
@@ -685,6 +691,14 @@ namespace Nucleus.Gaming.Coop.ProtoInput
 				ProtoInput32.SetCursorClipOptions(instanceHandle, useFakeClipCursor);
 			else
 				ProtoInput64.SetCursorClipOptions(instanceHandle, useFakeClipCursor);
+		}
+		
+		public void SetToggleFakeCursorVisibilityShortcut(uint instanceHandle, bool enabled, uint vkey)
+		{
+			if (IntPtr.Size == 4)
+				ProtoInput32.SetToggleFakeCursorVisibilityShortcut(instanceHandle, enabled, vkey);
+			else
+				ProtoInput64.SetToggleFakeCursorVisibilityShortcut(instanceHandle, enabled, vkey);
 		}
 
 		public void AllowFakeCursorOutOfBounds(uint instanceHandle, bool allowOutOfBounds)

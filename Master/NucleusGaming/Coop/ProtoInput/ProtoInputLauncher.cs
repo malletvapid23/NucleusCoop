@@ -156,6 +156,9 @@ namespace Nucleus.Gaming.Coop.ProtoInput
 
 			ProtoInput.protoInput.SetDrawFakeCursor(instanceHandle, gen.ProtoInput.DrawFakeCursor);
 			ProtoInput.protoInput.AllowFakeCursorOutOfBounds(instanceHandle, gen.ProtoInput.AllowFakeCursorOutOfBounds);
+			ProtoInput.protoInput.SetToggleFakeCursorVisibilityShortcut(instanceHandle,
+				gen.ProtoInput.EnableToggleFakeCursorVisibilityShortcut,
+				gen.ProtoInput.ToggleFakeCursorVisibilityShortcutVkey);
 
 			if (gen.ProtoInput.RenameHandles != null)
 			{

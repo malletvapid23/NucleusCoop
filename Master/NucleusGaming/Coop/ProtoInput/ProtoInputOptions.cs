@@ -63,6 +63,8 @@ namespace Nucleus.Gaming.Coop.ProtoInput
 
 		public bool DrawFakeCursor;
 		public bool AllowFakeCursorOutOfBounds;
+		public bool EnableToggleFakeCursorVisibilityShortcut;
+		public uint ToggleFakeCursorVisibilityShortcutVkey = 0x24; // VK_HOME
 
 		public bool UseDinputRedirection;
 
