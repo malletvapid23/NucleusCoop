@@ -155,7 +155,7 @@ namespace Nucleus.Gaming.Coop.ProtoInput
 									  gen.ProtoInput.FocusLoop_WM_MOUSEACTIVATE);
 
 			ProtoInput.protoInput.SetDrawFakeCursor(instanceHandle, gen.ProtoInput.DrawFakeCursor);
-			ProtoInput.protoInput.AllowFakeCursorOutOfBounds(instanceHandle, gen.ProtoInput.AllowFakeCursorOutOfBounds);
+			ProtoInput.protoInput.AllowFakeCursorOutOfBounds(instanceHandle, gen.ProtoInput.AllowFakeCursorOutOfBounds, gen.ProtoInput.ExtendFakeCursorBounds);
 			ProtoInput.protoInput.SetToggleFakeCursorVisibilityShortcut(instanceHandle,
 				gen.ProtoInput.EnableToggleFakeCursorVisibilityShortcut,
 				gen.ProtoInput.ToggleFakeCursorVisibilityShortcutVkey);

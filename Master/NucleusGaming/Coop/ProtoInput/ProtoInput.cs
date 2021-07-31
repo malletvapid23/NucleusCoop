@@ -188,7 +188,7 @@ namespace Nucleus.Gaming.Coop.ProtoInput
 			public static extern void SetCursorClipOptions(uint instanceHandle, bool useFakeClipCursor);
 
 			[DllImport("ProtoInputLoader32.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
-			public static extern void AllowFakeCursorOutOfBounds(uint instanceHandle, bool allowOutOfBounds);
+			public static extern void AllowFakeCursorOutOfBounds(uint instanceHandle, bool allowOutOfBounds, bool extendBounds);
 
 			[DllImport("ProtoInputLoader32.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
 			public static extern void SetToggleFakeCursorVisibilityShortcut(uint instanceHandle, bool enabled, uint vkey);
@@ -320,7 +320,7 @@ namespace Nucleus.Gaming.Coop.ProtoInput
 			public static extern void SetCursorClipOptions(uint instanceHandle, bool useFakeClipCursor);
 
 			[DllImport("ProtoInputLoader64.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
-			public static extern void AllowFakeCursorOutOfBounds(uint instanceHandle, bool allowOutOfBounds);
+			public static extern void AllowFakeCursorOutOfBounds(uint instanceHandle, bool allowOutOfBounds, bool extendBounds);
 
 			[DllImport("ProtoInputLoader64.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
 			public static extern void SetToggleFakeCursorVisibilityShortcut(uint instanceHandle, bool enabled, uint vkey);
@@ -701,12 +701,12 @@ namespace Nucleus.Gaming.Coop.ProtoInput
 				ProtoInput64.SetToggleFakeCursorVisibilityShortcut(instanceHandle, enabled, vkey);
 		}
 
-		public void AllowFakeCursorOutOfBounds(uint instanceHandle, bool allowOutOfBounds)
+		public void AllowFakeCursorOutOfBounds(uint instanceHandle, bool allowOutOfBounds, bool extendBounds)
 		{
 			if (IntPtr.Size == 4)
-				ProtoInput32.AllowFakeCursorOutOfBounds(instanceHandle, allowOutOfBounds);
+				ProtoInput32.AllowFakeCursorOutOfBounds(instanceHandle, allowOutOfBounds, extendBounds);
 			else
-				ProtoInput64.AllowFakeCursorOutOfBounds(instanceHandle, allowOutOfBounds);
+				ProtoInput64.AllowFakeCursorOutOfBounds(instanceHandle, allowOutOfBounds, extendBounds);
 		}
 
 		public bool GetTaskbarAutohide()
