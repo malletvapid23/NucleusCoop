@@ -110,6 +110,8 @@ namespace Nucleus.Gaming.Coop.ProtoInput
 
 			ProtoInput.protoInput.SetCreateSingleHIDName(instanceHandle, player.RawHID);
 			if (gen.ProtoInput.CreateSingleHIDHook) ProtoInput.protoInput.InstallHook(instanceHandle, ProtoInput.ProtoHookIDs.CreateSingleHIDHookID);
+			
+			if (gen.ProtoInput.SetWindowStyleHook) ProtoInput.protoInput.InstallHook(instanceHandle, ProtoInput.ProtoHookIDs.WindowStyleHookID);
 
 			ProtoInput.protoInput.SetUseOpenXinput(instanceHandle, gen.ProtoInput.UseOpenXinput);
 			ProtoInput.protoInput.SetUseDinputRedirection(instanceHandle, gen.ProtoInput.UseDinputRedirection);
