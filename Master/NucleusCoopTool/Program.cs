@@ -12,6 +12,9 @@ namespace Nucleus.Coop
         [STAThread]
         static void Main()
         {
+	        if (!StartChecks.StartCheck())
+		        return;
+
             // initialize DPIManager BEFORE setting 
             // the application to be DPI aware
             DPIManager.PreInitialize();
