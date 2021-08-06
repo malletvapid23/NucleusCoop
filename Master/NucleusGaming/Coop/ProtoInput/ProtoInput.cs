@@ -195,6 +195,9 @@ namespace Nucleus.Gaming.Coop.ProtoInput
 			[DllImport("ProtoInputLoader32.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
 			public static extern void SetToggleFakeCursorVisibilityShortcut(uint instanceHandle, bool enabled, uint vkey);
 
+			[DllImport("ProtoInputLoader32.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
+			public static extern void SetRawInputBypass(uint instanceHandle, bool enabled);
+
 			[DllImport("ProtoInputUtilDynamic32.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
 			public static extern uint LockInput(bool lockInput);
 
@@ -326,6 +329,9 @@ namespace Nucleus.Gaming.Coop.ProtoInput
 
 			[DllImport("ProtoInputLoader64.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
 			public static extern void SetToggleFakeCursorVisibilityShortcut(uint instanceHandle, bool enabled, uint vkey);
+
+			[DllImport("ProtoInputLoader64.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
+			public static extern void SetRawInputBypass(uint instanceHandle, bool enabled);
 
 			[DllImport("ProtoInputUtilDynamic64.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
 			public static extern uint LockInput(bool lockInput);
@@ -709,6 +715,14 @@ namespace Nucleus.Gaming.Coop.ProtoInput
 				ProtoInput32.AllowFakeCursorOutOfBounds(instanceHandle, allowOutOfBounds, extendBounds);
 			else
 				ProtoInput64.AllowFakeCursorOutOfBounds(instanceHandle, allowOutOfBounds, extendBounds);
+		}
+
+		public void SetRawInputBypass(uint instanceHandle, bool enableBypass)
+		{
+			if (IntPtr.Size == 4)
+				ProtoInput32.SetRawInputBypass(instanceHandle, enableBypass);
+			else
+				ProtoInput64.SetRawInputBypass(instanceHandle, enableBypass);
 		}
 
 		public bool GetTaskbarAutohide()

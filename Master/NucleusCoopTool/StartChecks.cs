@@ -20,6 +20,7 @@ namespace Nucleus.Coop
 
 			bool problematic = exePath.StartsWith(@"C:\Program Files\".ToLower()) ||
 			                   exePath.StartsWith(@"C:\Program Files (x86)\".ToLower()) ||
+			                   exePath.StartsWith(@"C:\Users\".ToLower()) ||
 			                   exePath.StartsWith(@"C:\Windows\".ToLower());
 
 			if (problematic)
@@ -29,6 +30,7 @@ namespace Nucleus.Coop
 								"Do NOT install in any of these folders:\n" +
 								"- A folder containing any game files\n" +
 								"- C:\\Program Files or C:\\Program Files (x86)\n" +
+								"- C:\\Users (including Documents, Desktop, or Downloads)\n" +
 								"- Any folder with security settings like C:\\Windows\n" +
 								"\n" +
 								"A good place is C:\\Nucleus\\NucleusCoop.exe";
