@@ -418,7 +418,13 @@ namespace Nucleus.Gaming.Coop.ProtoInput
 			else
 				return ProtoInput64.EasyHookInjectStartup(exePath, commandLine, processCreationFlags, dllFolderPath, out pid, environment);
 		}
-		
+
+		// JavaScript friendly version
+		public uint EasyHookInjectStartup(string exePath, string commandLine, uint processCreationFlags, string dllFolderPath)
+		{
+			return EasyHookInjectStartup(exePath, commandLine, processCreationFlags, dllFolderPath, out var pid, IntPtr.Zero); 
+		}
+
 		public void InstallHook(uint instanceHandle, ProtoHookIDs hookID)
 		{
 			if (IntPtr.Size == 4)
