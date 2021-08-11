@@ -506,6 +506,14 @@ namespace Nucleus.Gaming
             }
         }
 
+        public void SetProtoInputMultipleControllers(int controller1, int controller2, int controller3, int controller4)
+        {
+	        pInfo.ProtoController1 = controller1;
+	        pInfo.ProtoController2 = controller2;
+	        pInfo.ProtoController3 = controller3;
+	        pInfo.ProtoController4 = controller4;
+        }
+
         public void BackupFile(string filePath, bool overwrite)
         {
             if(pInfo.PlayerID == 0)

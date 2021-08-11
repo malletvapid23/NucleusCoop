@@ -3803,7 +3803,11 @@ namespace Nucleus.Gaming
 	                            startArgs, 0, nucleusRootFolder, i + 1, gen, player, out uint pid, envPtr,
                                 (player.IsRawMouse ? (int)player.RawMouseDeviceHandle : -1),
 	                            (player.IsRawKeyboard ? (int)player.RawKeyboardDeviceHandle : -1),
-	                            (player.IsRawMouse || player.IsRawKeyboard) ? 0 : (player.GamepadId+1));
+	                            (gen.ProtoInput.MultipleProtoControllers ? (player.ProtoController1) : ((player.IsRawMouse || player.IsRawKeyboard) ? 0 : player.GamepadId + 1)),
+	                            (gen.ProtoInput.MultipleProtoControllers ? player.ProtoController2 : 0),
+	                            (gen.ProtoInput.MultipleProtoControllers ? player.ProtoController3 : 0),
+	                            (gen.ProtoInput.MultipleProtoControllers ? player.ProtoController4 : 0)
+                                );
 
                             try
                             {
@@ -4983,7 +4987,11 @@ namespace Nucleus.Gaming
                         player,
 		                (player.IsRawMouse ? (int)player.RawMouseDeviceHandle : -1),
 		                (player.IsRawKeyboard ? (int)player.RawKeyboardDeviceHandle : -1),
-		                (player.IsRawMouse || player.IsRawKeyboard) ? 0 : (player.GamepadId + 1));
+		                (gen.ProtoInput.MultipleProtoControllers ? (player.ProtoController1) : ((player.IsRawMouse || player.IsRawKeyboard) ? 0 : player.GamepadId + 1)),
+						(gen.ProtoInput.MultipleProtoControllers ? player.ProtoController2 : 0),
+						(gen.ProtoInput.MultipleProtoControllers ? player.ProtoController3 : 0),
+		                (gen.ProtoInput.MultipleProtoControllers ? player.ProtoController4 : 0)
+	                );
                 }
 
                 if (gen.PromptAfterFirstInstance)

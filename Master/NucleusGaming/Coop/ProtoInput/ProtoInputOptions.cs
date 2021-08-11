@@ -72,6 +72,8 @@ namespace Nucleus.Gaming.Coop.ProtoInput
 
 		public bool UseOpenXinput;
 
+		public bool MultipleProtoControllers;
+
 		public bool DinputHookAlsoHooksGetDeviceState;
 
 		public bool FreezeExternalInputWhenInputNotLocked;

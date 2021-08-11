@@ -147,7 +147,7 @@ namespace Nucleus.Gaming.Coop.ProtoInput
 			public static extern void AddSelectedKeyboardHandle(uint instanceHandle, uint keyboardHandle);
 
 			[DllImport("ProtoInputLoader32.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
-			public static extern void SetControllerIndex(uint instanceHandle, uint controllerIndex);
+			public static extern void SetControllerIndex(uint instanceHandle, uint controllerIndex, uint controllerIndex2, uint controllerIndex3, uint controllerIndex4);
 
 			// This MUST be called before calling InstallHook on the Xinput hook
 			[DllImport("ProtoInputLoader32.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
@@ -282,7 +282,7 @@ namespace Nucleus.Gaming.Coop.ProtoInput
 			public static extern void AddSelectedKeyboardHandle(uint instanceHandle, uint keyboardHandle);
 
 			[DllImport("ProtoInputLoader64.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
-			public static extern void SetControllerIndex(uint instanceHandle, uint controllerIndex);
+			public static extern void SetControllerIndex(uint instanceHandle, uint controllerIndex, uint controllerIndex2, uint controllerIndex3, uint controllerIndex4);
 
 			// This MUST be called before calling InstallHook on the Xinput hook
 			[DllImport("ProtoInputLoader64.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
@@ -568,12 +568,12 @@ namespace Nucleus.Gaming.Coop.ProtoInput
 				ProtoInput64.AddSelectedKeyboardHandle(instanceHandle, keyboardHandle);
 		}
 
-		public void SetControllerIndex(uint instanceHandle, uint controllerIndex)
+		public void SetControllerIndex(uint instanceHandle, uint controllerIndex, uint controllerIndex2, uint controllerIndex3, uint controllerIndex4)
 		{
 			if (IntPtr.Size == 4)
-				ProtoInput32.SetControllerIndex(instanceHandle, controllerIndex);
+				ProtoInput32.SetControllerIndex(instanceHandle, controllerIndex, controllerIndex2, controllerIndex3, controllerIndex4);
 			else
-				ProtoInput64.SetControllerIndex(instanceHandle, controllerIndex);
+				ProtoInput64.SetControllerIndex(instanceHandle, controllerIndex, controllerIndex2, controllerIndex3, controllerIndex4);
 		}
 
 		/// <summary>

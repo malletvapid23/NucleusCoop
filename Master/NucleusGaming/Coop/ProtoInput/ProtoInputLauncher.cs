@@ -25,8 +25,11 @@ namespace Nucleus.Gaming.Coop.ProtoInput
 			IntPtr environment,
 			int mouseHandle = -1,
 			int keyboardHandle = -1,
-			int controllerIndex = 0
-			)
+			int controllerIndex = 0,
+			int controllerIndex2 = 0,
+			int controllerIndex3 = 0,
+			int controllerIndex4 = 0
+		)
 		{
 			if (!dllFolderPath.EndsWith("\\"))
 				dllFolderPath += "\\";
@@ -40,7 +43,7 @@ namespace Nucleus.Gaming.Coop.ProtoInput
 			}
 			else
 			{
-				SetupInstance(instanceHandle, instanceIndex, gen, player, mouseHandle, keyboardHandle, controllerIndex);
+				SetupInstance(instanceHandle, instanceIndex, gen, player, mouseHandle, keyboardHandle, controllerIndex, controllerIndex2, controllerIndex3, controllerIndex4);
 				
 				ProtoInput.protoInput.WakeUpProcess(instanceHandle);
 			}
@@ -57,7 +60,11 @@ namespace Nucleus.Gaming.Coop.ProtoInput
 			PlayerInfo player,
 			int mouseHandle = -1,
 			int keyboardHandle = -1,
-			int controllerIndex = 0)
+			int controllerIndex = 0,
+			int controllerIndex2 = 0,
+			int controllerIndex3 = 0,
+			int controllerIndex4 = 0
+			)
 		{
 			if (!dllFolderPath.EndsWith("\\"))
 				dllFolderPath += "\\";
@@ -78,11 +85,12 @@ namespace Nucleus.Gaming.Coop.ProtoInput
 			}
 			else
 			{
-				SetupInstance(instanceHandle, instanceIndex, gen, player, mouseHandle, keyboardHandle, controllerIndex);
+				SetupInstance(instanceHandle, instanceIndex, gen, player, mouseHandle, keyboardHandle, 
+					controllerIndex, controllerIndex2, controllerIndex3, controllerIndex4);
 			}
 		}
 
-		private static void SetupInstance(uint instanceHandle, int instanceIndex, GenericGameInfo gen, PlayerInfo player, int mouseHandle, int keyboardHandle, int controllerIndex)
+		private static void SetupInstance(uint instanceHandle, int instanceIndex, GenericGameInfo gen, PlayerInfo player, int mouseHandle, int keyboardHandle, int controllerIndex, int controllerIndex2, int controllerIndex3, int controllerIndex4)
 		{
 			Debug.WriteLine("Setting up ProtoInput instance " + instanceIndex);
 
@@ -184,7 +192,12 @@ namespace Nucleus.Gaming.Coop.ProtoInput
 			if (keyboardHandle != -1)
 				ProtoInput.protoInput.AddSelectedKeyboardHandle(instanceHandle, (uint)keyboardHandle);
 
-			ProtoInput.protoInput.SetControllerIndex(instanceHandle, controllerIndex < 0 ? 0 : (uint)controllerIndex);
+			ProtoInput.protoInput.SetControllerIndex(instanceHandle, 
+				controllerIndex < 0 ? 0 : (uint)controllerIndex,
+				controllerIndex2 < 0 ? 0 : (uint)controllerIndex2,
+				controllerIndex3 < 0 ? 0 : (uint)controllerIndex3,
+				controllerIndex4 < 0 ? 0 : (uint)controllerIndex4
+				);
 
 			//SetExternalFreezeFakeInput(instanceHandle, !isInputCurrentlyLocked && freezeGameInputWhileInputNotLocked);
 
