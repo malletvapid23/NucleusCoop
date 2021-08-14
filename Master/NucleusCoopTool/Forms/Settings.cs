@@ -141,6 +141,11 @@ namespace Nucleus.Coop
                 useNicksCheck.Checked = Boolean.Parse(ini.IniReadValue("Misc", "UseNicksInGame"));
             }
 
+            if (ini.IniReadValue("Misc", "IgnoreInputLockReminder") != "")
+            {
+	            ignoreInputLockReminderCheckbox.Checked = Boolean.Parse(ini.IniReadValue("Misc", "IgnoreInputLockReminder"));
+            }
+
             if (ini.IniReadValue("Misc", "DebugLog") != "")
             {
                 debugLogCheck.Checked = Boolean.Parse(ini.IniReadValue("Misc", "DebugLog"));
@@ -290,6 +295,7 @@ namespace Nucleus.Coop
                 }
 
                 ini.IniWriteValue("Misc", "UseNicksInGame", useNicksCheck.Checked.ToString());
+                ini.IniWriteValue("Misc", "IgnoreInputLockReminder", ignoreInputLockReminderCheckbox.Checked.ToString());
                 ini.IniWriteValue("Misc", "DebugLog", debugLogCheck.Checked.ToString());
                 ini.IniWriteValue("Misc", "Network", cmb_Network.SelectedItem.ToString());
                 ini.IniWriteValue("Misc", "SteamLang", cmb_Lang.SelectedItem.ToString());
@@ -653,5 +659,10 @@ namespace Nucleus.Coop
         {
             RefreshAudioList();
         }
-    }
+
+		private void ignoreInputLockReminderCheckbox_CheckedChanged(object sender, EventArgs e)
+		{
+
+		}
+	}
 }

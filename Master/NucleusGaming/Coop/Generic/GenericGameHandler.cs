@@ -1497,6 +1497,11 @@ namespace Nucleus.Gaming
             WindowsIdentity identity = WindowsIdentity.GetCurrent();
             WindowsPrincipal principal = new WindowsPrincipal(identity);
 
+            if (ini.IniReadValue("Misc", "IgnoreInputLockReminder") != "True")
+			{
+				MessageBox.Show("Some scripts will require you to press the End key to lock input. Remember to unlock input by pressing End again when you finish playing. You can disable this message in the Settings. ", "Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+
             if ((gen.RequiresAdmin || gen.LaunchAsDifferentUsersAlt || gen.LaunchAsDifferentUsers || gen.ChangeIPPerInstanceAlt) && !principal.IsInRole(WindowsBuiltInRole.Administrator))
             {
                 earlyExit = true;
