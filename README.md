@@ -48,10 +48,10 @@ Thank you ^_^
 # Credits
 Original NucleusCoop Project: Lucas Assis (lucasassislar)  
 Mod: ZeroFox  
-Multiple keyboards/mice & hooks: Ilyaki  
+Proto Input, multiple keyboards/mice: Ilyaki  
 Website & handler API: r-mach  
   
 Additional credits to all original developers of third party utilities Nucleus uses:
-Mr_Goldberg (Goldberg Emulator), syahmixp (SmartSteamEmu), EJocys (x360ce), 0dd14 Lab (Xinput Plus), r1ch (ForceBindIP), HaYDeN (Flawless Widescreen), briankendall (devreorder), VerGreeneyes (DirectXWrapper), wizark952 (dinput8 blocker), Nemirtinga (Epic Emulator)
+Mr_Goldberg (Goldberg Emulator), syahmixp (SmartSteamEmu), EJocys (x360ce), 0dd14 Lab (Xinput Plus), r1ch (ForceBindIP), HaYDeN (Flawless Widescreen), briankendall (devreorder), VerGreeneyes (DirectXWrapper), wizark952 (dinput8 blocker), Nemirtinga (Epic Emulator & OpenXinput)
 
 Special thanks to: Talos91, PoundlandBacon, dr.oldboi, Pizzo, Snailed It and the rest of the Splitscreen Dreams discord community.
