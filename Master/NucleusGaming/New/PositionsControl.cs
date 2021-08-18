@@ -80,7 +80,7 @@ namespace Nucleus.Coop
         //private List<Joystick> dinputJoysticks;
 
         // xinput
-        private List<Controller> xinputControllers;
+        private List<OpenXinputController> xinputControllers;
 
         //private Timer gamepadTimer;
         //private Timer gamepadPollTimer;
@@ -108,10 +108,10 @@ namespace Nucleus.Coop
 
             //dinput = new DirectInput();
             //dinputJoysticks = new List<Joystick>();
-            xinputControllers = new List<Controller>();
-            for (int i = 0; i < 4; i++)
+            xinputControllers = new List<OpenXinputController>();
+            for (int i = 0; i < 16; i++)
             {
-                xinputControllers.Add(new Controller((UserIndex)i));
+                xinputControllers.Add(new OpenXinputController(i));
             }
 
             //gamepadTimer = new System.Threading.Timer(GamepadTimer_Tick, null, 0, 200);
@@ -319,7 +319,9 @@ namespace Nucleus.Coop
 
             DirectInput dinput = new DirectInput();
 
-            if (g.Hook.DInputEnabled || g.Hook.XInputReroute)
+            // Using OpenXinput with more than 4 players means we can use more than 4 xinput controllers
+           
+            if (g.Hook.DInputEnabled || g.Hook.XInputReroute || g.ProtoInput.DinputDeviceHook)
             {
                 
                 IList<DeviceInstance> devices = dinput.GetDevices(DeviceClass.GameControl /*SlimDX.DirectInput.DeviceType.Gamepad*/, DeviceEnumerationFlags.AllDevices);
@@ -417,11 +419,11 @@ namespace Nucleus.Coop
 
             }
 
-            if (g.Hook.XInputEnabled && !g.Hook.XInputReroute)
+            if ((g.Hook.XInputEnabled && !g.Hook.XInputReroute && !g.ProtoInput.DinputDeviceHook) || g.ProtoInput.XinputHook)
             {
                 // XInput is only really enabled inside Nucleus Coop when
                 // we have 4 or less players, else we need to force DirectInput to grab everything
-
+                
                 
 
                 for (int j = 0; j < data.Count; j++)
@@ -429,7 +431,7 @@ namespace Nucleus.Coop
                     PlayerInfo p = data[j];
                     if (p.IsXInput && !p.IsFake)
                     {
-                        Controller c = xinputControllers[p.GamepadId];
+                        var c = xinputControllers[p.GamepadId];
                         if (!c.IsConnected)
                         {
                             data[j].DInputJoystick.Unacquire();
@@ -442,13 +444,13 @@ namespace Nucleus.Coop
                 }
 
                 int cOffset = 0;
-                for (int i = 0; i < 4; i++)
+                for (int i = 0; i < 16; i++)
                 {
-                    Controller c = xinputControllers[i];
+                    var c = xinputControllers[i];
                     bool already = false;
                     
 
-                    if (c.IsConnected)
+                    if (c.IsConnected && (i < 4 || g.ProtoInput.UseOpenXinput))
                     {
                         // see if this gamepad is already on a player
                         for (int j = 0; j < data.Count; j++)

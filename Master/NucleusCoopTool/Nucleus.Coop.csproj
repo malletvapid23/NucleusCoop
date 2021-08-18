@@ -79,6 +79,9 @@
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
     <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
+  <PropertyGroup>
+    <RunPostBuildEvent>Always</RunPostBuildEvent>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="DotNetZip, Version=1.13.7.0, Culture=neutral, PublicKeyToken=6583c7c814667745, processorArchitecture=MSIL">
       <HintPath>..\packages\DotNetZip.1.13.7\lib\net40\DotNetZip.dll</HintPath>
@@ -164,6 +167,7 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="StartChecks.cs" />
     <EmbeddedResource Include="Forms\BaseForm.resx">
       <DependentUpon>BaseForm.cs</DependentUpon>
     </EmbeddedResource>
@@ -332,6 +336,7 @@
     <None Include="Resources\not_found_white.png" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="copyoutput\openxinput1_3.dll" />
     <Content Include="copyoutput\utils\Credits.txt" />
     <Content Include="copyoutput\utils\Custom utils go in User folder.txt" />
     <Content Include="copyoutput\utils\devcon\devcon.exe" />
@@ -475,6 +480,8 @@
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
   <PropertyGroup>
     <PostBuildEvent>echo.&gt;Built.flag
+copy $(SolutionDir)..\Submodules\ProtoInput\src\ProtoInput\Release\*.dll $(TargetPath)\..
+copy $(SolutionDir)..\Submodules\ProtoInput\src\ProtoInput\Release\*.exe $(TargetPath)\..
 copy $(SolutionDir)ThirdParty\easyhook\*.dll $(TargetPath)\..
 copy $(SolutionDir)ThirdParty\easyhook\*.exe $(TargetPath)\..
 xcopy $(SolutionDir)ThirdParty\AutoHotkey.Interop\x64\*.dll $(TargetDir)x64\

@@ -29,7 +29,7 @@ Note that these are global so you won't have to change them for each game. For g
 If you want to change your steam_id on a per game basis, simply create a settings folder in the game unique directory (Full path: C:\Users\<Your windows user name>\AppData\Roaming\Goldberg SteamEmu Saves\<appid>\settings)
 In that settings folder create a user_steam_id.txt file that contains the valid steam id that you want to use for that game only.
 
-You can also make the emu ignore certain global settings by using a force_account_name.txt, force_language.txt or force_steamid.txt that you put in the <path where my emu lib is>\steam_settings\ folder.
+You can also make the emu ignore certain global settings by using a force_account_name.txt, force_language.txt, force_listen_port.txt or force_steamid.txt that you put in the <path where my emu lib is>\steam_settings\ folder.
 See the steam_settings.EXAMPLE folder for an example.
 
 If for some reason you want it to save in the game directory you can create a file named local_save.txt right beside steam_api(64).dll (libsteam_api.so on linux)
@@ -104,6 +104,11 @@ and expect a default value to be read when doing so. To set the type for each st
 The format is: STAT_NAME=type=default value
 The type can be: int, float or avgrate
 The default value is simply a number that represents the default value for the stat.
+
+Build id:
+Add a steam_settings\build_id.txt with the build id if the game doesn't show the correct build id and you want the emu to give it the correct one.
+An example can be found in steam_settings.EXAMPLE
+
 
 Support for CPY steam_api(64).dll cracks: See the build in the experimental folder.
 
@@ -195,7 +200,9 @@ brazilian
 romanian
 russian
 spanish
+latam
 swedish
 thai
 turkish
 ukrainian
+vietnamese

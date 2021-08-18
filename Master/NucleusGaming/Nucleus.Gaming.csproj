@@ -176,6 +176,11 @@
     <Compile Include="Coop\InputManagement\Structs\RID_DEVICE_INFO_MOUSE.cs" />
     <Compile Include="Coop\InputManagement\Structs\WM_MOUSEMOVE_wParam.cs" />
     <Compile Include="Coop\InputManagement\WinApi.cs" />
+    <Compile Include="Coop\OpenXinputController.cs" />
+    <Compile Include="Coop\ProtoInput\GetMainWindow.cs" />
+    <Compile Include="Coop\ProtoInput\ProtoInput.cs" />
+    <Compile Include="Coop\ProtoInput\ProtoInputLauncher.cs" />
+    <Compile Include="Coop\ProtoInput\ProtoInputOptions.cs" />
     <Compile Include="Coop\Window.cs" />
     <Compile Include="DirectInput\DInputManager.cs" />
     <Compile Include="Coop\GameOption.cs" />

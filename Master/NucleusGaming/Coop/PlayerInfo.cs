@@ -50,6 +50,13 @@ namespace Nucleus.Gaming.Coop
         public int GamepadMask;
         public Joystick DInputJoystick;
 
+        // Should be set by a script, then these are sent into Proto Input.
+        // Zero implies no contorller, 1 means controller 1, etc
+        public int ProtoController1;
+        public int ProtoController2;
+        public int ProtoController3;
+        public int ProtoController4;
+
         public string HIDDeviceID;
         public string Nickname;
         public string InstanceId;
@@ -61,6 +68,8 @@ namespace Nucleus.Gaming.Coop
         public string UserProfile;
 
         public Display Display;
+
+        public uint ProtoInputInstanceHandle = 0;
 
         // Serialized
 

@@ -1,4 +1,4 @@
-NucleusCoop Alpha 8 Mod - version 0.9.9.1
+NucleusCoop Alpha 8 Mod - version 1.1.0
 
 This a mod for NucleusCoop Alpha 8 and it includes the following:
 
@@ -34,10 +34,10 @@ Game.UseX360ce = true;					//Before launching any games, NucleusCoop will open x
 Game.Hook.UseAlpha8CustomDll = false;			//Use the xinput custom dll from Alpha 8 instead of Alpha 10 | Will still force alpha 10 custom dll if game is x64
 Game.Hook.FixResolution = false;			//Should the custom dll do the resizing? | Only works with Alpha 10 custom dll | default: false
 Game.Hook.FixPosition = false;				//Should the custom dll do the repositioning? | Only works with Alpha 10 custom dll | default: false
-Context.Hook.WindowX = 0;				//If manual positioning, what is the window's X coordinate | If both X and Y value > 0, window will be positioned manually
-Context.Hook.WindowY = 0;				//If manual positioning, what is the window's Y coordinate | If both X and Y value > 0, window will be positioned manually
-Context.Hook.ResWidth = 1280; 				//If manual resizing, what is the window's width | If both ResWidth and ResHeight value > 0, window will be positioned manually
-Context.Hook.ResHeight = 720;				//If manual resizing, what is the window's height | If both ResWidth and ResHeight value > 0, window will be positioned manually
+Game.Hook.WindowX = 0;				//If manual positioning, what is the window's X coordinate | If both X and Y value > 0, window will be positioned manually
+Game.Hook.WindowY = 0;				//If manual positioning, what is the window's Y coordinate | If both X and Y value > 0, window will be positioned manually
+Game.Hook.ResWidth = 1280; 				//If manual resizing, what is the window's width | If both ResWidth and ResHeight value > 0, window will be positioned manually
+Game.Hook.ResHeight = 720;				//If manual resizing, what is the window's height | If both ResWidth and ResHeight value > 0, window will be positioned manually
 Game.KeepAspectRatio = false;				//Should the game window try and keep it's aspect ratio when being resized? | default: false
 Game.PartialMutexSearch = false;			//When killing mutexes, should a partial search be done with the mutex name? | Renaming mutexes requires an exact match | default: false
 Game.UseGoldberg = false;				//Use the built-in Goldberg features in Nucleus | default: false
@@ -91,17 +91,146 @@ Game.ForceUserProfileSaveCopy = false;			//Force the games save files in UserPro
 Game.PlayerSteamIDs = [ "1234","5678" ];		//A list of steam IDs to be used instead of the pre-defined ones Nucleuses uses | IDs will be used in order they are placed, i.e. instance 1 will be first non-empty string in array
 Game.HexEditExeAddress = [ "1|address|bytes" ];		//Use this to replace bytes in a file at a specified address, can be for specific instances with optional 3rd argument | 1st arg: instance # (optional), 2nd arg: hex address offset, 3rd arg: new bytes
 Game.HexEditFileAddress = [ "1|relativePath|address|bytes" ];	//Same as HexEditExeAddress but for a file other than exe | Need to provide relative path (from game root folder) + filename as 1st or 2nd arg if not specifying an instance
+Game.ProcessChangesAtEnd = false;			//Do the resizing, repositioning and post-launch hooking of all game instances at the very end | will not work with every option ran normally
+Game.PromptProcessChangesAtEnd = false;			//If ProcessChangesAtEnd = true, pause and show a prompt, before making changes to processes
+Game.DeleteFilesInConfigPath = [ "file.del", "me.too" ];//Specify files to delete in Nucleus environment config path (UserProfileConfigPath)
+Game.DeleteFilesInSavePath = [ "file.del", "me.too" ];	//Specify files to delete in Nucleus environment save path (UserProfileSavePath)
+Game.PromptBetweenInstancesEnd = false;			//If ProcessChangesAtEnd = true, show a prompt between each instance being changed
+Game.IgnoreDeleteFilesPrompt = false;			//Do not display the warning message about a file being deleted 
+Game.ChangeIPPerInstance = false;			//Highly experimental feature, will change your existing network to a static IP for each instance | option in settings to choose your network
+Game.FlawlessWidescreen = "FWGameName";			//Use Flawless Widescreen application | value must be the name of the game plugin folder in PluginCache\FWS_Plugins\Modules
+Game.RenameAndOrMoveFiles = [ "1|before.dat|after.dat" ];//Specify files to either rename or move | can accept relative path from root | optional first parameter to specify a specific instance to apply to, omit to do them all
+Game.DeleteFiles = [ "1|delete.dis" ];			//Specify files to be deleted from instanced folder | can accept relative path from root | optional first parameter to specify a specific instance to apply to, omit to do them all
+Game.GoldbergExperimentalRename = false;		//Set to true to have Goldberg Experimental rename instanced steam_api(64).dll to cracksteam_api(64).dll
+Game.PreventGameFocus = false;				//Makes sure all the game windows are unfocused so nothing received double input from Windows.
+Game.FakeFocusInterval = 1000; 				//The milliseconds between sending fake focus messages. Default at 1000, some games need this to be very low
+Game.KillProcessesOnClose = [ "kill", "me" ];		//List of additional processes that need to be killed (other than executable and launcher)
+Game.KeyboardPlayerSkipPreventWindowDeactivate = false; //Ignore PreventWindowDeactivation if player is using keyboard
+Game.DirSymlinkCopyInstead = [ "folder1", "folder2" ];	//Copy (not symlink) all files within a given folder | Folder name is relative from root game folder
+Game.DontResize = false;				//Should Nucleus not resize the game windows?
+Game.DontReposition = false;				//Should Nucleus not reposition the game windows?
+Game.NotTopMost = false;				//Should Nucleus not make the game windows top most (appear above everything else)
+Game.WindowStyleValues = [ "~0xC00000", "0x8000000" ];	//Override Nucleus' default of removing borders and specify a custom window style | Start string with ~ to remove a style, or don't use it to add one | See https://docs.microsoft.com/en-us/windows/win32/winmsg/window-styles for values that can be used
+Game.ExtWindowStyleValues = [ "~0x200", "0x200000" ];	//Override Nucleus' default of removing borders and specify a custom extended window style | Start string with ~ to remove a style, or don't use it to add one | See https://docs.microsoft.com/en-us/windows/win32/winmsg/window-styles for values that can be used
+Game.KillLastInstanceMutex = false;			//Kill the mutexes, specified in Game.KillMutex, in the last instance (normally last is ignored)
+Game.RefreshWindowAfterStart = false;			//Should each game window be minimized and restored once all instances are opened?
+Game.CreateSingleDeviceFile = false;			//Create only one file for HID devices per instance (the assigned HID device)
+Game.FakeFocusSendActivate = true;			//Should WM_ACTIVATE message be sent to each instance? | default: true
+Game.KillMutexAtEnd = false;				//When using ProcessChangesAtEnd, should mutexes also be killed at the end?
+Game.CMDStartArgsInside = false;			//When using CMDLaunch, should the game's starting arguments be inside the same quotations as the game path?
+Game.UseEACBypass = false;				//Replace any EasyAntiCheat_(x86)(x64).dll with a bypass dll
+Game.LaunchAsDifferentUsers = false;			//Launch each instance from a different user account | must run Nucleus as admin | will temporary create user accounts "nucleusplayerx" and delete them when closing Nucleus
+Game.LaunchAsDifferentUsersAlt = false;			//An alternative method to launch each instance from a different user account | must run Nucleus as admin | will temporary create user accounts "nucleusplayerx" and delete them when closing Nucleus
+Game.RunLauncherAndExe = false;				//When using Game.LauncherExe, should ExecutableName also be launched?
+Game.PauseBetweenProcessGrab = 30;			//How many seconds to wait after launching game (or launcher) but before grabbing game process
+Game.PauseBetweenContextAndLaunch = 0;			//Number of seconds to wait after running additional files but before continuing with player setup
+Game.DirSymlinkCopyInsteadIncludeSubFolders = false;	//When specifying folder(s) to copy all its contents instead of linking, should subfolders and files be included as well?
+Game.LaunchAsDifferentUsersAlt;				//An alternative method to launch each game process as a different user | must run Nucleus as admin | will temporary create user accounts "nucleusplayerx" and delete them when closing Nucleus
+Game.ChangeIPPerInstanceAlt;				//An alternative method to changing IP per instance | this method will create loopback adapters for each player and assign them a static ip on the same subnet mask as your main network interface
+Game.GamePlayAfterLaunch;				//Call the Game.Play function after the call has launched
+Game.UserProfileConfigPathNoCopy = false;		//Do not copy files from original UserProfileConfigPath if using Nucleus Environment
+Game.UserProfileSavePathNoCopy = false;			//Do not copy files from original UserProfileSavePath if using Nucleus Environment
+Game.LauncherExeIgnoreFileCheck = false;		//Do not check if Launcher Exe exists in game folder | you will need to provide a relative filepath from game root folder
+Game.UseNemirtingasEpicEmu = false;			//Automatically set up Nemirtinga's Epic Emulator in Nucleus
+Game.EpicEmuArgs = false;				//When using Nemirtinga's Epic Emulator, use pre-defined parameters -AUTH_LOGIN=unused -AUTH_PASSWORD=bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb -AUTH_TYPE=exchangecode -epicapp=CrabTest -epicenv=Prod -EpicPortal -epicusername=\"" + <Player Nickname here> + "\" -epicuserid=AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA -epiclocale=en"
+Game.Hook.EnableMKBInput = false;			//Enable Mouse/Keyboard input for instances when using Alpha 10 custom xinput dll (normally MKB is restricted)		
+Game.UseDInputBlocker = false;				//Setup wizark952's dinput blocker (block dinput for the game)
+Game.PromptAfterFirstInstance = false;			//Show a prompt that user must click on ok to continue, after the first instance is setup
+Game.GoldbergWriteSteamIDAndAccount = false;		//Force Goldberg to write account_name.txt and user_steam_id.txt | Requires Game.UseGoldberg;
+Game.ForceProcessSearch = false;			//Force Nucleus to search for the game process
+Game.ExecutableToLaunch = "Game.exe";			//If the game is to launch a different executable, other than what Game.ExecutableName is
+Game.WindowStyleEndChanges = [ "~0xC00000", "0x8000000" ];	//Override Nucleus' default of removing borders and specify a custom window style during end processing | Start string with ~ to remove a style, or don't use it to add one | See https://docs.microsoft.com/en-us/windows/win32/winmsg/window-styles for values that can be used
+Game.ExtWindowStyleEndChanges = [ "~0xC00000", "0x8000000" ]; 	//Override Nucleus' default of removing borders and specify a custom window style during end processing | Start string with ~ to remove a style, or don't use it to add one | See https://docs.microsoft.com/en-us/windows/win32/winmsg/window-styles for values that can be used
+Game.IgnoreWindowBordercheck = false;			//Ignore logic at end to check if any game window still has a border
+Game.EnableWindows = false;				//Enable each game window at the end (useful if became disabled, or for some games that require this Window function to be called to display properly, after Nucleus setup)
+Game.IgnoreThirdPartyPrompt = false;			//Ignore the prompt that appears when using Game.ThirdPartyLaunch;
+Game.TransferNucleusUserAccountProfiles = false;	//Will backup and restore Nucleus user account user profile's on windows between sessions (when user accounts are not kept)
+Game.UseCurrentUserEnvironment = false;			//Force the game to use the current user's environment (useful for some games that may require different Window user accounts)
+Game.CopyEnvFoldersToNucleusAccounts = ["Documents", "AppData"];	//Copy subfolders of current user profile to Nucleus user accounts
+Game.CopyFoldersTo = ["folderToMove|whereToMoveIt"]; 	//Copy folders in game root folder to another spot in game folder | Relative paths from root of game folder
+Game.SymlinkFoldersTo = ["folderToMove|whereToMoveIt"]; //Symlink folders in game root folder to another spot in game folder | Relative paths from root of game folder
+Game.HardlinkFoldersTo = ["folderToMove|whereToMoveIt"];	//Hardlink folders in game root folder to another spot in game folder | Relative paths from root of game folder
+Game.ForceGameArch = "x86" (or "x64");			//Force Nucleus to treat the game as 32 or 64-bit architecture
+Game.SSEAdditionalLines = ["Section|Key=Value"];	//When using Game.NeedsSteamEmulation, here you can provide additional lines to write to the SSE ini file
+Game.DontRemoveBorders = false;				//Prevent Nucleus from removing game window borders
+Game.GamePlayBeforeGameSetup = false;			//Execute Game.Play function (context) before the majority of the game is setup
+Game.RequiresAdmin = false;				//Game requires Nucleus to be run as administrator (this option will check and advise if detected not running Nucleus as admin)
+Game.PauseCMDBatchBefore = 10;				//Wait for X number of seconds before proceeding with CMDBatchBefore
+Game.PauseCMDBatchAfter = 10;				//Wait for X number of seconds before proceeding with CMDBatchAfter
+Game.MutexProcessExe = "Process.exe";			//Specify another executable to kill mutexes for
+Game.KillMutexProcess = ["Mutexes","To","Close"];	//When using Game.MutexProcessExe, here you can specify the mutexes that need to be killed
+Game.PartialMutexSearchProcess = false;			//When using Game.MutexProcessExe, here you can specify if you want to do a partial search for mutexes
+Game.KillMutexTypeProcess = "Mutant";			//When using Game.MutexProcessExe, here you can specify the type of mutexes to kill
+Game.GoldbergExperimentalSteamClient = false;		//Automatically setup Goldberg's Experimental Steam Client | Requires Game.UseGoldberg
+Game.PauseBeforeMutexKilling = 1000;			//Wait for X number of seconds before proceeding with mutex killing
+Game.KillMutexDelayProcess = 1000;			//When using Game.MutexProcessExe, wait for X number of seconds before beginning it's mutex killing
+Game.DeleteOnClose = ["DeleteThis.exe"]; 		//Delete a file upon ending game session | Relative paths from root of game folder
+Game.GoldbergIgnoreFileCheck = false;			//When using Game.UseGoldberg, ignore checking for account_name.txt and user_steam_id.txt
+Game.XInputPlusNoIni = false;				//Do not copy XInputPlus' ini when using Game.XInputPlusDll
+Game.DocumentsConfigPath = "Path\\Here";		//Similar to UserProfileConfigPath, use this when the game uses Documents to store game files
+string DocumentsSavePath = "Path\\Here";		//Similar to UserProfileSavePath, use this when the game uses Documents to store game files
+Game.ForceDocumentsConfigCopy = false;			//When using DocumentsConfigPath, forces a file copy from original location to Nucleus Documents
+Game.ForceDocumentsSaveCopy = false;			//When using DocumentsSavePath, forces a file copy from original location to Nucleus Documents
+Game.DocumentsConfigPathNoCopy = false;			//When using DocumentsConfigPath, do not let Nucleus copy from original location to Nucleus Documents
+Game.DocumentsSavePathNoCopy = false;			//When using DocumentsSavePath, do not let Nucleus copy from original location to Nucleus Documents
+Game.XInputPlusOldDll = false;				//When using Game.XInputPlusDll, you can specify to use the previous version instead of latest (needed for some games)
+Game.CMDBatchClose ["cmd1", "cmd2"];			//Run command lines upon exiting Nucleus
+Game.FlawlessWidescreenOverrideDisplay = false; 	//(undocumented)
+Game.WriteToProcessMemory 				//(undocumented)
+Game.FlawlessWidescreenPluginPath 			//(undocumented)
 
 
+~ Custom prompts - Prompt user for input, which can be then used in script logic
 
-2. New methods to be used in game scripts -
+Game.CustomUserGeneralPrompts = ["Enter ROM name", "Enter filename"];	//This prompts user one time and applies to ALL players, unless a value text file already exists and saving is on
+Game.SaveCustomUserGeneralValues = false;
+Game.SaveAndEditCustomUserGeneralValues = false;
+
+Game.CustomUserPlayerPrompts = ["Enter network Adapter name", "Enter character name"];	//This will prompt each player, unless a value text file already exists for that player and saving for players is on
+Game.SaveCustomUserPlayerValues = false;
+Game.SaveAndEditCustomUserPlayerValues = false;
+
+Game.CustomUserInstancePrompts = ["Enter network Adapter name"];	//This will prompt each instance, unless a value text file already exists for that instance and save is on. In case it is not player specific but different values are needed for instances
+Game.SaveCustomUserInstanceValues = false;
+Game.SaveAndEditCustomUserInstanceValues = false;
+Access the user input values via Context.CustomUser(General/Player/Instance)Values[index]
+
+
+2. Support for multiple mice and keyboards (These options are deprecated, see the new Proto Input guide)
+Game.SupportsMultipleKeyboardsAndMice = true;
+Game.SendNormalMouseInput = true;
+Game.SendNormalKeyboardInput = true;
+Game.ForwardRawKeyboardInput = false;
+Game.ForwardRawMouseInput = false;
+Game.SendScrollWheel = false;
+Game.DrawFakeMouseCursor = true;
+Game.DrawFakeMouseForControllers = false;
+Game.HookFilterRawInput = false;
+Game.HookFilterMouseMessages = false;
+Game.HookGetCursorPos = true;
+Game.HookSetCursorPos = true;
+Game.HookUseLegacyInput = false;
+Game.HookDontUpdateLegacyInMouseMsg = false;
+Game.HookGetKeyState = false;
+Game.HookGetAsyncKeyState = true;
+Game.HookGetKeyboardState = false;
+Game.HookMouseVisibility = false;
+Game.LockInputAtStart = true;
+Game.LockInputToggleKey = 0x23;				//See https://docs.microsoft.com/en-us/windows/win32/inputdev/virtual-key-codes
+Game.HookReRegisterRawInput = false;			//Re-register raw input from directly within game process | Recommended to disable forwarding input while using this
+Game.HookReRegisterRawInputMouse = true;		
+Game.HookReRegisterRawInputKeyboard = true;
+Game.UpdateFakeMouseWithInternalInput = false;
+
+
+3. New methods to be used in game scripts -
 
 Context.ChangeXmlNodeInnerTextValue(string path, string nodeName, string newValue)		//Edit an XML element (previously only nodes and attributes)
 Context.ReplaceLinesInTextFile(string path, string[] lineNumAndnewValues)			//Replace an entire line; for string array use the format: "lineNum|newValue", the | is required
 Context.ReplacePartialLinesInTextFile(string path, string[] lineNumRegPtrnAndNewValues)		//Partially replace a line; for string array use the format: "lineNum|Regex pattern|newValue", the | is required
 Context.RemoveLineInTextFile(string path, int lineNum)						//Removes a given line number completely
 Context.RemoveLineInTextFile(string path, string txtInLine, SearchType type)			//Removes a given line number completely
-			//Returns a line number (int), utilizes a newly created enum SearchType
+Context.FindLineNumberInTextFile(string path, string searchValue, SearchType type)		//Returns a line number (int), utilizes a newly created enum SearchType
 	Each of the above methods, also have an overload method so you can specify a kind of encoding to use (enter string of encoding as last parameter, e.g. "utf-8", "utf-16", "us-ascii")
 	- SearchTypes include: "Contains", "Full" and "StartsWith", use like so: Nucleus.SearchType.StartsWith
 Context.CreateRegKey(string baseKey, string sKey, string subKey)				//Create a registry key for current user, baseKey can either be "HKEY_LOCAL_MACHINE" or "HKEY_CURRENT_USER"
@@ -116,15 +245,53 @@ Context.EnvironmentPlayer									//Path to current players Nucleus environment
 Context.EnvironmentRoot										//Path to Nucleus environment root folder
 Context.UserProfileConfigPath									//Relative path from user profile to game's config path | requires Game.UserProfileConfigPath be set
 Context.UserProfileSavePath									//Relative path from user profile to game's save path | requires Game.UserProfileSavePath be set
+Context.KillProcessesMatchingProcessName(string name)						//Kill processes matching a given process name during preperation
+Context.KillProcessesMatchingWindowName(string name)						//Kill processes matching a given window name during preperation
+Context.IsKeyboardPlayer									//True if current player is using keyboard, useful for logic that is needed for keyboard only player
+Context.OrigHeight										//Player monitor's height
+Context.OrigWidth										//Player monitor's width
+Context.OrigAspectRatio										//Player monitor's aspect ratio (e.g. 16:9)
+Context.OrigAspectRatioDecimal									//Player monitor's aspect ratio in decimal (e.g. 1.777777)
+Context.AspectRatio										//Player's aspect ratio (e.g. 16:9)
+Context.AspectRatioDecimal									//Player's aspect ratio in decimal (e.g. 1777777)
+Context.FindFiles(string rootFolder, string fileName)						//Return a string array of filenames (and their paths) found that match a pattern you specify
+Context.CreatedDate(string file, int year, int month, int day)					//Change the creation date of a file
+Context.ModifiedDate(string file, int year, int month, int day)					//Change the last modified date of a file
+Context.RunAdditionalFiles(string[] filePaths, bool changeWorkingDir, int secondsToPause)	//Specify additional files to run before launching game. By default will run each additional file once but can specify to run during specific player's instances by prefixing the filepath with #|. Replace # with player number. Can also specify to run files for each player by prefixing filepath with "all|". Optional two extra params, bool run as admin and bool prompt between
+Context.ReadRegKey(string baseKey, string sKey, string subKey)					//Return the value of a provided key as a string
+Context.HandlerGUID
+Context.NucleusFolder
+Context.NumberOfPlayers
+Context.ScriptFolder
+Context.CopyScriptFolder 
+Context.HexEdit
+Context.PatchFileFindAll 
+Context.MoveFolder 
+Context.EnvironmentPlayer
+Context.EnvironmentRoot
+Context.DocumentsPlayer
+Context.DocumentsRoot
+Context.DocumentsConfigPath
+Context.DocumentsSavePath
+Context.CopyScriptFolder(string DestinationPath)
+Context.RandomInt(int min, int max)
+Context.RandomString(int size, bool lowerCase = false)
+Context.ConvertToInt()
+Context.ConvertToString()
+Context.ConvertToBytes()
+Context.GCD(int a, int b)
+Context.Arch
+Context.PosX
+Context.PosY
+Context.MonitorWidth
+Context.MonitorHeight
+Context.Log()
+Context.ProcessID
+Context.HasKeyboardPlayer
+Context.NucleusUserRoot
 
 
-3. 6 and 8 player support
-4. Expanded Mutex Killing (doesn't only look for mutexs beginning with "Sessions")
-5. Customizable global hotkeys - Hotkeys to close Nucleus, stop the current session and toggle game windows being top most. Edit hotkeys by selecting the new Settings button 
-6. Bug fixes
-7. Code optimization 
-
-8. CMD Launch Environment Variables (used with CMDBatchBefore and CMDBatchAfter)
+4. CMD Launch Environment Variables (used with CMDBatchBefore and CMDBatchAfter)
 %NUCLEUS_EXE% 			= Exe filename (e.g. Halo.exe)
 %NUCLEUS_INST_EXE_FOLDER% 	= Path the instance exe resides in (e.g. C:\Nucleus\content\Halo\Instance0\Binaries)
 %NUCLEUS_INST_FOLDER% 		= Path of the instance folder (e.g. C:\Nucleus\content\Halo\Instance0\)
@@ -132,16 +299,180 @@ Context.UserProfileSavePath									//Relative path from user profile to game's 
 %NUCLEUS_ORIG_EXE_FOLDER%	= Path the original exe resides in (e.g. C:\Program Files\Halo\Binaries)
 %NUCLEUS_ORIG_FOLDER%		= Path of the "root" original folder (e.g. C:\Proggram Files\Halo)
 
+5. New Player variables
+Player.Nickname
+Player.HIDDeviceID
+Player.RawHID
+Player.SID
+Player.Adapter
+Player.UserProfile
+
+6. Support for any number of players
+7. Expanded Mutex Killing (doesn't only look for mutexs beginning with "Sessions")
+8. Customizable global hotkeys - Hotkeys to close Nucleus, stop the current session and toggle game windows being top most. Edit hotkeys by selecting the new Settings button 
+9. Bug fixes
+10. Code optimization 
+
 
 Known Issues: --------------------------------------------------------------------------------------
 
-- Mouse constantly flickering back and forth with FakeFocus (can be avoided now using PreventWindowDeactivation)
-- Mouse loses focus on game window for a split second on an on-going basis when using KBM (can be avoided now using PreventWindowDeactivation)
-- Nucleus crashes and/or hooks don't install when using games that use launchers
 - Force feedback does not work with Nucleus custom dlls
-
+- PreventWindowDeactivation will prevent mouse and keyboard input on instances using this hook (and may have other adverse effects)
+- Status Window may cause Nucleus to crash every now and then
 
 Changelog: -----------------------------------------------------------------------------------------
+
+v1.1.0 - August 16, 2021
+- Integrated Proto Input (github.com/ilyaki/protoinput) hooks for greatly improved input
+
+v1.0.2 R5 FINAL - January 2, 2020
+- Fixed bug that would cause the incorrect document path to be used for subsequent players when using Nucleus environment and start up hooks
+- Document path in registry will now only be changed if it needs to (only if playing a game that uses Documents for game files)
+- Some fixes for device layout screen
+- Updated Goldberg emulator to latest git build
+
+v1.0.1 R5 FINAL - December 30, 2020
+- Fixed app not opening for some users
+- Fixed bug with expanding single keyboard vertically
+- Added NucluesUserRoot to context (get userprofile paths for a player's respective nucleusplayer Windows account)
+- Other minor bug fixes/tweaks
+
+v1.0 R5 FINAL - December 24, 2020
+- Audio routing per instance; specify each game to run through different audio sources
+- Added support for Nemirtingas Epic Emulator
+- Added support for games that use Documents for game files (and support for users with custom document folders)
+- Nucleus user accounts on windows can now retain save data between sessions (including Halo MCC, your game saves will remain intact)
+- Nucleus on close will now remove files it created when using original game folders (keeping your original game folder untouched)
+- Registry edits done by Nucleus now only persist the game session (Nucleus backs up and restores, as to note touch your original game settings)
+- Added alot of new scripting features that greatly increases game compatibility list
+- New function, custom prompts. Scripts can prompt users for input that can be used in scripts for logic
+- New xinput hooks (alot more effective way of hooking and handling xinput messages) (Thanks to @Ilyaki)
+- Fixes for custom layouts and stretching KMB inputs on layouts
+- Fixes for status window, performs alot better (but still every once and awhile may not work)
+- Updated alpha 10 custom xinput dlls to enable mouse and keyboard input for instances
+- XinputPlus assign gamepad based on player's gamepad index NOT player's index
+- Added support for wizark952's dinput8 blocker 
+- Added some support for Goldberg's steam client loader 
+- Added options to set window styles at very end, ignore window border check, and option to enable windows at end
+- Added function Game.IgnoreThirdPartyPrompt; when launching via third party, ignore the prompt to press ok when game is launched
+- Changes to LaunchAsDifferentUsers - added option to keep user accounts and ability to transfer user account data (if not keeping)
+- Made some back-end changes to Nucleus environment 
+- Revamped settings window, tabs are now used to seperate different sub-settings
+- Changes to Context values, functions and bug fixes 
+- Updated Goldberg emulator to latest git build
+- Added prelimary and experimental function to write to process memory; Game.WriteToProcessMemory
+- LOTS of miscellaneous changes/bug-fixes
+
+v0.9.9.9 r4 - April 12, 2020
+- Improved script downloader. Handlers are cached and viewable up to a specified # of results at a time (via "pages"). User can also pre-sort and use drop-down as an alternative way to sort when searching
+- Replaced LaunchAsDifferentUsers with a new and improved method, which will now also utilize current user's Nucleus environment. The previous method has been retained as LaunchAsDifferentUsersAlt
+- Added an optional status window to appear when launching and closing Nucleus, to show what Nucleus is doing
+- Added an alternative method of changing IP per instance. Alt method will create temporary loopback adapters for each player (however, it will not change any metric)
+- Added the ability to extract existing script handlers (.nc files)
+- Added a new option in game scripts to call Game.Play after the game instance has launched
+- Added a new option in game scripts to not copy files from UserProfile<Config><Save>Path when using Nucleus environment
+- Added a new option in game scripts to ignore checking if launcher exe exists in game folder
+- Added a new Context function, ReadRegKey. Will return a string value for a specified key
+- Added new Context function, RunAdditionalFiles. User can specify files that need to be run before launcher/game
+- Added functions to Context so you can now get a list of all found files and their paths that match a given pattern. Can also change a creation date and modified date of a file
+- Added an option for DirSymlinkCopyInstead to copy all subfolders and files in addition
+- Added new values for Player, SID, Adapter and UserProfile (for use with some of the new functions in this update)
+- Improved editing and deleting of registry keys, in addition keys in HKEY_USERS are now accessible
+- Changed prompts from message boxes to Forms (more control, shold now be on top most of the time)
+- Migrated from SlimDX to SharpDX for reading controllers
+- Updated rename mutexes to work with "Type:|" prefixes introduced in a recent update
+- Updated external libraries to latest versions (Jint, DotNetZip, Newtonsoft Json)
+- Potential fix for bug that was eating CPU resources when using Direct Input/Xinput Reroute
+- Fixed XInputPlus bug that would only recognize dinput dll if it was all lowercase
+- Fixed bugs when using DrawFakeMouseCursor, added option DrawFakeMouseForControllers [thanks to @Ilyaki]
+- Fixed some bugs in script downloader
+- Fixed backed up registry table not being restored
+- Fixed DirSymlinkCopyInstead not copying folder itself
+- Fixed ChangeExe not working when KeepSymLinkOnExit is being used
+- Fixed Nucleus post hook dlls being injected too early when using ProcessChangesAtEnd
+- Number of other bug fixes
+- Minor tweaks/changes
+
+
+v0.9.9.9 r3 - March 26, 2020
+- Fixes and improvements to Game.LaunchAsDifferentUsers
+- Fixed error message on the controller layout screen when using dinput / xinput reroute
+- Fixed context aspect ratio decimals
+
+
+v0.9.9.9 r2 - March 25, 2020
+- Can now view all public scripts in Script Downloader and sort columns by ascending/descending order
+- Added an option in game scripts to launch each game instance as a different user (Nucleus will create temporary accounts "nucluesplayerx" and then delete them at the very end) [thanks to @napserious for his base code]
+- Added an option in game scripts to run Game.ExecutableName in addition to Game.LauncherExe (if used)
+- Added an option in game scripts to specify an amount of time to wait after lauching game but before grabbing the game's process
+- Added an option in game scripts to specify if starting arguments should be inside the executable path when using Game.CMDLaunch
+- Added an option in game scripts/utility to use a EAC bypass dll
+- Added an option in game scripts to kill mutexes at the end, when using Game.ProcessChangsAtEnd
+- Added an option in game scripts to add gamepad cursors [thanks to @Ilyaki]
+- Added additional logic to SetWindowHook and SetWindowHook hooks, now they should work better
+- New context options available to get monitor or a specific player window's height/width/aspectratio
+- Game.CreateSingleDeviceFile will now also hook CreateFileA for ANSI calls
+- Whenever registry keys are being edited or deleted by a script, Nucleus will now backup the current registry keys and restore them upon exit
+- When hard copying game files, you can now specify exclusions
+- When hard copying game files, Nucleus will wait for each instance to hard copy before continuing
+- Updated Goldberg emulator to latest git build (sha 5c41ba020c4ffc46d0adbeb3b82c9ae623d14ef2)
+- Fixed not all lines using right encoding when specified, when modifying lines to files (replacelines, removelines, etc)
+- Fixed Script Downloader not working for Window 7 users
+- Fix for raw input filter / reregister raw input not working [thanks to @Ilyaki]
+- Fixed some objects weren't being properly disposed
+
+
+v0.9.9.9 f1 - March 15, 2020
+- Added an option in game scripts to create only one file for HID devices per instance (the assigned HID device). This is a workaround for Unity games that use default input
+- Added an option in game scripts to enable the minimize, and restore of game window at the end (now off by default, only few games are known to need it atm)
+- Device handle zero support [thanks to @Ilyaki]
+- Added a delay during start up hooks for better performance (would cause issues on lower end PCs), and fixed hang when it failed its 5 attempts
+- Fix ResetWindows not resizing or repositioning if DontResize or DontReposition is on
+- Only copy from AppData folder to Nucleus Environment if Nucleus Environment is being used
+- Re-enabled debug log header
+- Minor tweaks/bug fixes
+
+
+v0.9.9.9 - March 7, 2020
+- Nucleus now supports multiple Mice and Keyboards [thanks to @Ilyaki]
+- Added the ability to search for scripts (handlers) and download them directly from the UI [thanks to @r-mach]
+- You can now edit scripts while Nucleus is open and changes will take effect (no need to restart Nucleus each time anymore)
+- Added a new option in game scripts to do resizing, repositioning and post-launch hooking of ALL instances at the very end (after all have been opened)
+	- Note: This method will not work for every option to-date
+- Added an option in game scripts to re-register raw input in game process, a replacement for forwarding raw input [thanks to @Ilyaki]
+- Added a new utility, Flawless Widescreen. Can be setup by calling it in game script
+- Added an option in game scripts to change your IP per instance (NOTE: Highly experimental), a drop-down has been added to settings to select which network to change IP for
+- Added logic to delete certain files that Nucleus adds to original game folder (when not linking or copying). For example, some that get deleted: Nucleus custom dlls, x360ce, xinput plus, custom utils
+- Added an option in game scripts to kill mutexes in launchers	
+- Added an option in game scripts to kill mutexes in the last instance (normally last is ignored)
+- Added an option in game scripts to rename, move or delete files in instance folders
+- Added an option in game scripts to prompt the user after launching each instance, but before the grab process is grabbed
+- Added an option in game scripts to delete file(s) from user profile config or save path, a prompt asking you to confirm will typically show, but this can be turned off in script too
+- Added an option in game scripts to rename the steam api for Goldberg experimental (default will now not rename, you must set it to do so)
+- Added an option in game scripts to kill additional processes upon exiting Nucleus or stopping a session
+- Added an option in game scripts to ignore PreventWindowDeactivation if player is using keyboard
+- Added an option in game scripts to copy (not symlink) all files within a given folder
+- Added options in game scripts to disable Nucleus resizing, repositioning or making windows top most
+- Added an option in game scripts to specify custom window styles (extended window styles as well)
+- Increased max nickname length to 9 characters
+- Exposed IsKeyboardPlayer to Context (will be True or False), can now be called in Game.Play
+- Launchers will now also be killed upon exiting Nucleus or stopping a session (if any remain open throughout session), in addition to game windows
+- Added logic to KeepAspectRatio & KeepMonitorAspectRatio if new width is to be determined (previously only new height)
+- Added logic so that mutexes of different kinds can be killed. In Game.KillMutex(Launcher), simply begin the string with "Type:Mutant|" following by the name of the mutex to kill. Can replace mutant with any mutex type
+- Added logic to check if borders are removed at very end (some games bring them back), and if they aren't, remove them again
+- Added Steam language in UI settings, and language gets updated automatically for SSE now as well
+- Updated logic when launching games with start up hooks. Will check if process for that instance is already running, as well as try to grab the correct process if it is detected to be wrong
+- Updated logic for Goldberg to set the settings folder in Nucleus Environment if environment and no local save are enabled
+- Updated Goldberg emulator to latest git build (sha a0b66407bf2b8da686a708802cbc412f9cd386ca)
+- Updated Context.LocalIP to better identify user's local IP when there are multiple IPs
+- Updated method to capture current environment's user profile if different than their username [thanks to @Ilyaki]
+- Fixed bug with x360ce placing files in wrong directory
+- Fixed some duplicate operations happening if game was not linked or copied
+- Fixed instanced folders trying to be deleted if game was not linked or copied
+- Fixed a bug with PreventWindowDeactivation causing input to not work for some users
+- Fixed some bugs with HexEditFileAddress and HexEditExeAddress
+- Fixed architecture displayed in UI script details
+
 
 v0.9.9.1 - February 5, 2020
 - Updated logic for LauncherExe. The file name in this field will now be launched via Nucleus but ExecutableName will be used to resize, reposition and hook. Launchers will no longer be looked for when grabbing process to manipulate. LauncherExe will be used for hex editing exes and change exes.
@@ -236,7 +567,7 @@ v0.9.8 - November 1, 2019
 - Added number of players each game has in the UI game list, under the title
 - Added option to right click on layout selection to go through the different layouts in reverse
 - Added/tweaked some additional logging info
-- Added more information to be displayed when selecting the Details option in UI
+- Added more information to be displayed when selec	ting the Details option in UI
 - Updated Goldberg emulator to latest git build (sha 2986b01d0cf34cd900f772cf4294ad387c104cf4)
 - XInput plus and X360ce will now leave controller slots blank if player is using a keyboard (no controller input should work on keyboard instance)
 - Scripts will now open in Notepad++ by default if installed, when using the Open Script option in UI
@@ -380,9 +711,13 @@ v0.9a - August 1, 2019
 
 
 Credits: -----------------------------------------------------------------------------------------
+Original NucleusCoop Project: Lucas Assis (lucasassislar)
+Mod: ZeroFox
+Multiple keyboards/mice & hooks: Ilyaki
+Website & handler API: r-mach
 
-Mod created by ZeroFox
-NucleusCoop original created by lucasassislar
-Special thanks to: Ilyaki for his hook soure code
-Big thanks to: Talos91, PoundlandBacon and others in the Splitscreen Dreams discord for their help, suggestions, feedback and testing
-Also credit to the respective developers of the third party utilities that Nucleus uses to help automate the whole process
+Additional credits to all original developers of third party utilities Nucleus uses:
+Mr_Goldberg (Goldberg Emulator), syahmixp (SmartSteamEmu), EJocys (x360ce), 0dd14 Lab (Xinput Plus), r1ch (ForceBindIP), HaYDeN (Flawless Widescreen), briankendall (devreorder), VerGreeneyes (DirectXWrapper), wizark952 (dinput8 blocker), Nemirtinga (Epic Emulator)
+
+Special thanks to: Talos91, PoundlandBacon, Pizzo, dr.oldboi, Snailed It, and many more from the SplitScreenDreams discord
+ 

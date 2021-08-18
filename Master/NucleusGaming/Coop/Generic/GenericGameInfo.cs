@@ -8,6 +8,7 @@ using Microsoft.Win32;
 using Nucleus.Gaming.Generic.Step;
 using Nucleus.Gaming.Coop;
 using System.Windows.Forms;
+using Nucleus.Gaming.Coop.ProtoInput;
 
 namespace Nucleus.Gaming
 {
@@ -293,9 +294,13 @@ namespace Nucleus.Gaming
 		public bool LockInputAtStart = false;
 		public bool PreventGameFocus = false;
 		public int LockInputToggleKey = 0x23;//End by default. Keys: https://docs.microsoft.com/en-us/windows/win32/inputdev/virtual-key-codes
-		// --
+                                             // --
 
-		public Type HandlerType
+        // Proto Input
+        public ProtoInputOptions ProtoInput = new ProtoInputOptions();
+        public bool LockInputSuspendsExplorer = false;
+
+        public Type HandlerType
         {
             get { return typeof(GenericGameHandler); }
         }
@@ -356,13 +361,24 @@ namespace Nucleus.Gaming
             return step;
         }
 
+        public void SetPlayerList(List<PlayerInfo> players)
+		{
+            engine.SetValue("PlayerList", players);
+        }
+
+        public void SetProtoInputValues()
+        {
+	        engine.SetValue("ProtoInput", Coop.ProtoInput.ProtoInput.protoInput);
+			//engine.SetValue("ProtoInputValues", Coop.ProtoInput.ProtoInput.exposedValues);
+        }
+
         public void PrePlay(GenericContext context, GenericGameHandler handler, PlayerInfo player)
         {
             engine.SetValue("Context", context);
             engine.SetValue("Handler", handler);
             engine.SetValue("Player", player);
             engine.SetValue("Game", this);
-
+            
             Play?.Invoke();
         }
 

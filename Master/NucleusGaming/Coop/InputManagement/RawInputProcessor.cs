@@ -364,9 +364,9 @@ namespace Nucleus.Gaming.Coop.InputManagement
 			    {
 				    Debug.WriteLine("Lock input key pressed");
 				    if (!LockInput.IsLocked)
-					    LockInput.Lock();
+					    LockInput.Lock(CurrentGameInfo?.LockInputSuspendsExplorer ?? true, CurrentGameInfo?.ProtoInput.FreezeExternalInputWhenInputNotLocked ?? true, CurrentGameInfo?.ProtoInput);
 				    else
-					    LockInput.Unlock();
+					    LockInput.Unlock(CurrentGameInfo?.ProtoInput.FreezeExternalInputWhenInputNotLocked ?? true, CurrentGameInfo?.ProtoInput);
 			    }
 
 			    //foreach (var window in Windows.Where(x => x.KeyboardAttached == hDevice))

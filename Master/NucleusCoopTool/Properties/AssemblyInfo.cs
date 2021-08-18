@@ -8,7 +8,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTitle("Nucleus Coop Tool (Mod)")]
 [assembly: AssemblyDescription("Split-screen gaming on PC")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Lucas Assis & ZeroFox")]
+[assembly: AssemblyCompany("Lucas Assis, ZeroFox & Ilyaki")]
 [assembly: AssemblyProduct("NucleusCoop")]
 [assembly: AssemblyCopyright("Copyright ©  2019")]
 [assembly: AssemblyTrademark("")]
