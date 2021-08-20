@@ -19,6 +19,7 @@ namespace Nucleus.Coop.Forms
         private bool zipExtractFinished;
         private int numEntries;
         private int entriesDone = 0;
+        private bool overwriteWithoutAsking = false;
 
         private MainForm mainForm;
 
@@ -43,6 +44,11 @@ namespace Nucleus.Coop.Forms
                 zipFile = zipFileName;
                 ExtractHandler();
             }
+        }
+
+        public DownloadPrompt(Handler handler, MainForm mf, string zipFileName, bool overwriteWithoutAsking) : this(handler, mf, zipFileName)
+        {
+	        this.overwriteWithoutAsking = overwriteWithoutAsking;
         }
 
         private void BeginDownload()
@@ -157,7 +163,7 @@ namespace Nucleus.Coop.Forms
 
             if (File.Exists(Path.Combine(scriptFolder, frmHandleTitle + ".js")))
             {
-                DialogResult ovdialogResult = MessageBox.Show("An existing script with the name " + (frmHandleTitle + ".js") + " already exists. Do you wish to overwrite it?", "Script already exists", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+                DialogResult ovdialogResult = overwriteWithoutAsking ? DialogResult.Yes : MessageBox.Show("An existing script with the name " + (frmHandleTitle + ".js") + " already exists. Do you wish to overwrite it?", "Script already exists", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
                 if (ovdialogResult != DialogResult.Yes)
                 {
                     zip.Dispose();
@@ -217,12 +223,15 @@ namespace Nucleus.Coop.Forms
             label1.Text = "Finished!";
 
             File.Delete(Path.Combine(scriptFolder, zipFile));
-
-            DialogResult dialogResult = MessageBox.Show("Downloading and extraction of " + frmHandleTitle + " script is complete. Would you like to add this game to Nucleus now? You will need to select the game executable to add it.", "Download finished! Add to Nucleus?", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+            
+            DialogResult dialogResult = MessageBox.Show(
+	            "Downloading and extraction of " + frmHandleTitle +
+	            " script is complete. Would you like to add this game to Nucleus now? You will need to select the game executable to add it.",
+	            "Download finished! Add to Nucleus?", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
             if (dialogResult == DialogResult.Yes)
             {
-                Gaming.GameManager.Instance.AddScript(frmHandleTitle);
-                mainForm.SearchGame(exeName);
+	            Gaming.GameManager.Instance.AddScript(frmHandleTitle);
+	            mainForm.SearchGame(exeName);
             }
         }
     }

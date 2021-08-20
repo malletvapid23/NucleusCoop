@@ -8,6 +8,7 @@ using Microsoft.Win32;
 using Nucleus.Gaming.Generic.Step;
 using Nucleus.Gaming.Coop;
 using System.Windows.Forms;
+using Nucleus.Gaming.Coop.Generic;
 using Nucleus.Gaming.Coop.ProtoInput;
 
 namespace Nucleus.Gaming
@@ -16,7 +17,9 @@ namespace Nucleus.Gaming
     {
         private Engine engine;
         private string js;
-        
+
+        private Hub Hub = new Hub();
+
         public GameHookInfo Hook = new GameHookInfo();
         public List<GameOption> Options = new List<GameOption>();
 
@@ -318,11 +321,11 @@ namespace Nucleus.Gaming
                 while (!sr.EndOfStream)
                 {
                     string line = sr.ReadLine();
-                    if (line.StartsWith("Hub."))
-                    {
-                        continue;
-                    }
-                    else
+                    // if (line.StartsWith("Hub."))
+                    // {
+                    //     continue;
+                    // }
+                    // else
                     {
                         js += "\r\n" + line + "\r\n";
                     }
@@ -334,6 +337,7 @@ namespace Nucleus.Gaming
             engine = new Engine(cfg => cfg.AllowClr(assembly));
 
             engine.SetValue("Game", this);
+            engine.SetValue("Hub", Hub);
             engine.Execute("var Nucleus = importNamespace('Nucleus.Gaming');");
             try
             {
@@ -343,6 +347,18 @@ namespace Nucleus.Gaming
             {
                 MessageBox.Show(string.Format("There is an error in the game script {0}. The game this script is for will not appear in the list. If the issue has been fixed, please try re-adding the game.\n\nCommon errors include:\n- A syntax error (such as a \',\' \';\' or \']\' missing)\n- Another script has this GUID (must be unique!)\n- Code is not in the right place or format (for example: methods using Context must be within the Game.Play function)\n\n{1}: {2}", fileName, ex.InnerException, ex.Message), "Error in script", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
+
+            // Run this in another thread to not block UI
+            System.Threading.Tasks.Task.Run(() =>
+            {
+	            bool update = Hub.IsUpdateAvailable(true);
+
+                //if (update)
+	            //{
+		        //    MessageBox.Show("Update is available for " + GameName);
+	            //}
+            });
+
             engine.SetValue("Game", (object)null);
         }
 
@@ -378,6 +394,7 @@ namespace Nucleus.Gaming
             engine.SetValue("Handler", handler);
             engine.SetValue("Player", player);
             engine.SetValue("Game", this);
+            engine.SetValue("Hub", Hub);
             
             Play?.Invoke();
         }
@@ -447,6 +464,16 @@ namespace Nucleus.Gaming
                 result = (string)Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\Valve\Steam", "Language", "english");
 
             return result;
+        }
+
+        public bool IsUpdateAvailable(bool fetch)
+        {
+	        return Hub.IsUpdateAvailable(fetch);
+        }
+
+        public string GetHubId()
+        {
+	        return Hub.Handler.Id;
         }
     }
 }

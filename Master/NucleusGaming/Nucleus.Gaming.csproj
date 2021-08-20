@@ -139,6 +139,7 @@
     <Compile Include="Coop\BasicTypes\IntVector2.cs" />
     <Compile Include="Coop\BasicTypes\RECT.cs" />
     <Compile Include="Coop\BasicTypes\Ref.cs" />
+    <Compile Include="Coop\Generic\Hub.cs" />
     <Compile Include="Coop\Generic\KeyboardPlayer.cs" />
     <Compile Include="Coop\Generic\RegType.cs" />
     <Compile Include="Coop\Generic\SearchType.cs" />

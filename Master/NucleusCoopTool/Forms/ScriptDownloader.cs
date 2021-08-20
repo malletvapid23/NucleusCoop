@@ -17,7 +17,7 @@ namespace Nucleus.Coop.Forms
 {
     public partial class ScriptDownloader : BaseForm
     {
-        protected string api = "https://hub.splitscreen.me/api/v1/";
+        private const string api = "https://hub.splitscreen.me/api/v1/";
 
         private readonly List<Handler> searchHandlers = new List<Handler>();
 
@@ -63,6 +63,60 @@ namespace Nucleus.Coop.Forms
 
             //list_Games.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent);
             //list_Games.AutoResizeColumns(ColumnHeaderAutoResizeStyle.HeaderSize);
+        }
+
+        public Handler GetHandler(string id)
+        {
+	        ServicePointManager.Expect100Continue = true;
+	        ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+	        ServicePointManager.ServerCertificateValidationCallback = delegate { return true; };
+	        ServicePointManager.DefaultConnectionLimit = 9999;
+
+	        var resp = Get(api + "handler/" + id);
+
+	        if (resp == null || resp == "{}")
+	        {
+		        return null;
+	        }
+
+	        JObject jObject = JsonConvert.DeserializeObject(resp) as JObject;
+
+	        if (jObject == null)
+	        {
+		        return null;
+	        }
+
+	        JArray array = jObject["Handlers"] as JArray;
+
+	        if (array == null || array.Count != 1)
+	        {
+		        return null;
+	        }
+
+	        var handler = new Handler
+	        {
+		        Id = array[0]["_id"].ToString(),
+		        Owner = array[0]["owner"].ToString(),
+		        OwnerName = array[0]["ownerName"].ToString(),
+		        Description = array[0]["description"].ToString(),
+		        Title = array[0]["title"].ToString(),
+		        GameName = array[0]["gameName"].ToString(),
+		        GameDescription = array[0]["gameDescription"].ToString(),
+		        GameCover = array[0]["gameCover"].ToString(),
+		        GameId = array[0]["gameId"].ToString(),
+		        GameUrl = array[0]["gameUrl"].ToString(),
+		        CreatedAt = array[0]["createdAt"].ToString(),
+		        UpdatedAt = array[0]["updatedAt"].ToString(),
+		        Stars = array[0]["stars"].ToString(),
+		        DownloadCount = array[0]["downloadCount"].ToString(),
+		        Verified = array[0]["verified"].ToString(),
+		        Private = array[0]["private"].ToString(),
+		        CommentCount = array[0]["commentCount"].ToString(),
+		        CurrentVersion = array[0]["currentVersion"].ToString(),
+		        CurrentPackage = array[0]["currentPackage"].ToString()
+	        };
+
+	        return handler;
         }
 
         private void btn_Search_Click(object sender, EventArgs e)
