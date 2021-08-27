@@ -5383,18 +5383,18 @@ namespace Nucleus.Gaming
                     }
                 }
             }
+            
+            // Call the input lock/unlock callbacks, just in case they haven't been called with the players fully setup
+            if (LockInput.IsLocked)
+	            gen.ProtoInput.OnInputLocked?.Invoke();
+            else
+	            gen.ProtoInput.OnInputUnlocked?.Invoke();
 
             if (gen.LockInputAtStart)
             {
 	            Thread.Sleep(5000);
 	            LockInput.Lock(gen.LockInputSuspendsExplorer, gen.ProtoInput.FreezeExternalInputWhenInputNotLocked, gen?.ProtoInput);
             }
-
-            // Call the input lock/unlock callbacks, just in case they haven't been called with the players fully setup
-            if (LockInput.IsLocked)
-	            gen.ProtoInput.OnInputLocked?.Invoke();
-            else
-	            gen.ProtoInput.OnInputUnlocked?.Invoke();
 
             //if(statusForm != null)
             //{
