@@ -5350,11 +5350,6 @@ namespace Nucleus.Gaming
 
                     RawInputProcessor.Start();
 
-                    if (gen.SupportsMultipleKeyboardsAndMice && gen.LockInputAtStart)
-					{
-						LockInput.Lock(gen.LockInputSuspendsExplorer, gen.ProtoInput.FreezeExternalInputWhenInputNotLocked, gen?.ProtoInput);
-					}
-
                     if (gen.SetForegroundWindowElsewhere)
                     {
                         Log("Setting the foreground window to Nucleus");
@@ -5387,6 +5382,12 @@ namespace Nucleus.Gaming
                         }
                     }
                 }
+            }
+
+            if (gen.LockInputAtStart)
+            {
+	            Thread.Sleep(5000);
+	            LockInput.Lock(gen.LockInputSuspendsExplorer, gen.ProtoInput.FreezeExternalInputWhenInputNotLocked, gen?.ProtoInput);
             }
 
             // Call the input lock/unlock callbacks, just in case they haven't been called with the players fully setup
