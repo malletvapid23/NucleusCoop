@@ -1,4 +1,4 @@
-NucleusCoop Alpha 8 Mod - version 1.1.0
+NucleusCoop Alpha 8 Mod - version 1.1.1
 
 This a mod for NucleusCoop Alpha 8 and it includes the following:
 
@@ -321,6 +321,12 @@ Known Issues: ------------------------------------------------------------------
 - Status Window may cause Nucleus to crash every now and then
 
 Changelog: -----------------------------------------------------------------------------------------
+
+v1.1.1 - August 30, 2021
+ - Added script updater
+ - Fixed the Proto Input controller hooks
+ - Fixed incorrect controller icons being displayed 
+ - Fixed the fake cursor not hiding when it should in some games
 
 v1.1.0 - August 18, 2021
 - Integrated Proto Input (github.com/ilyaki/protoinput) hooks
