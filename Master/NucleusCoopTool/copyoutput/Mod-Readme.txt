@@ -1,4 +1,4 @@
-NucleusCoop Alpha 8 Mod - version 1.1.0
+NucleusCoop Alpha 8 Mod - version 1.1.1
 
 This a mod for NucleusCoop Alpha 8 and it includes the following:
 
@@ -322,8 +322,25 @@ Known Issues: ------------------------------------------------------------------
 
 Changelog: -----------------------------------------------------------------------------------------
 
-v1.1.0 - August 16, 2021
-- Integrated Proto Input (github.com/ilyaki/protoinput) hooks for greatly improved input
+v1.1.1 - August 30, 2021
+ - Added script updater
+ - Fixed the Proto Input controller hooks
+ - Fixed incorrect controller icons being displayed 
+ - Fixed the fake cursor not hiding when it should in some games
+
+v1.1.0 - August 18, 2021
+- Integrated Proto Input (github.com/ilyaki/protoinput) hooks
+- Greatly improved keyboard/mouse input
+- Complete rewrite of all hooks, plus new injection method support
+- Fixed most bugs relating to keyboard/mouse input, including CursorVisibilityHook crashing
+- New in-game GUI to change hooks and input settings while the game is running
+- Improved fake focus, including a message filter system for all windows messages
+- Smarter scripting so you can use a combination of keyboards/mice and controllers smoothly
+- Custom mouse cursor support
+- Added support for more than 4 Xinput controllers with OpenXinput
+- Added DirectInput controller redirection
+- Rewrite of the input locking system - no more laggy cursor, and Windows UI elements won't randomly open
+- A bunch of misc changes and bug fixes
 
 v1.0.2 R5 FINAL - January 2, 2020
 - Fixed bug that would cause the incorrect document path to be used for subsequent players when using Nucleus environment and start up hooks

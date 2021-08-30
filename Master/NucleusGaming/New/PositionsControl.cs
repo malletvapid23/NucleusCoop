@@ -424,8 +424,6 @@ namespace Nucleus.Coop
                 // XInput is only really enabled inside Nucleus Coop when
                 // we have 4 or less players, else we need to force DirectInput to grab everything
                 
-                
-
                 for (int j = 0; j < data.Count; j++)
                 {
                     PlayerInfo p = data[j];
@@ -444,83 +442,84 @@ namespace Nucleus.Coop
                 }
 
                 int cOffset = 0;
-                for (int i = 0; i < 16; i++)
+                for (int i = 0; i < (g.ProtoInput.UseOpenXinput ? 16 : 4); i++)
                 {
-                    var c = xinputControllers[i];
+	                var c = xinputControllers[i];
                     bool already = false;
                     
-
-                    if (c.IsConnected && (i < 4 || g.ProtoInput.UseOpenXinput))
+                    if (!c.IsConnected)
                     {
-                        // see if this gamepad is already on a player
-                        for (int j = 0; j < data.Count; j++)
-                        {
-                            PlayerInfo p = data[j];
-                            if (p.IsXInput && p.GamepadId == i)
-                            {
-                                State s = c.GetState();
-                                int newmask = (int)s.Gamepad.Buttons;
-                                if (p.GamepadMask != newmask)
-                                {
-                                    changed = true;
-                                    p.GamepadMask = newmask;
-                                }
-                                
-                                
-                                already = true;
-                                break;
-                            }
-                        }
-                        if (already)
-                        {
-                            continue;
-                        }
-
-                        changed = true;
-
-                        PlayerInfo player = new PlayerInfo();
-                        IList<DeviceInstance> devices = dinput.GetDevices(SharpDX.DirectInput.DeviceType.Gamepad/*SlimDX.DirectInput.DeviceType.Gamepad*/ /*DeviceClass.GameController*/, DeviceEnumerationFlags.AttachedOnly);
-                        for (int x = 0; x < devices.Count; x++)
-                        {
-                            DeviceInstance device = devices[x];
-                            //if(!instanceIds.Contains(device.InstanceGuid.ToString()))
-                            if((x+cOffset) == i)
-                            {
-                                //instanceIds.Add(device.InstanceGuid.ToString());
-                                player.GamepadGuid = device.InstanceGuid;
-                                player.GamepadProductGuid = device.ProductGuid;
-                                player.GamepadName = device.InstanceName;
-                                player.DInputJoystick = new Joystick(dinput, device.InstanceGuid);
-                                string hid = player.DInputJoystick.Properties.InterfacePath;
-                                player.RawHID = hid;
-                                int start = hid.IndexOf("hid#");
-                                int end = hid.LastIndexOf("#{");
-                                string fhid = hid.Substring(start, end - start).Replace('#', '\\').ToUpper();
-                                player.HIDDeviceID = fhid;
-                                if(ini.IniReadValue("ControllerMapping", fhid) != "")
-                                {
-                                    player.Nickname = ini.IniReadValue("ControllerMapping", fhid);
-                                }
-                                player.DInputJoystick.Acquire();
-                                
-                                //dinput.Dispose();
-                                break;
-                            }
-                            else
-                            {
-                                
-                            }
-                        }
-
-                        // new gamepad
-                        player.IsXInput = true;
-                        player.GamepadId = i;
-                        data.Add(player);
-                        
+	                    cOffset++;
                     }
                     else
                     {
-                        cOffset++;
+	                    // see if this gamepad is already on a player
+	                    for (int j = 0; j < data.Count; j++)
+	                    {
+		                    PlayerInfo p = data[j];
+		                    if (p.IsXInput && p.GamepadId == i)
+		                    {
+			                    State s = c.GetState();
+			                    int newmask = (int) s.Gamepad.Buttons;
+			                    if (p.GamepadMask != newmask)
+			                    {
+				                    changed = true;
+				                    p.GamepadMask = newmask;
+			                    }
+
+
+			                    already = true;
+			                    break;
+		                    }
+	                    }
+
+	                    if (already)
+	                    {
+		                    continue;
+	                    }
+
+	                    changed = true;
+
+	                    PlayerInfo player = new PlayerInfo();
+	                    IList<DeviceInstance> devices = dinput.GetDevices(
+		                    SharpDX.DirectInput.DeviceType.Gamepad /*SlimDX.DirectInput.DeviceType.Gamepad*/
+		                    /*DeviceClass.GameController*/, DeviceEnumerationFlags.AttachedOnly);
+	                    for (int x = 0; x < devices.Count; x++)
+	                    {
+		                    DeviceInstance device = devices[x];
+		                    //if(!instanceIds.Contains(device.InstanceGuid.ToString()))
+		                    if ((x + cOffset) == i)
+		                    {
+			                    //instanceIds.Add(device.InstanceGuid.ToString());
+			                    player.GamepadGuid = device.InstanceGuid;
+			                    player.GamepadProductGuid = device.ProductGuid;
+			                    player.GamepadName = device.InstanceName;
+			                    player.DInputJoystick = new Joystick(dinput, device.InstanceGuid);
+			                    string hid = player.DInputJoystick.Properties.InterfacePath;
+			                    player.RawHID = hid;
+			                    int start = hid.IndexOf("hid#");
+			                    int end = hid.LastIndexOf("#{");
+			                    string fhid = hid.Substring(start, end - start).Replace('#', '\\').ToUpper();
+			                    player.HIDDeviceID = fhid;
+			                    if (ini.IniReadValue("ControllerMapping", fhid) != "")
+			                    {
+				                    player.Nickname = ini.IniReadValue("ControllerMapping", fhid);
+			                    }
+
+			                    player.DInputJoystick.Acquire();
+
+			                    //dinput.Dispose();
+			                    break;
+		                    }
+		                    else
+		                    {
+		                    }
+	                    }
+
+	                    // new gamepad
+	                    player.IsXInput = true;
+	                    player.GamepadId = i;
+	                    data.Add(player);
                     }
                 }
             }

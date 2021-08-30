@@ -18,6 +18,7 @@ using Microsoft.Win32;
 using System.Text;
 using System.Runtime.ExceptionServices;
 using System.Reflection;
+using Nucleus.Coop.Forms;
 using Nucleus.Gaming.Coop.ProtoInput;
 
 namespace Nucleus.Coop
@@ -27,7 +28,7 @@ namespace Nucleus.Coop
     /// </summary>
     public partial class MainForm : BaseForm
     {
-        public string version = "v1.1.0";
+        public string version = "v1.1.1";
 
         private Settings settingsForm = null;
 
@@ -69,6 +70,8 @@ namespace Nucleus.Coop
         private string DocumentsRoot = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
 
         public Action<IntPtr> RawInputAction { get; set; }
+
+        private bool currentlyUpdatingScript = false;
 
         public enum MachineType : ushort
         {
@@ -202,7 +205,7 @@ namespace Nucleus.Coop
 
         private void PositionsControl_Paint(object sender, PaintEventArgs e)
         {
-            if (positionsControl.isDisconnected)
+	        if (positionsControl.isDisconnected)
             {
                 DPIManager.ForceUpdate();
                 positionsControl.isDisconnected = false;
@@ -484,6 +487,7 @@ namespace Nucleus.Coop
             if (currentGameInfo == null)
             {
                 btn_gameOptions.Visible = false;
+                button_UpdateAvailable.Visible = false;
                 return;
             }
 
@@ -513,7 +517,11 @@ namespace Nucleus.Coop
             btn_gameOptions.Left += gameNameControl.Width - 100;
             btn_gameOptions.Visible = true;
 
-            if(currentGameInfo.Game.Description?.Length > 0)
+            button_UpdateAvailable.Left = btn_gameOptions.Right + 5;
+            button_UpdateAvailable.Visible = currentGameInfo.Game.IsUpdateAvailable(false);
+            currentlyUpdatingScript = false;
+
+            if (currentGameInfo.Game.Description?.Length > 0)
             {
                 //StepPanel.SendToBack();
                 scriptAuthorLbl.Visible = true;
@@ -1015,7 +1023,7 @@ namespace Nucleus.Coop
             }
         }
 
-        private void DeleteGame()
+        private void DeleteGame(bool dontConfirm = false)
         {
             string userProfile = gameManager.GetUserProfilePath();
 
@@ -1033,7 +1041,8 @@ namespace Nucleus.Coop
 
                     if (gameGuid == currentGameInfo.GameGuid && exePath == currentGameInfo.ExePath)
                     {
-                        DialogResult dialogResult = MessageBox.Show("Are you sure you want to delete " + currentGameInfo.Game.GameName + "?", "Confirm deletion", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+                        DialogResult dialogResult = dontConfirm ? DialogResult.Yes :
+							MessageBox.Show("Are you sure you want to delete " + currentGameInfo.Game.GameName + "?", "Confirm deletion", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
                         if (dialogResult == DialogResult.Yes)
                         {
                             gameManager.User.Games.RemoveAt(i);
@@ -1674,5 +1683,45 @@ namespace Nucleus.Coop
             Forms.ScriptDownloader scriptDownloader = new Forms.ScriptDownloader(this);
             scriptDownloader.ShowDialog();
         }
-    }
+
+		private void button_UpdateAvailable_Click(object sender, EventArgs e)
+		{
+            Handler hubHandler = new Forms.ScriptDownloader(this).GetHandler(currentGameInfo.Game.GetHubId());
+
+            if (hubHandler == null)
+            {
+	            MessageBox.Show("Error fetching update information", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            else
+            {
+	            DialogResult dialogResult =  MessageBox.Show("An update to this script is available, download it?", "Update Available", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+	            if (dialogResult == DialogResult.Yes)
+	            {
+		            currentlyUpdatingScript = true;
+
+                    DeleteGame(true);
+		            StepPanel.Visible = false;
+		            label_StepTitle.Text = "Nothing selected";
+		            btn_Play.Enabled = false;
+		            btn_Next.Enabled = false;
+		            btn_gameOptions.Visible = false;
+		            button_UpdateAvailable.Visible = false;
+		            stepsList.Clear();
+                    DownloadPrompt downloadPrompt = new DownloadPrompt(hubHandler, this, null, true);
+		            downloadPrompt.ShowDialog();
+	            }
+            }
+        }
+
+		private void MainForm_Paint(object sender, PaintEventArgs e)
+		{
+            
+        }
+
+		private void MainForm_MouseHover(object sender, EventArgs e)
+		{
+			if (!currentlyUpdatingScript)
+				button_UpdateAvailable.Visible = currentGameInfo?.Game?.IsUpdateAvailable(false) ?? button_UpdateAvailable.Visible;
+        }
+	}
 }
