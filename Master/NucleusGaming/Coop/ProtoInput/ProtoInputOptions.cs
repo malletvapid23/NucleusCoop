@@ -67,6 +67,7 @@ namespace Nucleus.Gaming.Coop.ProtoInput
 		public bool ExtendFakeCursorBounds;
 		public bool EnableToggleFakeCursorVisibilityShortcut;
 		public uint ToggleFakeCursorVisibilityShortcutVkey = 0x24; // VK_HOME
+		public bool DontShowCursorWhenImageUpdated;
 
 		public bool UseDinputRedirection;
 

@@ -156,6 +156,9 @@ namespace Nucleus.Gaming.Coop.ProtoInput
 			[DllImport("ProtoInputLoader32.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
 			public static extern void SetUseOpenXinput(uint instanceHandle, bool useOpenXinput);
 
+			[DllImport("ProtoInputLoader32.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
+			public static extern void SetShowCursorWhenImageUpdated(uint instanceHandle, bool enable);
+
 			// Both of these functions require RenameHandlesHookHookID hook
 			[DllImport("ProtoInputLoader32.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
 			public static extern void AddHandleToRename(uint instanceHandle, string name);
@@ -332,6 +335,9 @@ namespace Nucleus.Gaming.Coop.ProtoInput
 
 			[DllImport("ProtoInputLoader64.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
 			public static extern void SetRawInputBypass(uint instanceHandle, bool enabled);
+
+			[DllImport("ProtoInputLoader64.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
+			public static extern void SetShowCursorWhenImageUpdated(uint instanceHandle, bool enable);
 
 			[DllImport("ProtoInputUtilDynamic64.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
 			public static extern uint LockInput(bool lockInput);
@@ -595,6 +601,14 @@ namespace Nucleus.Gaming.Coop.ProtoInput
 				ProtoInput32.SetUseOpenXinput(instanceHandle, useOpenXinput);
 			else
 				ProtoInput64.SetUseOpenXinput(instanceHandle, useOpenXinput);
+		}
+
+		public void SetShowCursorWhenImageUpdated(uint instanceHandle, bool enable)
+		{
+			if (IntPtr.Size == 4)
+				ProtoInput32.SetShowCursorWhenImageUpdated(instanceHandle, enable);
+			else
+				ProtoInput64.SetShowCursorWhenImageUpdated(instanceHandle, enable);
 		}
 
 		/// <summary>
