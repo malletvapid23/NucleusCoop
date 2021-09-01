@@ -106,6 +106,8 @@ namespace Nucleus.Gaming.Coop.ProtoInput
 			if (gen.ProtoInput.GetKeyStateHook) ProtoInput.protoInput.InstallHook(instanceHandle, ProtoInput.ProtoHookIDs.GetKeyStateHookID);
 			if (gen.ProtoInput.GetAsyncKeyStateHook) ProtoInput.protoInput.InstallHook(instanceHandle, ProtoInput.ProtoHookIDs.GetAsyncKeyStateHookID);
 			if (gen.ProtoInput.GetKeyboardStateHook) ProtoInput.protoInput.InstallHook(instanceHandle, ProtoInput.ProtoHookIDs.GetKeyboardStateHookID);
+			
+			ProtoInput.protoInput.SetShowCursorWhenImageUpdated(instanceHandle, !gen.ProtoInput.DontShowCursorWhenImageUpdated);
 			if (gen.ProtoInput.CursorVisibilityHook) ProtoInput.protoInput.InstallHook(instanceHandle, ProtoInput.ProtoHookIDs.CursorVisibilityStateHookID);
 			
 			ProtoInput.protoInput.SetCursorClipOptions(instanceHandle, gen.ProtoInput.ClipCursorHookCreatesFakeClip);
