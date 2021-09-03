@@ -62,6 +62,8 @@ namespace Nucleus.Coop
 
 		private ImageAttributes flashImageAttributes;
 
+		private bool insideGamepadTick = false;
+
         public override bool CanProceed
         {
             get { return canProceed; }
@@ -80,7 +82,7 @@ namespace Nucleus.Coop
         //private List<Joystick> dinputJoysticks;
 
         // xinput
-        private List<OpenXinputController> xinputControllers;
+        // private List<OpenXinputController> xinputControllers;
 
         //private Timer gamepadTimer;
         //private Timer gamepadPollTimer;
@@ -108,12 +110,12 @@ namespace Nucleus.Coop
 
             //dinput = new DirectInput();
             //dinputJoysticks = new List<Joystick>();
-            xinputControllers = new List<OpenXinputController>();
-            for (int i = 0; i < 16; i++)
-            {
-                xinputControllers.Add(new OpenXinputController(i));
-            }
-
+            // xinputControllers = new List<OpenXinputController>();
+            // for (int i = 0; i < 16; i++)
+            // {
+            //     xinputControllers.Add(new OpenXinputController(true, i));
+            // }
+            
             //gamepadTimer = new System.Threading.Timer(GamepadTimer_Tick, null, 0, 200);
             //gamepadTimer = new Timer();
             //gamepadTimer.Interval = 1000;
@@ -308,9 +310,19 @@ namespace Nucleus.Coop
 
         private void GamepadTimer_Tick(Object state)/* object sender, EventArgs e)*/
         {
+	        if (insideGamepadTick)
+		        return;
+
+	        insideGamepadTick = true;
+
+
             gamePadPressed = -1;
             if (profile == null)
-                return;
+            {
+	            insideGamepadTick = false;
+	            return;
+            }
+
             List<PlayerInfo> data = profile.PlayerData;
             //List<string> instanceIds = new List<string>();
             bool changed = false;
@@ -423,13 +435,17 @@ namespace Nucleus.Coop
             {
                 // XInput is only really enabled inside Nucleus Coop when
                 // we have 4 or less players, else we need to force DirectInput to grab everything
-                
+
+                // foreach (var xinput in xinputControllers)
+	               //  xinput.openXinput = g.ProtoInput.UseOpenXinput;
+
                 for (int j = 0; j < data.Count; j++)
                 {
                     PlayerInfo p = data[j];
                     if (p.IsXInput && !p.IsFake)
                     {
-                        var c = xinputControllers[p.GamepadId];
+                        // var c = xinputControllers[p.GamepadId];
+                        var c = new OpenXinputController(g.ProtoInput.UseOpenXinput, p.GamepadId);
                         if (!c.IsConnected)
                         {
                             data[j].DInputJoystick.Unacquire();
@@ -441,10 +457,16 @@ namespace Nucleus.Coop
                     }
                 }
 
+                IList<DeviceInstance> devices = dinput.GetDevices(
+                            SharpDX.DirectInput.DeviceType.Gamepad /*SlimDX.DirectInput.DeviceType.Gamepad*/
+                            /*DeviceClass.GameController*/, DeviceEnumerationFlags.AttachedOnly);
+
                 int cOffset = 0;
-                for (int i = 0; i < (g.ProtoInput.UseOpenXinput ? 16 : 4); i++)
+                int numControllers = g.ProtoInput.UseOpenXinput ? 32 : 4; 
+                for (int i = 0; i < numControllers; i++)
                 {
-	                var c = xinputControllers[i];
+	                var c = new OpenXinputController(g.ProtoInput.UseOpenXinput, i);
+
                     bool already = false;
                     
                     if (!c.IsConnected)
@@ -454,9 +476,8 @@ namespace Nucleus.Coop
                     else
                     {
 	                    // see if this gamepad is already on a player
-	                    for (int j = 0; j < data.Count; j++)
+	                    foreach(PlayerInfo p in data)
 	                    {
-		                    PlayerInfo p = data[j];
 		                    if (p.IsXInput && p.GamepadId == i)
 		                    {
 			                    State s = c.GetState();
@@ -481,9 +502,7 @@ namespace Nucleus.Coop
 	                    changed = true;
 
 	                    PlayerInfo player = new PlayerInfo();
-	                    IList<DeviceInstance> devices = dinput.GetDevices(
-		                    SharpDX.DirectInput.DeviceType.Gamepad /*SlimDX.DirectInput.DeviceType.Gamepad*/
-		                    /*DeviceClass.GameController*/, DeviceEnumerationFlags.AttachedOnly);
+	                    
 	                    for (int x = 0; x < devices.Count; x++)
 	                    {
 		                    DeviceInstance device = devices[x];
@@ -505,14 +524,11 @@ namespace Nucleus.Coop
 			                    {
 				                    player.Nickname = ini.IniReadValue("ControllerMapping", fhid);
 			                    }
-
+	                    
 			                    player.DInputJoystick.Acquire();
-
+	                    
 			                    //dinput.Dispose();
 			                    break;
-		                    }
-		                    else
-		                    {
 		                    }
 	                    }
 
@@ -531,15 +547,13 @@ namespace Nucleus.Coop
                 {
                     Invoke(new MethodInvoker(UpdatePlayers));
                     Invoke(new MethodInvoker(Refresh));
+                    insideGamepadTick = false;
                     return;
                 }
             }
 
-            if (dinput != null)
-            {
-                dinput.Dispose();
-            }
-
+	        dinput?.Dispose();
+	        insideGamepadTick = false;
         }
 
         private void AddPlayer(int i, float playerWidth, float playerHeight, float offset)
@@ -698,7 +712,7 @@ namespace Nucleus.Coop
 
                 if (testXinputPlayers != -1)
                 {
-                    for (int i = 0; i < testXinputPlayers;i++)
+                    for (int i = 0; i < testXinputPlayers; i++)
                     {
                         PlayerInfo player = new PlayerInfo();
                         player.GamepadGuid = new Guid();
@@ -1431,7 +1445,6 @@ namespace Nucleus.Coop
 
                         loc.Y -= gamepadRect.Height * 0.1f;
                         
-                        GamepadButtonFlags flags = (GamepadButtonFlags)info.GamepadMask;
                         //g.DrawString(flags.ToString(), smallTextFont, Brushes.White, new PointF(loc.X, loc.Y + gamepadRect.Height * 0.01f));
 
                         if /*(!string.IsNullOrEmpty(info.Nickname)) */ (ini.IniReadValue("ControllerMapping",info.HIDDeviceID) != "")
