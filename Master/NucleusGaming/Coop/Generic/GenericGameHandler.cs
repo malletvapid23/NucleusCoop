@@ -604,6 +604,8 @@ namespace Nucleus.Gaming
 
             LockInput.Unlock(false, gen?.ProtoInput);
 
+            gen.OnStop?.Invoke();
+
             ForceFinish();
 
             Thread.Sleep(1000);
@@ -5413,6 +5415,7 @@ namespace Nucleus.Gaming
             }
             catch { }
 
+            gen.OnFinishedSetup?.Invoke();
 
             return string.Empty;
         }
