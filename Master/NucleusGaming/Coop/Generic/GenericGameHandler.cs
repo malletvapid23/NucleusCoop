@@ -1759,7 +1759,7 @@ namespace Nucleus.Gaming
 
             if(isDebug)
             {
-                Log("NucleusCoop mod version: 1.1.2");
+                Log("NucleusCoop mod version: 1.1.3");
 
                 Log("########## START OF SCRIPT ##########");
                 string line;
