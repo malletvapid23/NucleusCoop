@@ -1,7 +1,7 @@
-# Nucleus Co-Op & Unofficial Mod
+# Nucleus Co-Op & Official Mod
 Nucleus Co-Op is a free and open source tool for Windows that allows split-screen play on many games that do not initially support it.
 
-This repo is an unofficial mod of the Nucleus Co-Op application. The mod is based off of the official Nucleus Co-Op Alpha 8 build and features enhancements and quality of life changes including:
+This repo is an official mod of the Nucleus Co-Op application. The mod is based off of the official Nucleus Co-Op Alpha 8 build and features enhancements and quality of life changes including:
 - Huge increase to the amount of compabitle games
 - Much more customization (via game scripts)
 - Support for any number of players
@@ -12,7 +12,7 @@ This repo is an unofficial mod of the Nucleus Co-Op application. The mod is base
 View the full list of features/changes and changelog in Mod-Readme.txt in releases.
 
 # Disclaimer
-I am NOT associated with the original project or its authors. Nucleus Co-Op was originally created by Lucas Assis.
+Nucleus Co-Op was originally created by Lucas Assis. This Official Nucleus Co-op Mod is endorsed by Lucas. 
 
 Github link to the original project: https://github.com/lucasassislar/nucleuscoop
 
@@ -46,12 +46,21 @@ You can donate via PayPal through this link:
 Thank you ^_^
 
 # Credits
-Original NucleusCoop Project: Lucas Assis (lucasassislar)  
-Mod: ZeroFox  
-Proto Input, multiple keyboards/mice: Ilyaki  
-Website & handler API: r-mach  
+Original NucleusCoop Project: [Lucas Assis (lucasassislar)](https://github.com/lucasassislar)  
+Official NucleusCoop Mod: [ZeroFox](https://github.com/ZeroFox5866)  
+Proto Input, multiple keyboards/mice: [Ilyaki](https://github.com/Ilyaki)  
+Website & handler API: [r-mach](https://github.com/r-mach)  
   
 Additional credits to all original developers of third party utilities Nucleus uses:
-Mr_Goldberg (Goldberg Emulator), syahmixp (SmartSteamEmu), EJocys (x360ce), 0dd14 Lab (Xinput Plus), r1ch (ForceBindIP), HaYDeN (Flawless Widescreen), briankendall (devreorder), VerGreeneyes (DirectXWrapper), wizark952 (dinput8 blocker), Nemirtinga (Epic Emulator & OpenXinput)
+- Mr_Goldberg ([Goldberg Emulator](https://gitlab.com/Mr_Goldberg/goldberg_emulator))
+- syahmixp ([SmartSteamEmu](https://github.com/MAXBURAOT/SmartSteamEmu))
+- EJocys ([x360ce](https://github.com/x360ce/x360ce))
+- 0dd14 Lab ([Xinput Plus](https://sites.google.com/site/0dd14lab/xinput-plus))
+- r1ch ([ForceBindIP](https://r1ch.net/projects/forcebindip))
+- HaYDeN ([Flawless Widescreen](https://www.flawlesswidescreen.org/))
+- briankendall ([devreorder](https://github.com/briankendall/devreorder))
+- VerGreeneyes ([DirectXWrapper](https://community.pcgamingwiki.com/files/file/87-the-bards-tale-2005-windowed-mode/))
+- wizark952 (dinput8 blocker)
+- Nemirtinga ([Epic Emulator](https://gitlab.com/Nemirtingas/nemirtingas_epic_emu) & [OpenXinput](https://github.com/Nemirtingas/OpenXinput))
 
 Special thanks to: Talos91, PoundlandBacon, dr.oldboi, Pizzo, Snailed It and the rest of the Splitscreen Dreams discord community.
