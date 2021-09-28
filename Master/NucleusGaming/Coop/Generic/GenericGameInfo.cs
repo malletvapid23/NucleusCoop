@@ -84,6 +84,8 @@ namespace Nucleus.Gaming
         public string LauncherTitle;
         public Action Play;
         public Action SetupSse;
+        public Action OnStop;
+        public Action OnFinishedSetup;
         public List<CustomStep> CustomSteps = new List<CustomStep>();
         public string JsFileName;
         public bool LockMouse;

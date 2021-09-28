@@ -28,7 +28,7 @@ namespace Nucleus.Coop
     /// </summary>
     public partial class MainForm : BaseForm
     {
-        public string version = "v1.1.2";
+        public string version = "v1.1.3";
 
         private Settings settingsForm = null;
 
@@ -318,7 +318,7 @@ namespace Nucleus.Coop
 				            {
 					            for (int i = 0; i < procs.Length; i++)
 					            {
-						            IntPtr hWnd = procs[i].MainWindowHandle;
+						            IntPtr hWnd = procs[i].NucleusGetMainWindowHandle();
 						            User32Interop.SetWindowPos(hWnd, new IntPtr(-2), 0, 0, 0, 0,
 							            (uint) (PositioningFlags.SWP_NOSIZE | PositioningFlags.SWP_NOMOVE));
 						            ShowWindow(hWnd, ShowWindowEnum.Minimize);
@@ -344,7 +344,7 @@ namespace Nucleus.Coop
 			            {
 				            for (int i = 0; i < procs.Length; i++)
 				            {
-					            IntPtr hWnd = procs[i].MainWindowHandle;
+					            IntPtr hWnd = procs[i].NucleusGetMainWindowHandle();
 					            ShowWindow(hWnd, ShowWindowEnum.Restore);
 					            User32Interop.SetWindowPos(hWnd, new IntPtr(-1), 0, 0, 0, 0,
 						            (uint) (PositioningFlags.SWP_NOSIZE | PositioningFlags.SWP_NOMOVE));
