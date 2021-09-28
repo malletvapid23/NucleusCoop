@@ -322,6 +322,14 @@ Known Issues: ------------------------------------------------------------------
 
 Changelog: -----------------------------------------------------------------------------------------
 
+v1.1.3 - September 28, 2021
+ - Fixed only 4 Xinput controllers showing
+ - Fixed controller index being inconsistent with the Nucleus UI
+ - Fixed duplicate controller icons (and similar bugs)
+ - Fixed Ctrl+T working unreliably when Proto Input was injected
+ - Removed xinput1_4 dependency to fix crashing on Windows 7
+ - Added more script callbacks
+
 v1.1.2 - September 1, 2021
 - Fixed fake cursor not showing in some games
 
