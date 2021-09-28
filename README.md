@@ -16,9 +16,11 @@ View the full list of features/changes and changelog in Mod-Readme.txt in releas
 Nucleus Co-Op was originally created by Lucas Assis. This Official Nucleus Co-op Mod is endorsed by Lucas. 
 
 Github link to the original project: https://github.com/lucasassislar/nucleuscoop
+Official Nucleus Co-Op website: https://nucleus-coop.github.io/
 
 Subscribe the official Nucleus Co-Op subreddit: https://www.reddit.com/r/nucleuscoop/  
-Nucleus Co-Op (Mod) FAQ via subreddit: https://www.reddit.com/r/nucleuscoop/comments/fjdqid/list_of_new_supported_games_and_faq/  
+Nucleus Co-Op (Mod) FAQ via subreddit: https://www.reddit.com/r/nucleuscoop/comments/optwas/frequently_asked_questions/  
+Nucleus Co-Op (Mod) FAQ on website: https://nucleus-coop.github.io/docs/FAQ/
 
 Join the official Nucleus Co-Op Discord: https://discord.gg/QDUt8HpCvr
 
